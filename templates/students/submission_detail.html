@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}{{ submission.title }} - IFT Platform{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <div class="mb-4"><a href="{% url 'students:dashboard' %}">&larr; Back</a></div>
+    <div class="grid" style="grid-template-columns: 2fr 1fr; align-items: start;">
+        <div>
+            <div class="card mb-4">
+                <div class="card-header">
+                    <div>
+                        <h1 style="font-size: 1.5rem;">{{ submission.title }}</h1>
+                        <span style="font-size: 0.85rem;">{{ submission.submitted_at|date:"M d, Y" }}</span>
+                    </div>
+                    {% if submission.status == 'submitted' %}<span class="badge badge-info">Submitted</span>{% elif submission.status == 'reviewed' %}<span class="badge badge-success">Reviewed</span>{% endif %}
+                </div>
+                <div style="margin-bottom: 2rem;">
+                    <label class="form-label">Description</label>
+                    <p>{{ submission.description }}</p>
+                </div>
+                <div class="grid grid-2 mb-4">
+                    <div>
+                        <label class="form-label">Problem Statement</label>
+                        <div style="padding: 1rem; border-radius: 8px;">{{ submission.problem_statement|linebreaks }}</div>
+                    </div>
+                    <div>
+                        <label class="form-label">Target Audience</label>
+                        <div style="padding: 1rem; border-radius: 8px;">{{ submission.target_audience|linebreaks }}</div>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label">Innovation Aspect</label>
+                    <div style="padding: 1rem; border-radius: 8px;">{{ submission.innovation_aspect|linebreaks }}</div>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label">Implementation Plan</label>
+                    <div style="padding: 1rem; border-radius: 8px;">{{ submission.implementation_plan|linebreaks }}</div>
+                </div>
+            </div>
+            {% if ai_summary %}<div class="ai-block mb-4"><h3>AI Analysis</h3><p>{{ ai_summary.summary }}</p></div>{% endif %}
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <div class="card">
+                <h3 style="font-size: 1rem; margin-bottom: 1rem;">CLASSIFICATION</h3>
+                <div style="margin-bottom: 1rem;">
+                    <div style="font-size: 0.85rem;">Final Category</div>
+                    {% if submission.final_category %}<div>{{ submission.get_final_category_display }}</div>{% else %}<div>Not assigned</div>{% endif %}
+                </div>
+                {% if submission.ai_suggested_category %}<div><div style="font-size: 0.85rem;">AI Suggestion</div><span class="badge badge-info">{{ submission.get_ai_suggested_category_display }}</span></div>{% endif %}
+            </div>
+            {% if submission.uploaded_files.all %}
+            <div class="card">
+                <h3 style="font-size: 1rem; margin-bottom: 1rem;">ATTACHMENTS</h3>
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    {% for file in submission.uploaded_files.all %}
+                    <a href="{{ file.file.url }}" target="_blank" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; border-radius: 8px; border: 1px solid #333;">
+                        <div>{% if file.file_type == 'document' %}Doc{% elif file.file_type == 'image' %}Img{% elif file.file_type == 'video' %}Vid{% endif %}</div>
+                        <div><div>{{ file.original_filename }}</div><div style="font-size: 0.75rem;">{{ file.file_size|filesizeformat }}</div></div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

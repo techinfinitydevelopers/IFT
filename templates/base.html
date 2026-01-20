@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}IFT Platform - ENpower India Future Tycoon{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="{% url 'students:home' %}" class="navbar-brand">
+                <span style="font-size: 1.5rem;">🚀</span> IFT Platform
+            </a>
+            <ul class="navbar-nav">
+                {% if user.is_authenticated %}
+                {% if user.is_staff or user.is_superuser %}
+                <li><a href="{% url 'admins:dashboard' %}"
+                        class="nav-link {% if 'admins' in request.path %}active{% endif %}">Admin Dashboard</a></li>
+                <li><a href="{% url 'admins:all_submissions' %}" class="nav-link">All Submissions</a></li>
+                {% else %}
+                <li><a href="{% url 'students:dashboard' %}"
+                        class="nav-link {% if 'dashboard' in request.path %}active{% endif %}">Dashboard</a></li>
+                <li><a href="{% url 'students:submit_idea' %}" class="nav-link">Submit Idea</a></li>
+                {% endif %}
+                <li><a href="{% url 'students:logout' %}"
+                        style="padding-left: 1rem; border-left: 1px solid var(--border); margin-left: 1rem;"
+                        class="nav-link">Logout</a></li>
+                {% else %}
+                <li><a href="{% url 'students:home' %}" class="nav-link">Home</a></li>
+                <li><a href="{% url 'students:login' %}" class="nav-link">Login</a></li>
+                <li><a href="{% url 'students:register' %}" class="btn btn-primary btn-sm">Get Started</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="container mt-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main style="flex: 1; padding-bottom: 4rem;">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer
+        style="margin-top: auto; padding: 2rem 0; border-top: 1px solid var(--border); background: var(--bg-surface);">
+        <div class="container" style="text-align: center;">
+            <p style="margin: 0; font-size: 0.9rem; color: var(--text-muted);">&copy; 2026 ENpower India Future Tycoon.
+                All rights reserved.</p>
+        </div>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

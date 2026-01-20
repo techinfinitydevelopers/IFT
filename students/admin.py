@@ -1,0 +1,45 @@
+from django.contrib import admin
+from .models import Student, IdeaSubmission, UploadedFile
+
+
+@admin.register(Student)
+class StudentAdmin(admin.ModelAdmin):
+    list_display = ('student_id', 'user', 'school_name', 'grade', 'created_at')
+    search_fields = ('student_id', 'user__username', 'user__email', 'school_name')
+    list_filter = ('grade', 'created_at')
+    readonly_fields = ('created_at',)
+
+
+@admin.register(IdeaSubmission)
+class IdeaSubmissionAdmin(admin.ModelAdmin):
+    list_display = ('title', 'student', 'status', 'final_category', 'submitted_at', 'ai_processed')
+    search_fields = ('title', 'description', 'student__user__username')
+    list_filter = ('status', 'final_category', 'ai_processed', 'submitted_at')
+    readonly_fields = ('submitted_at', 'created_at', 'updated_at')
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('student', 'title', 'description', 'status')
+        }),
+        ('Questionnaire', {
+            'fields': ('problem_statement', 'target_audience', 'innovation_aspect',
+                      'implementation_plan', 'impact_assessment')
+        }),
+        ('Categories', {
+            'fields': ('ai_suggested_category', 'final_category')
+        }),
+        ('AI Processing', {
+            'fields': ('ai_processed', 'ai_processing_error')
+        }),
+        ('Timestamps', {
+            'fields': ('submitted_at', 'created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+
+@admin.register(UploadedFile)
+class UploadedFileAdmin(admin.ModelAdmin):
+    list_display = ('original_filename', 'submission', 'file_type', 'file_size', 'uploaded_at')
+    search_fields = ('original_filename', 'submission__title')
+    list_filter = ('file_type', 'uploaded_at')
+    readonly_fields = ('uploaded_at', 'file_size')

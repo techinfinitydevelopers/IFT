@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block title %}All Submissions - IFT Platform{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-4">
+        <div>
+            <h1>All Submissions</h1>
+            <p style="margin: 0;">Comprehensive list of all student entries.</p>
+        </div>
+        <a href="{% url 'admins:dashboard' %}" class="btn btn-secondary">&larr; Dashboard</a>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="card mb-4" style="padding: 1rem 1.5rem;">
+        <form method="get" class="flex gap-2 items-center">
+            <label class="form-label" style="margin: 0; white-space: nowrap;">Status Filter:</label>
+            <div style="width: 200px;">
+                <select name="status" class="form-control">
+                    <option value="">All Statuses</option>
+                    <option value="draft" {% if selected_status == 'draft' %}selected{% endif %}>Draft</option>
+                    <option value="submitted" {% if selected_status == 'submitted' %}selected{% endif %}>Submitted
+                    </option>
+                    <option value="under_review" {% if selected_status == 'under_review' %}selected{% endif %}>Under
+                        Review</option>
+                    <option value="reviewed" {% if selected_status == 'reviewed' %}selected{% endif %}>Reviewed</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Apply</button>
+            {% if selected_status %}
+            <a href="{% url 'admins:all_submissions' %}" class="btn btn-outline">Clear</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Table Card -->
+    <div class="card">
+        <div class="card-header flex justify-between items-center">
+            <h3 class="card-title">Submissions List</h3>
+            <span class="badge badge-secondary">{{ submissions|length }} entries</span>
+        </div>
+
+        {% if submissions %}
+        <div class="table-container" style="border: none; border-radius: 0;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">#</th>
+                        <th>Idea / Student</th>
+                        <th>School</th>
+                        <th>Category</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th style="text-align: right;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for submission in submissions %}
+                    <tr>
+                        <td style="color: var(--text-dim);">{{ forloop.counter }}</td>
+                        <td>
+                            <strong style="display: block; color: var(--text-main); font-size: 0.95rem;">{{ submission.title }}</strong>
+                            <span style="font-size: 0.85rem; color: var(--text-dim);">{{ submission.student.user.get_full_name }} ({{ submission.student.student_id }})</span>
+                        </td>
+                        <td>{{ submission.student.school_name }}</td>
+                        <td>
+                            {% if submission.final_category %}
+                            <span class="badge badge-primary">{{ submission.get_final_category_display }}</span>
+                            {% elif submission.ai_suggested_category %}
+                            <span class="badge badge-info">{{ submission.get_ai_suggested_category_display }}</span>
+                            {% else %}
+                            <span style="color: var(--text-dim);">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if submission.status == 'draft' %}
+                            <span class="badge badge-secondary">Draft</span>
+                            {% elif submission.status == 'submitted' %}
+                            <span class="badge badge-info">Submitted</span>
+                            {% elif submission.status == 'under_review' %}
+                            <span class="badge badge-warning">Under Review</span>
+                            {% elif submission.status == 'reviewed' %}
+                            <span class="badge badge-success">Reviewed</span>
+                            {% endif %}
+                        </td>
+                        <td style="font-size: 0.9rem;">
+                            {% if submission.submitted_at %}
+                            {{ submission.submitted_at|date:"M d, Y" }}
+                            {% else %}
+                            <span style="color: var(--text-dim);">-</span>
+                            {% endif %}
+                        </td>
+                        <td style="text-align: right;">
+                            <a href="{% url 'admins:submission_detail' submission.id %}"
+                                class="btn btn-outline btn-sm">Review</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 3rem;">
+            <p>No submissions found matching your filters.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}Register - IFT Platform{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 4rem; padding-bottom: 4rem; display: flex; justify-content: center;">
+    <div style="width: 100%; max-width: 600px;">
+        <div class="card" style="padding: 2.5rem;">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🎓</div>
+                <h2>Create Account</h2>
+                <p>Join the India Future Tycoon community</p>
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="grid grid-2" style="gap: 1rem; margin-bottom: 1rem;">
+                    <div class="form-group" style="margin: 0;">
+                        <label class="form-label">First Name</label>
+                        {{ form.first_name }}
+                        {% if form.first_name.errors %}<div
+                            style="color: var(--danger); font-size: 0.8rem; margin-top: 0.25rem;">{{ form.first_name.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="form-group" style="margin: 0;">
+                        <label class="form-label">Last Name</label>
+                        {{ form.last_name }}
+                        {% if form.last_name.errors %}<div
+                            style="color: var(--danger); font-size: 0.8rem; margin-top: 0.25rem;">{{ form.last_name.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    {{ form.username }}
+                    {% if form.username.errors %}<div
+                        style="color: var(--danger); font-size: 0.8rem; margin-top: 0.25rem;">{{ form.username.errors.0 }}</div>{% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}<div
+                        style="color: var(--danger); font-size: 0.8rem; margin-top: 0.25rem;">{{ form.email.errors.0 }}
+                    </div>{% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">School Name</label>
+                    {{ form.school_name }}
+                    {% if form.school_name.errors %}<div
+                        style="color: var(--danger); font-size: 0.8rem; margin-top: 0.25rem;">{{ form.school_name.errors.0 }}</div>{% endif %}
+                </div>
+
+                <div class="grid grid-2" style="gap: 1rem; margin-bottom: 1rem;">
+                    <div class="form-group" style="margin: 0;">
+                        <label class="form-label">Grade/Class</label>
+                        {{ form.grade }}
+                        {% if form.grade.errors %}<div
+                            style="color: var(--danger); font-size: 0.8rem; margin-top: 0.25rem;">{{ form.grade.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="form-group" style="margin: 0;">
+                        <label class="form-label">Phone (Optional)</label>
+                        {{ form.phone }}
+                        {% if form.phone.errors %}<div
+                            style="color: var(--danger); font-size: 0.8rem; margin-top: 0.25rem;">{{ form.phone.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="grid grid-2" style="gap: 1rem; margin-bottom: 2rem;">
+                    <div class="form-group" style="margin: 0;">
+                        <label class="form-label">Password</label>
+                        {{ form.password }}
+                        {% if form.password.errors %}<div
+                            style="color: var(--danger); font-size: 0.8rem; margin-top: 0.25rem;">{{ form.password.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="form-group" style="margin: 0;">
+                        <label class="form-label">Confirm Password</label>
+                        {{ form.password_confirm }}
+                        {% if form.password_confirm.errors %}<div
+                            style="color: var(--danger); font-size: 0.8rem; margin-top: 0.25rem;">{{ form.password_confirm.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.8rem;">Create
+                    Account</button>
+            </form>
+
+            <div style="text-align: center; margin-top: 1.5rem;">
+                <p style="color: var(--text-muted);">Already have an account? <a href="{% url 'students:login' %}">Login
+                        here</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add form-control class to all form inputs automatically
+    document.querySelectorAll('input, select, textarea').forEach(function (element) {
+        if (!element.classList.contains('btn')) {
+            element.classList.add('form-control');
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Submission Received - IFT Platform{% endblock %}
+
+{% block content %}
+<div class="container mt-4" style="min-height: 60vh; display: flex; align-items: center; justify-content: center;">
+    <div style="width: 100%; max-width: 700px; text-align: center;">
+        <div class="card" style="padding: 3rem 2rem; border-top: 4px solid var(--success);">
+            <div
+                style="width: 80px; height: 80px; background: rgba(16, 185, 129, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; color: var(--success); font-size: 2.5rem;">
+                ✓
+            </div>
+
+            <h1 style="font-size: 2rem; margin-bottom: 0.5rem;">Submission Received!</h1>
+            <p style="font-size: 1.1rem; color: var(--text-muted); margin-bottom: 2rem;">
+                Your innovation <strong>"{{ submission.title }}"</strong> has been successfully submitted.
+            </p>
+
+            {% if submission.ai_processed %}
+            <div
+                style="background: var(--bg-body); padding: 1.5rem; border-radius: var(--radius-md); text-align: left; margin-bottom: 2rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+                    <span style="font-size: 1.2rem;">🤖</span>
+                    <h3 style="font-size: 1.1rem; margin: 0; color: var(--primary);">Initial AI Analysis</h3>
+                </div>
+
+                {% if submission.ai_suggested_category %}
+                <div style="margin-bottom: 1rem;">
+                    <span style="font-size: 0.9rem; color: var(--text-dim);">Categorized as:</span>
+                    <span class="badge badge-info" style="margin-left: 0.5rem;">{{ submission.get_ai_suggested_category_display }}</span>
+                </div>
+                {% endif %}
+
+                {% if ai_summary %}
+                <p style="font-size: 0.95rem; line-height: 1.6; color: var(--text-main); margin: 0;">
+                    {{ ai_summary.summary }}
+                </p>
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="alert alert-info" style="text-align: left; margin-bottom: 2rem;">
+                <strong>Next Step:</strong> Our AI is currently processing your submission. Check back in a few minutes
+                for the analysis report.
+            </div>
+            {% endif %}
+
+            <div class="flex gap-2" style="justify-content: center;">
+                <a href="{% url 'students:submission_detail' submission.id %}" class="btn btn-primary">View Full
+                    Details</a>
+                <a href="{% url 'students:dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

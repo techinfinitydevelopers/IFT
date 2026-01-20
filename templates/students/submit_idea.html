@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block title %}Submit Idea - IFT Platform{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div style="max-width: 800px; margin: 0 auto;">
+        <div class="mb-4">
+            <h1 style="font-size: 2rem; margin-bottom: 0.5rem;">Submit Innovation</h1>
+            <p style="margin: 0;">Share your idea with us. Our AI will help categorize and analyze it.</p>
+        </div>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <!-- Basic Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="card-title">Basic Information</h3>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Idea Title</label>
+                    {{ form.title }}
+                    {% if form.title.help_text %}<div
+                        style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.25rem;">{{ form.title.help_text }}</div>{% endif %}
+                    {% if form.title.errors %}<div style="color: var(--danger); font-size: 0.8rem;">{{ form.title.errors.0 }}</div>{% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Brief Description</label>
+                    {{ form.description }}
+                    {% if form.description.help_text %}<div
+                        style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.25rem;">{{ form.description.help_text }}</div>{% endif %}
+                    {% if form.description.errors %}<div style="color: var(--danger); font-size: 0.8rem;">{{ form.description.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+
+            <!-- Detailed Questionnaire -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="card-title">Project Details</h3>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Problem Statement</label>
+                    {{ form.problem_statement }}
+                    {% if form.problem_statement.help_text %}<div
+                        style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.25rem;">{{ form.problem_statement.help_text }}</div>{% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Target Audience</label>
+                    {{ form.target_audience }}
+                    {% if form.target_audience.help_text %}<div
+                        style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.25rem;">{{ form.target_audience.help_text }}</div>{% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Innovation Aspect</label>
+                    {{ form.innovation_aspect }}
+                    {% if form.innovation_aspect.help_text %}<div
+                        style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.25rem;">{{ form.innovation_aspect.help_text }}</div>{% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Implementation Plan</label>
+                    {{ form.implementation_plan }}
+                    {% if form.implementation_plan.help_text %}<div
+                        style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.25rem;">{{ form.implementation_plan.help_text }}</div>{% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Impact Assessment</label>
+                    {{ form.impact_assessment }}
+                    {% if form.impact_assessment.help_text %}<div
+                        style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.25rem;">{{ form.impact_assessment.help_text }}</div>{% endif %}
+                </div>
+            </div>
+
+            <!-- File Uploads -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="card-title">Supporting Materials (Optional)</h3>
+                </div>
+
+                <div class="grid grid-3">
+                    <div class="form-group">
+                        <label class="form-label">📄 Document/PPT</label>
+                        {{ form.document_file }}
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">📷 Images</label>
+                        {{ form.image_file }}
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">🎥 Video</label>
+                        {{ form.video_file }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex gap-2 mb-4" style="padding-bottom: 2rem;">
+                <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">Submit Innovation 🚀</button>
+                <a href="{% url 'students:dashboard' %}" class="btn btn-secondary btn-lg">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add form-control class to all form inputs
+    document.querySelectorAll('input:not([type="file"]), select, textarea').forEach(function (element) {
+        if (!element.classList.contains('btn')) {
+            element.classList.add('form-control');
+        }
+    });
+
+    // Style file inputs
+    document.querySelectorAll('input[type="file"]').forEach(function (element) {
+        element.style.padding = '0.75rem';
+        element.style.border = '1px solid var(--border)';
+        element.style.borderRadius = 'var(--radius-md)';
+        element.style.backgroundColor = 'var(--bg-body)';
+        element.style.color = 'var(--text-main)';
+        element.style.width = '100%';
+    });
+
+    // Auto-resize textareas
+    document.querySelectorAll('textarea').forEach(function (textarea) {
+        textarea.style.minHeight = '120px';
+    });
+</script>
+{% endblock %}

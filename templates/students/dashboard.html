@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - IFT Platform{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-4">
+        <div>
+            <h1>Dashboard</h1>
+            <p style="margin: 0;">Welcome back, {{ user.first_name }}!</p>
+        </div>
+        <a href="{% url 'students:submit_idea' %}" class="btn btn-primary">
+            <span style="font-size: 1.2rem;">+</span> New Submission
+        </a>
+    </div>
+
+    <!-- Student Profile Card (Mini) -->
+    <div class="card mb-4" style="background: linear-gradient(135deg, var(--bg-surface) 0%, rgba(99, 102, 241, 0.05) 100%); border: 1px solid rgba(99, 102, 241, 0.2);">
+        <div class="flex items-center gap-4">
+            <div style="width: 50px; height: 50px; background: var(--bg-surface-active); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                
+            </div>
+            <div>
+                <h3 style="font-size: 1.1rem; margin: 0;">{{ student.school_name }}</h3>
+                <p style="margin: 0; font-size: 0.9rem;">ID: <span style="font-family: monospace; color: var(--text-main);">{{ student.student_id }}</span>  Grade: {{ student.grade }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="grid grid-3 mb-4">
+        <div class="stat-card">
+            <div class="stat-value">{{ submissions|length }}</div>
+            <div class="stat-label">Total Submissions</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ submitted_count|default:0 }}</div>
+            <div class="stat-label">Submitted</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ reviewed_count|default:0 }}</div>
+            <div class="stat-label">Reviewed</div>
+        </div>
+    </div>
+
+    <!-- Submissions List -->
+    <h3 class="mb-4">Your Innovations</h3>
+
+    {% if submissions %}
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                    <th>Submitted</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for submission in submissions %}
+                <tr>
+                    <td>
+                        <strong style="display: block; color: var(--text-main); font-size: 0.95rem;">{{ submission.title }}</strong>
+                        <span style="font-size: 0.85rem; color: var(--text-dim);">{{ submission.description|truncatewords:8 }}</span>
+                    </td>
+                    <td>
+                        {% if submission.final_category %}
+                            <span class="badge badge-primary">{{ submission.get_final_category_display }}</span>
+                        {% elif submission.ai_suggested_category %}
+                            <span class="badge badge-info">{{ submission.get_ai_suggested_category_display }}</span>
+                        {% else %}
+                            <span class="badge badge-secondary">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if submission.status == 'draft' %}
+                            <span class="badge badge-secondary">Draft</span>
+                        {% elif submission.status == 'submitted' %}
+                            <span class="badge badge-info">Submitted</span>
+                        {% elif submission.status == 'under_review' %}
+                            <span class="badge badge-warning">Under Review</span>
+                        {% elif submission.status == 'reviewed' %}
+                            <span class="badge badge-success">Reviewed</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if submission.submitted_at %}
+                            {{ submission.submitted_at|date:"M d, Y" }}
+                        {% else %}
+                            <span style="color: var(--text-dim);">-</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'students:submission_detail' submission.id %}" class="btn btn-outline btn-sm">View</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="card" style="text-align: center; padding: 4rem 2rem;">
+        <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></div>
+        <h3>No submissions yet</h3>
+        <p style="max-width: 400px; margin: 0 auto 1.5rem;">You haven''t submitted any ideas yet. Start your journey by sharing your first innovation!</p>
+        <a href="{% url 'students:submit_idea' %}" class="btn btn-primary">Start New Submission</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

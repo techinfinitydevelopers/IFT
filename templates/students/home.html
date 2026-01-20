@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - IFT Platform{% endblock %}
+
+{% block content %}
+<div
+    style="padding: 6rem 0; text-align: center; background: radial-gradient(circle at top center, rgba(99, 102, 241, 0.15), transparent 60%);">
+    <div class="container">
+        <span class="badge badge-primary" style="margin-bottom: 1.5rem; font-size: 0.85rem; padding: 0.5rem 1rem;">🚀
+            Empowering Young Innovators</span>
+        <h1
+            style="font-size: 3.5rem; letter-spacing: -0.04em; margin-bottom: 1.5rem; background: linear-gradient(135deg, #fff 0%, #cbd5e1 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            India Future Tycoon
+        </h1>
+        <p style="font-size: 1.25rem; max-width: 600px; margin: 0 auto 2.5rem; color: var(--text-muted);">
+            The ultimate platform for students to shape tomorrow's world. Submit your ideas, get AI analysis, and win
+            recognition.
+        </p>
+        <div class="flex gap-2" style="justify-content: center;">
+            <a href="{% url 'students:register' %}" class="btn btn-primary"
+                style="padding: 0.8rem 2rem; font-size: 1.1rem;">Get Started Now</a>
+            <a href="{% url 'students:login' %}" class="btn btn-secondary"
+                style="padding: 0.8rem 2rem; font-size: 1.1rem;">Login</a>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-4 mb-4">
+    <div class="grid grid-3">
+        <div class="card" style="text-align: center; padding: 2.5rem;">
+            <div
+                style="font-size: 3rem; margin-bottom: 1rem; background: var(--bg-surface-active); width: 80px; height: 80px; line-height: 80px; border-radius: 50%; margin: 0 auto 1.5rem;">
+                💡</div>
+            <h3>Submit Ideas</h3>
+            <p>Share your innovative solutions to real-world problems through our intuitive submission portal.</p>
+        </div>
+        <div class="card" style="text-align: center; padding: 2.5rem;">
+            <div
+                style="font-size: 3rem; margin-bottom: 1rem; background: var(--bg-surface-active); width: 80px; height: 80px; line-height: 80px; border-radius: 50%; margin: 0 auto 1.5rem;">
+                🤖</div>
+            <h3>AI Analysis</h3>
+            <p>Get instant, intelligent feedback and categorization for your ideas powered by advanced AI models.</p>
+        </div>
+        <div class="card" style="text-align: center; padding: 2.5rem;">
+            <div
+                style="font-size: 3rem; margin-bottom: 1rem; background: var(--bg-surface-active); width: 80px; height: 80px; line-height: 80px; border-radius: 50%; margin: 0 auto 1.5rem;">
+                🏆</div>
+            <h3>Win Recognition</h3>
+            <p>Compete with peers across the country and get recognized by industry experts and jury panels.</p>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-4" style="margin-bottom: 6rem;">
+    <div class="card"
+        style="display: flex; gap: 3rem; align-items: center; padding: 3rem; background: linear-gradient(135deg, var(--bg-surface) 0%, rgba(99, 102, 241, 0.05) 100%);">
+        <div style="flex: 1;">
+            <h2>About the Platform</h2>
+            <p style="font-size: 1.1rem; margin-bottom: 1.5rem;">
+                The ENpower India Future Tycoon (IFT) Platform is designed to nurture innovation and entrepreneurship
+                among young students.
+            </p>
+            <p>
+                Our platform uses cutting-edge AI technology to help categorize and summarize submissions, making the
+                review process efficient for both students and jury panels.
+            </p>
+        </div>
+        <div style="flex: 1; display: flex; justify-content: center;">
+            <div style="font-size: 8rem;">🚀</div>
+        </div>
+    </div>
+</div>
+{% endblock %}
