@@ -1,0 +1,90 @@
+[
+  {
+    "name": "Uniqueness",
+    "scale_1": "1. Mostly new/unheard of idea -even a targeted Google search doesn't throw up anything similar  \n2. Market competitors/existing alternatives don't have any similarity with this idea",
+    "scale_2": "1. Idea seems new, a random Google search doesn't throw up anything similar\n2. Not more than 2  existing alternatives or market competitors  are based on similar thoughts",
+    "scale_3": "1. Idea seems new \n2. Though some existing alternatives are based on similar ideas but this idea has some distinguishing features which separate it from the existing alternatives",
+    "scale_4": "1. Idea seems similar to  ideas/thoughts behind the existing alternatives\n2. It is tough to see any differentiator between this and the existing alternatives already in the market",
+    "scale_5": "1. The idea seems like any other idea currently in use to solve a similar problem\n2.  It is tough to see any differentiator between this and the existing alternatives already in the market"
+  },
+  {
+    "name": "Ease of implementation",
+    "scale_1": "1. Resources required are available in the market and can be easily procured\n2. Team has the expertise to give shape to the idea\n3. The team has complete clarity on how to translate the features into product benefits",
+    "scale_2": "1. Resources required are available in the market and can be easily procured\n2. Team has the expertise to give shape to the idea\n3. The team has a fair idea of how to translate the features into product benefits",
+    "scale_3": "1. Resources required are available in the market and can be easily procured\n2. Team lacks the expertise to give shape to the idea - they need to hire experts to do the job for them\n3. The team has a sketchy idea of how to translate the features into product benefits",
+    "scale_4": "1. Resources required are not easily available in the market, and therefore,  cannot be easily procured\n2. Team lacks the expertise to give shape to the idea - they need to hire experts to do the job for them\n3.The team is not sure how to translate the features into product benefits",
+    "scale_5": "1. Resources required are not easily available in the market, and therefore,  cannot be easily procured\n2. Team lacks the expertise to give shape to the idea - they need to hire experts to do the job for them\n3. The team does not have any idea how to translate the features into product benefits"
+  },
+  {
+    "name": "Scalable",
+    "scale_1": "Considering the solution benefits, the idea has the potential to take the business from X to 30 X in terms of growth in the first two years of operation",
+    "scale_2": "Considering the solution benefits, the idea has the potential to take the business from X to 20 X in terms of growth in the first two years of operation",
+    "scale_3": "Considering the solution benefits, the idea has the potential to take the business from X to 10 X in terms of growth in the first two years of operation",
+    "scale_4": "Considering the solution benefits, the idea has the potential to growth the business to some extent in the first two years of operation",
+    "scale_5": "Considering the solution benefits, it seems unlikely that the business can grow at all unless some major change is introduced with respect to the solution idea"
+  },
+  {
+    "name": "Impactful",
+    "scale_1": "1. The identified customer base that will get impacted by the solution idea is widespread\n2. The solution idea is critical for the user and makes a positive difference in their everyday lives\n3. The solution idea removes the current pains from the customers' lives and gives them some additional benefits that are over and above those offered by the existing alternatives",
+    "scale_2": "1. The identified customer base that will get impacted by the solution idea is widespread\n2. The solution idea brings a positive difference to the users' lives\n3. The solution idea removes the current pains from the customers' lives but is not able to provide any additional benefits over and above those offered by the existing alternatives",
+    "scale_3": "1. The team is yet to fully identify the  customer base that will get impacted by the solution idea \n2. The solution idea brings a positive difference to the users' lives\n3. The solution idea removes a few of the current pains from the customers' lives but is not able to provide any additional benefits over and above those offered by the existing alternatives",
+    "scale_4": "1. The customer base that will get impacted by the solution idea is sporadic and irregular\n2. The solution idea brings a positive difference to the users' lives\n3. The solution idea removes a few of the current pains from the customers' lives but is not able to provide any additional benefits over and above those offered by the existing alternatives",
+    "scale_5": "1. The customer base that will get impacted by the solution idea is sporadic and irregular\n2. The solution idea does not bring any visible positive difference to the users' lives\n3. The solution idea does not impact the customers' lives in any visible way"
+  },
+  {
+    "name": "Sustainable",
+    "scale_1": "Score based on answers to the following questions:\n1. Is the idea solving a common problem that an average person would face?\n2. Will the solution create enough of a difference in the users' lives that they would be ready to pay for it?\n3. Is the idea going to last more than a year (hint: think about all those businesses that started manufacturing masks and shields during the Corona virus pandemic)?\nIf the answers to all above questions is a resounding yes, the idea scores 5  on sustainability",
+    "scale_2": "Score based on answers to the following questions:\n1. Is the idea solving a common problem that an average person would face?\n2. Will the solution create enough of a difference in the users' lives that they would be ready to pay for it?\n3. Is the idea going to last more than a year (hint: think about all those businesses that started manufacturing masks and shields during the Corona virus pandemic)?\nIf the answers to the first two questions are a resounding yes, but you are not quite sure about Q3, the idea scores 4 on sustainability",
+    "scale_3": "Score based on answers to the following questions:\n1. Is the idea solving a common problem that an average person would face?\n2. Will the solution create enough of a difference in the users' lives that they would be ready to pay for it?\n3. Is the idea going to last more than a year (hint: think about all those businesses that started manufacturing masks and shields during the Corona virus pandemic)?\nIf the answer to the first question is a resounding yes, but you are not quite sure about Q 2 & 3, the idea scores 3  on sustainability",
+    "scale_4": "Score based on answers to the following questions:\n1. Is the idea solving a common problem that an average person would face?\n2. Will the solution create enough of a difference in the users' lives that they would be ready to pay for it?\n3. Is the idea going to last more than a year (hint: think about all those businesses that started manufacturing masks and shields during the Corona virus pandemic)?\nIf you are not quite sure about any of the answers, the idea scores 2 on sustainability",
+    "scale_5": "Score based on answers to the following questions:\n1. Is the idea solving a common problem that an average person would face?\n2. Will the solution create enough of a difference in the users' lives that they would be ready to pay for it?\n3. Is the idea going to last more than a year (hint: think about all those businesses that started manufacturing masks and shields during the Corona virus pandemic)?\nIf the answer to any of the above three questions is a resounding No, the idea scores 1 on sustainability"
+  },
+  {
+    "name": "Total Idea Score",
+    "scale_1": "",
+    "scale_2": "",
+    "scale_3": "",
+    "scale_4": "",
+    "scale_5": ""
+  },
+  {
+    "name": "Conceptual clarity & comprehensiveness",
+    "scale_1": "The team is clear about the idea and how they are going to execute it. They have even thought out the details like how the final product is going to look like, what are the features that are absolutely non-negotiable, what are the features that are good-to-have.",
+    "scale_2": "The team is clear about the idea and how they are going to execute it. They have even thought out the details like how the final product is going to look like, what are the features that they are going to add to the product. However, they are yet to decide on which of those features are absolutely non-negotiable and which are good-to-have.",
+    "scale_3": "The team is clear about the idea and how they are going to execute it. They have an image in mind of how the final product is going to look like but plan to proceed further on the go.",
+    "scale_4": "The team is clear about the idea but are not yet decided on how they are going to execute it. They have an image in mind of how the final product is going to look like but plan to proceed further on the go.",
+    "scale_5": "The team is still not very clear about the idea and are getting lost in discussions regarding the same every now and then. They are yet to think through the execution plan. They have an image in mind of how the final product is going to look like but plan to proceed further on the go."
+  },
+  {
+    "name": "Empathy",
+    "scale_1": "The team has demonstrated great empathy while coming up with the idea. They have put themselves in the users' shoes and tried to feel the challenges that the user is facing with the existing alternatives. They have also gone one step further and besides removing the current pains, have also looked at the gains that they could bring in to the users' lives through their idea.",
+    "scale_2": "The team has demonstrated great empathy while coming up with the idea. They have put themselves in the users' shoes and tried to feel the challenges that the user is facing with the existing alternatives. They have ensured that their idea removes all pains that the users are currently facing with the existing alternatives.",
+    "scale_3": "The team has demonstrated ample empathy while coming up with the idea. They have put themselves in the users' shoes and tried to feel the challenges that the user is facing with the existing alternatives. They have ensured that their idea removes most of the pains that the users are currently facing with the existing alternatives.",
+    "scale_4": "The team has demonstrated some amount of empathy while coming up with the idea. They have tried to identify the challenges that the user is facing with the existing alternatives. However, they have failed to identify all the pains that the users are currently facing, hence the idea fails to provide a complete solution to the users' pains.",
+    "scale_5": "The team has focused more on the thrill of ideation and has ignored the users and the pains that they are facing currently. The idea fails to provide a solution to the users' problems."
+  },
+  {
+    "name": "Creativity",
+    "scale_1": "After identifying the problem they want to solve, they have demonstrated divergent and out-of-the-box thinking while coming up with the solution idea. They demonstrate a temperament to be trend-setters rather than followers. Besides showing creativity and innovation during important milestones like idea generation, they also demonstrate creativity in everyday tasks like compiling data and presenting facts.",
+    "scale_2": "After identifying the problem they want to solve, they have demonstrated divergent and out-of-the-box thinking while coming up with the idea. They demonstrate a temperament to be trend-setters rather than followers. However, other than important milestones like idea generation,  they do not demonstrate much creativity in their everyday tasks like compiling data or presenting facts.",
+    "scale_3": "After identifying the problem they want to solve, they have demonstrated good problem-solving  skills while coming up with the idea. They demonstrate a temperament to play safe and not stray completely away from the trodden path. They seldom display any creativity in their everyday tasks like compiling data or presenting facts.",
+    "scale_4": "After identifying the problem they want to solve, they have demonstrated good problem-solving skills in order to come up with the idea. They hardly show any temperament to be creative in their tasks, irrespective of how important the task is.",
+    "scale_5": "After identifying the problem they want to solve, they have demonstrated average  problem-solving skills in order to come up with the idea. They never show any temperament to be creative in their tasks, irrespective of their importance."
+  },
+  {
+    "name": "Communication",
+    "scale_1": "The team members think alike and share the same passion. They communicate well among themselves and ensure they are all on the same page internally. They also communicate regularly with the outside world, whether they be the users or stakeholders. They use all forms of communication, verbal and non-verbal, to get their point across to the audience.",
+    "scale_2": "The team members think alike and share the same passion. They communicate well among themselves and ensure that they are all on the same page internally.  However, they need to communicate more with their users and stakeholders.",
+    "scale_3": "It is clear that communication within the team often gets broken and not all of them are on the same page. They appear confused when it comes to communicating with their users and audience. They need to communicate better and more often, both internally and externally, only then will they appear as one unit and give their users and investors the confidence in their ability as a team.",
+    "scale_4": "As a team, they don't appear to be in sync with each other. They need to communicate better and more often, both internally and externally, only then will they appear as one unit and give their users and investors the confidence in their ability as a team.",
+    "scale_5": "They do not appear as a single unit as the communication within them is ineffective and irregular. None of them are on the same page as the other and hence, they are always confused about what to convey to the users or to the audience."
+  },
+  {
+    "name": "Flexible Thinking",
+    "scale_1": "The team is flexible in its approach and is always ready to learn, adapt, and iterate.",
+    "scale_2": "The team is flexible in its approach and is willing to adapt and iterate as and when essential.",
+    "scale_3": "The team shows some resistance to adapt and iterate unless absolutely essential.",
+    "scale_4": "The team is not flexible in its approach and is not willing to adapt or iterate as and when essential.",
+    "scale_5": "The team is completely closed on any iteration whatsoever.."
+  }
+]

@@ -25,12 +25,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-sk-6xrzl@i$3i6=*-5i8!%f(4qcd$oa4ae@30nct6xce9&z0&x')
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-dev-only-change-in-production')
+if not os.getenv('SECRET_KEY') and not os.getenv('DEBUG', 'True').lower() in ('true', '1'):
+    raise RuntimeError("SECRET_KEY environment variable must be set in production")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'True').lower() in ('true', '1')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 
 # Application definition
@@ -138,3 +140,4 @@ OPENROUTER_API_KEY = os.getenv('OPENROUTER_API_KEY', '')
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+# admin_dashboard_fix

@@ -1,0 +1,8 @@
+Changes 
+
+Here is the list of things which is not done yet.
+
+1) In the jury dashboard there is no button to evalutae the idea
+2) In this page there is no AI summery available (when we review the submissions)
+3) And when user submits the idea after that in the confirmation page in the "
+Initial AI Analysis" summery is not coming

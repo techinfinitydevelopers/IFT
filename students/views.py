@@ -97,6 +97,8 @@ def dashboard(request):
     })
 
 
+import threading
+
 @login_required
 def submit_idea(request):
     """Idea submission form"""
@@ -134,13 +136,27 @@ def submit_idea(request):
                         file_size=uploaded_file.size
                     )
             
-            # Trigger AI processing
-            try:
-                ai_summary = generate_summary(submission)
-                messages.success(request, 'Your idea has been submitted successfully!')
-            except Exception as e:
-                messages.warning(request, f'Idea submitted, but AI processing encountered an issue: {str(e)}')
+            # Trigger AI processing in background to avoid timeout
+            def run_ai(sub_id):
+                try:
+                    from .models import IdeaSubmission
+                    sub = IdeaSubmission.objects.get(id=sub_id)
+                    generate_summary(sub)
+                    sub.ai_processed = True
+                    sub.ai_processing_error = ''
+                    sub.save(update_fields=['ai_processed', 'ai_processing_error'])
+                except Exception as e:
+                    try:
+                        from .models import IdeaSubmission
+                        sub = IdeaSubmission.objects.get(id=sub_id)
+                        sub.ai_processing_error = str(e)[:500]
+                        sub.save(update_fields=['ai_processing_error'])
+                    except Exception:
+                        pass
+
+            threading.Thread(target=run_ai, args=(submission.id,), daemon=True).start()
             
+            messages.success(request, 'Your idea has been submitted successfully! AI analysis is running in the background.')
             return redirect('students:submission_confirmation', submission_id=submission.id)
     else:
         form = IdeaSubmissionForm()
@@ -152,18 +168,13 @@ def submit_idea(request):
 def submission_confirmation(request, submission_id):
     """Confirmation page after submission"""
     submission = get_object_or_404(IdeaSubmission, id=submission_id, student__user=request.user)
-    
-    # Get AI summary if available
     ai_summary = None
     try:
         ai_summary = submission.ai_summary
     except:
         pass
-    
-    return render(request, 'students/submission_confirmation.html', {
-        'submission': submission,
-        'ai_summary': ai_summary
-    })
+    return render(request, 'students/submission_confirmation.html', {'submission': submission, 'ai_summary': ai_summary})
+
 
 
 @login_required
@@ -171,14 +182,30 @@ def submission_detail(request, submission_id):
     """View details of a specific submission"""
     submission = get_object_or_404(IdeaSubmission, id=submission_id, student__user=request.user)
     
-    # Get AI summary if available
     ai_summary = None
     try:
         ai_summary = submission.ai_summary
     except:
         pass
     
-    return render(request, 'students/submission_detail.html', {
+    # Flatten context for reliable rendering
+    context = {
         'submission': submission,
-        'ai_summary': ai_summary
-    })
+        'ai_summary': ai_summary,
+        'submitted_at': submission.submitted_at.strftime("%B %d, %Y") if submission.submitted_at else "Not submitted",
+        'status_label': submission.get_status_display(),
+        
+        # Questions
+        'q1_problem': submission.problem_definition or "Not provided",
+        'q2_description': submission.problem_description or "Not provided",
+        'q3_target': submission.target_user_group or "Not provided",
+        'q4_urgency': submission.problem_urgency or "Not provided",
+        'q5_solution': submission.solution or "Not provided",
+        'q6_benefits': submission.solution_benefits or "Not provided",
+        'q7_why': submission.why_best_equipped or "Not provided",
+        'q8_stage': submission.get_idea_stage_display(),
+        
+        'uploaded_files': submission.uploaded_files.all(),
+    }
+    
+    return render(request, 'students/submission_detail_v2.html', context)

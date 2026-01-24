@@ -1,7 +1,5 @@
 {% extends 'base.html' %}
-
 {% block title %}Jury Dashboard - IFT Platform{% endblock %}
-
 {% block content %}
 <div class="container mt-4">
     <div class="flex justify-between items-center mb-4">
@@ -13,79 +11,109 @@
             <a href="{% url 'admins:all_submissions' %}" class="btn btn-secondary">View All Submissions</a>
         </div>
     </div>
-
     <div class="grid grid-3 mb-4">
         <div class="stat-card">
-            <div class="stat-value">{{ total_submissions }}</div>
+            <div class="stat-value">{{total_submissions}}</div>
             <div class="stat-label">Total Ideas</div>
         </div>
         <div class="stat-card">
-            <div class="stat-value">{{ ai_processed_count }}</div>
+            <div class="stat-value">{{ai_processed_count}}</div>
             <div class="stat-label">AI Analyzed</div>
         </div>
         <div class="stat-card">
-            <div class="stat-value">{{ category_stats|length }}</div>
+            <div class="stat-value">{{category_stats|length}}</div>
             <div class="stat-label">Active Categories</div>
         </div>
     </div>
-
     <div class="card mb-4" style="padding: 1rem 1.5rem;">
         <form method="get" class="flex gap-2 items-center" style="flex-wrap: wrap;">
             <div style="flex: 1; min-width: 200px;">
-                <input type="text" name="search" class="form-control" placeholder="Search..." value="{{ search_query|default:'' }}">
+                <input type="text" name="search" class="form-control" placeholder="Search..." value="{{search_query}}">
             </div>
             <div style="width: 200px;">
                 <select name="category" class="form-control">
                     <option value="">All Categories</option>
                     <option value="edtech" {% if selected_category == 'edtech' %}selected{% endif %}>EdTech</option>
-                    <option value="sustainability" {% if selected_category == 'sustainability' %}selected{% endif %}>Sustainability</option>
+                    <option value="sustainability" {% if selected_category == 'sustainability' %}selected{% endif %}>
+                        Sustainability</option>
                     <option value="health" {% if selected_category == 'health' %}selected{% endif %}>Health</option>
                     <option value="fintech" {% if selected_category == 'fintech' %}selected{% endif %}>FinTech</option>
-                    <option value="social_impact" {% if selected_category == 'social_impact' %}selected{% endif %}>Social Impact</option>
-                    <option value="agriculture" {% if selected_category == 'agriculture' %}selected{% endif %}>Agriculture</option>
+                    <option value="social_impact" {% if selected_category == 'social_impact' %}selected{% endif %}>Social
+                        Impact</option>
+                    <option value="agriculture" {% if selected_category == 'agriculture' %}selected{% endif %}>Agriculture
+                    </option>
                     <option value="other" {% if selected_category == 'other' %}selected{% endif %}>Other</option>
                 </select>
             </div>
             <button type="submit" class="btn btn-primary">Filter</button>
-            {% if search_query or selected_category %}
-                <a href="{% url 'admins:dashboard' %}" class="btn btn-outline">Clear</a>
-            {% endif %}
+            {% if search_query or selected_category %}<a href="{% url 'admins:dashboard' %}"
+                class="btn btn-outline">Clear</a>{% endif %}
         </form>
     </div>
-
     <div class="grid" style="grid-template-columns: 2fr 1fr; align-items: start;">
         <div>
             <h3 class="mb-4">Recent Submissions</h3>
             {% if submissions %}
-                <div class="grid" style="gap: 1rem;">
-                    {% for submission in submissions %}
-                    <div class="card" style="padding: 1.25rem;">
-                        <h4 style="margin: 0 0 0.5rem;">{{ submission.title }}</h4>
-                        <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">{{ submission.description|truncatewords:25 }}</p>
-                        <div style="font-size: 0.85rem; color: var(--text-dim);">
-                            {{ submission.student.user.get_full_name }} - {{ submission.student.school_name }}
-                        </div>
-                        <a href="{% url 'admins:submission_detail' submission.id %}" class="btn btn-outline btn-sm" style="margin-top: 0.5rem;">Review</a>
+            <div class="grid" style="gap: 1rem;">
+                {% for s in submissions %}
+                <div class="card" style="padding: 1.25rem;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                        <h4 style="margin: 0; flex: 1;">{{s.title}}</h4>
+                        {% if s.status == 'evaluated' or s.status == 'reviewed' %}
+                        <span
+                            style="background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; white-space: nowrap;">Evaluated</span>
+                        {% elif s.status == 'under_review' %}
+                        <span
+                            style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; white-space: nowrap;">Under
+                            Review</span>
+                        {% else %}
+                        <span
+                            style="background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; white-space: nowrap;">Pending</span>
+                        {% endif %}
                     </div>
-                    {% endfor %}
+                    <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">{{s.description}}</p>
+                    <div style="font-size: 0.85rem; color: #888;">{{s.student_name}} - {{s.school_name}}</div>
+                    <div style="margin-top: 0.5rem; display: flex; gap: 0.5rem;">
+                        <a href="{% url 'admins:submission_detail' s.id %}" class="btn btn-outline btn-sm">Review</a>
+                        <form method="post" action="{% url 'admins:evaluate_submission' s.id %}"
+                            style="display: inline;">{% csrf_token %}<button type="submit"
+                                class="btn btn-primary btn-sm">Evaluate</button></form>
+                    </div>
                 </div>
+                {% endfor %}
+            </div>
+            {% if page_obj.has_other_pages %}
+            <div style="margin-top: 1.5rem; display: flex; justify-content: center; gap: 0.5rem; align-items: center;">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}"
+                    class="btn btn-outline btn-sm">Previous</a>
+                {% endif %}
+                <span style="font-size: 0.9rem; color: #888;">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </span>
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}"
+                    class="btn btn-outline btn-sm">Next</a>
+                {% endif %}
+            </div>
+            {% endif %}
             {% else %}
-                <div class="card" style="text-align: center; padding: 3rem;">
-                    <p>No submissions found.</p>
-                </div>
+            <div class="card" style="text-align: center; padding: 3rem;">
+                <p>No submissions found.</p>
+            </div>
             {% endif %}
         </div>
-
         <div>
             <h3 class="mb-4">Trends</h3>
             <div class="card">
                 <h4 style="font-size: 1rem; margin-bottom: 1rem;">Category Distribution</h4>
                 {% if category_stats %}
-                    {% for stat in category_stats %}
-                    <div style="margin-bottom: 0.5rem;">{{ stat.final_category|default:"Uncategorized"|title }}: {{ stat.count }}</div>
-                    {% endfor %}
+                {% for stat in category_stats %}
+                <div style="margin-bottom: 0.5rem;">{{stat.category}}: {{stat.count}}</div>
+                {% endfor %}
                 {% else %}
-                    <p>No data yet.</p>
+                <p>No data yet.</p>
                 {% endif %}
             </div>
         </div>

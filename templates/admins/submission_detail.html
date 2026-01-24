@@ -1,92 +1,182 @@
-{% extends 'base.html' %}
-{% block title %}Review {{ submission.title }} - IFT Admin{% endblock %}
-{% block content %}
-<div class="container mt-4">
-    <div class="mb-4"><a href="{% url 'admins:dashboard' %}" style="color: var(--text-muted);">&larr; Back to Dashboard</a></div>
+﻿{% extends 'base.html' %}
+{% block title %}Review - IFT Admin{% endblock %}
 
-    <div class="card mb-4" style="background: linear-gradient(135deg, var(--bg-surface) 0%, rgba(99, 102, 241, 0.1) 100%);">
-        <div class="flex items-center gap-4" style="flex-wrap: wrap;">
-            <div style="width: 60px; height: 60px; background: var(--bg-surface-active); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem;">👤</div>
-            <div style="flex: 1;">
-                <h2 style="font-size: 1.5rem; margin: 0;">{{ submission.student.user.get_full_name }}</h2>
-                <div style="color: var(--text-muted); font-size: 0.95rem;">{{ submission.student.school_name }} • Grade {{ submission.student.grade }}</div>
+{% block content %}
+<style>
+    .param-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-top: 1rem;
+    }
+
+    .param-box {
+        background: rgba(59, 130, 246, 0.05);
+        padding: 1rem;
+        border-radius: 8px;
+        border: 1px solid rgba(59, 130, 246, 0.1);
+    }
+
+    .param-label {
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: var(--primary);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.4rem;
+    }
+
+    .param-score {
+        background: var(--primary);
+        color: white;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+    }
+
+    .param-justification {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        line-height: 1.4;
+    }
+
+    .question-section {
+        margin-bottom: 2rem;
+    }
+
+    .question-label {
+        font-weight: 600;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .question-content {
+        background: var(--bg-surface);
+        padding: 1.25rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        line-height: 1.6;
+        color: var(--text-body);
+    }
+</style>
+
+<div class="container mt-4">
+    <div style="margin-bottom: 1.5rem;"><a href="{% url 'admins:dashboard' %}"
+            class="btn btn-outline-secondary btn-sm">← Back</a></div>
+
+    <div class="card" style="margin-bottom: 2rem; padding: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1 style="font-size: 2rem; margin: 0 0 0.5rem 0;">{{ student_name }}</h1>
+                <p style="color: var(--text-muted); margin: 0;">{{ school_name }} • Grade {{ grade }}</p>
+            </div>
+            <div style="text-align: right;">
+                <span class="badge"
+                    style="background: rgba(59, 130, 246, 0.1); color: var(--primary); border: 1px solid var(--primary);">{{
+                    status_label }}</span>
+                <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; color: var(--text-muted);">{{ submitted_date }}</p>
             </div>
         </div>
     </div>
 
-    <div class="grid" style="grid-template-columns: 2fr 1fr; align-items: start;">
+    <div class="grid" style="grid-template-columns: 2fr 1fr; gap: 2rem; align-items: start;">
         <div>
-            <div class="card mb-4">
-                <div class="card-header">
-                    <div>
-                        <h1 style="font-size: 1.5rem;">{{ submission.title }}</h1>
-                        <p style="margin: 0; font-size: 0.9rem;">{{ submission.submitted_at|date:"F d, Y" }}</p>
+            <div class="card" style="padding: 2rem;">
+                <h2 style="margin-bottom: 1.5rem;">Submission Details</h2>
+                <div class="question-section"><span class="question-label">1. Problem Definition</span>
+                    <div class="question-content">{{ q1_problem }}</div>
+                </div>
+                <div class="question-section"><span class="question-label">2. Problem Description</span>
+                    <div class="question-content">{{ q2_description }}</div>
+                </div>
+                <div class="question-section"><span class="question-label">3. Target User Group</span>
+                    <div class="question-content">{{ q3_target }}</div>
+                </div>
+                <div class="question-section"><span class="question-label">4. Problem Urgency</span>
+                    <div class="question-content">{{ q4_urgency }}</div>
+                </div>
+                <div class="question-section"><span class="question-label">5. Proposed Solution</span>
+                    <div class="question-content">{{ q5_solution }}</div>
+                </div>
+                <div class="question-section"><span class="question-label">6. Solution Benefits</span>
+                    <div class="question-content">{{ q6_benefits }}</div>
+                </div>
+                <div class="question-section"><span class="question-label">7. Why Best Equipped</span>
+                    <div class="question-content">{{ q7_why }}</div>
+                </div>
+                <div class="question-section"><span class="question-label">8. Idea Stage</span>
+                    <div class="question-content">{{ q8_stage }}</div>
+                </div>
+            </div>
+
+            {% if ai_evaluation %}
+            <div class="card" style="margin-top: 2rem; padding: 2rem; border: 2px solid var(--primary);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <h2 style="margin: 0;">AI Score: {{ final_score }}/50</h2>
+                    <span style="font-weight: 700;">Rank: #{{ rank }}</span>
+                </div>
+                <div class="param-grid">
+                    <div class="param-box">
+                        <div class="param-label">Uniqueness <span class="param-score">{{ un_score }}/5</span></div>
+                        <div class="param-justification">{{ un_just }}</div>
                     </div>
-                    {% if submission.status == 'submitted' %}<span class="badge badge-info">Submitted</span>{% elif submission.status == 'reviewed' %}<span class="badge badge-success">Reviewed</span>{% endif %}
+                    <div class="param-box">
+                        <div class="param-label">Ease <span class="param-score">{{ ease_score }}/5</span></div>
+                        <div class="param-justification">{{ ease_just }}</div>
+                    </div>
+                    <div class="param-box">
+                        <div class="param-label">Scalable <span class="param-score">{{ scale_score }}/5</span></div>
+                        <div class="param-justification">{{ scale_just }}</div>
+                    </div>
+                    <div class="param-box">
+                        <div class="param-label">Impact <span class="param-score">{{ impact_score }}/5</span></div>
+                        <div class="param-justification">{{ impact_just }}</div>
+                    </div>
+                    <div class="param-box">
+                        <div class="param-label">Sustain <span class="param-score">{{ sust_score }}/5</span></div>
+                        <div class="param-justification">{{ sust_just }}</div>
+                    </div>
+                    <div class="param-box">
+                        <div class="param-label">Clarity <span class="param-score">{{ clarity_score }}/5</span></div>
+                        <div class="param-justification">{{ clarity_just }}</div>
+                    </div>
+                    <div class="param-box">
+                        <div class="param-label">Empathy <span class="param-score">{{ empathy_score }}/5</span></div>
+                        <div class="param-justification">{{ empathy_just }}</div>
+                    </div>
+                    <div class="param-box">
+                        <div class="param-label">Creativity <span class="param-score">{{ creativity_score }}/5</span>
+                        </div>
+                        <div class="param-justification">{{ creativity_just }}</div>
+                    </div>
+                    <div class="param-box">
+                        <div class="param-label">Communication <span class="param-score">{{ comm_score }}/5</span></div>
+                        <div class="param-justification">{{ comm_just }}</div>
+                    </div>
+                    <div class="param-box">
+                        <div class="param-label">Flexible Thinking <span class="param-score">{{ flex_score }}/5</span>
+                        </div>
+                        <div class="param-justification">{{ flex_just }}</div>
+                    </div>
                 </div>
-                <div class="mb-4"><label class="form-label">Description</label><p>{{ submission.description }}</p></div>
-                <div class="grid grid-2 mb-4">
-                    <div><label class="form-label">Problem Statement</label><div style="background: var(--bg-body); padding: 1rem; border-radius: 8px;">{{ submission.problem_statement }}</div></div>
-                    <div><label class="form-label">Target Audience</label><div style="background: var(--bg-body); padding: 1rem; border-radius: 8px;">{{ submission.target_audience }}</div></div>
-                </div>
-                <div class="mb-4"><label class="form-label">Innovation Aspect</label><div style="background: var(--bg-body); padding: 1rem; border-radius: 8px;">{{ submission.innovation_aspect }}</div></div>
-                <div class="mb-4"><label class="form-label">Implementation Plan</label><div style="background: var(--bg-body); padding: 1rem; border-radius: 8px;">{{ submission.implementation_plan }}</div></div>
-            </div>
-
-            {% if ai_summary %}
-            <div class="ai-block">
-                <h3 style="color: var(--primary); margin-bottom: 1rem;">🤖 AI Analysis <span style="font-size: 0.7rem; color: var(--text-dim);">powered by Claude</span></h3>
-
-                {% if not ai_summary.is_consistent %}
-                <div class="mb-4" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); padding: 1rem; border-radius: 8px;">
-                    <h4 style="color: #ef4444; margin-bottom: 0.5rem;">⚠️ Content Mismatch Detected</h4>
-                    <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">The uploaded files may not match the idea:</p>
-                    <ul style="margin: 0; padding-left: 1.5rem; font-size: 0.85rem;">{% for reason in ai_summary.inconsistency_reasons %}<li>{{ reason }}</li>{% endfor %}</ul>
-                </div>
-                {% endif %}
-
-                <div class="mb-4" style="background: rgba(99, 102, 241, 0.05); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--primary);">
-                    <h4 style="font-size: 0.85rem; color: var(--primary);">Summary</h4>
-                    <p>{{ ai_summary.summary }}</p>
-                </div>
-
-                {% if ai_summary.file_summaries %}
-                <div class="mb-4">
-                    <h4 style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;">📁 File Analysis</h4>
-                    {% for filename, summary in ai_summary.file_summaries.items %}<div style="background: var(--bg-body); padding: 0.75rem; border-radius: 6px; margin-bottom: 0.5rem;"><strong style="font-size: 0.85rem;">{{ filename }}:</strong><p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: var(--text-dim);">{{ summary }}</p></div>{% endfor %}
-                </div>
-                {% endif %}
-
-                <div style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 1rem;">Model: {{ ai_summary.model_used }} | Tokens: {{ ai_summary.tokens_used }} | {% if ai_summary.is_consistent %}<span style="color: var(--success);">✓ Consistent</span>{% else %}<span style="color: #ef4444;">⚠ Mismatch</span>{% endif %}</div>
-                
-                {% if ai_summary.suggested_tags %}<div class="mb-4">{% for tag in ai_summary.suggested_tags %}<span class="badge badge-secondary">{{ tag }}</span> {% endfor %}</div>{% endif %}
-            </div>
-            {% else %}
-            <div class="card" style="text-align: center; padding: 2rem;">
-                <p>⏳ AI Analysis will be generated automatically...</p>
             </div>
             {% endif %}
         </div>
-
-        <div style="display: flex; flex-direction: column; gap: 1rem;">
+        <div>
             <div class="card">
-                <h3 style="font-size: 1rem; color: var(--text-muted);">CATEGORY</h3>
-                <div style="font-size: 1.1rem; color: var(--primary); margin-top: 0.5rem;">{{ submission.get_final_category_display|default:"Uncategorized" }}</div>
-                {% if submission.ai_suggested_category %}<div style="font-size: 0.85rem; color: var(--text-dim); margin-top: 0.25rem;">AI: {{ submission.get_ai_suggested_category_display }}</div>{% endif %}
+                <h3 style="font-size: 0.9rem; color: var(--text-muted);">CATEGORY</h3>
+                <div style="font-size: 1.2rem; font-weight: 700;">{{ category_label }}</div>
             </div>
-
             {% if uploaded_files %}
-            <div class="card">
-                <h3 style="font-size: 1rem; color: var(--text-muted);">ATTACHMENTS</h3>
-                <div style="margin-top: 0.5rem;">
-                    {% for file in uploaded_files %}
-                    <div style="background: var(--bg-body); padding: 0.5rem; border-radius: 6px; margin-bottom: 0.5rem;">
-                        <a href="{{ file.file.url }}" target="_blank" style="color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
-                            {% if file.file_type == 'document' %}📄{% elif file.file_type == 'image' %}🖼️{% else %}🎬{% endif %} {{ file.original_filename|truncatechars:25 }}
-                        </a>
-                    </div>
-                    {% endfor %}
-                </div>
+            <div class="card" style="margin-top: 1rem;">
+                <h3 style="font-size: 0.9rem; color: var(--text-muted);">ATTACHMENTS</h3>
+                {% for f in uploaded_files %}<div style="margin-top: 0.5rem;"><a href="{{ f.file.url }}"
+                        target="_blank">📄 Attachment</a></div>{% endfor %}
             </div>
             {% endif %}
         </div>

@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% block title %}My Submission - IFT Platform{% endblock %}
+{% block content %}
+<style>
+    .question-section {
+        margin-bottom: 1.5rem;
+    }
+
+    .question-label {
+        font-weight: 600;
+        color: var(--text-muted);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        margin-bottom: 0.4rem;
+        display: block;
+    }
+
+    .question-content {
+        background: var(--bg-surface);
+        padding: 1rem;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        line-height: 1.5;
+        color: var(--text-body);
+        font-size: 0.95rem;
+    }
+
+    .sidebar-card {
+        background: var(--bg-surface);
+        padding: 1rem;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        margin-bottom: 1rem;
+    }
+</style>
+<div class="container mt-4">
+    <div style="margin-bottom:1rem;"><a href="{% url 'students:dashboard' %}" class="btn btn-outline-secondary btn-sm">←
+            Back to Dashboard</a></div>
+    <div class="card" style="margin-bottom:1.5rem;padding:1.5rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+                <h1 style="font-size:1.75rem;margin:0 0 0.4rem 0;">Idea Submission</h1>
+                <p style="color:var(--text-muted);margin:0;">Submitted on {{submitted_at}}</p>
+            </div>
+            <div style="text-align:right;"><span class="badge"
+                    style="background:rgba(59,130,246,0.1);color:var(--primary);border:1px solid var(--primary);">{{status_label}}</span>
+            </div>
+        </div>
+    </div>
+    <div class="grid" style="grid-template-columns:2fr 1fr;gap:1.5rem;align-items:start;">
+        <div>
+            <div class="card" style="padding:1.5rem;">
+                <h2 style="margin-bottom:1.5rem;border-bottom:1px solid var(--border);padding-bottom:0.5rem;">Innovation
+                    Questionnaire</h2>
+                <div class="question-section"><span class="question-label">1. Problem Definition</span>
+                    <div class="question-content">{{q1_problem}}</div>
+                </div>
+                <div class="question-section"><span class="question-label">2. Detailed Description</span>
+                    <div class="question-content">{{q2_description}}</div>
+                </div>
+                <div class="question-section"><span class="question-label">3. Target User Group</span>
+                    <div class="question-content">{{q3_target}}</div>
+                </div>
+                <div class="question-section"><span class="question-label">4. Problem Urgency</span>
+                    <div class="question-content">{{q4_urgency}}</div>
+                </div>
+                <div class="question-section"><span class="question-label">5. Proposed Solution</span>
+                    <div class="question-content">{{q5_solution}}</div>
+                </div>
+                <div class="question-section"><span class="question-label">6. Solution Benefits</span>
+                    <div class="question-content">{{q6_benefits}}</div>
+                </div>
+                <div class="question-section"><span class="question-label">7. Why Best Equipped</span>
+                    <div class="question-content">{{q7_why}}</div>
+                </div>
+                <div class="question-section"><span class="question-label">8. Idea Stage</span>
+                    <div class="question-content" style="font-weight:600;">{{q8_stage}}</div>
+                </div>
+            </div>
+            {% if ai_summary %}
+            <div class="card"
+                style="margin-top:1.5rem;padding:1.5rem;border:1px solid var(--primary);background:rgba(59,130,246,0.02);">
+                <h2 style="margin-bottom:1rem;color:var(--primary);">✨ AI Analysis</h2>
+                <p style="line-height:1.6;font-size:1rem;">{{ai_summary.summary}}</p>
+                {% if ai_summary.suggested_tags %}
+                <div style="margin-top:1rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
+                    {% for tag in ai_summary.suggested_tags %}<span class="badge"
+                        style="background:var(--primary);color:white;">{{tag}}</span>{% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="card"
+                style="margin-top:1.5rem;padding:1.5rem;text-align:center;border:1px dashed var(--border);">
+                <p style="margin:0;color:var(--text-muted);">AI is currently analyzing your submission. Please refresh
+                    in a few moments.</p>
+            </div>
+            {% endif %}
+        </div>
+        <div>
+            {% if uploaded_files %}
+            <div class="sidebar-card">
+                <h3 style="font-size:0.8rem;color:var(--text-muted);text-transform:uppercase;margin-bottom:0.8rem;">
+                    Uploaded Files</h3>
+                {% for f in uploaded_files %}<div
+                    style="margin-bottom:0.5rem;display:flex;align-items:center;gap:0.5rem;"><span
+                        style="font-size:1.2rem;">📄</span><a href="{{f.file.url}}" target="_blank"
+                        style="font-size:0.85rem;text-decoration:none;word-break:break-all;">{{f.original_filename}}</a>
+                </div>{% endfor %}
+            </div>
+            {% endif %}
+            <div class="sidebar-card" style="background:rgba(16,185,129,0.05);border-color:rgba(16,185,129,0.1);">
+                <p style="margin:0;font-size:0.85rem;color:var(--success);">Your submission has been received. Our jury
+                    will review it soon!</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -70,10 +70,10 @@ def extract_video_frames(video_path, num_frames=3):
 def validate_submission(submission):
     """Validate if submission is complete"""
     missing = []
-    if not submission.title or len(submission.title.strip()) < 5:
-        missing.append("Title too short")
-    if not submission.description or len(submission.description.strip()) < 20:
-        missing.append("Description too short")
+    if not submission.problem_definition or len(submission.problem_definition.strip()) < 10:
+        missing.append("Problem Definition too short")
+    if not submission.solution or len(submission.solution.strip()) < 10:
+        missing.append("Solution too short")
     return len(missing) == 0, "; ".join(missing) if missing else "Complete"
 
 
@@ -93,14 +93,16 @@ Describe what you see in each image/video frame.
 Check if uploaded files match the idea description.
 If they don't match, explain exactly what the image/video shows vs what the idea is about."""
     
-    # Compile idea text
+    # Compile idea text using the 8 new questions
     idea_text = f"""STUDENT IDEA SUBMISSION:
-Title: {submission.title}
-Description: {submission.description}
-Problem: {submission.problem_statement}
-Target Audience: {submission.target_audience}
-Innovation: {submission.innovation_aspect}
-Implementation: {submission.implementation_plan or 'Not provided'}"""
+1. Problem: {submission.problem_definition}
+2. Details: {submission.problem_description}
+3. Target: {submission.target_user_group}
+4. Urgency: {submission.problem_urgency}
+5. Solution: {submission.solution}
+6. Benefits: {submission.solution_benefits}
+7. Team/Why: {submission.why_best_equipped}
+8. Stage: {submission.get_idea_stage_display()}"""
     
     # Collect files for analysis
     image_paths = []
@@ -151,16 +153,18 @@ UPLOADED FILES:
 {f"[{num_images} images/frames attached for visual analysis]" if num_images > 0 else ""}
 
 YOUR TASK:
-1. Summarize the idea in 2-3 sentences
-2. For EACH image/video frame: Describe what you see in detail
-3. CONSISTENCY CHECK: Do the images/videos relate to the idea?
+1. Generate a SHORT TITLE for this idea (5-8 words, catchy and descriptive)
+2. Summarize the idea in 2-3 sentences
+3. For EACH image/video frame: Describe what you see in detail
+4. CONSISTENCY CHECK: Do the images/videos relate to the idea?
    - If YES: Note they support the idea
    - If NO: Explain exactly what the image shows vs what the idea is about
    Example: "Image shows a beach/ocean scene, but the idea is about education technology - this appears unrelated"
-4. Suggest category tags
+5. Suggest category tags
 
 Return JSON:
 {{
+    "title": "Short catchy title for the idea (5-8 words)",
     "summary": "2-3 sentence idea summary",
     "tags": ["tag1", "tag2"],
     "file_summaries": {{
@@ -170,6 +174,7 @@ Return JSON:
     "is_consistent": true or false,
     "inconsistency_reasons": ["Specific reason why each file doesn't match, describing what it shows"]
 }}"""
+
     
     try:
         response = client.generate_completion(
@@ -189,14 +194,15 @@ Return JSON:
                 json_end = content.rfind('}') + 1
                 ai_data = json.loads(content[json_start:json_end])
             else:
-                raise ValueError("No JSON")
-        except:
+                raise ValueError("No JSON found in AI response")
+        except (json.JSONDecodeError, ValueError) as parse_err:
+            logger.warning(f"AI response JSON parse failed: {parse_err}")
             ai_data = {
-                "summary": content[:500],
+                "summary": f"[Parse error - raw response] {content[:400]}",
                 "tags": ["Other"],
                 "file_summaries": {},
-                "is_consistent": True,
-                "inconsistency_reasons": []
+                "is_consistent": False,
+                "inconsistency_reasons": ["AI response could not be parsed - needs manual review"]
             }
         
         is_complete, notes = validate_submission(submission)
@@ -231,9 +237,14 @@ Return JSON:
             if not submission.final_category:
                 submission.final_category = submission.ai_suggested_category
         
+        # Auto-generate title from AI if not already set
+        if ai_data.get('title') and not submission.title:
+            submission.title = ai_data['title'][:300]  # Limit to field max length
+        
         submission.ai_processed = True
         submission.ai_processing_error = ""
         submission.save()
+
         
         return ai_summary
         

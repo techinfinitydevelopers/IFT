@@ -17,16 +17,6 @@ class OpenRouterClient:
     def generate_completion(self, system_prompt, user_prompt, model=None, max_tokens=800, images=None):
         """
         Generate a completion from OpenRouter API with optional image support
-        
-        Args:
-            system_prompt: System role instruction
-            user_prompt: User message
-            model: Model to use
-            max_tokens: Maximum tokens in response
-            images: List of image paths to include (for vision models)
-            
-        Returns:
-            dict: Response containing 'content', 'model', 'tokens', 'time'
         """
         if not self.api_key:
             raise ValueError("OpenRouter API key not configured.")
@@ -40,38 +30,33 @@ class OpenRouterClient:
             "X-Title": "IFT - India Future Tycoon"
         }
         
-        # Build user content with text and images
-        user_content = []
-        
-        # Add text
-        user_content.append({
-            "type": "text",
-            "text": user_prompt
-        })
-        
-        # Add images if provided
-        if images:
-            for img_path in images[:5]:  # Max 5 images
+        # Build user content
+        if not images:
+            # For text-only, many providers prefer a simple string
+            user_msg_content = user_prompt
+        else:
+            # Multi-modal format
+            user_msg_content = []
+            user_msg_content.append({
+                "type": "text",
+                "text": user_prompt
+            })
+            
+            for img_path in images[:5]:
                 try:
                     if os.path.exists(img_path):
                         with open(img_path, 'rb') as f:
                             img_data = base64.b64encode(f.read()).decode('utf-8')
                         
-                        # Determine media type
                         ext = img_path.lower().split('.')[-1]
                         media_type = {
-                            'jpg': 'image/jpeg',
-                            'jpeg': 'image/jpeg',
-                            'png': 'image/png',
-                            'gif': 'image/gif',
-                            'webp': 'image/webp'
+                            'jpg': 'image/jpeg', 'jpeg': 'image/jpeg',
+                            'png': 'image/png', 'gif': 'image/gif', 'webp': 'image/webp'
                         }.get(ext, 'image/jpeg')
                         
-                        user_content.append({
+                        user_msg_content.append({
                             "type": "image_url",
-                            "image_url": {
-                                "url": f"data:{media_type};base64,{img_data}"
-                            }
+                            "image_url": {"url": f"data:{media_type};base64,{img_data}"}
                         })
                 except Exception as e:
                     print(f"Failed to load image {img_path}: {e}")
@@ -80,7 +65,7 @@ class OpenRouterClient:
             "model": model,
             "messages": [
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_content}
+                {"role": "user", "content": user_msg_content}
             ],
             "max_tokens": max_tokens,
             "temperature": 0.7
@@ -93,9 +78,17 @@ class OpenRouterClient:
                 self.base_url,
                 headers=headers,
                 json=payload,
-                timeout=60  # Longer timeout for vision
+                timeout=60
             )
-            response.raise_for_status()
+            
+            # Try to get error message from body if it failed
+            if not response.ok:
+                try:
+                    error_data = response.json()
+                    error_msg = error_data.get('error', {}).get('message', str(error_data))
+                    raise Exception(error_msg)
+                except:
+                    response.raise_for_status()
             
             data = response.json()
             processing_time = time.time() - start_time
@@ -111,4 +104,7 @@ class OpenRouterClient:
         except requests.exceptions.RequestException as e:
             raise Exception(f"OpenRouter API request failed: {str(e)}")
         except (KeyError, IndexError) as e:
+            # Check if there's an error in the response body that wasn't caught
+            if 'error' in data:
+                raise Exception(str(data['error']))
             raise Exception(f"Unexpected API response format: {str(e)}")
