@@ -3,10 +3,19 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Q, Count
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 import csv
+import io
+import uuid
+import threading
+from django.utils import timezone
+from django.contrib.auth.models import User
 from students.models import IdeaSubmission, Student
 from ai_assistant.models import AIEvaluation
+
+# In-memory progress tracker (works for single-server/SQLite setup)
+PROGRESS_TRACKER = {}
 
 
 def is_staff_or_superuser(user):
@@ -230,8 +239,6 @@ def regenerate_ai_summary(request, submission_id):
     return redirect('admins:submission_detail', submission_id=submission_id)
 
 
-from django.views.decorators.csrf import csrf_exempt
-
 @csrf_exempt
 @login_required
 @user_passes_test(is_staff_or_superuser)
@@ -262,7 +269,7 @@ def evaluate_submission(request, submission_id):
 def batch_evaluate_view(request):
     """Batch evaluate all pending submissions"""
     if request.method == 'POST':
-        limit = int(request.POST.get('limit', 10))
+        limit = int(request.POST.get('limit', 20))
         
         try:
             from ai_assistant.evaluator import batch_evaluate, update_rankings
@@ -378,3 +385,223 @@ def export_top_400(request):
         ])
     
     return response
+
+
+@login_required
+@user_passes_test(is_staff_or_superuser)
+def download_template(request):
+    """Download CSV template for bulk idea upload"""
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="idea_upload_template.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow([
+        'first_name', 'last_name', 'email', 'school_name', 'grade', 'title',
+        'problem_definition', 'problem_description', 'target_user_group',
+        'problem_urgency', 'solution', 'solution_benefits',
+        'why_best_equipped', 'idea_stage'
+    ])
+    # Example row
+    writer.writerow([
+        'Rahul', 'Sharma', 'rahul.sharma@example.com', 'Delhi Public School', '10',
+        'Smart Water Monitor', 'Water wastage in urban households',
+        'Many households waste water due to lack of real-time monitoring of usage.',
+        'Urban households and apartment complexes',
+        'Water scarcity is increasing and current meters only show monthly usage.',
+        'An IoT-based smart water meter that tracks real-time usage via a mobile app.',
+        'Users save 30% water and get alerts for leaks, reducing bills and waste.',
+        'I have experience building IoT prototypes and won a science fair for a similar project.',
+        'concept_prototype'
+    ])
+
+    return response
+
+
+@csrf_exempt
+@login_required
+@user_passes_test(is_staff_or_superuser)
+def bulk_upload_ideas(request):
+    """Accept CSV file upload, create users/students/ideas in background thread"""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+
+    csv_file = request.FILES.get('csv_file')
+    if not csv_file:
+        return JsonResponse({'error': 'No file uploaded'}, status=400)
+
+    try:
+        decoded = csv_file.read().decode('utf-8-sig')
+    except UnicodeDecodeError:
+        return JsonResponse({'error': 'File must be UTF-8 encoded CSV'}, status=400)
+
+    reader = csv.DictReader(io.StringIO(decoded))
+    rows = []
+    for i, row in enumerate(reader):
+        if i >= 50:
+            break
+        rows.append(row)
+
+    if not rows:
+        return JsonResponse({'error': 'CSV file is empty or has no data rows'}, status=400)
+
+    task_id = str(uuid.uuid4())
+    PROGRESS_TRACKER[task_id] = {
+        'current': 0,
+        'total': len(rows),
+        'errors': [],
+        'status': 'running',
+        'message': 'Starting upload...'
+    }
+
+    def process_rows(rows, task_id):
+        import django
+        django.setup()
+        from django.db import connection
+        tracker = PROGRESS_TRACKER[task_id]
+        valid_stages = ['idea', 'concept_prototype', 'working_prototype', 'running_business']
+
+        for i, row in enumerate(rows):
+            try:
+                email = (row.get('email') or '').strip()
+                first_name = (row.get('first_name') or '').strip()
+                last_name = (row.get('last_name') or '').strip()
+                school_name = (row.get('school_name') or '').strip()
+                grade = (row.get('grade') or '').strip()
+                title = (row.get('title') or '').strip()
+
+                if not email:
+                    tracker['errors'].append(f'Row {i+1}: Missing email')
+                    tracker['current'] = i + 1
+                    continue
+                if not title:
+                    tracker['errors'].append(f'Row {i+1}: Missing title')
+                    tracker['current'] = i + 1
+                    continue
+
+                # Get or create user
+                user, created = User.objects.get_or_create(
+                    email=email,
+                    defaults={
+                        'username': email.split('@')[0] + '_' + str(uuid.uuid4())[:4],
+                        'first_name': first_name,
+                        'last_name': last_name,
+                    }
+                )
+                if created:
+                    user.set_unusable_password()
+                    user.save()
+
+                # Get or create student
+                student, _ = Student.objects.get_or_create(
+                    user=user,
+                    defaults={
+                        'school_name': school_name or 'Unknown',
+                        'grade': grade or 'N/A',
+                        'student_id': f'BULK-{uuid.uuid4().hex[:8].upper()}',
+                    }
+                )
+
+                idea_stage = (row.get('idea_stage') or 'idea').strip()
+                if idea_stage not in valid_stages:
+                    idea_stage = 'idea'
+
+                IdeaSubmission.objects.create(
+                    student=student,
+                    title=title,
+                    problem_definition=row.get('problem_definition', '').strip(),
+                    problem_description=row.get('problem_description', '').strip(),
+                    target_user_group=row.get('target_user_group', '').strip(),
+                    problem_urgency=row.get('problem_urgency', '').strip(),
+                    solution=row.get('solution', '').strip(),
+                    solution_benefits=row.get('solution_benefits', '').strip(),
+                    why_best_equipped=row.get('why_best_equipped', '').strip(),
+                    idea_stage=idea_stage,
+                    status='submitted',
+                    submitted_at=timezone.now(),
+                )
+
+                tracker['current'] = i + 1
+                tracker['message'] = f'Processing {i+1}/{len(rows)} ideas...'
+            except Exception as e:
+                tracker['errors'].append(f'Row {i+1}: {str(e)}')
+                tracker['current'] = i + 1
+
+        connection.close()
+        tracker['status'] = 'completed'
+        tracker['message'] = f'Upload complete. {tracker["current"] - len(tracker["errors"])} ideas created.'
+
+    thread = threading.Thread(target=process_rows, args=(rows, task_id))
+    thread.daemon = True
+    thread.start()
+
+    return JsonResponse({'task_id': task_id, 'total': len(rows)})
+
+
+@login_required
+@user_passes_test(is_staff_or_superuser)
+def get_progress(request, task_id):
+    """Return progress for a background task"""
+    tracker = PROGRESS_TRACKER.get(task_id)
+    if not tracker:
+        return JsonResponse({'error': 'Task not found'}, status=404)
+    return JsonResponse(tracker)
+
+
+@csrf_exempt
+@login_required
+@user_passes_test(is_staff_or_superuser)
+def batch_evaluate_async(request):
+    """Batch evaluate submissions in background thread with progress tracking"""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+
+    limit = int(request.POST.get('limit', 20))
+
+    submissions = list(
+        IdeaSubmission.objects.filter(status='submitted')
+        .exclude(ai_evaluation__isnull=False)[:limit]
+    )
+
+    if not submissions:
+        return JsonResponse({'error': 'No pending submissions to evaluate'}, status=400)
+
+    task_id = str(uuid.uuid4())
+    PROGRESS_TRACKER[task_id] = {
+        'current': 0,
+        'total': len(submissions),
+        'errors': [],
+        'status': 'running',
+        'message': 'Starting evaluation...'
+    }
+
+    def process_evaluations(submissions, task_id):
+        import django
+        django.setup()
+        from django.db import connection
+        from ai_assistant.evaluator import evaluate_idea, update_rankings
+        tracker = PROGRESS_TRACKER[task_id]
+
+        for i, submission in enumerate(submissions):
+            try:
+                evaluate_idea(submission)
+                tracker['current'] = i + 1
+                tracker['message'] = f'Evaluating {i+1}/{len(submissions)}...'
+            except Exception as e:
+                tracker['errors'].append(f'{submission.title}: {str(e)}')
+                tracker['current'] = i + 1
+
+        try:
+            update_rankings()
+        except Exception:
+            pass
+
+        connection.close()
+        success = tracker['current'] - len(tracker['errors'])
+        tracker['status'] = 'completed'
+        tracker['message'] = f'Done. {success} evaluated, {len(tracker["errors"])} failed.'
+
+    thread = threading.Thread(target=process_evaluations, args=(submissions, task_id))
+    thread.daemon = True
+    thread.start()
+
+    return JsonResponse({'task_id': task_id, 'total': len(submissions)})
