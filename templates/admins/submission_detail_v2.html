@@ -70,7 +70,168 @@
         border: 1px solid var(--border);
         margin-bottom: 1rem;
     }
+
+    /* Inline Terminal Box */
+    .ai-terminal-box {
+        background: #0d0d0d;
+        border: 1px solid #333;
+        border-radius: 6px;
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        font-size: 12px;
+        color: #ccc;
+        margin-top: 1rem;
+        display: none;
+        overflow: hidden;
+    }
+
+    .ai-terminal-box.active {
+        display: block;
+    }
+
+    /* Progress Bar */
+    .ai-progress {
+        height: 3px;
+        background: #222;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .ai-progress-bar {
+        height: 100%;
+        background: #22c55e;
+        width: 0%;
+        transition: width 0.2s ease;
+    }
+
+    .ai-progress-buffer {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        background: linear-gradient(90deg, transparent, rgba(34, 197, 94, 0.3), transparent);
+        animation: buffer 1s infinite;
+    }
+
+    @keyframes buffer {
+        0% {
+            transform: translateX(-100%);
+        }
+
+        100% {
+            transform: translateX(100%);
+        }
+    }
+
+    .ai-terminal-content {
+        padding: 12px;
+        max-height: 280px;
+        overflow-y: auto;
+    }
+
+    .ai-line {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 3px;
+        line-height: 1.5;
+    }
+
+    .ai-line .p {
+        color: #22c55e;
+        flex-shrink: 0;
+    }
+
+    .ai-line .t {
+        color: #888;
+    }
+
+    .ai-line .s {
+        color: #22c55e;
+        font-weight: bold;
+        margin-left: auto;
+    }
+
+    .ai-line .w {
+        color: #fff;
+    }
+
+    .ai-line .status {
+        color: #f59e0b;
+        margin-left: auto;
+        font-size: 11px;
+    }
+
+    .ai-line .done {
+        color: #22c55e;
+    }
+
+    .ai-divider {
+        border: none;
+        border-top: 1px solid #333;
+        margin: 8px 0;
+    }
+
+    .ai-cursor {
+        display: inline-block;
+        width: 6px;
+        height: 12px;
+        background: #22c55e;
+        animation: blink 0.8s infinite;
+        vertical-align: middle;
+    }
+
+    @keyframes blink {
+
+        0%,
+        50% {
+            opacity: 1;
+        }
+
+        51%,
+        100% {
+            opacity: 0;
+        }
+    }
+
+    .ai-spinner {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border: 2px solid #333;
+        border-top-color: #22c55e;
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+        margin-right: 6px;
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .ai-done-btn {
+        background: #1a1a1a;
+        border: 1px solid #333;
+        color: #ccc;
+        padding: 6px 16px;
+        border-radius: 4px;
+        font-family: inherit;
+        font-size: 11px;
+        cursor: pointer;
+        margin-top: 10px;
+        display: none;
+    }
+
+    .ai-done-btn.show {
+        display: inline-block;
+    }
+
+    .ai-done-btn:hover {
+        background: #222;
+    }
 </style>
+
 <div class="container mt-4">
     <div style="margin-bottom:1rem;"><a href="{% url 'admins:dashboard' %}" class="btn btn-outline-secondary btn-sm">←
             Back</a></div>
@@ -117,12 +278,36 @@
                     <div class="question-content" style="font-weight:600;">{{q8_stage}}</div>
                 </div>
             </div>
+
             {% if ai_evaluation %}
             <div class="card" style="margin-top:1.5rem;padding:1.5rem;border:2px solid var(--primary);">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
                     <h2 style="margin:0;">AI Score: {{final_score}}/50</h2>
                     <span style="font-weight:700;">Rank: #{{rank}}</span>
                 </div>
+                {% if not is_coherent %}
+                <div style="background:#fee2e2;border:1px solid #ef4444;border-radius:8px;padding:1rem;margin-bottom:1.5rem;">
+                    <strong style="color:#dc2626;">⚠️ INCOHERENT SUBMISSION:</strong>
+                    <span style="color:#991b1b;">The fields in this submission do not relate to each other and appear to be from different ideas. Scores are penalized.</span>
+                </div>
+                {% endif %}
+                {% if attachment_mismatch %}
+                <div style="background:{% if mismatch_penalty >= 5 %}#fee2e2{% elif mismatch_penalty >= 3 %}#fef3c7{% else %}#fff7ed{% endif %};border:1px solid {% if mismatch_penalty >= 5 %}#ef4444{% elif mismatch_penalty >= 3 %}#f59e0b{% else %}#fb923c{% endif %};border-radius:8px;padding:1rem;margin-bottom:1.5rem;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+                        <strong style="color:{% if mismatch_penalty >= 5 %}#dc2626{% elif mismatch_penalty >= 3 %}#d97706{% else %}#ea580c{% endif %};">
+                            {% if mismatch_penalty >= 5 %}⚠️ CONTENT MISMATCH (Severe){% elif mismatch_penalty >= 3 %}⚠️ NO ATTACHMENTS{% else %}⚠️ CONTENT MISMATCH (Minor){% endif %}
+                        </strong>
+                        <span style="background:{% if mismatch_penalty >= 5 %}#dc2626{% elif mismatch_penalty >= 3 %}#d97706{% else %}#ea580c{% endif %};color:white;padding:2px 8px;border-radius:4px;font-size:0.8rem;font-weight:700;">-{{mismatch_penalty}} marks</span>
+                    </div>
+                    {% if mismatch_reasons %}
+                    <ul style="margin:0;padding-left:1.2rem;font-size:0.85rem;color:#78350f;">
+                        {% for reason in mismatch_reasons %}
+                        <li>{{reason}}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+                {% endif %}
                 <h3 style="font-size:0.9rem;color:var(--text-muted);margin-bottom:0.8rem;text-transform:uppercase;">Idea
                     Parameters</h3>
                 <div class="param-grid">
@@ -176,20 +361,88 @@
                     <h4 style="margin:0 0 0.4rem 0;font-size:0.95rem;">AI Summary</h4>
                     <p style="margin:0;line-height:1.4;font-size:0.9rem;">{{ai_summary_text}}</p>
                 </div>
-                <div style="margin-top:1rem;text-align:center;">
-                    <form method="post" action="{% url 'admins:evaluate_submission' submission.id %}"
-                        style="display:inline;">{% csrf_token %}<button type="submit"
-                            class="btn btn-primary btn-sm">Re-Evaluate with AI</button></form>
+
+                {% if attachment_file_analyses %}
+                <div style="margin-top:1.5rem;">
+                    <h4 style="margin:0 0 1rem 0;font-size:0.95rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">Attachment Analysis</h4>
+                    {% for file_info in attachment_file_analyses %}
+                    {% if file_info.file_type == 'video' and not file_info.video_verified %}
+                    <div style="padding:0.85rem;background:#eff6ff;border-radius:10px;border:2px solid #93c5fd;margin-bottom:0.6rem;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
+                            <span style="font-weight:700;font-size:0.85rem;color:#1e40af;">
+                                🎥 {{ file_info.filename }}
+                            </span>
+                            <span style="background:#1e40af;color:white;padding:2px 10px;border-radius:20px;font-size:0.7rem;font-weight:700;letter-spacing:0.3px;">UNVERIFIED</span>
+                        </div>
+                        <p style="margin:0;font-size:0.84rem;color:#1d4ed8;line-height:1.5;">Video file present. Frame extraction failed — not penalized.</p>
+                    </div>
+                    {% elif file_info.is_relevant %}
+                    <div style="padding:0.85rem;background:#f0fdf4;border-radius:10px;border:2px solid #86efac;margin-bottom:0.6rem;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
+                            <span style="font-weight:700;font-size:0.85rem;color:#166534;">
+                                {% if file_info.file_type == 'image' %}🖼️{% elif file_info.file_type == 'document' %}📄{% elif file_info.file_type == 'video' %}🎥{% else %}📎{% endif %}
+                                {{ file_info.filename }}
+                            </span>
+                            <span style="background:#166534;color:white;padding:2px 10px;border-radius:20px;font-size:0.7rem;font-weight:700;letter-spacing:0.3px;">{% if file_info.file_type == 'video' %}VIDEO VERIFIED{% else %}RELEVANT{% endif %}</span>
+                        </div>
+                        <p style="margin:0;font-size:0.84rem;color:#15803d;line-height:1.5;">{{ file_info.summary }}</p>
+                    </div>
+                    {% else %}
+                    <div style="padding:0.85rem;background:#fef2f2;border-radius:10px;border:2px solid #f87171;margin-bottom:0.6rem;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
+                            <span style="font-weight:700;font-size:0.85rem;color:#991b1b;">
+                                {% if file_info.file_type == 'image' %}🖼️{% elif file_info.file_type == 'document' %}📄{% elif file_info.file_type == 'video' %}🎥{% else %}📎{% endif %}
+                                {{ file_info.filename }}
+                            </span>
+                            <span style="background:#dc2626;color:white;padding:2px 10px;border-radius:20px;font-size:0.7rem;font-weight:700;letter-spacing:0.3px;">IRRELEVANT</span>
+                        </div>
+                        <p style="margin:0 0 0.4rem 0;font-size:0.84rem;color:#991b1b;line-height:1.5;">{{ file_info.summary }}</p>
+                        {% if file_info.relevance_note %}
+                        <div style="padding:0.5rem 0.7rem;background:#fecaca;border-radius:6px;font-size:0.8rem;color:#7f1d1d;line-height:1.4;">
+                            ⚠️ {{ file_info.relevance_note }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+
+                    {% if attachment_missing_types %}
+                    <div style="margin-top:0.5rem;padding:0.6rem 0.75rem;background:#fef3c7;border:2px solid #fbbf24;border-radius:10px;font-size:0.85rem;color:#92400e;">
+                        <strong>Missing Attachments:</strong>
+                        {% for t in attachment_missing_types %}
+                            <span style="background:#fbbf24;color:#78350f;padding:2px 8px;border-radius:20px;font-size:0.72rem;margin-left:4px;font-weight:600;">{{ t }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+                <div style="margin-top:1rem;">
+                    <button type="button" id="evalBtn" onclick="startEvaluation(true)"
+                        class="btn btn-primary btn-sm">Re-Evaluate with AI</button>
+                    <div class="ai-terminal-box" id="aiTerminal">
+                        <div class="ai-progress">
+                            <div class="ai-progress-bar" id="progressBar"></div>
+                            <div class="ai-progress-buffer" id="progressBuffer"></div>
+                        </div>
+                        <div class="ai-terminal-content" id="terminalContent"></div>
+                    </div>
                 </div>
             </div>
             {% else %}
             <div class="card" style="margin-top:1.5rem;padding:1.5rem;border:1px dashed var(--border);">
-                <h3 style="margin-bottom:0.5rem;">AI Summary</h3>
+                <h3 style="margin-bottom:0.5rem;">AI Evaluation</h3>
                 <p style="margin-bottom:1rem;color:var(--text-muted);">{{ai_summary_text}}</p>
-                <form method="post" action="{% url 'admins:evaluate_submission' submission.id %}">{% csrf_token %}<button type="submit" class="btn btn-primary">Run AI Evaluation</button></form>
+                <button type="button" id="evalBtn" onclick="startEvaluation(false)" class="btn btn-primary">Run AI
+                    Evaluation</button>
+                <div class="ai-terminal-box" id="aiTerminal">
+                    <div class="ai-progress">
+                        <div class="ai-progress-bar" id="progressBar"></div>
+                        <div class="ai-progress-buffer" id="progressBuffer"></div>
+                    </div>
+                    <div class="ai-terminal-content" id="terminalContent"></div>
+                </div>
             </div>
             {% endif %}
-
         </div>
         <div>
             <div class="sidebar-card">
@@ -199,13 +452,270 @@
             </div>
             {% if uploaded_files %}<div class="sidebar-card">
                 <h3 style="font-size:0.8rem;color:var(--text-muted);text-transform:uppercase;margin-bottom:0.8rem;">
-                    Attachments</h3>{% for f in uploaded_files %}<div style="margin-bottom:0.5rem;"><a
-                        href="{{f.file.url}}" target="_blank" style="font-size:0.85rem;text-decoration:none;">📄
-                        Attachment</a></div>{% endfor %}
+                    Attachments</h3>
+                {% for f in uploaded_files %}<div style="margin-bottom:0.5rem;"><a href="{{f.file.url}}" target="_blank"
+                        style="font-size:0.85rem;text-decoration:none;">{% if f.file_type == 'image' %}🖼️{% elif f.file_type == 'video' %}🎥{% else %}📄{% endif %} {{f.original_filename}}</a>
+                    <span style="font-size:0.7rem;color:var(--text-muted);display:block;padding-left:1.2rem;">{{f.get_file_type_display}}</span></div>{% endfor %}
             </div>{% endif %}
+            {% if ai_evaluation %}
+            <div class="sidebar-card" id="sidebarMismatchBox" style="border:{% if attachment_mismatch %}2px solid {% if mismatch_penalty >= 5 %}#ef4444{% elif mismatch_penalty >= 3 %}#f59e0b{% else %}#fb923c{% endif %}{% else %}1px solid #bbf7d0{% endif %};background:{% if attachment_mismatch %}{% if mismatch_penalty >= 5 %}#fef2f2{% elif mismatch_penalty >= 3 %}#fffbeb{% else %}#fff7ed{% endif %}{% else %}#f0fdf4{% endif %};">
+                {% if attachment_mismatch %}
+                <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.6rem;">
+                    <span style="font-size:1.4rem;">⚠️</span>
+                    <div>
+                        <h3 style="font-size:0.8rem;color:{% if mismatch_penalty >= 5 %}#dc2626{% elif mismatch_penalty >= 3 %}#d97706{% else %}#ea580c{% endif %};text-transform:uppercase;margin:0;letter-spacing:0.5px;">Content Mismatch</h3>
+                        <span style="font-size:0.75rem;font-weight:700;color:{% if mismatch_penalty >= 5 %}#dc2626{% elif mismatch_penalty >= 3 %}#d97706{% else %}#ea580c{% endif %};">{% if mismatch_penalty >= 5 %}Severe{% elif mismatch_penalty >= 3 %}Missing Files{% else %}Minor{% endif %} &middot; -{{mismatch_penalty}} marks</span>
+                    </div>
+                </div>
+                {% if mismatch_reasons %}
+                <ul style="margin:0;padding-left:1.2rem;font-size:0.78rem;color:#78350f;line-height:1.5;">
+                    {% for reason in mismatch_reasons %}
+                    <li>{{reason}}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                {% if attachment_missing_types %}
+                <div style="margin-top:0.5rem;font-size:0.75rem;color:#92400e;">
+                    <strong>Missing:</strong>
+                    {% for t in attachment_missing_types %}
+                    <span style="background:#fde68a;color:#78350f;padding:1px 5px;border-radius:3px;font-size:0.7rem;">{{ t }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% else %}
+                <div style="display:flex;align-items:center;gap:0.5rem;">
+                    <span style="font-size:1.4rem;">✅</span>
+                    <div>
+                        <h3 style="font-size:0.8rem;color:#166534;text-transform:uppercase;margin:0;letter-spacing:0.5px;">Content Match</h3>
+                        <span style="font-size:0.75rem;color:#15803d;">All attachments are relevant</span>
+                    </div>
+                </div>
+                {% if attachment_missing_types %}
+                <div style="margin-top:0.5rem;font-size:0.75rem;color:#92400e;">
+                    <strong>Missing:</strong>
+                    {% for t in attachment_missing_types %}
+                    <span style="background:#fde68a;color:#78350f;padding:1px 5px;border-radius:3px;font-size:0.7rem;">{{ t }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% endif %}
+            </div>
+            {% endif %}
             <div class="sidebar-card" style="text-align:center;"><a href="{% url 'admins:rankings' %}"
                     class="btn btn-outline-primary btn-sm" style="width:100%;">View Leaderboard</a></div>
         </div>
     </div>
 </div>
+
+<script>
+    const EVAL_URL = "{% url 'admins:evaluate_submission_async' submission.id %}";
+
+    const PARAMS = [
+        { key: 'uniqueness', name: 'Uniqueness' },
+        { key: 'ease_of_implementation', name: 'Ease of Implementation' },
+        { key: 'scalable', name: 'Scalability' },
+        { key: 'impactful', name: 'Impact' },
+        { key: 'sustainable', name: 'Sustainability' },
+        { key: 'conceptual_clarity', name: 'Conceptual Clarity' },
+        { key: 'empathy', name: 'Empathy' },
+        { key: 'creativity', name: 'Creativity' },
+        { key: 'communication', name: 'Communication' },
+        { key: 'flexible_thinking', name: 'Flexible Thinking' }
+    ];
+
+    const STATUS_TEXTS = ['Processing...', 'Thinking...', 'Analyzing...', 'Computing...', 'Evaluating...'];
+
+    function getCookie(name) {
+        let v = null;
+        document.cookie.split(';').forEach(c => {
+            c = c.trim();
+            if (c.startsWith(name + '=')) v = decodeURIComponent(c.substring(name.length + 1));
+        });
+        return v;
+    }
+
+    function setProgress(percent) {
+        document.getElementById('progressBar').style.width = percent + '%';
+    }
+
+    function hideBuffer() {
+        document.getElementById('progressBuffer').style.display = 'none';
+    }
+
+    function addLine(html) {
+        const t = document.getElementById('terminalContent');
+        t.innerHTML += html;
+        t.scrollTop = t.scrollHeight;
+    }
+
+    function updateLine(id, html) {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = html;
+    }
+
+    function startEvaluation(isReEval) {
+        const btn = document.getElementById('evalBtn');
+        const terminal = document.getElementById('aiTerminal');
+        const content = document.getElementById('terminalContent');
+
+        btn.disabled = true;
+        btn.textContent = 'Evaluating...';
+        terminal.classList.add('active');
+        setProgress(0);
+
+        // Fake loading steps while waiting for API
+        const loadingSteps = [
+            { text: 'Connecting...', progress: 2 },
+            { text: 'Authenticating...', progress: 5 },
+            { text: 'Loading data...', progress: 8 },
+            { text: 'Initializing AI...', progress: 12 }
+        ];
+
+        let stepIndex = 0;
+        let apiDone = false;
+        let apiData = null;
+
+        function showNextStep() {
+            if (apiDone) return;
+            if (stepIndex >= loadingSteps.length) {
+                stepIndex = loadingSteps.length - 1;
+                return;
+            }
+            const step = loadingSteps[stepIndex];
+            content.innerHTML = '<div class="ai-line"><span class="ai-spinner"></span><span class="t">' + step.text + '</span></div>';
+            setProgress(step.progress);
+            stepIndex++;
+            if (!apiDone && stepIndex < loadingSteps.length) {
+                setTimeout(showNextStep, 400);
+            }
+        }
+
+        showNextStep();
+
+        const formData = new FormData();
+        if (isReEval) formData.append('force', '1');
+
+        fetch(EVAL_URL, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCookie('csrftoken') },
+            body: formData
+        })
+            .then(r => r.json())
+            .then(data => {
+                apiDone = true;
+                if (data.success) {
+                    setProgress(15);
+                    content.innerHTML = '<div class="ai-line"><span class="p">✓</span><span class="t">Ready</span></div>';
+                    addLine('<hr class="ai-divider">');
+                    showResults(data);
+                } else {
+                    hideBuffer();
+                    content.innerHTML = '<div class="ai-line"><span style="color:#ef4444;">✗ Error: ' + (data.error || 'Failed') + '</span></div>';
+                    addLine('<button class="ai-done-btn show" onclick="closeTerminal()">Close</button>');
+                }
+            })
+            .catch(err => {
+                apiDone = true;
+                hideBuffer();
+                content.innerHTML = '<div class="ai-line"><span style="color:#ef4444;">✗ Error: ' + err + '</span></div>';
+                addLine('<button class="ai-done-btn show" onclick="closeTerminal()">Close</button>');
+            });
+    }
+
+    function showResults(data) {
+        // First show all params as pending
+        PARAMS.forEach((p, i) => {
+            addLine('<div class="ai-line" id="param-' + i + '"><span class="p">○</span><span class="t">' + p.name + '</span><span class="status">Pending</span></div>');
+        });
+
+        let i = 0;
+        function processNext() {
+            if (i >= PARAMS.length) {
+                showFinal(data);
+                return;
+            }
+
+            const p = PARAMS[i];
+            const score = data.scores[p.key].score;
+            const statusText = STATUS_TEXTS[i % STATUS_TEXTS.length];
+
+            // Update current to processing
+            updateLine('param-' + i, '<span class="ai-spinner"></span><span class="t">' + p.name + '</span><span class="status">' + statusText + '</span>');
+
+            setProgress(20 + (i / PARAMS.length) * 70);
+
+            setTimeout(() => {
+                // Mark as done with score
+                updateLine('param-' + i, '<span class="p">✓</span><span class="t">' + p.name + '</span><span class="s">' + score + '/5</span>');
+                i++;
+                setTimeout(processNext, 60);
+            }, 120);
+        }
+
+        processNext();
+    }
+
+    function showFinal(data) {
+        hideBuffer();
+        setProgress(100);
+
+        addLine('<hr class="ai-divider">');
+
+        // Show mismatch penalty if applicable
+        if (data.mismatch && data.mismatch.has_mismatch) {
+            let sevLabel = data.mismatch.severity === 'severe' ? 'SEVERE MISMATCH' : (data.mismatch.severity === 'missing' ? 'NO ATTACHMENTS' : 'MINOR MISMATCH');
+            let sevColor = data.mismatch.penalty >= 5 ? '#ef4444' : (data.mismatch.penalty >= 3 ? '#f59e0b' : '#fb923c');
+            addLine('<div class="ai-line"><span style="color:' + sevColor + ';">⚠ ' + sevLabel + ': -' + data.mismatch.penalty + ' marks</span></div>');
+            if (data.mismatch.reasons && data.mismatch.reasons.length > 0) {
+                data.mismatch.reasons.forEach(function(reason) {
+                    addLine('<div class="ai-line"><span class="t" style="padding-left:16px;font-size:11px;">• ' + reason + '</span></div>');
+                });
+            }
+            addLine('<hr class="ai-divider">');
+        }
+
+        // Show attachment analysis summary
+        if (data.attachment_summaries && data.attachment_summaries.file_analyses && data.attachment_summaries.file_analyses.length > 0) {
+            addLine('<div class="ai-line"><span class="w" style="font-size:11px;text-transform:uppercase;color:#7c3aed;">Attachment Analysis</span></div>');
+            data.attachment_summaries.file_analyses.forEach(function(f) {
+                var icon = f.file_type === 'image' ? '🖼️' : (f.file_type === 'document' ? '📄' : '🎥');
+                var relBadge;
+                if (f.file_type === 'video' && !f.video_verified) {
+                    relBadge = '<span style="color:#3b82f6;">○</span>';
+                } else {
+                    relBadge = f.is_relevant ? '<span style="color:#22c55e;">✓</span>' : '<span style="color:#ef4444;">✗</span>';
+                }
+                addLine('<div class="ai-line"><span class="t" style="padding-left:8px;">' + icon + ' ' + f.filename + '</span>' + relBadge + '</div>');
+                if (f.file_type === 'video' && !f.video_verified) {
+                    addLine('<div class="ai-line"><span class="t" style="padding-left:24px;font-size:11px;color:#3b82f6;">Unverified — frame extraction failed</span></div>');
+                } else {
+                    addLine('<div class="ai-line"><span class="t" style="padding-left:24px;font-size:11px;color:#999;">' + f.summary + '</span></div>');
+                    if (!f.is_relevant && f.relevance_note) {
+                        addLine('<div class="ai-line"><span style="padding-left:24px;font-size:11px;color:#ef4444;">⚠ ' + f.relevance_note + '</span></div>');
+                    }
+                }
+            });
+            if (data.attachment_summaries.missing_types && data.attachment_summaries.missing_types.length > 0) {
+                addLine('<div class="ai-line"><span style="color:#f59e0b;padding-left:8px;font-size:11px;">Missing: ' + data.attachment_summaries.missing_types.join(', ') + '</span></div>');
+            }
+            addLine('<hr class="ai-divider">');
+        }
+
+        addLine('<div class="ai-line"><span class="w">Total Score: <span class="s">' + data.final_score + '/50</span></span></div>');
+
+        if (data.rank) {
+            addLine('<div class="ai-line"><span class="w">Rank: #' + data.rank + '</span></div>');
+        }
+
+        let status = data.final_score >= 34 ? '✓ QUALIFIED FOR TOP 400' : '○ BELOW THRESHOLD';
+        let color = data.final_score >= 34 ? '#22c55e' : '#f59e0b';
+        addLine('<div class="ai-line"><span style="color:' + color + ';">' + status + '</span></div>');
+
+        addLine('<button class="ai-done-btn show" onclick="closeTerminal()">Done</button>');
+    }
+
+    function closeTerminal() {
+        location.reload();
+    }
+</script>
 {% endblock %}

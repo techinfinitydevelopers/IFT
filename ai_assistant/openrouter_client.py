@@ -68,7 +68,9 @@ class OpenRouterClient:
                 {"role": "user", "content": user_msg_content}
             ],
             "max_tokens": max_tokens,
-            "temperature": 0.7
+            "temperature": 0,
+            "seed": 42,
+            "top_p": 1
         }
         
         start_time = time.time()

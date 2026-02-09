@@ -2,23 +2,84 @@
 AI Idea Evaluator - Scores submissions using 10-parameter jury rubric (1-5 scale each).
 """
 import json
+import os
 import re
+import tempfile
+from django.conf import settings
 from .openrouter_client import OpenRouterClient
-from .models import AIEvaluation
+from .models import AIEvaluation, AISummary
 from students.models import IdeaSubmission
 
 
+def extract_video_frames(video_path, num_frames=3):
+    """Extract evenly-spaced frames from a video file for visual analysis."""
+    try:
+        import cv2
+    except ImportError:
+        return []
+
+    try:
+        cap = cv2.VideoCapture(video_path)
+        if not cap.isOpened():
+            return []
+
+        total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        if total_frames <= 0:
+            cap.release()
+            return []
+
+        # Pick evenly-spaced frame indices
+        indices = [int(i * total_frames / (num_frames + 1)) for i in range(1, num_frames + 1)]
+
+        frame_paths = []
+        for idx in indices:
+            cap.set(cv2.CAP_PROP_POS_FRAMES, idx)
+            ret, frame = cap.read()
+            if ret:
+                temp_path = os.path.join(tempfile.gettempdir(), f'ift_vframe_{os.path.basename(video_path)}_{idx}.jpg')
+                cv2.imwrite(temp_path, frame)
+                frame_paths.append(temp_path)
+
+        cap.release()
+        return frame_paths
+    except Exception as e:
+        print(f"Video frame extraction failed for {video_path}: {e}")
+        return []
+
+
 # 10-parameter evaluation prompt based on jury rubric (exact sheet descriptions)
-EVALUATION_PROMPT = """You are an Idea Evaluation AI for a student innovation competition called "India Future Tycoon".
+EVALUATION_PROMPT = """You are a STRICT Idea Evaluation AI for a student innovation competition called "India Future Tycoon".
+You must be RIGOROUS - this is a competition, and only truly strong ideas should score high.
 Evaluate the submitted idea using exactly these 10 parameters on a 1-5 scale.
 
-IDEA SUBMISSION:
-================
+IDEA SUBMISSION (8 Questions):
+===============================
 Title: {title}
-Problem Statement: {problem_statement}
-Proposed Solution: {proposed_solution}
-Target Users: {target_users}
-Idea Stage: {idea_stage}
+Q1 - Problem Definition: {problem_statement}
+Q2 - Detailed Description: {problem_description}
+Q3 - Target User Group: {target_users}
+Q4 - Problem Urgency: {problem_urgency}
+Q5 - Proposed Solution: {proposed_solution}
+Q6 - Solution Benefits: {solution_benefits}
+Q7 - Why Best Equipped: {why_best_equipped}
+Q8 - Idea Stage: {idea_stage}
+
+SUBMISSION EFFORT: {effort_note}
+
+*** CRITICAL: COHERENCE CHECK (DO THIS FIRST) ***
+==================================================
+Before scoring, check if ALL fields are talking about the SAME idea:
+1. Does the Problem Statement describe ONE clear problem?
+2. Does the Proposed Solution DIRECTLY address that specific problem?
+3. Are the Target Users the people who would face that specific problem?
+4. Do all fields logically connect and make sense together?
+
+If the submission is INCOHERENT (fields seem to be from different ideas, unrelated, or contradictory):
+- Set "is_coherent": false in your response
+- Give score of 0 to ALL parameters (incoherent submissions get zero marks)
+- In overall_justification, clearly state: "INCOHERENT SUBMISSION: The fields do not relate to each other and appear to be from different ideas."
+
+Only if the submission IS coherent, proceed with normal evaluation.
 
 SCORING RUBRIC (Rate each 1-5, where 1 is WORST and 5 is BEST):
 ================================================================
@@ -136,6 +197,7 @@ RESPONSE FORMAT (STRICT JSON):
 ==============================
 Return ONLY valid JSON with this exact structure:
 {{
+    "is_coherent": <true/false>,
     "parameter_scores": [
         {{"parameter_name": "Uniqueness", "score": <1-5>, "reason": "<one sentence>"}},
         {{"parameter_name": "Ease of Implementation", "score": <1-5>, "reason": "<one sentence>"}},
@@ -154,10 +216,15 @@ Return ONLY valid JSON with this exact structure:
 }}
 
 IMPORTANT RULES:
-- Score MUST be integer 1-5 only (no 0, no decimals)
+- Score MUST be integer 0-5 (0 ONLY for incoherent submissions, otherwise 1-5)
 - Higher score = BETTER (5 is best, 1 is worst)
-- Do NOT default to score 3. If the idea genuinely meets the criteria for 4 or 5, give that score. Be fair, not conservative.
-- Evaluate based on what IS written, not what is missing. If a student clearly articulates a strong idea, reward them.
+- Be STRICT and RIGOROUS. This is a national competition - only truly exceptional ideas deserve 5, and only well-articulated ideas deserve 4.
+- Score 5 should be RARE (top 5% quality). Score 4 = strong. Score 3 = average. Score 2 = below average. Score 1 = poor.
+- If the student gave vague, short, or generic answers, score LOW. Effort and depth matter.
+- Generic ideas (e.g. "make an app to solve X") without clear differentiation should score 1-2 on Uniqueness and Creativity.
+- If the student does NOT explain WHY their solution is better than alternatives, Uniqueness and Impact should be LOW.
+- If the student does NOT show understanding of user pain points with specific examples, Empathy should be LOW.
+- If there is no mention of adaptability, iteration, or willingness to learn, Flexible Thinking MUST be 1-2.
 - Reason MUST be one short sentence
 - Do NOT include recommendations or rankings
 """
@@ -177,38 +244,270 @@ def parse_evaluation_response(response_text):
     raise ValueError(f"Could not parse AI response as JSON: {response_text[:200]}")
 
 
+ATTACHMENT_ANALYSIS_PROMPT = """You are a STRICT file relevance checker for a student business idea competition called "India Future Tycoon".
+Your job is to check whether uploaded files ACTUALLY relate to the idea or not.
+
+IDEA CONTEXT:
+================
+Title: {title}
+Problem: {problem}
+Solution: {solution}
+
+UPLOADED FILES:
+================
+{file_details}
+
+*** CRITICAL INSTRUCTIONS ***
+==============================
+For EACH file, you MUST follow this exact process:
+
+STEP 1: DESCRIBE what you LITERALLY see/read in the file. Do NOT assume or infer anything from the idea context.
+- For images: Describe EXACTLY what objects, text, diagrams, scenes you see. If it's a stock photo, say so. If it's a screenshot of something unrelated, say so.
+- For documents: Summarize ONLY what the extracted text actually says.
+- For videos: Just note the filename.
+
+STEP 2: JUDGE RELEVANCE - Be STRICT. A file is RELEVANT only if it DIRECTLY and SPECIFICALLY relates to THIS idea's topic/problem/solution.
+
+A file is IRRELEVANT if:
+- It shows generic content (stock photos, random landscapes, animals, memes, generic charts)
+- It shows content about a DIFFERENT topic than the idea
+- It's a random screenshot unrelated to the idea
+- It's a generic template with no specific content about this idea
+- The connection between the file and the idea is vague or requires stretching logic
+- It contains content about a completely different domain/subject
+
+DO NOT be lenient. If there's no CLEAR, DIRECT connection to the specific idea, mark it as IRRELEVANT.
+
+RESPONSE FORMAT (STRICT JSON):
+{{
+    "file_analyses": [
+        {{
+            "filename": "example.pptx",
+            "file_type": "document",
+            "summary": "Describe EXACTLY what you see/read in the file content.",
+            "is_relevant": true,
+            "relevance_note": "If irrelevant: explain what the file actually shows and why it does not match the idea."
+        }}
+    ],
+    "missing_types": ["video"],
+    "has_content_mismatch": false
+}}
+
+RULES:
+- summary: Describe the ACTUAL content you see - NOT what you think it should be
+- is_relevant: true ONLY if the file DIRECTLY relates to this specific idea. When in doubt, mark IRRELEVANT.
+- relevance_note: If irrelevant, state: "File shows [what it actually shows] which does not relate to [idea topic]"
+- missing_types: List file types NOT uploaded (from: "video", "document", "image")
+- has_content_mismatch: true if ANY file is irrelevant
+- For video files: If video frames are provided below, analyze the VISUAL CONTENT of those frames to determine relevance. Describe what you see in the frames. If frames show content related to the idea, mark RELEVANT. If frames show unrelated content, mark IRRELEVANT.
+- If video frames could NOT be extracted (stated in file details), mark as RELEVANT by default since content is unverifiable.
+"""
+
+
+def analyze_attachments(submission, client=None):
+    """Analyze uploaded attachments - generate per-file summaries and check relevance."""
+    if client is None:
+        client = OpenRouterClient()
+
+    uploaded_files = list(submission.uploaded_files.all())
+    if not uploaded_files:
+        return {
+            'file_analyses': [],
+            'missing_types': ['video', 'document', 'image'],
+            'has_content_mismatch': False
+        }
+
+    # Build idea context
+    title = submission.title or (submission.problem_definition or '')[:100] or 'Untitled'
+    problem = submission.problem_definition or submission.problem_statement or ''
+    solution_text = submission.solution or submission.proposed_solution or ''
+
+    # Categorize files and build details
+    file_details_parts = []
+    image_paths = []
+    present_types = set()
+    video_frame_temps = []  # temp files to clean up
+    videos_with_frames = set()  # filenames of videos whose frames were extracted
+
+    for f in uploaded_files:
+        present_types.add(f.file_type)
+        detail = f"- File: {f.original_filename} (Type: {f.get_file_type_display()})"
+
+        if f.file_type == 'document' and f.extracted_text:
+            detail += f"\n  Extracted Text: {f.extracted_text[:500]}"
+        elif f.file_type == 'image':
+            full_path = os.path.join(settings.MEDIA_ROOT, str(f.file))
+            if os.path.exists(full_path):
+                image_paths.append(full_path)
+            detail += "\n  (Image attached below - describe EXACTLY what you see, do not assume relevance)"
+        elif f.file_type == 'video':
+            full_path = os.path.join(settings.MEDIA_ROOT, str(f.file))
+            if os.path.exists(full_path):
+                frames = extract_video_frames(full_path, num_frames=3)
+                if frames:
+                    image_paths.extend(frames)
+                    video_frame_temps.extend(frames)
+                    videos_with_frames.add(f.original_filename)
+                    detail += f"\n  ({len(frames)} frames extracted from video - attached below. Describe EXACTLY what you see in these frames and judge relevance based on visual content.)"
+                else:
+                    detail += "\n  (Video file - frame extraction failed. Content is unverifiable. Mark as RELEVANT by default.)"
+            else:
+                detail += "\n  (Video file - file not found. Content is unverifiable. Mark as RELEVANT by default.)"
+
+        file_details_parts.append(detail)
+
+    # Determine missing types
+    all_types = {'video', 'document', 'image'}
+    missing = list(all_types - present_types)
+
+    file_details = "\n".join(file_details_parts)
+
+    prompt = ATTACHMENT_ANALYSIS_PROMPT.format(
+        title=title,
+        problem=problem,
+        solution=solution_text,
+        file_details=file_details
+    )
+
+    try:
+        response = client.generate_completion(
+            system_prompt="You are a strict file relevance checker. Describe EXACTLY what you see in each file. For video files, analyze the extracted frames carefully. Do NOT assume files are relevant just because they were uploaded with the idea. Be skeptical - if you cannot see a DIRECT, SPECIFIC connection to the idea, mark it IRRELEVANT. Return ONLY valid JSON.",
+            user_prompt=prompt,
+            model="anthropic/claude-3.5-sonnet",
+            max_tokens=1000,
+            images=image_paths if image_paths else None
+        )
+
+        if response and 'content' in response:
+            json_match = re.search(r'\{[\s\S]*\}', response['content'])
+            if json_match:
+                result = json.loads(json_match.group())
+                # Ensure missing_types is accurate
+                result['missing_types'] = missing
+                # Post-process video files
+                video_filenames = {f.original_filename for f in uploaded_files if f.file_type == 'video'}
+                for analysis in result.get('file_analyses', []):
+                    fname = analysis.get('filename')
+                    if fname in video_filenames:
+                        if fname in videos_with_frames:
+                            # Frames were extracted and AI analyzed them - keep AI judgment
+                            analysis['video_verified'] = True
+                        else:
+                            # No frames could be extracted - give benefit of doubt
+                            analysis['is_relevant'] = True
+                            analysis['video_verified'] = False
+                            analysis['summary'] = 'Video file present. Frame extraction failed — content unverifiable.'
+                            analysis['relevance_note'] = 'Video content is unverifiable — not penalized.'
+                # Recalculate has_content_mismatch
+                result['has_content_mismatch'] = any(
+                    not fa.get('is_relevant', True)
+                    for fa in result.get('file_analyses', [])
+                )
+                return result
+    except Exception as e:
+        print(f"Attachment analysis failed: {e}")
+    finally:
+        # Clean up temporary frame files
+        for temp_path in video_frame_temps:
+            try:
+                if os.path.exists(temp_path):
+                    os.remove(temp_path)
+            except OSError:
+                pass
+
+    # Fallback - return basic info
+    return {
+        'file_analyses': [
+            {
+                'filename': f.original_filename,
+                'file_type': f.file_type,
+                'summary': 'Analysis not available',
+                'is_relevant': True,
+                'relevance_note': '',
+                'video_verified': False if f.file_type == 'video' else None
+            } for f in uploaded_files
+        ],
+        'missing_types': missing,
+        'has_content_mismatch': False
+    }
+
+
 def evaluate_idea(submission: IdeaSubmission, force_reevaluate=False) -> AIEvaluation:
     """
     Evaluate a single idea submission using 10-parameter jury rubric.
+    On re-evaluation: reuses attachment analysis (files don't change) and
+    takes the LOWER of old vs new parameter scores to prevent score inflation.
     """
     if hasattr(submission, 'ai_evaluation') and not force_reevaluate:
         return submission.ai_evaluation
 
+    # Save old evaluation data before deleting (for re-evaluation consistency)
+    old_scores = None
+    old_attachment_data = None
     if force_reevaluate:
         try:
             old_eval = submission.ai_evaluation
+            # Save old scores to compare later
+            old_scores = {
+                'uniqueness': old_eval.uniqueness_score,
+                'ease_of_implementation': old_eval.ease_of_implementation_score,
+                'scalable': old_eval.scalable_score,
+                'impactful': old_eval.impactful_score,
+                'sustainable': old_eval.sustainable_score,
+                'conceptual_clarity': old_eval.conceptual_clarity_score,
+                'empathy': old_eval.empathy_score,
+                'creativity': old_eval.creativity_score,
+                'communication': old_eval.communication_score,
+                'flexible_thinking': old_eval.flexible_thinking_score,
+                'is_coherent': old_eval.is_coherent,
+            }
+            # Save old attachment analysis (files don't change, so reuse)
+            old_attachment_data = {
+                'attachment_summaries': old_eval.attachment_summaries,
+                'attachment_mismatch': old_eval.attachment_mismatch,
+                'mismatch_severity': old_eval.mismatch_severity,
+                'mismatch_penalty': old_eval.mismatch_penalty,
+                'mismatch_reasons': old_eval.mismatch_reasons,
+            }
             old_eval.delete()
         except AIEvaluation.DoesNotExist:
             pass
 
     client = OpenRouterClient()
 
-    # Build prompt with submission data
-    problem_statement = submission.problem_definition or ''
+    # Build prompt with ALL 8 submission fields
+    problem_definition = submission.problem_definition or ''
     problem_description = submission.problem_description or ''
-    proposed_solution = submission.solution or ''
     target_users = submission.target_user_group or ''
+    problem_urgency = submission.problem_urgency or ''
+    proposed_solution = submission.solution or ''
+    solution_benefits = submission.solution_benefits or ''
+    why_best_equipped = submission.why_best_equipped or ''
     idea_stage = submission.get_idea_stage_display() if submission.idea_stage else 'Idea'
 
-    full_problem = f"{problem_statement}\n\n{problem_description}"
-    full_solution = f"{proposed_solution}"
+    # Calculate effort level based on total content length
+    all_text = f"{problem_definition} {problem_description} {target_users} {problem_urgency} {proposed_solution} {solution_benefits} {why_best_equipped}"
+    total_words = len(all_text.split())
+    if total_words < 30:
+        effort_note = "VERY LOW EFFORT - Student wrote less than 30 words total. Score VERY strictly."
+    elif total_words < 80:
+        effort_note = "LOW EFFORT - Student wrote only a few sentences. Answers lack depth. Score strictly."
+    elif total_words < 150:
+        effort_note = f"MODERATE EFFORT - {total_words} words total. Evaluate based on content quality."
+    else:
+        effort_note = f"GOOD EFFORT - {total_words} words total. Evaluate based on content quality and depth."
 
     prompt = EVALUATION_PROMPT.format(
-        title=submission.title or problem_statement[:100],
-        problem_statement=full_problem,
-        proposed_solution=full_solution,
+        title=submission.title or problem_definition[:100],
+        problem_statement=problem_definition,
+        problem_description=problem_description,
+        proposed_solution=proposed_solution,
         target_users=target_users,
-        idea_stage=idea_stage
+        problem_urgency=problem_urgency,
+        solution_benefits=solution_benefits,
+        why_best_equipped=why_best_equipped,
+        idea_stage=idea_stage,
+        effort_note=effort_note
     )
 
     try:
@@ -232,30 +531,41 @@ def evaluate_idea(submission: IdeaSubmission, force_reevaluate=False) -> AIEvalu
     # Extract scores from parameter_scores array
     scores = {p['parameter_name']: p for p in eval_data.get('parameter_scores', [])}
     
-    def get_score(name, default=3):
+    # Check coherence status from AI response
+    is_coherent = eval_data.get('is_coherent', True)
+
+    def get_score(name, old_key=None, default=3):
+        if not is_coherent:
+            return 0  # Incoherent submissions get 0 marks
         param = scores.get(name, {})
-        score = param.get('score', default)
-        return max(1, min(5, int(score)))  # Clamp to 1-5
-    
+        new_score = param.get('score', default)
+        new_score = max(1, min(5, int(new_score)))  # Clamp to 1-5
+        # On re-evaluation: take the LOWER of old vs new to prevent score inflation
+        if old_scores and old_key and old_scores.get('is_coherent', True):
+            old_score = old_scores.get(old_key, new_score)
+            return min(old_score, new_score)
+        return new_score
+
     def get_reason(name, default=''):
         return scores.get(name, {}).get('reason', default)
-    
+
     evaluation = AIEvaluation.objects.create(
         submission=submission,
-        
+        is_coherent=is_coherent,
+
         # Idea parameters
-        uniqueness_score=get_score('Uniqueness'),
-        ease_of_implementation_score=get_score('Ease of Implementation'),
-        scalable_score=get_score('Scalable'),
-        impactful_score=get_score('Impactful'),
-        sustainable_score=get_score('Sustainable'),
-        
+        uniqueness_score=get_score('Uniqueness', 'uniqueness'),
+        ease_of_implementation_score=get_score('Ease of Implementation', 'ease_of_implementation'),
+        scalable_score=get_score('Scalable', 'scalable'),
+        impactful_score=get_score('Impactful', 'impactful'),
+        sustainable_score=get_score('Sustainable', 'sustainable'),
+
         # Team parameters
-        conceptual_clarity_score=get_score('Conceptual Clarity'),
-        empathy_score=get_score('Empathy'),
-        creativity_score=get_score('Creativity'),
-        communication_score=get_score('Communication'),
-        flexible_thinking_score=get_score('Flexible Thinking'),
+        conceptual_clarity_score=get_score('Conceptual Clarity', 'conceptual_clarity'),
+        empathy_score=get_score('Empathy', 'empathy'),
+        creativity_score=get_score('Creativity', 'creativity'),
+        communication_score=get_score('Communication', 'communication'),
+        flexible_thinking_score=get_score('Flexible Thinking', 'flexible_thinking'),
         
         # Justifications
         uniqueness_justification=get_reason('Uniqueness'),
@@ -277,9 +587,91 @@ def evaluate_idea(submission: IdeaSubmission, force_reevaluate=False) -> AIEvalu
         processing_time=response.get('time', 0),
         raw_response=response.get('raw_response', '')
     )
-    
+
+    # === Attachment Analysis & Content Mismatch Penalty ===
+    # On re-evaluation: REUSE old attachment analysis (files don't change between evaluations)
+    if old_attachment_data and old_attachment_data.get('attachment_summaries'):
+        attachment_summaries = old_attachment_data['attachment_summaries']
+        attachment_mismatch_flag = old_attachment_data['attachment_mismatch']
+        mismatch_severity = old_attachment_data['mismatch_severity']
+        mismatch_penalty = old_attachment_data['mismatch_penalty']
+        mismatch_reasons = old_attachment_data['mismatch_reasons']
+    else:
+        # First evaluation - run fresh attachment analysis
+        mismatch_penalty = 0
+        mismatch_severity = 'none'
+        attachment_mismatch_flag = False
+        mismatch_reasons = []
+        attachment_summaries = {}
+
+        has_files = submission.uploaded_files.exists()
+
+        if not has_files:
+            mismatch_penalty = 3
+            mismatch_severity = 'missing'
+            attachment_mismatch_flag = True
+            mismatch_reasons = ['No attachments uploaded with the submission']
+            attachment_summaries = {
+                'file_analyses': [],
+                'missing_types': ['video', 'document', 'image'],
+                'has_content_mismatch': False
+            }
+        else:
+            attachment_summaries = analyze_attachments(submission, client)
+
+            has_mismatch = attachment_summaries.get('has_content_mismatch', False)
+
+            if has_mismatch:
+                irrelevant_files = [
+                    f for f in attachment_summaries.get('file_analyses', [])
+                    if not f.get('is_relevant', True)
+                ]
+                total_files = len(attachment_summaries.get('file_analyses', []))
+
+                mismatch_reasons = [
+                    f"{f['filename']}: {f.get('relevance_note', 'Content does not match the idea')}"
+                    for f in irrelevant_files
+                ]
+
+                if total_files > 0 and len(irrelevant_files) >= total_files:
+                    mismatch_severity = 'severe'
+                    mismatch_penalty = 5
+                else:
+                    mismatch_severity = 'minor'
+                    mismatch_penalty = 2
+
+                attachment_mismatch_flag = True
+            else:
+                try:
+                    ai_summary = submission.ai_summary
+                    if not ai_summary.is_consistent:
+                        reasons = ai_summary.inconsistency_reasons or []
+                        mismatch_reasons = reasons
+                        file_count = submission.uploaded_files.count()
+                        reason_count = len(reasons)
+                        if reason_count >= file_count:
+                            mismatch_severity = 'severe'
+                            mismatch_penalty = 5
+                        else:
+                            mismatch_severity = 'minor'
+                            mismatch_penalty = 2
+                        attachment_mismatch_flag = True
+                except AISummary.DoesNotExist:
+                    pass
+
+    evaluation.attachment_mismatch = attachment_mismatch_flag
+    evaluation.mismatch_severity = mismatch_severity
+    evaluation.mismatch_penalty = mismatch_penalty
+    evaluation.mismatch_reasons = mismatch_reasons
+    evaluation.attachment_summaries = attachment_summaries
+    evaluation.save()
+
     submission.status = 'evaluated'
-    submission.save(update_fields=['status'])
+    if not is_coherent:
+        submission.final_category = 'incoherent'
+        submission.save(update_fields=['status', 'final_category'])
+    else:
+        submission.save(update_fields=['status'])
     
     return evaluation
 

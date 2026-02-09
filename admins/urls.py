@@ -11,6 +11,7 @@ urlpatterns = [
     
     # Evaluation endpoints
     path('submission/<int:submission_id>/evaluate/', views.evaluate_submission, name='evaluate_submission'),
+    path('submission/<int:submission_id>/evaluate-async/', views.evaluate_submission_async, name='evaluate_submission_async'),
     path('batch-evaluate/', views.batch_evaluate_view, name='batch_evaluate'),
     
     # Rankings

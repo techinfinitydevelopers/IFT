@@ -39,6 +39,7 @@ class IdeaSubmission(models.Model):
         ('technology', 'Technology'),
         ('entertainment', 'Entertainment'),
         ('other', 'Other'),
+        ('incoherent', 'Incoherent'),
     ]
     
     IDEA_STAGE_CHOICES = [

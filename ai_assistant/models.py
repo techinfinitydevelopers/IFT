@@ -49,23 +49,39 @@ class AIEvaluation(models.Model):
     
     submission = models.OneToOneField(IdeaSubmission, on_delete=models.CASCADE, related_name='ai_evaluation')
     
-    # ===== IDEA PARAMETERS (5 params, 1-5 scale each) =====
-    uniqueness_score = models.IntegerField(default=1, help_text="Uniqueness (1-5)")
-    ease_of_implementation_score = models.IntegerField(default=1, help_text="Ease of Implementation (1-5)")
-    scalable_score = models.IntegerField(default=1, help_text="Scalable (1-5)")
-    impactful_score = models.IntegerField(default=1, help_text="Impactful (1-5)")
-    sustainable_score = models.IntegerField(default=1, help_text="Sustainable (1-5)")
-    
-    # ===== TEAM PARAMETERS (5 params, 1-5 scale each) =====
-    conceptual_clarity_score = models.IntegerField(default=1, help_text="Conceptual Clarity & Comprehensiveness (1-5)")
-    empathy_score = models.IntegerField(default=1, help_text="Empathy (1-5)")
-    creativity_score = models.IntegerField(default=1, help_text="Creativity (1-5)")
-    communication_score = models.IntegerField(default=1, help_text="Communication (1-5)")
-    flexible_thinking_score = models.IntegerField(default=1, help_text="Flexible Thinking (1-5)")
+    # ===== IDEA PARAMETERS (5 params, 0-5 scale each, 0 = incoherent) =====
+    uniqueness_score = models.IntegerField(default=0, help_text="Uniqueness (0-5, 0=incoherent)")
+    ease_of_implementation_score = models.IntegerField(default=0, help_text="Ease of Implementation (0-5, 0=incoherent)")
+    scalable_score = models.IntegerField(default=0, help_text="Scalable (0-5, 0=incoherent)")
+    impactful_score = models.IntegerField(default=0, help_text="Impactful (0-5, 0=incoherent)")
+    sustainable_score = models.IntegerField(default=0, help_text="Sustainable (0-5, 0=incoherent)")
+
+    # ===== TEAM PARAMETERS (5 params, 0-5 scale each, 0 = incoherent) =====
+    conceptual_clarity_score = models.IntegerField(default=0, help_text="Conceptual Clarity & Comprehensiveness (0-5, 0=incoherent)")
+    empathy_score = models.IntegerField(default=0, help_text="Empathy (0-5, 0=incoherent)")
+    creativity_score = models.IntegerField(default=0, help_text="Creativity (0-5, 0=incoherent)")
+    communication_score = models.IntegerField(default=0, help_text="Communication (0-5, 0=incoherent)")
+    flexible_thinking_score = models.IntegerField(default=0, help_text="Flexible Thinking (0-5, 0=incoherent)")
     
     # Final calculated score (max 50)
     final_score = models.IntegerField(default=0, help_text="Total score out of 50")
-    
+
+    # Coherence check - do all fields relate to the same idea?
+    is_coherent = models.BooleanField(default=True, help_text="Do all submission fields relate to the same idea?")
+
+    # Content mismatch - do attachments match the idea?
+    MISMATCH_SEVERITY_CHOICES = [
+        ('none', 'None'),
+        ('minor', 'Minor Mismatch'),
+        ('severe', 'Severe Mismatch'),
+        ('missing', 'No Attachments'),
+    ]
+    attachment_mismatch = models.BooleanField(default=False, help_text="Are attachments mismatched with idea?")
+    mismatch_severity = models.CharField(max_length=10, choices=MISMATCH_SEVERITY_CHOICES, default='none')
+    mismatch_penalty = models.IntegerField(default=0, help_text="Marks deducted for attachment mismatch")
+    mismatch_reasons = models.JSONField(default=list, blank=True, help_text="Reasons for attachment mismatch")
+    attachment_summaries = models.JSONField(default=dict, blank=True, help_text="Per-file analysis: summaries, relevance, missing types")
+
     # Ranking position
     rank = models.IntegerField(null=True, blank=True, help_text="Position in overall ranking")
     is_top_400 = models.BooleanField(default=False, help_text="Selected in Top 400")
@@ -101,8 +117,8 @@ class AIEvaluation(models.Model):
     raw_response = models.TextField(blank=True)
     
     def save(self, *args, **kwargs):
-        # Calculate total score from all 10 parameters (each 1-5, max 50)
-        self.final_score = (
+        # Calculate total score from all 10 parameters (each 0-5, max 50)
+        raw_score = (
             self.uniqueness_score +
             self.ease_of_implementation_score +
             self.scalable_score +
@@ -114,6 +130,8 @@ class AIEvaluation(models.Model):
             self.communication_score +
             self.flexible_thinking_score
         )
+        # Apply mismatch penalty (never go below 0)
+        self.final_score = max(0, raw_score - self.mismatch_penalty)
         super().save(*args, **kwargs)
     
     def __str__(self):

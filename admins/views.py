@@ -189,7 +189,17 @@ def submission_detail(request, submission_id):
         
         'final_score': ai_evaluation.final_score if ai_evaluation else 0,
         'rank': ai_evaluation.rank if ai_evaluation else "TBD",
+        'is_coherent': ai_evaluation.is_coherent if ai_evaluation else True,
         'ai_summary_text': ai_summary.summary if ai_summary else "AI Summary is being processed...",
+        # Content mismatch
+        'attachment_mismatch': ai_evaluation.attachment_mismatch if ai_evaluation else False,
+        'mismatch_severity': ai_evaluation.get_mismatch_severity_display() if ai_evaluation else 'None',
+        'mismatch_penalty': ai_evaluation.mismatch_penalty if ai_evaluation else 0,
+        'mismatch_reasons': ai_evaluation.mismatch_reasons if ai_evaluation else [],
+        # Attachment summaries
+        'attachment_summaries': ai_evaluation.attachment_summaries if ai_evaluation else {},
+        'attachment_file_analyses': (ai_evaluation.attachment_summaries or {}).get('file_analyses', []) if ai_evaluation else [],
+        'attachment_missing_types': (ai_evaluation.attachment_summaries or {}).get('missing_types', []) if ai_evaluation else [],
     }
     
     return render(request, 'admins/submission_detail_v2.html', context)
@@ -605,3 +615,87 @@ def batch_evaluate_async(request):
     thread.start()
 
     return JsonResponse({'task_id': task_id, 'total': len(submissions)})
+
+
+@csrf_exempt
+@login_required
+@user_passes_test(is_staff_or_superuser)
+def evaluate_submission_async(request, submission_id):
+    """Evaluate a single submission and return JSON with all scores for animated UI"""
+    submission = get_object_or_404(IdeaSubmission, id=submission_id)
+
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+
+    force_reevaluate = request.POST.get('force') == '1'
+
+    try:
+        from ai_assistant.evaluator import evaluate_idea, update_rankings
+
+        evaluation = evaluate_idea(submission, force_reevaluate=force_reevaluate)
+
+        # Update rankings after evaluation
+        try:
+            update_rankings()
+        except:
+            pass
+
+        # Return all scores for animated display
+        return JsonResponse({
+            'success': True,
+            'scores': {
+                'uniqueness': {
+                    'score': evaluation.uniqueness_score,
+                    'justification': evaluation.uniqueness_justification or ''
+                },
+                'ease_of_implementation': {
+                    'score': evaluation.ease_of_implementation_score,
+                    'justification': evaluation.ease_of_implementation_justification or ''
+                },
+                'scalable': {
+                    'score': evaluation.scalable_score,
+                    'justification': evaluation.scalable_justification or ''
+                },
+                'impactful': {
+                    'score': evaluation.impactful_score,
+                    'justification': evaluation.impactful_justification or ''
+                },
+                'sustainable': {
+                    'score': evaluation.sustainable_score,
+                    'justification': evaluation.sustainable_justification or ''
+                },
+                'conceptual_clarity': {
+                    'score': evaluation.conceptual_clarity_score,
+                    'justification': evaluation.conceptual_clarity_justification or ''
+                },
+                'empathy': {
+                    'score': evaluation.empathy_score,
+                    'justification': evaluation.empathy_justification or ''
+                },
+                'creativity': {
+                    'score': evaluation.creativity_score,
+                    'justification': evaluation.creativity_justification or ''
+                },
+                'communication': {
+                    'score': evaluation.communication_score,
+                    'justification': evaluation.communication_justification or ''
+                },
+                'flexible_thinking': {
+                    'score': evaluation.flexible_thinking_score,
+                    'justification': evaluation.flexible_thinking_justification or ''
+                },
+            },
+            'final_score': evaluation.final_score,
+            'rank': evaluation.rank,
+            'confidence': evaluation.confidence_level or 'medium',
+            'mismatch': {
+                'has_mismatch': evaluation.attachment_mismatch,
+                'severity': evaluation.mismatch_severity,
+                'penalty': evaluation.mismatch_penalty,
+                'reasons': evaluation.mismatch_reasons or [],
+            },
+            'attachment_summaries': evaluation.attachment_summaries or {},
+        })
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
