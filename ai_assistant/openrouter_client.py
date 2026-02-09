@@ -88,13 +88,14 @@ class OpenRouterClient:
                 try:
                     error_data = response.json()
                     error_msg = error_data.get('error', {}).get('message', str(error_data))
-                    raise Exception(error_msg)
-                except:
+                except (ValueError, KeyError):
                     response.raise_for_status()
-            
+                else:
+                    raise Exception(f"OpenRouter API error: {error_msg}")
+
             data = response.json()
             processing_time = time.time() - start_time
-            
+
             return {
                 'content': data['choices'][0]['message']['content'],
                 'model': data.get('model', model),
@@ -102,11 +103,115 @@ class OpenRouterClient:
                 'time': processing_time,
                 'raw_response': json.dumps(data)
             }
-            
+
         except requests.exceptions.RequestException as e:
             raise Exception(f"OpenRouter API request failed: {str(e)}")
         except (KeyError, IndexError) as e:
-            # Check if there's an error in the response body that wasn't caught
-            if 'error' in data:
-                raise Exception(str(data['error']))
+            raise Exception(f"Unexpected API response format: {str(e)}")
+    
+    def generate_video_completion(self, system_prompt, user_prompt, video_path, model=None, max_tokens=1200):
+        """
+        Generate a completion with native video support using Gemini.
+        Sends video file directly to Gemini 1.5 Flash for full video analysis.
+        """
+        if not self.api_key:
+            raise ValueError("OpenRouter API key not configured.")
+        
+        # Default to Gemini for video analysis
+        model = model or "google/gemini-2.0-flash-001"
+        
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+            "HTTP-Referer": "https://ift-platform.local",
+            "X-Title": "IFT - India Future Tycoon"
+        }
+        
+        # Build user content with video
+        user_msg_content = []
+        user_msg_content.append({
+            "type": "text",
+            "text": user_prompt
+        })
+        
+        # Encode video as base64
+        if video_path and os.path.exists(video_path):
+            try:
+                # Get video MIME type
+                ext = video_path.lower().split('.')[-1]
+                video_mime = {
+                    'mp4': 'video/mp4',
+                    'webm': 'video/webm',
+                    'mov': 'video/quicktime',
+                    'mpeg': 'video/mpeg',
+                    'mpg': 'video/mpeg',
+                }.get(ext)
+
+                if not video_mime:
+                    raise ValueError(f"Unsupported video format: {ext}. Supported: mp4, webm, mov, mpeg")
+
+                # Check file size (max 20MB to prevent OOM and timeout)
+                file_size_mb = os.path.getsize(video_path) / (1024 * 1024)
+                if file_size_mb > 20:
+                    raise ValueError(f"Video too large ({file_size_mb:.1f}MB). Max allowed: 20MB")
+
+                # Read and encode video
+                with open(video_path, 'rb') as f:
+                    video_data = base64.b64encode(f.read()).decode('utf-8')
+                
+                # Add video to content using video_url format
+                user_msg_content.append({
+                    "type": "video_url",
+                    "video_url": {"url": f"data:{video_mime};base64,{video_data}"}
+                })
+                
+            except Exception as e:
+                print(f"Failed to load video {video_path}: {e}")
+                raise
+        else:
+            raise ValueError(f"Video file not found: {video_path}")
+        
+        payload = {
+            "model": model,
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_msg_content}
+            ],
+            "max_tokens": max_tokens,
+            "temperature": 0,
+        }
+        
+        start_time = time.time()
+        
+        try:
+            response = requests.post(
+                self.base_url,
+                headers=headers,
+                json=payload,
+                timeout=120  # Longer timeout for video processing
+            )
+            
+            if not response.ok:
+                try:
+                    error_data = response.json()
+                    error_msg = error_data.get('error', {}).get('message', str(error_data))
+                except (ValueError, KeyError):
+                    response.raise_for_status()
+                else:
+                    raise Exception(f"OpenRouter API error: {error_msg}")
+
+            data = response.json()
+            processing_time = time.time() - start_time
+
+            return {
+                'content': data['choices'][0]['message']['content'],
+                'model': data.get('model', model),
+                'tokens': data.get('usage', {}).get('total_tokens', 0),
+                'time': processing_time,
+                'raw_response': json.dumps(data)
+            }
+
+        except requests.exceptions.RequestException as e:
+            raise Exception(f"OpenRouter API request failed: {str(e)}")
+        except (KeyError, IndexError) as e:
             raise Exception(f"Unexpected API response format: {str(e)}")

@@ -48,7 +48,7 @@ class IdeaSubmissionForm(forms.ModelForm):
     )
     video_file = forms.FileField(
         required=False,
-        help_text="Upload a video (optional, max 50MB)",
+        help_text="Upload a video (optional, max 20MB)",
         widget=forms.FileInput(attrs={'accept': 'video/*', 'class': 'form-control'})
     )
     
@@ -142,8 +142,8 @@ class IdeaSubmissionForm(forms.ModelForm):
         """Validate video file size"""
         video = self.cleaned_data.get('video_file')
         if video:
-            if video.size > 50 * 1024 * 1024:  # 50MB limit
-                raise forms.ValidationError("Video file size must be under 50MB")
+            if video.size > 20 * 1024 * 1024:  # 20MB limit (matches Gemini API limit)
+                raise forms.ValidationError("Video file size must be under 20MB")
         return video
     
     def clean_document_file(self):

@@ -1,10 +1,9 @@
 """
 AI Processing Module for IFT Platform
 
-Uses Claude 3.5 Sonnet with Vision for analyzing:
-- Text content (ideas, PDFs, DOCX)
-- Images (direct vision)
-- Videos (frame extraction → vision)
+Hybrid AI Approach:
+- Claude 3.5 Sonnet: Text content, PDFs, DOCX, Images
+- Gemini 1.5 Flash: Native video analysis (full video understanding)
 """
 
 import json
@@ -18,11 +17,15 @@ from .file_extractors import extract_text_from_file
 
 logger = logging.getLogger(__name__)
 
-# Model Configuration
+# Model Configuration - Hybrid approach
 MODELS = {
-    'default': 'anthropic/claude-3.5-sonnet',
+    'default': 'anthropic/claude-3.5-sonnet',    # Text + Images
+    'video': 'google/gemini-2.0-flash-001',       # Native video analysis
     'premium': 'anthropic/claude-3-opus',
 }
+
+# Supported video formats for Gemini
+GEMINI_VIDEO_FORMATS = ('mp4', 'webm', 'mov', 'mpeg', 'mpg')
 
 
 def extract_video_frames(video_path, num_frames=3):
@@ -77,21 +80,90 @@ def validate_submission(submission):
     return len(missing) == 0, "; ".join(missing) if missing else "Complete"
 
 
+def analyze_video_with_gemini(video_path, filename, idea_context, client):
+    """
+    Analyze video using Gemini 1.5 Flash for native video understanding.
+    Returns video analysis dict or None if failed.
+    """
+    video_system_prompt = """You are analyzing a video from a student's innovation idea submission.
+Watch the entire video carefully and provide detailed analysis.
+Describe what you see, any demonstrations, prototypes, or presentations shown."""
+
+    video_prompt = f"""IDEA CONTEXT:
+Problem: {idea_context.get('problem', 'Not provided')}
+Solution: {idea_context.get('solution', 'Not provided')}
+
+TASK - Analyze this video:
+1. Describe what the video shows (scenes, demonstrations, content)
+2. Does the video support/relate to the student's idea?
+3. If it shows a prototype or demo, describe what it demonstrates
+4. Note any important text, diagrams, or visuals in the video
+5. Describe any audio/speech content if present
+
+Return JSON:
+{{
+    "video_description": "Detailed description of what the video shows",
+    "supports_idea": true or false,
+    "key_observations": ["observation1", "observation2", "observation3"],
+    "audio_content": "Description of any speech or audio if present",
+    "inconsistency_reason": "If video doesn't support idea, explain why"
+}}"""
+
+    try:
+        response = client.generate_video_completion(
+            video_system_prompt,
+            video_prompt,
+            video_path,
+            model=MODELS['video'],
+            max_tokens=1000
+        )
+        
+        content = response['content'].strip()
+        
+        # Parse JSON response
+        if '{' in content:
+            json_start = content.find('{')
+            json_end = content.rfind('}') + 1
+            video_data = json.loads(content[json_start:json_end])
+            
+            return {
+                'filename': filename,
+                'description': video_data.get('video_description', 'Video analyzed'),
+                'supports_idea': video_data.get('supports_idea', True),
+                'key_observations': video_data.get('key_observations', []),
+                'audio_content': video_data.get('audio_content', ''),
+                'inconsistency_reason': video_data.get('inconsistency_reason', ''),
+                'model_used': response.get('model', MODELS['video']),
+                'tokens': response.get('tokens', 0),
+            }
+        else:
+            return {
+                'filename': filename,
+                'description': content[:500],
+                'supports_idea': True,
+                'key_observations': [],
+                'model_used': response.get('model', MODELS['video']),
+            }
+            
+    except Exception as e:
+        logger.error(f"Gemini video analysis failed for {filename}: {e}")
+        return None
+
+
 def generate_summary(submission, use_premium_model=False):
     """
-    Generate AI summary using Claude Vision.
-    - Images: Sent directly to Claude
-    - Videos: Frames extracted and sent to Claude
-    - Documents: Text extracted and sent
+    Generate AI summary using hybrid approach:
+    - Claude 3.5 Sonnet: Text content, images, documents
+    - Gemini 1.5 Flash: Native video analysis (full video understanding)
     """
     model = MODELS['premium'] if use_premium_model else MODELS['default']
     client = OpenRouterClient()
     
     system_prompt = """You are analyzing a student's idea submission.
-Be factual and neutral. Analyze all content including images and video frames.
-Describe what you see in each image/video frame.
+Be factual and neutral. Analyze all content including images.
+Describe what you see in each image.
 Check if uploaded files match the idea description.
-If they don't match, explain exactly what the image/video shows vs what the idea is about."""
+If they don't match, explain exactly what the image shows vs what the idea is about."""
     
     # Compile idea text using the 8 new questions
     idea_text = f"""STUDENT IDEA SUBMISSION:
@@ -104,10 +176,17 @@ If they don't match, explain exactly what the image/video shows vs what the idea
 7. Team/Why: {submission.why_best_equipped}
 8. Stage: {submission.get_idea_stage_display()}"""
     
-    # Collect files for analysis
+    # Context for video analysis
+    idea_context = {
+        'problem': submission.problem_definition,
+        'solution': submission.solution,
+    }
+    
+    # Collect files for analysis - HYBRID APPROACH
     image_paths = []
     file_descriptions = []
-    temp_frames = []  # Track temp files for cleanup
+    video_analyses = []  # Store Gemini video analysis results
+    temp_frames = []  # Track temp files for cleanup (fallback only)
     
     for f in submission.uploaded_files.all():
         file_path = os.path.join(settings.MEDIA_ROOT, str(f.file))
@@ -121,8 +200,35 @@ If they don't match, explain exactly what the image/video shows vs what the idea
             image_paths.append(file_path)
             file_descriptions.append(f"[IMAGE: {f.original_filename}] - Attached for visual analysis")
         
-        # Videos - extract frames
-        elif ext in ('mp4', 'mov', 'avi', 'webm', 'mkv'):
+        # Videos - Use Gemini for native video analysis
+        elif ext in GEMINI_VIDEO_FORMATS:
+            logger.info(f"Analyzing video with Gemini: {f.original_filename}")
+            video_result = analyze_video_with_gemini(file_path, f.original_filename, idea_context, client)
+            
+            if video_result:
+                video_analyses.append(video_result)
+                # Add video analysis to file descriptions for Claude's context
+                desc = video_result.get('description', 'Video analyzed')[:500]
+                audio = video_result.get('audio_content', '')
+                file_descriptions.append(
+                    f"[VIDEO: {f.original_filename}] (Analyzed by Gemini)\n"
+                    f"Content: {desc}\n"
+                    f"{'Audio/Speech: ' + audio if audio else ''}"
+                )
+            else:
+                # Fallback to frame extraction if Gemini fails
+                logger.warning(f"Gemini failed, falling back to frame extraction for {f.original_filename}")
+                frames = extract_video_frames(file_path, num_frames=3)
+                if frames:
+                    image_paths.extend(frames)
+                    temp_frames.extend(frames)
+                    file_descriptions.append(f"[VIDEO: {f.original_filename}] - 3 frames extracted (fallback)")
+                else:
+                    file_descriptions.append(f"[VIDEO: {f.original_filename}] - Could not analyze")
+        
+        # Unsupported video formats - use frame extraction
+        elif ext in ('avi', 'mkv'):
+            logger.info(f"Unsupported format for Gemini, using frame extraction: {f.original_filename}")
             frames = extract_video_frames(file_path, num_frames=3)
             if frames:
                 image_paths.extend(frames)
@@ -144,19 +250,21 @@ If they don't match, explain exactly what the image/video shows vs what the idea
     
     # Count images for prompt
     num_images = len(image_paths)
+    num_videos = len(video_analyses)
     
     user_prompt = f"""{idea_text}
 
 UPLOADED FILES:
 {chr(10).join(file_descriptions) if file_descriptions else "No files uploaded"}
 
-{f"[{num_images} images/frames attached for visual analysis]" if num_images > 0 else ""}
+{f"[{num_images} images attached for visual analysis]" if num_images > 0 else ""}
+{f"[{num_videos} videos analyzed by Gemini AI]" if num_videos > 0 else ""}
 
 YOUR TASK:
 1. Generate a SHORT TITLE for this idea (5-8 words, catchy and descriptive)
 2. Summarize the idea in 2-3 sentences
-3. For EACH image/video frame: Describe what you see in detail
-4. CONSISTENCY CHECK: Do the images/videos relate to the idea?
+3. For EACH image: Describe what you see in detail
+4. CONSISTENCY CHECK: Do the images relate to the idea?
    - If YES: Note they support the idea
    - If NO: Explain exactly what the image shows vs what the idea is about
    Example: "Image shows a beach/ocean scene, but the idea is about education technology - this appears unrelated"
@@ -168,8 +276,7 @@ Return JSON:
     "summary": "2-3 sentence idea summary",
     "tags": ["tag1", "tag2"],
     "file_summaries": {{
-        "filename.jpg": "Detailed description of what this image shows",
-        "video.mp4": "Description of what the video frames show"
+        "filename.jpg": "Detailed description of what this image shows"
     }},
     "is_consistent": true or false,
     "inconsistency_reasons": ["Specific reason why each file doesn't match, describing what it shows"]
@@ -205,21 +312,53 @@ Return JSON:
                 "inconsistency_reasons": ["AI response could not be parsed - needs manual review"]
             }
         
+        # Merge Gemini video analyses into file_summaries
+        file_summaries = ai_data.get('file_summaries', {})
+        inconsistency_reasons = ai_data.get('inconsistency_reasons', [])
+        is_consistent = ai_data.get('is_consistent', True)
+        
+        for video_result in video_analyses:
+            filename = video_result.get('filename', 'video')
+            description = video_result.get('description', 'Video analyzed')
+            audio = video_result.get('audio_content', '')
+            observations = video_result.get('key_observations', [])
+            
+            # Build comprehensive video summary
+            video_summary = f"{description}"
+            if observations:
+                video_summary += f" Key observations: {', '.join(observations[:3])}"
+            if audio:
+                video_summary += f" Audio content: {audio}"
+            
+            file_summaries[filename] = f"[Gemini Analysis] {video_summary}"
+            
+            # Check video consistency
+            if not video_result.get('supports_idea', True):
+                is_consistent = False
+                reason = video_result.get('inconsistency_reason', f"Video {filename} doesn't match the idea")
+                if reason and reason not in inconsistency_reasons:
+                    inconsistency_reasons.append(reason)
+        
         is_complete, notes = validate_submission(submission)
         
-        # Save AI summary
+        # Calculate total tokens (Claude + Gemini)
+        total_tokens = response['tokens']
+        for v in video_analyses:
+            total_tokens += v.get('tokens', 0)
+        
+        # Save AI summary with merged results
         ai_summary, _ = AISummary.objects.update_or_create(
             submission=submission,
             defaults={
                 'summary': ai_data.get('summary', 'Summary unavailable'),
                 'suggested_tags': ai_data.get('tags', []),
-                'file_summaries': ai_data.get('file_summaries', {}),
-                'is_consistent': ai_data.get('is_consistent', True),
-                'inconsistency_reasons': ai_data.get('inconsistency_reasons', []),
+                'file_summaries': file_summaries,
+                'is_consistent': is_consistent,
+                'inconsistency_reasons': inconsistency_reasons,
                 'is_complete': is_complete,
                 'completeness_notes': notes,
-                'model_used': response['model'],
-                'tokens_used': response['tokens'],
+                'model_used': f"{response['model']} + {MODELS['video']}" if video_analyses else response['model'],
+                'tokens_used': total_tokens,
                 'processing_time': response['time'],
                 'raw_response': response['raw_response']
             }

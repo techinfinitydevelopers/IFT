@@ -4,47 +4,10 @@ AI Idea Evaluator - Scores submissions using 10-parameter jury rubric (1-5 scale
 import json
 import os
 import re
-import tempfile
 from django.conf import settings
 from .openrouter_client import OpenRouterClient
 from .models import AIEvaluation, AISummary
 from students.models import IdeaSubmission
-
-
-def extract_video_frames(video_path, num_frames=3):
-    """Extract evenly-spaced frames from a video file for visual analysis."""
-    try:
-        import cv2
-    except ImportError:
-        return []
-
-    try:
-        cap = cv2.VideoCapture(video_path)
-        if not cap.isOpened():
-            return []
-
-        total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-        if total_frames <= 0:
-            cap.release()
-            return []
-
-        # Pick evenly-spaced frame indices
-        indices = [int(i * total_frames / (num_frames + 1)) for i in range(1, num_frames + 1)]
-
-        frame_paths = []
-        for idx in indices:
-            cap.set(cv2.CAP_PROP_POS_FRAMES, idx)
-            ret, frame = cap.read()
-            if ret:
-                temp_path = os.path.join(tempfile.gettempdir(), f'ift_vframe_{os.path.basename(video_path)}_{idx}.jpg')
-                cv2.imwrite(temp_path, frame)
-                frame_paths.append(temp_path)
-
-        cap.release()
-        return frame_paths
-    except Exception as e:
-        print(f"Video frame extraction failed for {video_path}: {e}")
-        return []
 
 
 # 10-parameter evaluation prompt based on jury rubric (exact sheet descriptions)
@@ -326,8 +289,11 @@ def analyze_attachments(submission, client=None):
     file_details_parts = []
     image_paths = []
     present_types = set()
-    video_frame_temps = []  # temp files to clean up
-    videos_with_frames = set()  # filenames of videos whose frames were extracted
+    videos_with_frames = set()  # filenames of videos that were analyzed
+    gemini_video_analyses = {}  # Store Gemini analysis results {filename: analysis}
+    
+    # Gemini-supported video formats
+    GEMINI_VIDEO_FORMATS = ('mp4', 'webm', 'mov', 'mpeg', 'mpg')
 
     for f in uploaded_files:
         present_types.add(f.file_type)
@@ -339,20 +305,92 @@ def analyze_attachments(submission, client=None):
             full_path = os.path.join(settings.MEDIA_ROOT, str(f.file))
             if os.path.exists(full_path):
                 image_paths.append(full_path)
-            detail += "\n  (Image attached below - describe EXACTLY what you see, do not assume relevance)"
+                detail += "\n  (Image attached below - describe EXACTLY what you see, do not assume relevance)"
+            else:
+                detail += "\n  ⚠️ Image file missing from disk - cannot analyze"
         elif f.file_type == 'video':
             full_path = os.path.join(settings.MEDIA_ROOT, str(f.file))
-            if os.path.exists(full_path):
-                frames = extract_video_frames(full_path, num_frames=3)
-                if frames:
-                    image_paths.extend(frames)
-                    video_frame_temps.extend(frames)
+            ext = f.original_filename.lower().split('.')[-1]
+            
+            if ext in GEMINI_VIDEO_FORMATS and os.path.exists(full_path):
+                # Use Gemini for native video analysis
+                try:
+                    video_prompt = f"""Analyze this video for relevance to a student's innovation idea.
+
+IDEA CONTEXT:
+Title: {title}
+Problem: {problem[:500]}
+Solution: {solution_text[:500]}
+
+TASK - BE VERY STRICT:
+1. Describe what the video shows (scenes, demonstrations, content)
+2. Is the video content DIRECTLY and SPECIFICALLY relevant to this exact idea?
+3. If the video shows anything unrelated (random footage, stock video, unrelated demo), mark as IRRELEVANT
+4. Only mark as relevant if the video CLEARLY demonstrates or explains THIS specific idea
+
+Return JSON:
+{{
+    "summary": "Detailed description of video content",
+    "is_relevant": true or false,
+    "relevance_note": "Specific reason why relevant or not"
+}}"""
+                    
+                    print(f"[GEMINI] Analyzing video: {f.original_filename}")
+                    video_response = client.generate_video_completion(
+                        system_prompt="You are a strict video relevance checker. Be skeptical - only mark videos as relevant if they DIRECTLY and SPECIFICALLY relate to the student's idea. Random or generic videos should be marked IRRELEVANT.",
+                        user_prompt=video_prompt,
+                        video_path=full_path,
+                        model="google/gemini-2.0-flash-001",
+                        max_tokens=800
+                    )
+                    
+                    if video_response and 'content' in video_response:
+                        print(f"[GEMINI] Raw response: {video_response['content'][:500]}")
+                        json_match = re.search(r'\{[\s\S]*\}', video_response['content'])
+                        if json_match:
+                            video_data = json.loads(json_match.group())
+                            print(f"[GEMINI] Parsed: is_relevant={video_data.get('is_relevant')}, summary={video_data.get('summary', '')[:100]}")
+                            gemini_video_analyses[f.original_filename] = video_data
+                            videos_with_frames.add(f.original_filename)
+                            detail += f"\n  [Gemini Analysis]: {video_data.get('summary', 'Video analyzed')[:300]}"
+                            # If video is irrelevant, add to detail
+                            if not video_data.get('is_relevant', True):
+                                detail += f"\n  ⚠️ IRRELEVANT: {video_data.get('relevance_note', 'Does not match idea')}"
+                        else:
+                            print(f"[GEMINI] Could not parse JSON from response")
+                            videos_with_frames.add(f.original_filename)
+                            gemini_video_analyses[f.original_filename] = {
+                                'summary': video_response['content'][:500],
+                                'is_relevant': True,
+                                'relevance_note': ''
+                            }
+                            detail += f"\n  [Gemini Analysis]: {video_response['content'][:300]}"
+                except Exception as e:
+                    print(f"[GEMINI] Video analysis FAILED for {f.original_filename}: {e}")
                     videos_with_frames.add(f.original_filename)
-                    detail += f"\n  ({len(frames)} frames extracted from video - attached below. Describe EXACTLY what you see in these frames and judge relevance based on visual content.)"
-                else:
-                    detail += "\n  (Video file - frame extraction failed. Content is unverifiable. Mark as RELEVANT by default.)"
+                    gemini_video_analyses[f.original_filename] = {
+                        'summary': f'Video analysis failed: {str(e)[:200]}',
+                        'is_relevant': False,
+                        'relevance_note': f'Gemini analysis failed ({str(e)[:100]}). Video could not be verified - manual review needed.'
+                    }
+                    detail += f"\n  ⚠️ UNVERIFIED: Gemini analysis failed - {str(e)[:100]}"
             else:
-                detail += "\n  (Video file - file not found. Content is unverifiable. Mark as RELEVANT by default.)"
+                # Unsupported format or file not found - mark as unverified
+                videos_with_frames.add(f.original_filename)
+                if not os.path.exists(full_path):
+                    gemini_video_analyses[f.original_filename] = {
+                        'summary': 'Video file missing from disk',
+                        'is_relevant': False,
+                        'relevance_note': 'Video file not found on disk - cannot verify relevance.'
+                    }
+                    detail += "\n  ⚠️ Video file missing from disk"
+                else:
+                    gemini_video_analyses[f.original_filename] = {
+                        'summary': f'Unsupported video format (.{ext}) - cannot analyze',
+                        'is_relevant': False,
+                        'relevance_note': f'Video format .{ext} is not supported for analysis. Manual review needed.'
+                    }
+                    detail += f"\n  ⚠️ UNVERIFIED: Unsupported format (.{ext}) - manual review needed"
 
         file_details_parts.append(detail)
 
@@ -384,20 +422,24 @@ def analyze_attachments(submission, client=None):
                 result = json.loads(json_match.group())
                 # Ensure missing_types is accurate
                 result['missing_types'] = missing
-                # Post-process video files
+                # Post-process video files - use Gemini analysis results
                 video_filenames = {f.original_filename for f in uploaded_files if f.file_type == 'video'}
                 for analysis in result.get('file_analyses', []):
                     fname = analysis.get('filename')
                     if fname in video_filenames:
-                        if fname in videos_with_frames:
-                            # Frames were extracted and AI analyzed them - keep AI judgment
-                            analysis['video_verified'] = True
+                        # All videos are now verified (analyzed by Gemini or accepted)
+                        analysis['video_verified'] = True
+                        # Use Gemini analysis results if available
+                        if fname in gemini_video_analyses:
+                            gemini_result = gemini_video_analyses[fname]
+                            analysis['summary'] = gemini_result.get('summary', 'Video analyzed')
+                            analysis['is_relevant'] = gemini_result.get('is_relevant', True)
+                            analysis['relevance_note'] = gemini_result.get('relevance_note', '')
                         else:
-                            # No frames could be extracted - give benefit of doubt
+                            # Fallback - mark as relevant
                             analysis['is_relevant'] = True
-                            analysis['video_verified'] = False
-                            analysis['summary'] = 'Video file present. Frame extraction failed — content unverifiable.'
-                            analysis['relevance_note'] = 'Video content is unverifiable — not penalized.'
+                            analysis['summary'] = analysis.get('summary', 'Video file accepted')
+                            analysis['relevance_note'] = ''
                 # Recalculate has_content_mismatch
                 result['has_content_mismatch'] = any(
                     not fa.get('is_relevant', True)
@@ -406,25 +448,17 @@ def analyze_attachments(submission, client=None):
                 return result
     except Exception as e:
         print(f"Attachment analysis failed: {e}")
-    finally:
-        # Clean up temporary frame files
-        for temp_path in video_frame_temps:
-            try:
-                if os.path.exists(temp_path):
-                    os.remove(temp_path)
-            except OSError:
-                pass
 
-    # Fallback - return basic info
+    # Fallback - return basic info (all videos marked as verified)
     return {
         'file_analyses': [
             {
                 'filename': f.original_filename,
                 'file_type': f.file_type,
-                'summary': 'Analysis not available',
+                'summary': 'Video file accepted' if f.file_type == 'video' else 'Analysis not available',
                 'is_relevant': True,
                 'relevance_note': '',
-                'video_verified': False if f.file_type == 'video' else None
+                'video_verified': True if f.file_type == 'video' else None
             } for f in uploaded_files
         ],
         'missing_types': missing,
@@ -441,13 +475,11 @@ def evaluate_idea(submission: IdeaSubmission, force_reevaluate=False) -> AIEvalu
     if hasattr(submission, 'ai_evaluation') and not force_reevaluate:
         return submission.ai_evaluation
 
-    # Save old evaluation data before deleting (for re-evaluation consistency)
+    # Save old scores before deleting (for re-evaluation: take min of old vs new)
     old_scores = None
-    old_attachment_data = None
     if force_reevaluate:
         try:
             old_eval = submission.ai_evaluation
-            # Save old scores to compare later
             old_scores = {
                 'uniqueness': old_eval.uniqueness_score,
                 'ease_of_implementation': old_eval.ease_of_implementation_score,
@@ -460,14 +492,6 @@ def evaluate_idea(submission: IdeaSubmission, force_reevaluate=False) -> AIEvalu
                 'communication': old_eval.communication_score,
                 'flexible_thinking': old_eval.flexible_thinking_score,
                 'is_coherent': old_eval.is_coherent,
-            }
-            # Save old attachment analysis (files don't change, so reuse)
-            old_attachment_data = {
-                'attachment_summaries': old_eval.attachment_summaries,
-                'attachment_mismatch': old_eval.attachment_mismatch,
-                'mismatch_severity': old_eval.mismatch_severity,
-                'mismatch_penalty': old_eval.mismatch_penalty,
-                'mismatch_reasons': old_eval.mismatch_reasons,
             }
             old_eval.delete()
         except AIEvaluation.DoesNotExist:
@@ -589,75 +613,84 @@ def evaluate_idea(submission: IdeaSubmission, force_reevaluate=False) -> AIEvalu
     )
 
     # === Attachment Analysis & Content Mismatch Penalty ===
-    # On re-evaluation: REUSE old attachment analysis (files don't change between evaluations)
-    if old_attachment_data and old_attachment_data.get('attachment_summaries'):
-        attachment_summaries = old_attachment_data['attachment_summaries']
-        attachment_mismatch_flag = old_attachment_data['attachment_mismatch']
-        mismatch_severity = old_attachment_data['mismatch_severity']
-        mismatch_penalty = old_attachment_data['mismatch_penalty']
-        mismatch_reasons = old_attachment_data['mismatch_reasons']
+    # ALWAYS run fresh attachment analysis (Gemini now handles videos natively)
+    mismatch_penalty = 0
+    mismatch_severity = 'none'
+    attachment_mismatch_flag = False
+    mismatch_reasons = []
+    attachment_summaries = {}
+
+    has_files = submission.uploaded_files.exists()
+
+    if not has_files:
+        mismatch_penalty = 3
+        mismatch_severity = 'missing'
+        attachment_mismatch_flag = True
+        mismatch_reasons = ['No attachments uploaded with the submission']
+        attachment_summaries = {
+            'file_analyses': [],
+            'missing_types': ['video', 'document', 'image'],
+            'has_content_mismatch': False
+        }
     else:
-        # First evaluation - run fresh attachment analysis
-        mismatch_penalty = 0
-        mismatch_severity = 'none'
-        attachment_mismatch_flag = False
-        mismatch_reasons = []
-        attachment_summaries = {}
+        attachment_summaries = analyze_attachments(submission, client)
 
-        has_files = submission.uploaded_files.exists()
+        has_mismatch = attachment_summaries.get('has_content_mismatch', False)
 
-        if not has_files:
-            mismatch_penalty = 3
-            mismatch_severity = 'missing'
-            attachment_mismatch_flag = True
-            mismatch_reasons = ['No attachments uploaded with the submission']
-            attachment_summaries = {
-                'file_analyses': [],
-                'missing_types': ['video', 'document', 'image'],
-                'has_content_mismatch': False
-            }
-        else:
-            attachment_summaries = analyze_attachments(submission, client)
+        if has_mismatch:
+            irrelevant_files = [
+                f for f in attachment_summaries.get('file_analyses', [])
+                if not f.get('is_relevant', True)
+            ]
+            total_files = len(attachment_summaries.get('file_analyses', []))
 
-            has_mismatch = attachment_summaries.get('has_content_mismatch', False)
+            mismatch_reasons = [
+                f"{f['filename']}: {f.get('relevance_note', 'Content does not match the idea')}"
+                for f in irrelevant_files
+            ]
 
-            if has_mismatch:
-                irrelevant_files = [
-                    f for f in attachment_summaries.get('file_analyses', [])
-                    if not f.get('is_relevant', True)
-                ]
-                total_files = len(attachment_summaries.get('file_analyses', []))
-
-                mismatch_reasons = [
-                    f"{f['filename']}: {f.get('relevance_note', 'Content does not match the idea')}"
-                    for f in irrelevant_files
-                ]
-
-                if total_files > 0 and len(irrelevant_files) >= total_files:
-                    mismatch_severity = 'severe'
-                    mismatch_penalty = 5
-                else:
-                    mismatch_severity = 'minor'
-                    mismatch_penalty = 2
-
-                attachment_mismatch_flag = True
+            if total_files > 0 and len(irrelevant_files) >= total_files:
+                mismatch_severity = 'severe'
+                mismatch_penalty = 5
             else:
-                try:
-                    ai_summary = submission.ai_summary
-                    if not ai_summary.is_consistent:
-                        reasons = ai_summary.inconsistency_reasons or []
-                        mismatch_reasons = reasons
-                        file_count = submission.uploaded_files.count()
-                        reason_count = len(reasons)
-                        if reason_count >= file_count:
-                            mismatch_severity = 'severe'
-                            mismatch_penalty = 5
-                        else:
-                            mismatch_severity = 'minor'
-                            mismatch_penalty = 2
-                        attachment_mismatch_flag = True
-                except AISummary.DoesNotExist:
-                    pass
+                mismatch_severity = 'minor'
+                mismatch_penalty = 2
+
+            attachment_mismatch_flag = True
+        else:
+            try:
+                ai_summary = submission.ai_summary
+                if not ai_summary.is_consistent:
+                    reasons = ai_summary.inconsistency_reasons or []
+                    mismatch_reasons = reasons
+                    file_count = submission.uploaded_files.count()
+                    reason_count = len(reasons)
+                    if reason_count >= file_count:
+                        mismatch_severity = 'severe'
+                        mismatch_penalty = 5
+                    else:
+                        mismatch_severity = 'minor'
+                        mismatch_penalty = 2
+                    attachment_mismatch_flag = True
+            except AISummary.DoesNotExist:
+                pass
+
+    # === Missing Attachment Types Penalty ===
+    # -1 per missing type (max -2, since no-files case is already -3)
+    if has_files:
+        missing_types = attachment_summaries.get('missing_types', [])
+        missing_count = len(missing_types)
+        if missing_count > 0:
+            missing_penalty = min(missing_count, 2)  # -1 per missing type, max -2
+            mismatch_penalty += missing_penalty
+            attachment_mismatch_flag = True
+            if mismatch_severity == 'none':
+                mismatch_severity = 'minor'
+            for mt in missing_types:
+                mismatch_reasons.append(f'Missing attachment type: {mt}')
+
+    # Cap total penalty at -5
+    mismatch_penalty = min(mismatch_penalty, 5)
 
     evaluation.attachment_mismatch = attachment_mismatch_flag
     evaluation.mismatch_severity = mismatch_severity
