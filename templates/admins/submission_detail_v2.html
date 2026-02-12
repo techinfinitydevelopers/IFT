@@ -230,16 +230,44 @@
     .ai-done-btn:hover {
         background: #222;
     }
+
+    .coherence-check {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0.75rem;
+        border-radius: 6px;
+        margin-bottom: 0.4rem;
+        font-size: 0.82rem;
+    }
+    .coherence-pass {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        color: #166534;
+    }
+    .coherence-fail {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #991b1b;
+    }
 </style>
 
 <div class="container mt-4">
-    <div style="margin-bottom:1rem;"><a href="{% url 'admins:dashboard' %}" class="btn btn-outline-secondary btn-sm">←
+    <div style="margin-bottom:1rem;"><a href="{% url 'admins:dashboard' %}" class="btn btn-outline-secondary btn-sm">
             Back</a></div>
+
+    {% if is_disqualified %}
+    <div style="background:#dc2626;color:white;padding:1rem 1.5rem;border-radius:10px;margin-bottom:1rem;display:flex;align-items:center;gap:0.75rem;">
+        <span style="font-size:1.5rem;">DISQUALIFIED</span>
+        <span style="font-size:0.9rem;">This submission failed more than 5 coherence checks. Final score set to 0.</span>
+    </div>
+    {% endif %}
+
     <div class="card" style="margin-bottom:1.5rem;padding:1.5rem;">
         <div style="display:flex;justify-content:space-between;align-items:center;">
             <div>
                 <h1 style="font-size:1.75rem;margin:0 0 0.4rem 0;">{{student_name}}</h1>
-                <p style="color:var(--text-muted);margin:0;">{{school_name}} • Grade {{grade}}</p>
+                <p style="color:var(--text-muted);margin:0;">{{school_name}} &bull; Grade {{grade}}</p>
             </div>
             <div style="text-align:right;">
                 <span class="badge"
@@ -253,49 +281,61 @@
             <div class="card" style="padding:1.5rem;">
                 <h2 style="margin-bottom:1.5rem;border-bottom:1px solid var(--border);padding-bottom:0.5rem;">Submission
                     Details</h2>
-                <div class="question-section"><span class="question-label">1. Problem Definition</span>
-                    <div class="question-content">{{q1_problem}}</div>
+                <div class="question-section"><span class="question-label">1. Target Group</span>
+                    <div class="question-content">{{q1}}</div>
                 </div>
-                <div class="question-section"><span class="question-label">2. Detailed Description</span>
-                    <div class="question-content">{{q2_description}}</div>
+                <div class="question-section"><span class="question-label">2. Exact Problem</span>
+                    <div class="question-content">{{q2}}</div>
                 </div>
-                <div class="question-section"><span class="question-label">3. Target User Group</span>
-                    <div class="question-content">{{q3_target}}</div>
+                <div class="question-section"><span class="question-label">3. Solution (Simple)</span>
+                    <div class="question-content">{{q3}}</div>
                 </div>
-                <div class="question-section"><span class="question-label">4. Problem Urgency</span>
-                    <div class="question-content">{{q4_urgency}}</div>
+                <div class="question-section"><span class="question-label">4. Differentiation</span>
+                    <div class="question-content">{{q4}}</div>
                 </div>
-                <div class="question-section"><span class="question-label">5. Proposed Solution</span>
-                    <div class="question-content">{{q5_solution}}</div>
+                <div class="question-section"><span class="question-label">5. Build Steps</span>
+                    <div class="question-content">{{q5}}</div>
                 </div>
-                <div class="question-section"><span class="question-label">6. Solution Benefits</span>
-                    <div class="question-content">{{q6_benefits}}</div>
+                <div class="question-section"><span class="question-label">6. Resources</span>
+                    <div class="question-content">{{q6}}</div>
                 </div>
-                <div class="question-section"><span class="question-label">7. Why Best Equipped</span>
-                    <div class="question-content">{{q7_why}}</div>
+                <div class="question-section"><span class="question-label">7. Positive Change</span>
+                    <div class="question-content">{{q7}}</div>
                 </div>
-                <div class="question-section"><span class="question-label">8. Idea Stage</span>
-                    <div class="question-content" style="font-weight:600;">{{q8_stage}}</div>
+                <div class="question-section"><span class="question-label">8. Challenges</span>
+                    <div class="question-content">{{q8}}</div>
+                </div>
+                <div class="question-section"><span class="question-label">9. Team Fit</span>
+                    <div class="question-content">{{q9}}</div>
+                </div>
+                <div class="question-section"><span class="question-label">10. Feedback & Learning</span>
+                    <div class="question-content">{{q10}}</div>
+                </div>
+                <div class="question-section"><span class="question-label">11. Creative Element</span>
+                    <div class="question-content">{{q11}}</div>
+                </div>
+                <div class="question-section"><span class="question-label">12. 60-Second Pitch</span>
+                    <div class="question-content">{{q12}}</div>
                 </div>
             </div>
 
             {% if ai_evaluation %}
             <div class="card" style="margin-top:1.5rem;padding:1.5rem;border:2px solid var(--primary);">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
-                    <h2 style="margin:0;">AI Score: {{final_score}}/50</h2>
+                    <h2 style="margin:0;">AI Score: {{final_score}}/100</h2>
                     <span style="font-weight:700;">Rank: #{{rank}}</span>
                 </div>
-                {% if not is_coherent %}
+                {% if is_disqualified %}
                 <div style="background:#fee2e2;border:1px solid #ef4444;border-radius:8px;padding:1rem;margin-bottom:1.5rem;">
-                    <strong style="color:#dc2626;">⚠️ INCOHERENT SUBMISSION:</strong>
-                    <span style="color:#991b1b;">The fields in this submission do not relate to each other and appear to be from different ideas. Scores are penalized.</span>
+                    <strong style="color:#dc2626;">DISQUALIFIED:</strong>
+                    <span style="color:#991b1b;">Failed {{coherence_failures}}/10 coherence checks (threshold: 5). All scores set to 0.</span>
                 </div>
                 {% endif %}
                 {% if attachment_mismatch %}
                 <div style="background:{% if mismatch_penalty >= 5 %}#fee2e2{% elif mismatch_penalty >= 3 %}#fef3c7{% else %}#fff7ed{% endif %};border:1px solid {% if mismatch_penalty >= 5 %}#ef4444{% elif mismatch_penalty >= 3 %}#f59e0b{% else %}#fb923c{% endif %};border-radius:8px;padding:1rem;margin-bottom:1.5rem;">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
                         <strong style="color:{% if mismatch_penalty >= 5 %}#dc2626{% elif mismatch_penalty >= 3 %}#d97706{% else %}#ea580c{% endif %};">
-                            {% if mismatch_penalty >= 5 %}⚠️ CONTENT MISMATCH (Severe){% elif mismatch_penalty >= 3 %}⚠️ NO ATTACHMENTS{% else %}⚠️ CONTENT MISMATCH (Minor){% endif %}
+                            {% if mismatch_penalty >= 5 %}CONTENT MISMATCH (Severe){% elif mismatch_penalty >= 3 %}NO ATTACHMENTS{% else %}CONTENT MISMATCH (Minor){% endif %}
                         </strong>
                         <span style="background:{% if mismatch_penalty >= 5 %}#dc2626{% elif mismatch_penalty >= 3 %}#d97706{% else %}#ea580c{% endif %};color:white;padding:2px 8px;border-radius:4px;font-size:0.8rem;font-weight:700;">-{{mismatch_penalty}} marks</span>
                     </div>
@@ -312,23 +352,23 @@
                     Parameters</h3>
                 <div class="param-grid">
                     <div class="param-box">
-                        <div class="param-label">Uniqueness <span class="param-score">{{un_score}}/5</span></div>
+                        <div class="param-label">Uniqueness <span class="param-score">{{un_score}}/10</span></div>
                         <div class="param-justification">{{un_just}}</div>
                     </div>
                     <div class="param-box">
-                        <div class="param-label">Ease <span class="param-score">{{ease_score}}/5</span></div>
+                        <div class="param-label">Ease <span class="param-score">{{ease_score}}/10</span></div>
                         <div class="param-justification">{{ease_just}}</div>
                     </div>
                     <div class="param-box">
-                        <div class="param-label">Scalability <span class="param-score">{{scale_score}}/5</span></div>
-                        <div class="param-justification">{{scale_just}}</div>
+                        <div class="param-label">Feasibility <span class="param-score">{{feas_score}}/10</span></div>
+                        <div class="param-justification">{{feas_just}}</div>
                     </div>
                     <div class="param-box">
-                        <div class="param-label">Impact <span class="param-score">{{impact_score}}/5</span></div>
+                        <div class="param-label">Impact <span class="param-score">{{impact_score}}/10</span></div>
                         <div class="param-justification">{{impact_just}}</div>
                     </div>
                     <div class="param-box">
-                        <div class="param-label">Sustainability <span class="param-score">{{sust_score}}/5</span></div>
+                        <div class="param-label">Sustainability <span class="param-score">{{sust_score}}/10</span></div>
                         <div class="param-justification">{{sust_just}}</div>
                     </div>
                 </div>
@@ -336,27 +376,39 @@
                     Team Parameters</h3>
                 <div class="param-grid">
                     <div class="param-box">
-                        <div class="param-label">Clarity <span class="param-score">{{clarity_score}}/5</span></div>
+                        <div class="param-label">Clarity <span class="param-score">{{clarity_score}}/10</span></div>
                         <div class="param-justification">{{clarity_just}}</div>
                     </div>
                     <div class="param-box">
-                        <div class="param-label">Empathy <span class="param-score">{{empathy_score}}/5</span></div>
+                        <div class="param-label">Empathy <span class="param-score">{{empathy_score}}/10</span></div>
                         <div class="param-justification">{{empathy_just}}</div>
                     </div>
                     <div class="param-box">
-                        <div class="param-label">Creativity <span class="param-score">{{creativity_score}}/5</span>
+                        <div class="param-label">Creativity <span class="param-score">{{creativity_score}}/10</span>
                         </div>
                         <div class="param-justification">{{creativity_just}}</div>
                     </div>
                     <div class="param-box">
-                        <div class="param-label">Communication <span class="param-score">{{comm_score}}/5</span></div>
+                        <div class="param-label">Communication <span class="param-score">{{comm_score}}/10</span></div>
                         <div class="param-justification">{{comm_just}}</div>
                     </div>
                     <div class="param-box">
-                        <div class="param-label">Flexibility <span class="param-score">{{flex_score}}/5</span></div>
+                        <div class="param-label">Flexibility <span class="param-score">{{flex_score}}/10</span></div>
                         <div class="param-justification">{{flex_just}}</div>
                     </div>
                 </div>
+
+                {% if coherence_checks %}
+                <h3 style="font-size:0.9rem;color:var(--text-muted);margin:1.5rem 0 0.8rem 0;text-transform:uppercase;">
+                    Coherence Checks ({{coherence_failures}}/10 failed)</h3>
+                {% for check in coherence_checks %}
+                <div class="coherence-check {% if check.passed %}coherence-pass{% else %}coherence-fail{% endif %}">
+                    <span>{{check.name}}</span>
+                    <span>{% if check.passed %}PASS{% else %}FAIL (-1){% endif %}</span>
+                </div>
+                {% endfor %}
+                {% endif %}
+
                 <div style="margin-top:1.5rem;padding:1rem;background:rgba(59,130,246,0.05);border-radius:10px;">
                     <h4 style="margin:0 0 0.4rem 0;font-size:0.95rem;">AI Summary</h4>
                     <p style="margin:0;line-height:1.4;font-size:0.9rem;">{{ai_summary_text}}</p>
@@ -370,17 +422,17 @@
                     <div style="padding:0.85rem;background:#eff6ff;border-radius:10px;border:2px solid #93c5fd;margin-bottom:0.6rem;">
                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
                             <span style="font-weight:700;font-size:0.85rem;color:#1e40af;">
-                                🎥 {{ file_info.filename }}
+                                {{ file_info.filename }}
                             </span>
                             <span style="background:#1e40af;color:white;padding:2px 10px;border-radius:20px;font-size:0.7rem;font-weight:700;letter-spacing:0.3px;">UNVERIFIED</span>
                         </div>
-                        <p style="margin:0;font-size:0.84rem;color:#1d4ed8;line-height:1.5;">Video file present. Frame extraction failed — not penalized.</p>
+                        <p style="margin:0;font-size:0.84rem;color:#1d4ed8;line-height:1.5;">Video file present. Frame extraction failed - not penalized.</p>
                     </div>
                     {% elif file_info.is_relevant %}
                     <div style="padding:0.85rem;background:#f0fdf4;border-radius:10px;border:2px solid #86efac;margin-bottom:0.6rem;">
                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
                             <span style="font-weight:700;font-size:0.85rem;color:#166534;">
-                                {% if file_info.file_type == 'image' %}🖼️{% elif file_info.file_type == 'document' %}📄{% elif file_info.file_type == 'video' %}🎥{% else %}📎{% endif %}
+                                {% if file_info.file_type == 'image' %}IMG{% elif file_info.file_type == 'document' %}DOC{% elif file_info.file_type == 'video' %}VID{% else %}FILE{% endif %}
                                 {{ file_info.filename }}
                             </span>
                             <span style="background:#166534;color:white;padding:2px 10px;border-radius:20px;font-size:0.7rem;font-weight:700;letter-spacing:0.3px;">{% if file_info.file_type == 'video' %}VIDEO VERIFIED{% else %}RELEVANT{% endif %}</span>
@@ -391,7 +443,7 @@
                     <div style="padding:0.85rem;background:#fef2f2;border-radius:10px;border:2px solid #f87171;margin-bottom:0.6rem;">
                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
                             <span style="font-weight:700;font-size:0.85rem;color:#991b1b;">
-                                {% if file_info.file_type == 'image' %}🖼️{% elif file_info.file_type == 'document' %}📄{% elif file_info.file_type == 'video' %}🎥{% else %}📎{% endif %}
+                                {% if file_info.file_type == 'image' %}IMG{% elif file_info.file_type == 'document' %}DOC{% elif file_info.file_type == 'video' %}VID{% else %}FILE{% endif %}
                                 {{ file_info.filename }}
                             </span>
                             <span style="background:#dc2626;color:white;padding:2px 10px;border-radius:20px;font-size:0.7rem;font-weight:700;letter-spacing:0.3px;">IRRELEVANT</span>
@@ -399,7 +451,7 @@
                         <p style="margin:0 0 0.4rem 0;font-size:0.84rem;color:#991b1b;line-height:1.5;">{{ file_info.summary }}</p>
                         {% if file_info.relevance_note %}
                         <div style="padding:0.5rem 0.7rem;background:#fecaca;border-radius:6px;font-size:0.8rem;color:#7f1d1d;line-height:1.4;">
-                            ⚠️ {{ file_info.relevance_note }}
+                            {{ file_info.relevance_note }}
                         </div>
                         {% endif %}
                     </div>
@@ -454,14 +506,13 @@
                 <h3 style="font-size:0.8rem;color:var(--text-muted);text-transform:uppercase;margin-bottom:0.8rem;">
                     Attachments</h3>
                 {% for f in uploaded_files %}<div style="margin-bottom:0.5rem;"><a href="{{f.file.url}}" target="_blank"
-                        style="font-size:0.85rem;text-decoration:none;">{% if f.file_type == 'image' %}🖼️{% elif f.file_type == 'video' %}🎥{% else %}📄{% endif %} {{f.original_filename}}</a>
+                        style="font-size:0.85rem;text-decoration:none;">{% if f.file_type == 'image' %}IMG{% elif f.file_type == 'video' %}VID{% else %}DOC{% endif %} {{f.original_filename}}</a>
                     <span style="font-size:0.7rem;color:var(--text-muted);display:block;padding-left:1.2rem;">{{f.get_file_type_display}}</span></div>{% endfor %}
             </div>{% endif %}
             {% if ai_evaluation %}
             <div class="sidebar-card" id="sidebarMismatchBox" style="border:{% if attachment_mismatch %}2px solid {% if mismatch_penalty >= 5 %}#ef4444{% elif mismatch_penalty >= 3 %}#f59e0b{% else %}#fb923c{% endif %}{% else %}1px solid #bbf7d0{% endif %};background:{% if attachment_mismatch %}{% if mismatch_penalty >= 5 %}#fef2f2{% elif mismatch_penalty >= 3 %}#fffbeb{% else %}#fff7ed{% endif %}{% else %}#f0fdf4{% endif %};">
                 {% if attachment_mismatch %}
                 <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.6rem;">
-                    <span style="font-size:1.4rem;">⚠️</span>
                     <div>
                         <h3 style="font-size:0.8rem;color:{% if mismatch_penalty >= 5 %}#dc2626{% elif mismatch_penalty >= 3 %}#d97706{% else %}#ea580c{% endif %};text-transform:uppercase;margin:0;letter-spacing:0.5px;">Content Mismatch</h3>
                         <span style="font-size:0.75rem;font-weight:700;color:{% if mismatch_penalty >= 5 %}#dc2626{% elif mismatch_penalty >= 3 %}#d97706{% else %}#ea580c{% endif %};">{% if mismatch_penalty >= 5 %}Severe{% elif mismatch_penalty >= 3 %}Missing Files{% else %}Minor{% endif %} &middot; -{{mismatch_penalty}} marks</span>
@@ -484,7 +535,6 @@
                 {% endif %}
                 {% else %}
                 <div style="display:flex;align-items:center;gap:0.5rem;">
-                    <span style="font-size:1.4rem;">✅</span>
                     <div>
                         <h3 style="font-size:0.8rem;color:#166534;text-transform:uppercase;margin:0;letter-spacing:0.5px;">Content Match</h3>
                         <span style="font-size:0.75rem;color:#15803d;">All attachments are relevant</span>
@@ -513,7 +563,7 @@
     const PARAMS = [
         { key: 'uniqueness', name: 'Uniqueness' },
         { key: 'ease_of_implementation', name: 'Ease of Implementation' },
-        { key: 'scalable', name: 'Scalability' },
+        { key: 'feasibility', name: 'Feasibility' },
         { key: 'impactful', name: 'Impact' },
         { key: 'sustainable', name: 'Sustainability' },
         { key: 'conceptual_clarity', name: 'Conceptual Clarity' },
@@ -563,12 +613,19 @@
         terminal.classList.add('active');
         setProgress(0);
 
-        // Fake loading steps while waiting for API
+        // Loading steps that cycle while waiting for API
         const loadingSteps = [
-            { text: 'Connecting...', progress: 2 },
-            { text: 'Authenticating...', progress: 5 },
-            { text: 'Loading data...', progress: 8 },
-            { text: 'Initializing AI...', progress: 12 }
+            { text: 'Connecting to AI...', progress: 2 },
+            { text: 'Sending submission data...', progress: 5 },
+            { text: 'Scoring 10 parameters...', progress: 10 },
+            { text: 'Running coherence checks...', progress: 18 },
+            { text: 'Analyzing attachments...', progress: 25 },
+            { text: 'Evaluating uniqueness & creativity...', progress: 32 },
+            { text: 'Checking feasibility & impact...', progress: 40 },
+            { text: 'Assessing team parameters...', progress: 48 },
+            { text: 'Cross-checking consistency...', progress: 55 },
+            { text: 'Computing final scores...', progress: 62 },
+            { text: 'Almost done...', progress: 70 },
         ];
 
         let stepIndex = 0;
@@ -578,7 +635,7 @@
         function showNextStep() {
             if (apiDone) return;
             if (stepIndex >= loadingSteps.length) {
-                stepIndex = loadingSteps.length - 1;
+                // Keep showing last step
                 return;
             }
             const step = loadingSteps[stepIndex];
@@ -586,7 +643,7 @@
             setProgress(step.progress);
             stepIndex++;
             if (!apiDone && stepIndex < loadingSteps.length) {
-                setTimeout(showNextStep, 400);
+                setTimeout(showNextStep, 2500);
             }
         }
 
@@ -605,19 +662,19 @@
                 apiDone = true;
                 if (data.success) {
                     setProgress(15);
-                    content.innerHTML = '<div class="ai-line"><span class="p">✓</span><span class="t">Ready</span></div>';
+                    content.innerHTML = '<div class="ai-line"><span class="p">&#10003;</span><span class="t">Ready</span></div>';
                     addLine('<hr class="ai-divider">');
                     showResults(data);
                 } else {
                     hideBuffer();
-                    content.innerHTML = '<div class="ai-line"><span style="color:#ef4444;">✗ Error: ' + (data.error || 'Failed') + '</span></div>';
+                    content.innerHTML = '<div class="ai-line"><span style="color:#ef4444;">Error: ' + (data.error || 'Failed') + '</span></div>';
                     addLine('<button class="ai-done-btn show" onclick="closeTerminal()">Close</button>');
                 }
             })
             .catch(err => {
                 apiDone = true;
                 hideBuffer();
-                content.innerHTML = '<div class="ai-line"><span style="color:#ef4444;">✗ Error: ' + err + '</span></div>';
+                content.innerHTML = '<div class="ai-line"><span style="color:#ef4444;">Error: ' + err + '</span></div>';
                 addLine('<button class="ai-done-btn show" onclick="closeTerminal()">Close</button>');
             });
     }
@@ -625,7 +682,7 @@
     function showResults(data) {
         // First show all params as pending
         PARAMS.forEach((p, i) => {
-            addLine('<div class="ai-line" id="param-' + i + '"><span class="p">○</span><span class="t">' + p.name + '</span><span class="status">Pending</span></div>');
+            addLine('<div class="ai-line" id="param-' + i + '"><span class="p">&#9675;</span><span class="t">' + p.name + '</span><span class="status">Pending</span></div>');
         });
 
         let i = 0;
@@ -646,7 +703,7 @@
 
             setTimeout(() => {
                 // Mark as done with score
-                updateLine('param-' + i, '<span class="p">✓</span><span class="t">' + p.name + '</span><span class="s">' + score + '/5</span>');
+                updateLine('param-' + i, '<span class="p">&#10003;</span><span class="t">' + p.name + '</span><span class="s">' + score + '/10</span>');
                 i++;
                 setTimeout(processNext, 60);
             }, 120);
@@ -661,14 +718,29 @@
 
         addLine('<hr class="ai-divider">');
 
+        // Show coherence check results if available
+        if (data.coherence && data.coherence.checks) {
+            addLine('<div class="ai-line"><span class="w" style="font-size:11px;text-transform:uppercase;color:#7c3aed;">Coherence Checks</span></div>');
+            data.coherence.checks.forEach(function(c) {
+                var icon = c.passed ? '<span style="color:#22c55e;">&#10003;</span>' : '<span style="color:#ef4444;">&#10007;</span>';
+                addLine('<div class="ai-line"><span class="t" style="padding-left:8px;">' + c.name + '</span>' + icon + '</div>');
+            });
+            if (data.coherence.failures > 5) {
+                addLine('<div class="ai-line"><span style="color:#ef4444;font-weight:bold;">DISQUALIFIED (' + data.coherence.failures + '/10 checks failed)</span></div>');
+            } else if (data.coherence.failures > 0) {
+                addLine('<div class="ai-line"><span style="color:#f59e0b;">' + data.coherence.failures + ' check(s) failed, -1 penalty each to affected parameters</span></div>');
+            }
+            addLine('<hr class="ai-divider">');
+        }
+
         // Show mismatch penalty if applicable
         if (data.mismatch && data.mismatch.has_mismatch) {
             let sevLabel = data.mismatch.severity === 'severe' ? 'SEVERE MISMATCH' : (data.mismatch.severity === 'missing' ? 'NO ATTACHMENTS' : 'MINOR MISMATCH');
             let sevColor = data.mismatch.penalty >= 5 ? '#ef4444' : (data.mismatch.penalty >= 3 ? '#f59e0b' : '#fb923c');
-            addLine('<div class="ai-line"><span style="color:' + sevColor + ';">⚠ ' + sevLabel + ': -' + data.mismatch.penalty + ' marks</span></div>');
+            addLine('<div class="ai-line"><span style="color:' + sevColor + ';">' + sevLabel + ': -' + data.mismatch.penalty + ' marks</span></div>');
             if (data.mismatch.reasons && data.mismatch.reasons.length > 0) {
                 data.mismatch.reasons.forEach(function(reason) {
-                    addLine('<div class="ai-line"><span class="t" style="padding-left:16px;font-size:11px;">• ' + reason + '</span></div>');
+                    addLine('<div class="ai-line"><span class="t" style="padding-left:16px;font-size:11px;">&bull; ' + reason + '</span></div>');
                 });
             }
             addLine('<hr class="ai-divider">');
@@ -678,20 +750,20 @@
         if (data.attachment_summaries && data.attachment_summaries.file_analyses && data.attachment_summaries.file_analyses.length > 0) {
             addLine('<div class="ai-line"><span class="w" style="font-size:11px;text-transform:uppercase;color:#7c3aed;">Attachment Analysis</span></div>');
             data.attachment_summaries.file_analyses.forEach(function(f) {
-                var icon = f.file_type === 'image' ? '🖼️' : (f.file_type === 'document' ? '📄' : '🎥');
+                var icon = f.file_type === 'image' ? 'IMG' : (f.file_type === 'document' ? 'DOC' : 'VID');
                 var relBadge;
                 if (f.file_type === 'video' && !f.video_verified) {
-                    relBadge = '<span style="color:#3b82f6;">○</span>';
+                    relBadge = '<span style="color:#3b82f6;">&#9675;</span>';
                 } else {
-                    relBadge = f.is_relevant ? '<span style="color:#22c55e;">✓</span>' : '<span style="color:#ef4444;">✗</span>';
+                    relBadge = f.is_relevant ? '<span style="color:#22c55e;">&#10003;</span>' : '<span style="color:#ef4444;">&#10007;</span>';
                 }
                 addLine('<div class="ai-line"><span class="t" style="padding-left:8px;">' + icon + ' ' + f.filename + '</span>' + relBadge + '</div>');
                 if (f.file_type === 'video' && !f.video_verified) {
-                    addLine('<div class="ai-line"><span class="t" style="padding-left:24px;font-size:11px;color:#3b82f6;">Unverified — frame extraction failed</span></div>');
+                    addLine('<div class="ai-line"><span class="t" style="padding-left:24px;font-size:11px;color:#3b82f6;">Unverified - frame extraction failed</span></div>');
                 } else {
                     addLine('<div class="ai-line"><span class="t" style="padding-left:24px;font-size:11px;color:#999;">' + f.summary + '</span></div>');
                     if (!f.is_relevant && f.relevance_note) {
-                        addLine('<div class="ai-line"><span style="padding-left:24px;font-size:11px;color:#ef4444;">⚠ ' + f.relevance_note + '</span></div>');
+                        addLine('<div class="ai-line"><span style="padding-left:24px;font-size:11px;color:#ef4444;">' + f.relevance_note + '</span></div>');
                     }
                 }
             });
@@ -701,14 +773,14 @@
             addLine('<hr class="ai-divider">');
         }
 
-        addLine('<div class="ai-line"><span class="w">Total Score: <span class="s">' + data.final_score + '/50</span></span></div>');
+        addLine('<div class="ai-line"><span class="w">Total Score: <span class="s">' + data.final_score + '/100</span></span></div>');
 
         if (data.rank) {
             addLine('<div class="ai-line"><span class="w">Rank: #' + data.rank + '</span></div>');
         }
 
-        let status = data.final_score >= 34 ? '✓ QUALIFIED FOR TOP 400' : '○ BELOW THRESHOLD';
-        let color = data.final_score >= 34 ? '#22c55e' : '#f59e0b';
+        let status = data.final_score >= 68 ? '&#10003; QUALIFIED FOR TOP 400' : '&#9675; BELOW THRESHOLD';
+        let color = data.final_score >= 68 ? '#22c55e' : '#f59e0b';
         addLine('<div class="ai-line"><span style="color:' + color + ';">' + status + '</span></div>');
 
         addLine('<button class="ai-done-btn show" onclick="closeTerminal()">Done</button>');

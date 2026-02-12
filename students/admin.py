@@ -13,16 +13,28 @@ class StudentAdmin(admin.ModelAdmin):
 @admin.register(IdeaSubmission)
 class IdeaSubmissionAdmin(admin.ModelAdmin):
     list_display = ('title', 'student', 'status', 'final_category', 'submitted_at', 'ai_processed')
-    search_fields = ('title', 'description', 'student__user__username')
+    search_fields = ('title', 'student__user__username')
     list_filter = ('status', 'final_category', 'ai_processed', 'submitted_at')
     readonly_fields = ('submitted_at', 'created_at', 'updated_at')
     fieldsets = (
         ('Basic Information', {
-            'fields': ('student', 'title', 'description', 'status')
+            'fields': ('student', 'title', 'status')
         }),
-        ('Questionnaire', {
-            'fields': ('problem_statement', 'target_audience', 'innovation_aspect',
-                      'implementation_plan', 'impact_assessment')
+        ('V3 Questionnaire (12 Questions)', {
+            'fields': (
+                'q1_target_group', 'q2_exact_problem', 'q3_solution_simple',
+                'q4_differentiation', 'q5_build_steps', 'q6_resources',
+                'q7_positive_change', 'q8_challenges', 'q9_team_fit',
+                'q10_feedback', 'q11_creative_element', 'q12_pitch',
+            )
+        }),
+        ('Legacy V2 Fields', {
+            'fields': (
+                'problem_definition', 'problem_description', 'target_user_group',
+                'problem_urgency', 'solution', 'solution_benefits',
+                'why_best_equipped', 'idea_stage',
+            ),
+            'classes': ('collapse',)
         }),
         ('Categories', {
             'fields': ('ai_suggested_category', 'final_category')

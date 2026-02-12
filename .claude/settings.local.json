@@ -3,7 +3,8 @@
     "allow": [
       "Bash(python:*)",
       "Bash(dir \"C:\\\\Users\\\\kunal\\\\Desktop\\\\IFT\\\\Parameters_Sheet\"\" /S /B *.xlsx)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(python3:*)"
     ]
   }
 }

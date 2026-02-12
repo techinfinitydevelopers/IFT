@@ -34,7 +34,7 @@
     }
 </style>
 <div class="container mt-4">
-    <div style="margin-bottom:1rem;"><a href="{% url 'students:dashboard' %}" class="btn btn-outline-secondary btn-sm">←
+    <div style="margin-bottom:1rem;"><a href="{% url 'students:dashboard' %}" class="btn btn-outline-secondary btn-sm">
             Back to Dashboard</a></div>
     <div class="card" style="margin-bottom:1.5rem;padding:1.5rem;">
         <div style="display:flex;justify-content:space-between;align-items:center;">
@@ -52,35 +52,47 @@
             <div class="card" style="padding:1.5rem;">
                 <h2 style="margin-bottom:1.5rem;border-bottom:1px solid var(--border);padding-bottom:0.5rem;">Innovation
                     Questionnaire</h2>
-                <div class="question-section"><span class="question-label">1. Problem Definition</span>
-                    <div class="question-content">{{q1_problem}}</div>
+                <div class="question-section"><span class="question-label">1. Target Group</span>
+                    <div class="question-content">{{q1}}</div>
                 </div>
-                <div class="question-section"><span class="question-label">2. Detailed Description</span>
-                    <div class="question-content">{{q2_description}}</div>
+                <div class="question-section"><span class="question-label">2. Exact Problem</span>
+                    <div class="question-content">{{q2}}</div>
                 </div>
-                <div class="question-section"><span class="question-label">3. Target User Group</span>
-                    <div class="question-content">{{q3_target}}</div>
+                <div class="question-section"><span class="question-label">3. Solution (Simple)</span>
+                    <div class="question-content">{{q3}}</div>
                 </div>
-                <div class="question-section"><span class="question-label">4. Problem Urgency</span>
-                    <div class="question-content">{{q4_urgency}}</div>
+                <div class="question-section"><span class="question-label">4. Differentiation</span>
+                    <div class="question-content">{{q4}}</div>
                 </div>
-                <div class="question-section"><span class="question-label">5. Proposed Solution</span>
-                    <div class="question-content">{{q5_solution}}</div>
+                <div class="question-section"><span class="question-label">5. Build Steps</span>
+                    <div class="question-content">{{q5}}</div>
                 </div>
-                <div class="question-section"><span class="question-label">6. Solution Benefits</span>
-                    <div class="question-content">{{q6_benefits}}</div>
+                <div class="question-section"><span class="question-label">6. Resources</span>
+                    <div class="question-content">{{q6}}</div>
                 </div>
-                <div class="question-section"><span class="question-label">7. Why Best Equipped</span>
-                    <div class="question-content">{{q7_why}}</div>
+                <div class="question-section"><span class="question-label">7. Positive Change</span>
+                    <div class="question-content">{{q7}}</div>
                 </div>
-                <div class="question-section"><span class="question-label">8. Idea Stage</span>
-                    <div class="question-content" style="font-weight:600;">{{q8_stage}}</div>
+                <div class="question-section"><span class="question-label">8. Challenges</span>
+                    <div class="question-content">{{q8}}</div>
+                </div>
+                <div class="question-section"><span class="question-label">9. Team Fit</span>
+                    <div class="question-content">{{q9}}</div>
+                </div>
+                <div class="question-section"><span class="question-label">10. Feedback & Learning</span>
+                    <div class="question-content">{{q10}}</div>
+                </div>
+                <div class="question-section"><span class="question-label">11. Creative Element</span>
+                    <div class="question-content">{{q11}}</div>
+                </div>
+                <div class="question-section"><span class="question-label">12. 60-Second Pitch</span>
+                    <div class="question-content">{{q12}}</div>
                 </div>
             </div>
             {% if ai_summary %}
             <div class="card"
                 style="margin-top:1.5rem;padding:1.5rem;border:1px solid var(--primary);background:rgba(59,130,246,0.02);">
-                <h2 style="margin-bottom:1rem;color:var(--primary);">✨ AI Analysis</h2>
+                <h2 style="margin-bottom:1rem;color:var(--primary);">AI Analysis</h2>
                 <p style="line-height:1.6;font-size:1rem;">{{ai_summary.summary}}</p>
                 {% if ai_summary.suggested_tags %}
                 <div style="margin-top:1rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
@@ -103,8 +115,7 @@
                 <h3 style="font-size:0.8rem;color:var(--text-muted);text-transform:uppercase;margin-bottom:0.8rem;">
                     Uploaded Files</h3>
                 {% for f in uploaded_files %}<div
-                    style="margin-bottom:0.5rem;display:flex;align-items:center;gap:0.5rem;"><span
-                        style="font-size:1.2rem;">📄</span><a href="{{f.file.url}}" target="_blank"
+                    style="margin-bottom:0.5rem;display:flex;align-items:center;gap:0.5rem;"><a href="{{f.file.url}}" target="_blank"
                         style="font-size:0.85rem;text-decoration:none;word-break:break-all;">{{f.original_filename}}</a>
                 </div>{% endfor %}
             </div>

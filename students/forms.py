@@ -33,8 +33,8 @@ class StudentRegistrationForm(forms.ModelForm):
 
 
 class IdeaSubmissionForm(forms.ModelForm):
-    """Main form for idea submission - aligned with AI evaluation criteria"""
-    
+    """Main form for idea submission — 12 questions aligned with AI evaluation criteria"""
+
     # File upload fields (not part of model, handled separately)
     document_file = forms.FileField(
         required=False,
@@ -51,81 +51,108 @@ class IdeaSubmissionForm(forms.ModelForm):
         help_text="Upload a video (optional, max 20MB)",
         widget=forms.FileInput(attrs={'accept': 'video/*', 'class': 'form-control'})
     )
-    
+
     class Meta:
         model = IdeaSubmission
         fields = [
-            'problem_definition',
-            'problem_description',
-            'target_user_group',
-            'problem_urgency',
-            'solution',
-            'solution_benefits',
-            'why_best_equipped',
-            'idea_stage',
+            'q1_target_group', 'q2_exact_problem', 'q3_solution_simple',
+            'q4_differentiation', 'q5_build_steps', 'q6_resources',
+            'q7_positive_change', 'q8_challenges', 'q9_team_fit',
+            'q10_feedback', 'q11_creative_element', 'q12_pitch',
         ]
         widgets = {
-            'problem_definition': forms.Textarea(attrs={
+            'q1_target_group': forms.Textarea(attrs={
                 'class': 'form-control',
-                'placeholder': "Define the problem precisely. What exactly is the issue you're trying to address?",
+                'placeholder': 'Describe the person or group you are trying to help. Who are they? What is their daily struggle related to this problem?',
                 'rows': 4
             }),
-            'problem_description': forms.Textarea(attrs={
+            'q2_exact_problem': forms.Textarea(attrs={
                 'class': 'form-control',
-                'placeholder': 'Provide a detailed description of the problem. Include context, current situation, and scope.',
-                'rows': 5
-            }),
-            'target_user_group': forms.Textarea(attrs={
-                'class': 'form-control',
-                'placeholder': "Who are the users facing this problem? Describe their demographics, behavior, and characteristics.",
+                'placeholder': 'What exact problem are they facing? When, where, and why does this problem matter? Why is it important to solve now?',
                 'rows': 4
             }),
-            'problem_urgency': forms.Textarea(attrs={
+            'q3_solution_simple': forms.Textarea(attrs={
                 'class': 'form-control',
-                'placeholder': 'Why is this problem critical? What happens if it remains unsolved? What is the urgency?',
+                'placeholder': 'Explain your solution simply, as if you are talking to a 10-year-old.',
                 'rows': 4
             }),
-            'solution': forms.Textarea(attrs={
+            'q4_differentiation': forms.Textarea(attrs={
                 'class': 'form-control',
-                'placeholder': 'Describe your solution in detail. How does it work? What does it do?',
-                'rows': 5
-            }),
-            'solution_benefits': forms.Textarea(attrs={
-                'class': 'form-control',
-                'placeholder': 'How does your solution benefit users? What pain does it reduce or eliminate?',
+                'placeholder': 'How is your solution different from what already exists or what people currently do to solve this problem?',
                 'rows': 4
             }),
-            'why_best_equipped': forms.Textarea(attrs={
+            'q5_build_steps': forms.Textarea(attrs={
                 'class': 'form-control',
-                'placeholder': 'Why are you the best person/team to solve this? What unique skills, experience, or resources do you have?',
+                'placeholder': 'What are the key steps required to build and test your solution in the real world?',
                 'rows': 4
             }),
-            'idea_stage': forms.Select(attrs={
-                'class': 'form-select'
+            'q6_resources': forms.Textarea(attrs={
+                'class': 'form-control',
+                'placeholder': 'What resources (skills, tools, money, technology, people) are required, and which of these do you already have?',
+                'rows': 4
+            }),
+            'q7_positive_change': forms.Textarea(attrs={
+                'class': 'form-control',
+                'placeholder': 'If your solution succeeds, what positive change will it create for users and society?',
+                'rows': 4
+            }),
+            'q8_challenges': forms.Textarea(attrs={
+                'class': 'form-control',
+                'placeholder': 'What challenges or problems could come while building or using this idea? How will you deal with them?',
+                'rows': 4
+            }),
+            'q9_team_fit': forms.Textarea(attrs={
+                'class': 'form-control',
+                'placeholder': 'Why do you think that your team is rightly placed to solve this problem than anyone else?',
+                'rows': 4
+            }),
+            'q10_feedback': forms.Textarea(attrs={
+                'class': 'form-control',
+                'placeholder': 'Have you taken any feedback from users on your idea? Describe one situation where your team changed its thinking or improved the idea after feedback or failure.',
+                'rows': 4
+            }),
+            'q11_creative_element': forms.Textarea(attrs={
+                'class': 'form-control',
+                'placeholder': 'What is the most creative or unexpected element in your solution, and why did you think of it?',
+                'rows': 4
+            }),
+            'q12_pitch': forms.Textarea(attrs={
+                'class': 'form-control',
+                'placeholder': 'If you had 60 seconds to convince someone to try or support your idea, what would you say?',
+                'rows': 4
             }),
         }
         labels = {
-            'problem_definition': "1. It's always better to define the problem before we attempt to solve it. Be précised in articulating it.",
-            'problem_description': '2. Give us a detailed description of the problem.',
-            'target_user_group': "3. Describe the 'user' group whose problem you are attempting to solve?",
-            'problem_urgency': '4. Why do you believe that this problem is critical and needs an urgent solution?',
-            'solution': '5. What is your solution?',
-            'solution_benefits': '6. How your solution gives a distinct benefit to users or reduce their pain?',
-            'why_best_equipped': '7. Why do you think you are the best equipped to offer this solution?',
-            'idea_stage': '8. Mention the stage of your idea at this moment',
+            'q1_target_group': "1. Describe the person or group you are trying to help. Who are they, and what is their daily struggle related to this problem?",
+            'q2_exact_problem': "2. What exact problem are they facing? When, where, and why does this problem matter? Why is this problem important to solve now?",
+            'q3_solution_simple': "3. What is your solution, explained simply as if you are talking to a 10-year-old?",
+            'q4_differentiation': "4. How is your solution different from what already exists or what people currently do to solve this problem?",
+            'q5_build_steps': "5. What are the key steps required to build and test your solution in the real world?",
+            'q6_resources': "6. What resources (skills, tools, money, technology, people) are required, and which of these do you already have?",
+            'q7_positive_change': "7. If your solution succeeds, what positive change will it create for users and society?",
+            'q8_challenges': "8. What challenges or problems could come while building or using this idea? How will you deal with them?",
+            'q9_team_fit': "9. Why do you think that your team is rightly placed to solve this problem than anyone else?",
+            'q10_feedback': "10. Have you taken any feedback from users on your idea? Describe one situation where your team changed its thinking after feedback or failure.",
+            'q11_creative_element': "11. What is the most creative or unexpected element in your solution, and why did you think of it?",
+            'q12_pitch': "12. If you had 60 seconds to convince someone to try or support your idea, what would you say?",
         }
-    
+
     def clean(self):
-        """Validate that required question fields have meaningful content"""
+        """Validate that all 12 question fields have meaningful content"""
         cleaned_data = super().clean()
         required_fields = {
-            'problem_definition': 'Problem definition',
-            'problem_description': 'Problem description',
-            'target_user_group': 'Target user group',
-            'problem_urgency': 'Problem urgency',
-            'solution': 'Solution',
-            'solution_benefits': 'Solution benefits',
-            'why_best_equipped': 'Why best equipped',
+            'q1_target_group': 'Target group description',
+            'q2_exact_problem': 'Problem description',
+            'q3_solution_simple': 'Solution explanation',
+            'q4_differentiation': 'Differentiation',
+            'q5_build_steps': 'Build steps',
+            'q6_resources': 'Resources',
+            'q7_positive_change': 'Positive change',
+            'q8_challenges': 'Challenges',
+            'q9_team_fit': 'Team fit',
+            'q10_feedback': 'Feedback & learning',
+            'q11_creative_element': 'Creative element',
+            'q12_pitch': '60-second pitch',
         }
         min_length = 20
 
@@ -142,23 +169,23 @@ class IdeaSubmissionForm(forms.ModelForm):
         """Validate video file size"""
         video = self.cleaned_data.get('video_file')
         if video:
-            if video.size > 20 * 1024 * 1024:  # 20MB limit (matches Gemini API limit)
+            if video.size > 20 * 1024 * 1024:
                 raise forms.ValidationError("Video file size must be under 20MB")
         return video
-    
+
     def clean_document_file(self):
         """Validate document file"""
         doc = self.cleaned_data.get('document_file')
         if doc:
-            if doc.size > 10 * 1024 * 1024:  # 10MB limit
+            if doc.size > 10 * 1024 * 1024:
                 raise forms.ValidationError("Document file size must be under 10MB")
         return doc
-    
+
     def clean_image_file(self):
         """Validate image file"""
         img = self.cleaned_data.get('image_file')
         if img:
-            if img.size > 5 * 1024 * 1024:  # 5MB limit
+            if img.size > 5 * 1024 * 1024:
                 raise forms.ValidationError("Image file size must be under 5MB")
         return img
 

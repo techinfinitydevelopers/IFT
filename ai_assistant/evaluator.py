@@ -1,196 +1,233 @@
 """
-AI Idea Evaluator - Scores submissions using 10-parameter jury rubric (1-5 scale each).
+AI Idea Evaluator - Scores submissions using 10-parameter rubric (0-10 scale each, max 100).
+Includes 10 coherence cross-checks with -1 penalty each. >5 failures = disqualified.
 """
 import json
 import os
 import re
+from concurrent.futures import ThreadPoolExecutor
 from django.conf import settings
 from .openrouter_client import OpenRouterClient
 from .models import AIEvaluation, AISummary
 from students.models import IdeaSubmission
 
 
-# 10-parameter evaluation prompt based on jury rubric (exact sheet descriptions)
+# ============================================================================
+# EVALUATION PROMPT — 12 Questions, 0-10 Scale, Primary/Secondary 60/40
+# ============================================================================
 EVALUATION_PROMPT = """You are a STRICT Idea Evaluation AI for a student innovation competition called "India Future Tycoon".
 You must be RIGOROUS - this is a competition, and only truly strong ideas should score high.
-Evaluate the submitted idea using exactly these 10 parameters on a 1-5 scale.
+Evaluate the submitted idea using exactly these 10 parameters on a 0-10 scale.
 
-IDEA SUBMISSION (8 Questions):
-===============================
-Title: {title}
-Q1 - Problem Definition: {problem_statement}
-Q2 - Detailed Description: {problem_description}
-Q3 - Target User Group: {target_users}
-Q4 - Problem Urgency: {problem_urgency}
-Q5 - Proposed Solution: {proposed_solution}
-Q6 - Solution Benefits: {solution_benefits}
-Q7 - Why Best Equipped: {why_best_equipped}
-Q8 - Idea Stage: {idea_stage}
+IDEA SUBMISSION (12 Questions):
+================================
+Q1 - Target Group & Struggle: {q1}
+Q2 - Exact Problem & Why It Matters: {q2}
+Q3 - Solution (Explained Simply): {q3}
+Q4 - How Solution Is Different: {q4}
+Q5 - Key Steps to Build & Test: {q5}
+Q6 - Resources Required & Available: {q6}
+Q7 - Positive Change If Successful: {q7}
+Q8 - Challenges & How to Deal: {q8}
+Q9 - Why Team Is Best Placed: {q9}
+Q10 - User Feedback & Learning: {q10}
+Q11 - Most Creative Element: {q11}
+Q12 - 60-Second Pitch: {q12}
 
 SUBMISSION EFFORT: {effort_note}
 
-*** CRITICAL: COHERENCE CHECK (DO THIS FIRST) ***
-==================================================
-Before scoring, check if ALL fields are talking about the SAME idea:
-1. Does the Problem Statement describe ONE clear problem?
-2. Does the Proposed Solution DIRECTLY address that specific problem?
-3. Are the Target Users the people who would face that specific problem?
-4. Do all fields logically connect and make sense together?
+*** PRIMARY/SECONDARY QUESTION-PARAMETER MAPPING (60/40 Weightage) ***
+=======================================================================
+When scoring each parameter, give 60% weight to PRIMARY question(s) and 40% to SECONDARY:
 
-If the submission is INCOHERENT (fields seem to be from different ideas, unrelated, or contradictory):
-- Set "is_coherent": false in your response
-- Give score of 0 to ALL parameters (incoherent submissions get zero marks)
-- In overall_justification, clearly state: "INCOHERENT SUBMISSION: The fields do not relate to each other and appear to be from different ideas."
+| Parameter              | Primary Questions (60%) | Secondary Questions (40%) |
+|------------------------|------------------------|--------------------------|
+| 1. Uniqueness          | Q4                     | Q11                      |
+| 2. Ease of Impl.       | Q5                     | Q6                       |
+| 3. Feasibility         | Q6                     | Q5, Q8                   |
+| 4. Impact              | Q1, Q7                 | Q12                      |
+| 5. Sustainability      | Q7                     | Q1                       |
+| 6. Conceptual Clarity  | Q2, Q3                 | Q4, Q9                   |
+| 7. Empathy             | Q1                     | Q2, Q10                  |
+| 8. Creativity          | Q11                    | Q4                       |
+| 9. Communication       | Q12                    | Q3, Q9                   |
+| 10. Flexible Thinking  | Q8, Q10                | Q6                       |
 
-Only if the submission IS coherent, proceed with normal evaluation.
-
-SCORING RUBRIC (Rate each 1-5, where 1 is WORST and 5 is BEST):
-================================================================
+SCORING RUBRIC (Rate each 0-10):
+==================================
 
 === IDEA PARAMETERS ===
 
-1. UNIQUENESS (1-5)
-   5 = (a) Mostly new/unheard of idea - even a targeted Google search doesn't throw up anything similar
-       (b) Market competitors/existing alternatives don't have any similarity with this idea
-   4 = (a) Idea seems new, a random Google search doesn't throw up anything similar
-       (b) Not more than 2 existing alternatives or market competitors are based on similar thoughts
-   3 = (a) Idea seems new
-       (b) Though some existing alternatives are based on similar ideas but this idea has some distinguishing features which separate it from the existing alternatives
-   2 = (a) Idea seems similar to ideas/thoughts behind the existing alternatives
-       (b) It is tough to see any differentiator between this and the existing alternatives already in the market
-   1 = (a) The idea seems like any other idea currently in use to solve a similar problem
-       (b) It is tough to see any differentiator between this and the existing alternatives already in the market
+1. UNIQUENESS (0-10)
+   High (8-10): Completely new/unheard idea — even targeted Google search shows nothing similar. No market competitors with similar approach. Clear differentiator explained.
+   Moderate (4-7): Idea has some novelty. A few similar alternatives exist but this has distinguishing features.
+   Low (0-3): Idea seems like any existing solution. No visible differentiator from alternatives.
+   KEYWORDS to look for: novel, first-of-its-kind, no competitor, patent-worthy, unique angle, disrupts existing, never done before, gap in market
 
-2. EASE OF IMPLEMENTATION (1-5)
-   5 = (a) Resources required are available in the market and can be easily procured
-       (b) Team has the expertise to give shape to the idea
-       (c) The team has complete clarity on how to translate the features into product benefits
-   4 = (a) Resources required are available in the market and can be easily procured
-       (b) Team has the expertise to give shape to the idea
-       (c) The team has a fair idea of how to translate the features into product benefits
-   3 = (a) Resources required are available in the market and can be easily procured
-       (b) Team lacks the expertise to give shape to the idea - they need to hire experts
-       (c) The team has a sketchy idea of how to translate the features into product benefits
-   2 = (a) Resources required are not easily available in the market
-       (b) Team lacks the expertise to give shape to the idea - they need to hire experts
-       (c) The team is not sure how to translate the features into product benefits
-   1 = (a) Resources required are not easily available in the market
-       (b) Team lacks the expertise to give shape to the idea
-       (c) The team does not have any idea how to translate the features into product benefits
+2. EASE OF IMPLEMENTATION (0-10)
+   High (8-10): Clear step-by-step plan. Resources available and listed. Team has expertise. Feature-to-benefit translation is clear.
+   Moderate (4-7): Some plan exists but gaps in execution details. Resources partially available.
+   Low (0-3): No clear plan. Resources unavailable. Team lacks expertise. No idea how to translate features to benefits.
+   KEYWORDS: step-by-step, prototype ready, tested, pilot, resources listed, team skills, timeline, actionable
 
-3. SCALABLE (1-5)
-   5 = Considering the solution benefits, the idea has the potential to take the business from X to 30X in terms of growth in the first two years of operation
-   4 = Considering the solution benefits, the idea has the potential to take the business from X to 20X in terms of growth in the first two years of operation
-   3 = Considering the solution benefits, the idea has the potential to take the business from X to 10X in terms of growth in the first two years of operation
-   2 = Considering the solution benefits, the idea has the potential to grow the business to some extent in the first two years of operation
-   1 = Considering the solution benefits, it seems unlikely that the business can grow at all unless some major change is introduced
+3. FEASIBILITY (0-10)
+   High (8-10): Resources realistically available. Plan is practical with clear milestones. Challenges acknowledged with mitigation strategies.
+   Moderate (4-7): Plan is partially realistic. Some resources available. Challenges mentioned but solutions vague.
+   Low (0-3): Plan seems unrealistic. Resources unavailable. No awareness of real constraints.
+   KEYWORDS: budget, cost-effective, available tools, realistic timeline, already have, partnership, phased approach
 
-4. IMPACTFUL (1-5)
-   5 = (a) The identified customer base that will get impacted by the solution idea is widespread
-       (b) The solution idea is critical for the user and makes a positive difference in their everyday lives
-       (c) The solution idea removes the current pains AND gives additional benefits over existing alternatives
-   4 = (a) The identified customer base that will get impacted by the solution idea is widespread
-       (b) The solution idea brings a positive difference to the users' lives
-       (c) The solution idea removes the current pains but no additional benefits over existing alternatives
-   3 = (a) The team is yet to fully identify the customer base
-       (b) The solution idea brings a positive difference to the users' lives
-       (c) The solution idea removes a few of the current pains but no additional benefits over existing alternatives
-   2 = (a) The customer base is sporadic and irregular
-       (b) The solution idea brings a positive difference to the users' lives
-       (c) The solution idea removes a few pains but no additional benefits over existing alternatives
-   1 = (a) The customer base is sporadic and irregular
-       (b) The solution idea does not bring any visible positive difference
-       (c) The solution idea does not impact the customers' lives in any visible way
+4. IMPACT (0-10)
+   High (8-10): Widespread customer base. Solution is critical for users. Removes pains AND adds new benefits over alternatives. Shows scale of impact.
+   Moderate (4-7): Customer base identified but not fully characterized. Some positive impact visible.
+   Low (0-3): Sporadic users. No visible positive difference. Impact claim not supported.
+   KEYWORDS: millions affected, daily pain, life-changing, saves time/money, health impact, community benefit, scalable impact
 
-5. SUSTAINABLE (1-5)
-   Score based on answers to these 3 questions:
-   Q1: Is the idea solving a common problem that an average person would face?
-   Q2: Will the solution create enough difference that users would be ready to pay for it?
-   Q3: Is the idea going to last more than a year?
-   5 = All three questions answered YES
-   4 = Q1 and Q2 are YES, but not sure about Q3
-   3 = Q1 is YES, but not sure about Q2 and Q3
-   2 = Not sure about any of the three questions
-   1 = Any of the three questions is a resounding NO
+5. SUSTAINABILITY (0-10)
+   High (8-10): Solves common problem + users would pay + lasts more than a year. Revenue model clear. Long-term viability demonstrated.
+   Moderate (4-7): Some sustainability factors present. Revenue model unclear but idea has staying power.
+   Low (0-3): Any of: not a common problem, users won't pay, won't last. No long-term plan.
+   KEYWORDS: revenue model, subscription, recurring, long-term, sustainable, growth plan, retention, business model
 
 === TEAM PARAMETERS ===
-NOTE: Since this is a text-based submission (not face-to-face), infer team qualities from:
-- How clearly and coherently the student writes (Communication)
-- How detailed and structured their execution plan is (Conceptual Clarity)
-- How well they understand user pain points (Empathy)
-- How unique/divergent their approach to the solution is (Creativity)
-- Whether they mention willingness to iterate, learn, or adapt (Flexible Thinking)
+NOTE: Since this is text-based (not face-to-face), infer team qualities from writing quality.
 
-6. CONCEPTUAL CLARITY & COMPREHENSIVENESS (1-5)
-   5 = The team is clear about the idea and execution. They have thought out details like how the final product looks, what features are non-negotiable vs good-to-have.
-   4 = The team is clear about the idea and execution. They have thought out features but are yet to decide which are non-negotiable vs good-to-have.
-   3 = The team is clear about the idea and execution. They have an image of the product but plan to proceed further on the go.
-   2 = The team is clear about the idea but not decided on execution. They plan to proceed on the go.
-   1 = The team is still not very clear about the idea and are getting lost. They are yet to think through the execution plan.
+6. CONCEPTUAL CLARITY (0-10)
+   High (8-10): Clear about idea AND execution. Knows non-negotiable vs nice-to-have features. Problem-solution link is crystal clear.
+   Moderate (4-7): Clear about idea but execution plan is vague. Has product image but details are sketchy.
+   Low (0-3): Still unclear about the idea itself. No execution plan. Getting lost in explanation.
+   KEYWORDS: clear vision, roadmap, feature list, MVP, priority, architecture, well-defined, structured
 
-7. EMPATHY (1-5)
-   5 = Great empathy demonstrated. Put themselves in users' shoes, felt the challenges users face. Besides removing current pains, also looked at gains they could bring to users' lives.
-   4 = Great empathy demonstrated. Put themselves in users' shoes, felt challenges. Ensured their idea removes all pains users currently face with existing alternatives.
-   3 = Ample empathy demonstrated. Tried to feel users' challenges. Ensured idea removes most pains users currently face.
-   2 = Some empathy. Tried to identify challenges but failed to identify all pains. Idea fails to provide a complete solution.
-   1 = Focused more on thrill of ideation. Ignored users and their pains. Idea fails to provide a solution to users' problems.
+7. EMPATHY (0-10)
+   High (8-10): Deep empathy — put themselves in users' shoes, felt challenges. Describes real user stories/observations. Removes pains AND brings extra gains.
+   Moderate (4-7): Some empathy. Tried to identify user challenges but description is generic.
+   Low (0-3): Focused on thrill of ideation. Ignored users and their actual pains. No user understanding.
+   KEYWORDS: user interviews, observed, felt, struggled, pain point, user story, walked in shoes, feedback
 
-8. CREATIVITY (1-5)
-   5 = Demonstrated divergent/out-of-box thinking. Trend-setter temperament. Shows creativity and innovation in how they present the idea and approach the problem.
-   4 = Demonstrated divergent thinking. Trend-setter temperament. However, the presentation and approach is conventional.
-   3 = Demonstrated good problem-solving skills. Plays safe, doesn't stray from the trodden path. Conventional approach.
-   2 = Good problem-solving but hardly any creative temperament visible in the submission.
-   1 = Average problem-solving. No creative temperament visible in the submission.
+8. CREATIVITY (0-10)
+   High (8-10): Divergent/out-of-box thinking. Trend-setter. Creative presentation and approach. Unexpected element clearly described.
+   Moderate (4-7): Good problem-solving but conventional approach. Plays safe.
+   Low (0-3): Average approach. No creative temperament visible. Copy of existing solutions.
+   KEYWORDS: innovative, unexpected, creative twist, new approach, reimagined, disrupted, unconventional
 
-9. COMMUNICATION (1-5)
-   5 = Ideas communicated clearly and coherently. Writing is well-structured, uses examples, and effectively conveys the vision to the reader. All aspects covered comprehensively.
-   4 = Ideas communicated clearly. Writing is structured and conveys the vision. Minor gaps in external communication clarity.
-   3 = Communication is somewhat unclear. Some confusion in conveying ideas. Reader has to work to understand the vision.
-   2 = Communication needs improvement. Ideas are not conveyed clearly. Writing lacks structure and coherence.
-   1 = Communication is ineffective. Writing is confusing, unclear, and fails to convey the idea properly.
+9. COMMUNICATION (0-10)
+   High (8-10): Ideas communicated clearly. Well-structured writing. Uses examples. Vision effectively conveyed. Pitch is compelling.
+   Moderate (4-7): Communication is adequate but has gaps. Reader has to work to understand.
+   Low (0-3): Confusing, unclear writing. Fails to convey the idea. No structure.
+   KEYWORDS: clear, concise, examples, structured, compelling, persuasive, well-written, engaging
 
-10. FLEXIBLE THINKING (1-5)
-    5 = Demonstrates flexible approach. Mentions willingness to learn, adapt, iterate. Shows awareness that the idea may need to evolve.
-    4 = Demonstrates flexibility. Willing to adapt and iterate when essential.
-    3 = Shows some resistance to change. Only willing to adapt if absolutely essential.
-    2 = Does not demonstrate flexibility. No mention of willingness to adapt or iterate.
-    1 = Appears completely closed to any iteration or change whatsoever.
+10. FLEXIBLE THINKING (0-10)
+    High (8-10): Mentions willingness to learn, adapt, iterate. Shows awareness idea may evolve. Describes actual pivot or change after feedback.
+    Moderate (4-7): Some flexibility shown. Willing to adapt if essential.
+    Low (0-3): No mention of adaptability. Appears closed to iteration. No evidence of learning from feedback.
+    KEYWORDS: pivot, iterate, adapt, feedback, learned, changed approach, flexible, open to change
 
 RESPONSE FORMAT (STRICT JSON):
-==============================
+===============================
 Return ONLY valid JSON with this exact structure:
 {{
-    "is_coherent": <true/false>,
     "parameter_scores": [
-        {{"parameter_name": "Uniqueness", "score": <1-5>, "reason": "<one sentence>"}},
-        {{"parameter_name": "Ease of Implementation", "score": <1-5>, "reason": "<one sentence>"}},
-        {{"parameter_name": "Scalable", "score": <1-5>, "reason": "<one sentence>"}},
-        {{"parameter_name": "Impactful", "score": <1-5>, "reason": "<one sentence>"}},
-        {{"parameter_name": "Sustainable", "score": <1-5>, "reason": "<one sentence>"}},
-        {{"parameter_name": "Conceptual Clarity", "score": <1-5>, "reason": "<one sentence>"}},
-        {{"parameter_name": "Empathy", "score": <1-5>, "reason": "<one sentence>"}},
-        {{"parameter_name": "Creativity", "score": <1-5>, "reason": "<one sentence>"}},
-        {{"parameter_name": "Communication", "score": <1-5>, "reason": "<one sentence>"}},
-        {{"parameter_name": "Flexible Thinking", "score": <1-5>, "reason": "<one sentence>"}}
+        {{"parameter_name": "Uniqueness", "score": <0-10>, "reason": "<one sentence>"}},
+        {{"parameter_name": "Ease of Implementation", "score": <0-10>, "reason": "<one sentence>"}},
+        {{"parameter_name": "Feasibility", "score": <0-10>, "reason": "<one sentence>"}},
+        {{"parameter_name": "Impact", "score": <0-10>, "reason": "<one sentence>"}},
+        {{"parameter_name": "Sustainability", "score": <0-10>, "reason": "<one sentence>"}},
+        {{"parameter_name": "Conceptual Clarity", "score": <0-10>, "reason": "<one sentence>"}},
+        {{"parameter_name": "Empathy", "score": <0-10>, "reason": "<one sentence>"}},
+        {{"parameter_name": "Creativity", "score": <0-10>, "reason": "<one sentence>"}},
+        {{"parameter_name": "Communication", "score": <0-10>, "reason": "<one sentence>"}},
+        {{"parameter_name": "Flexible Thinking", "score": <0-10>, "reason": "<one sentence>"}}
     ],
-    "total_score": <sum of all 10 scores, range 10-50>,
+    "total_score": <sum of all 10 scores, range 0-100>,
     "overall_justification": "<2-3 sentence summary>",
     "confidence": "<high/medium/low>"
 }}
 
 IMPORTANT RULES:
-- Score MUST be integer 0-5 (0 ONLY for incoherent submissions, otherwise 1-5)
-- Higher score = BETTER (5 is best, 1 is worst)
-- Be STRICT and RIGOROUS. This is a national competition - only truly exceptional ideas deserve 5, and only well-articulated ideas deserve 4.
-- Score 5 should be RARE (top 5% quality). Score 4 = strong. Score 3 = average. Score 2 = below average. Score 1 = poor.
-- If the student gave vague, short, or generic answers, score LOW. Effort and depth matter.
-- Generic ideas (e.g. "make an app to solve X") without clear differentiation should score 1-2 on Uniqueness and Creativity.
-- If the student does NOT explain WHY their solution is better than alternatives, Uniqueness and Impact should be LOW.
-- If the student does NOT show understanding of user pain points with specific examples, Empathy should be LOW.
-- If there is no mention of adaptability, iteration, or willingness to learn, Flexible Thinking MUST be 1-2.
-- Reason MUST be one short sentence
-- Do NOT include recommendations or rankings
+- Score MUST be integer 0-10
+- Higher score = BETTER (10 is best, 0 is worst)
+- Be STRICT and RIGOROUS. This is a national competition.
+- High scores (8-10) should be RARE (top 5% quality). 6-7 = strong. 4-5 = average. 2-3 = below average. 0-1 = poor.
+- If the student gave vague, short, or generic answers, score LOW.
+- Generic ideas ("make an app to solve X") without differentiation should score 0-3 on Uniqueness and Creativity.
+- If no explanation of WHY solution is better than alternatives, Uniqueness and Impact should be LOW.
+- If no understanding of user pain points with examples, Empathy should be LOW.
+- If no mention of adaptability or willingness to learn, Flexible Thinking MUST be 0-3.
+- Remember 60/40 weightage: Primary questions matter MORE for each parameter.
+- Reason MUST be one short sentence.
+- Do NOT include recommendations or rankings.
 """
+
+
+# ============================================================================
+# COHERENCE CHECK PROMPT — 10 Cross-Checks
+# ============================================================================
+COHERENCE_CHECK_PROMPT = """You are checking LOGICAL CONSISTENCY between answers in a student's innovation idea submission.
+For each pair of questions, determine if the answers are CONSISTENT (logically connected) or INCONSISTENT (contradictory/unrelated).
+
+SUBMISSION ANSWERS:
+====================
+Q1 - Target Group: {q1}
+Q2 - Exact Problem: {q2}
+Q3 - Solution Simple: {q3}
+Q4 - Differentiation: {q4}
+Q5 - Build Steps: {q5}
+Q6 - Resources: {q6}
+Q7 - Positive Change: {q7}
+Q8 - Challenges: {q8}
+Q9 - Team Fit: {q9}
+Q10 - Feedback: {q10}
+Q11 - Creative Element: {q11}
+Q12 - Pitch: {q12}
+
+PERFORM THESE 10 CHECKS:
+=========================
+1. USER-PROBLEM FIT (Q1 vs Q2): Does the target group in Q1 match the problem described in Q2? Are these the people who would face this problem?
+2. PROBLEM-SOLUTION FIT (Q2 vs Q3): Does the solution in Q3 DIRECTLY address the problem in Q2? Is there a logical connection?
+3. DIFFERENCE VALIDITY (Q3 vs Q4): Is the claimed difference in Q4 actually visible in the solution described in Q3?
+4. EXECUTION REALITY (Q3 vs Q5): Are the build steps in Q5 actually needed to create the solution in Q3? Do they make sense together?
+5. RESOURCES ALIGNMENT (Q5 vs Q6): Do the resources in Q6 support the steps listed in Q5? Are required resources acknowledged?
+6. RISK AWARENESS (Q6 vs Q8): Do the challenges in Q8 reflect real constraints from the resources in Q6? Are risks realistic?
+7. IMPACT CONTINUITY (Q7 vs Q8): Do the challenges in Q8 contradict the positive impact claimed in Q7?
+8. SUSTAINABILITY LOGIC (Q7 vs Q9): Does the team's positioning in Q9 support the long-term impact claimed in Q7?
+9. TEAM FIT (Q5+Q6 vs Q9): Does the team in Q9 have the skills/resources needed for the steps (Q5) and resources (Q6)?
+10. LEARNING LOOP (Q10 vs Q3+Q5): Has the feedback in Q10 actually influenced the current solution (Q3) or build steps (Q5)?
+
+RULES:
+- Be STRICT. Only pass if there is a CLEAR logical connection.
+- If an answer is empty or too short (<10 words), that check FAILS.
+- If answers contradict each other, that check FAILS.
+- If answers seem to be about different topics, that check FAILS.
+
+Return ONLY valid JSON:
+{{
+    "checks": [
+        {{"name": "User-Problem Fit", "passed": true, "reason": "brief reason"}},
+        {{"name": "Problem-Solution Fit", "passed": true, "reason": "brief reason"}},
+        {{"name": "Difference Validity", "passed": true, "reason": "brief reason"}},
+        {{"name": "Execution Reality", "passed": true, "reason": "brief reason"}},
+        {{"name": "Resources Alignment", "passed": true, "reason": "brief reason"}},
+        {{"name": "Risk Awareness", "passed": true, "reason": "brief reason"}},
+        {{"name": "Impact Continuity", "passed": true, "reason": "brief reason"}},
+        {{"name": "Sustainability Logic", "passed": true, "reason": "brief reason"}},
+        {{"name": "Team Fit", "passed": true, "reason": "brief reason"}},
+        {{"name": "Learning Loop", "passed": true, "reason": "brief reason"}}
+    ]
+}}
+"""
+
+# Coherence check definitions: which parameters get -1 penalty for each failed check
+COHERENCE_PENALTY_MAP = {
+    'User-Problem Fit': ['empathy', 'conceptual_clarity'],
+    'Problem-Solution Fit': ['conceptual_clarity', 'impactful'],
+    'Difference Validity': ['uniqueness'],
+    'Execution Reality': ['ease_of_implementation', 'feasibility'],
+    'Resources Alignment': ['feasibility'],
+    'Risk Awareness': ['flexible_thinking'],
+    'Impact Continuity': ['impactful'],
+    'Sustainability Logic': ['sustainable'],
+    'Team Fit': ['communication'],
+    'Learning Loop': ['flexible_thinking'],
+}
 
 
 def parse_evaluation_response(response_text):
@@ -203,10 +240,87 @@ def parse_evaluation_response(response_text):
                 return data
     except json.JSONDecodeError:
         pass
-    
+
     raise ValueError(f"Could not parse AI response as JSON: {response_text[:200]}")
 
 
+def get_submission_questions(submission):
+    """Get 12 question answers from submission, with fallback to old fields."""
+    return {
+        'q1': submission.q1_target_group or submission.target_user_group or '',
+        'q2': submission.q2_exact_problem or submission.problem_definition or '',
+        'q3': submission.q3_solution_simple or submission.solution or '',
+        'q4': submission.q4_differentiation or submission.innovation_uniqueness or '',
+        'q5': submission.q5_build_steps or submission.feasibility_execution or '',
+        'q6': submission.q6_resources or '',
+        'q7': submission.q7_positive_change or submission.solution_benefits or '',
+        'q8': submission.q8_challenges or '',
+        'q9': submission.q9_team_fit or submission.why_best_equipped or '',
+        'q10': submission.q10_feedback or '',
+        'q11': submission.q11_creative_element or '',
+        'q12': submission.q12_pitch or '',
+    }
+
+
+def run_coherence_checks(questions, client):
+    """
+    Run 10 coherence cross-checks via AI.
+    Returns list of check results: [{'name': str, 'passed': bool, 'reason': str}, ...]
+    """
+    prompt = COHERENCE_CHECK_PROMPT.format(**questions)
+
+    try:
+        response = client.generate_completion(
+            system_prompt="You are a strict logical consistency checker. Return ONLY valid JSON.",
+            user_prompt=prompt,
+            model="anthropic/claude-3.5-sonnet",
+            max_tokens=1200
+        )
+
+        if response and 'content' in response:
+            json_match = re.search(r'\{[\s\S]*\}', response['content'])
+            if json_match:
+                data = json.loads(json_match.group())
+                checks = data.get('checks', [])
+                if len(checks) == 10:
+                    return checks
+    except Exception as e:
+        print(f"[COHERENCE] AI check failed: {e}")
+
+    # Fallback: all checks pass (cannot verify)
+    return [
+        {'name': name, 'passed': True, 'reason': 'Could not verify - check passed by default'}
+        for name in COHERENCE_PENALTY_MAP.keys()
+    ]
+
+
+def apply_coherence_penalties(score_dict, check_results):
+    """
+    Apply -1 penalty to affected parameters for each failed coherence check.
+    If >5 failures: all scores = 0 (disqualified).
+    Returns: (modified_scores, failures_count, is_disqualified)
+    """
+    failures = 0
+    for check in check_results:
+        if not check.get('passed', True):
+            failures += 1
+            check_name = check.get('name', '')
+            penalty_params = COHERENCE_PENALTY_MAP.get(check_name, [])
+            for param in penalty_params:
+                if param in score_dict:
+                    score_dict[param] = max(0, score_dict[param] - 1)
+
+    is_disqualified = failures > 5
+    if is_disqualified:
+        for key in score_dict:
+            score_dict[key] = 0
+
+    return score_dict, failures, is_disqualified
+
+
+# ============================================================================
+# ATTACHMENT ANALYSIS (unchanged logic, updated field references)
+# ============================================================================
 ATTACHMENT_ANALYSIS_PROMPT = """You are a STRICT file relevance checker for a student business idea competition called "India Future Tycoon".
 Your job is to check whether uploaded files ACTUALLY relate to the idea or not.
 
@@ -225,7 +339,7 @@ UPLOADED FILES:
 For EACH file, you MUST follow this exact process:
 
 STEP 1: DESCRIBE what you LITERALLY see/read in the file. Do NOT assume or infer anything from the idea context.
-- For images: Describe EXACTLY what objects, text, diagrams, scenes you see. If it's a stock photo, say so. If it's a screenshot of something unrelated, say so.
+- For images: Describe EXACTLY what objects, text, diagrams, scenes you see. If it's a stock photo, say so.
 - For documents: Summarize ONLY what the extracted text actually says.
 - For videos: Just note the filename.
 
@@ -237,7 +351,6 @@ A file is IRRELEVANT if:
 - It's a random screenshot unrelated to the idea
 - It's a generic template with no specific content about this idea
 - The connection between the file and the idea is vague or requires stretching logic
-- It contains content about a completely different domain/subject
 
 DO NOT be lenient. If there's no CLEAR, DIRECT connection to the specific idea, mark it as IRRELEVANT.
 
@@ -262,8 +375,6 @@ RULES:
 - relevance_note: If irrelevant, state: "File shows [what it actually shows] which does not relate to [idea topic]"
 - missing_types: List file types NOT uploaded (from: "video", "document", "image")
 - has_content_mismatch: true if ANY file is irrelevant
-- For video files: If video frames are provided below, analyze the VISUAL CONTENT of those frames to determine relevance. Describe what you see in the frames. If frames show content related to the idea, mark RELEVANT. If frames show unrelated content, mark IRRELEVANT.
-- If video frames could NOT be extracted (stated in file details), mark as RELEVANT by default since content is unverifiable.
 """
 
 
@@ -280,19 +391,18 @@ def analyze_attachments(submission, client=None):
             'has_content_mismatch': False
         }
 
-    # Build idea context
-    title = submission.title or (submission.problem_definition or '')[:100] or 'Untitled'
-    problem = submission.problem_definition or submission.problem_statement or ''
-    solution_text = submission.solution or submission.proposed_solution or ''
+    # Build idea context (use new fields with fallback to old)
+    title = submission.title or (submission.q2_exact_problem or submission.problem_definition or '')[:100] or 'Untitled'
+    problem = submission.q2_exact_problem or submission.problem_definition or submission.problem_statement or ''
+    solution_text = submission.q3_solution_simple or submission.solution or submission.proposed_solution or ''
 
     # Categorize files and build details
     file_details_parts = []
     image_paths = []
     present_types = set()
-    videos_with_frames = set()  # filenames of videos that were analyzed
-    gemini_video_analyses = {}  # Store Gemini analysis results {filename: analysis}
-    
-    # Gemini-supported video formats
+    videos_with_frames = set()
+    gemini_video_analyses = {}
+
     GEMINI_VIDEO_FORMATS = ('mp4', 'webm', 'mov', 'mpeg', 'mpg')
 
     for f in uploaded_files:
@@ -307,13 +417,12 @@ def analyze_attachments(submission, client=None):
                 image_paths.append(full_path)
                 detail += "\n  (Image attached below - describe EXACTLY what you see, do not assume relevance)"
             else:
-                detail += "\n  ⚠️ Image file missing from disk - cannot analyze"
+                detail += "\n  Image file missing from disk - cannot analyze"
         elif f.file_type == 'video':
             full_path = os.path.join(settings.MEDIA_ROOT, str(f.file))
             ext = f.original_filename.lower().split('.')[-1]
-            
+
             if ext in GEMINI_VIDEO_FORMATS and os.path.exists(full_path):
-                # Use Gemini for native video analysis
                 try:
                     video_prompt = f"""Analyze this video for relevance to a student's innovation idea.
 
@@ -334,30 +443,26 @@ Return JSON:
     "is_relevant": true or false,
     "relevance_note": "Specific reason why relevant or not"
 }}"""
-                    
+
                     print(f"[GEMINI] Analyzing video: {f.original_filename}")
                     video_response = client.generate_video_completion(
-                        system_prompt="You are a strict video relevance checker. Be skeptical - only mark videos as relevant if they DIRECTLY and SPECIFICALLY relate to the student's idea. Random or generic videos should be marked IRRELEVANT.",
+                        system_prompt="You are a strict video relevance checker. Be skeptical - only mark videos as relevant if they DIRECTLY and SPECIFICALLY relate to the student's idea.",
                         user_prompt=video_prompt,
                         video_path=full_path,
                         model="google/gemini-2.0-flash-001",
                         max_tokens=800
                     )
-                    
+
                     if video_response and 'content' in video_response:
-                        print(f"[GEMINI] Raw response: {video_response['content'][:500]}")
                         json_match = re.search(r'\{[\s\S]*\}', video_response['content'])
                         if json_match:
                             video_data = json.loads(json_match.group())
-                            print(f"[GEMINI] Parsed: is_relevant={video_data.get('is_relevant')}, summary={video_data.get('summary', '')[:100]}")
                             gemini_video_analyses[f.original_filename] = video_data
                             videos_with_frames.add(f.original_filename)
                             detail += f"\n  [Gemini Analysis]: {video_data.get('summary', 'Video analyzed')[:300]}"
-                            # If video is irrelevant, add to detail
                             if not video_data.get('is_relevant', True):
-                                detail += f"\n  ⚠️ IRRELEVANT: {video_data.get('relevance_note', 'Does not match idea')}"
+                                detail += f"\n  IRRELEVANT: {video_data.get('relevance_note', 'Does not match idea')}"
                         else:
-                            print(f"[GEMINI] Could not parse JSON from response")
                             videos_with_frames.add(f.original_filename)
                             gemini_video_analyses[f.original_filename] = {
                                 'summary': video_response['content'][:500],
@@ -371,11 +476,10 @@ Return JSON:
                     gemini_video_analyses[f.original_filename] = {
                         'summary': f'Video analysis failed: {str(e)[:200]}',
                         'is_relevant': False,
-                        'relevance_note': f'Gemini analysis failed ({str(e)[:100]}). Video could not be verified - manual review needed.'
+                        'relevance_note': f'Gemini analysis failed ({str(e)[:100]}). Manual review needed.'
                     }
-                    detail += f"\n  ⚠️ UNVERIFIED: Gemini analysis failed - {str(e)[:100]}"
+                    detail += f"\n  UNVERIFIED: Gemini analysis failed - {str(e)[:100]}"
             else:
-                # Unsupported format or file not found - mark as unverified
                 videos_with_frames.add(f.original_filename)
                 if not os.path.exists(full_path):
                     gemini_video_analyses[f.original_filename] = {
@@ -383,18 +487,17 @@ Return JSON:
                         'is_relevant': False,
                         'relevance_note': 'Video file not found on disk - cannot verify relevance.'
                     }
-                    detail += "\n  ⚠️ Video file missing from disk"
+                    detail += "\n  Video file missing from disk"
                 else:
                     gemini_video_analyses[f.original_filename] = {
                         'summary': f'Unsupported video format (.{ext}) - cannot analyze',
                         'is_relevant': False,
-                        'relevance_note': f'Video format .{ext} is not supported for analysis. Manual review needed.'
+                        'relevance_note': f'Video format .{ext} is not supported. Manual review needed.'
                     }
-                    detail += f"\n  ⚠️ UNVERIFIED: Unsupported format (.{ext}) - manual review needed"
+                    detail += f"\n  UNVERIFIED: Unsupported format (.{ext}) - manual review needed"
 
         file_details_parts.append(detail)
 
-    # Determine missing types
     all_types = {'video', 'document', 'image'}
     missing = list(all_types - present_types)
 
@@ -409,7 +512,7 @@ Return JSON:
 
     try:
         response = client.generate_completion(
-            system_prompt="You are a strict file relevance checker. Describe EXACTLY what you see in each file. For video files, analyze the extracted frames carefully. Do NOT assume files are relevant just because they were uploaded with the idea. Be skeptical - if you cannot see a DIRECT, SPECIFIC connection to the idea, mark it IRRELEVANT. Return ONLY valid JSON.",
+            system_prompt="You are a strict file relevance checker. Describe EXACTLY what you see. Be skeptical. Return ONLY valid JSON.",
             user_prompt=prompt,
             model="anthropic/claude-3.5-sonnet",
             max_tokens=1000,
@@ -420,27 +523,21 @@ Return JSON:
             json_match = re.search(r'\{[\s\S]*\}', response['content'])
             if json_match:
                 result = json.loads(json_match.group())
-                # Ensure missing_types is accurate
                 result['missing_types'] = missing
-                # Post-process video files - use Gemini analysis results
                 video_filenames = {f.original_filename for f in uploaded_files if f.file_type == 'video'}
                 for analysis in result.get('file_analyses', []):
                     fname = analysis.get('filename')
                     if fname in video_filenames:
-                        # All videos are now verified (analyzed by Gemini or accepted)
                         analysis['video_verified'] = True
-                        # Use Gemini analysis results if available
                         if fname in gemini_video_analyses:
                             gemini_result = gemini_video_analyses[fname]
                             analysis['summary'] = gemini_result.get('summary', 'Video analyzed')
                             analysis['is_relevant'] = gemini_result.get('is_relevant', True)
                             analysis['relevance_note'] = gemini_result.get('relevance_note', '')
                         else:
-                            # Fallback - mark as relevant
                             analysis['is_relevant'] = True
                             analysis['summary'] = analysis.get('summary', 'Video file accepted')
                             analysis['relevance_note'] = ''
-                # Recalculate has_content_mismatch
                 result['has_content_mismatch'] = any(
                     not fa.get('is_relevant', True)
                     for fa in result.get('file_analyses', [])
@@ -449,7 +546,6 @@ Return JSON:
     except Exception as e:
         print(f"Attachment analysis failed: {e}")
 
-    # Fallback - return basic info (all videos marked as verified)
     return {
         'file_analyses': [
             {
@@ -466,11 +562,14 @@ Return JSON:
     }
 
 
+# ============================================================================
+# MAIN EVALUATION FUNCTION
+# ============================================================================
 def evaluate_idea(submission: IdeaSubmission, force_reevaluate=False) -> AIEvaluation:
     """
-    Evaluate a single idea submission using 10-parameter jury rubric.
-    On re-evaluation: reuses attachment analysis (files don't change) and
-    takes the LOWER of old vs new parameter scores to prevent score inflation.
+    Evaluate a single idea submission using 10-parameter rubric (0-10 scale).
+    Includes 10 coherence cross-checks with -1 penalty per fail. >5 fails = disqualified.
+    On re-evaluation: takes the LOWER of old vs new parameter scores.
     """
     if hasattr(submission, 'ai_evaluation') and not force_reevaluate:
         return submission.ai_evaluation
@@ -483,7 +582,7 @@ def evaluate_idea(submission: IdeaSubmission, force_reevaluate=False) -> AIEvalu
             old_scores = {
                 'uniqueness': old_eval.uniqueness_score,
                 'ease_of_implementation': old_eval.ease_of_implementation_score,
-                'scalable': old_eval.scalable_score,
+                'feasibility': old_eval.feasibility_score,
                 'impactful': old_eval.impactful_score,
                 'sustainable': old_eval.sustainable_score,
                 'conceptual_clarity': old_eval.conceptual_clarity_score,
@@ -499,18 +598,11 @@ def evaluate_idea(submission: IdeaSubmission, force_reevaluate=False) -> AIEvalu
 
     client = OpenRouterClient()
 
-    # Build prompt with ALL 8 submission fields
-    problem_definition = submission.problem_definition or ''
-    problem_description = submission.problem_description or ''
-    target_users = submission.target_user_group or ''
-    problem_urgency = submission.problem_urgency or ''
-    proposed_solution = submission.solution or ''
-    solution_benefits = submission.solution_benefits or ''
-    why_best_equipped = submission.why_best_equipped or ''
-    idea_stage = submission.get_idea_stage_display() if submission.idea_stage else 'Idea'
+    # Get 12 question answers (with fallback to old fields)
+    questions = get_submission_questions(submission)
 
-    # Calculate effort level based on total content length
-    all_text = f"{problem_definition} {problem_description} {target_users} {problem_urgency} {proposed_solution} {solution_benefits} {why_best_equipped}"
+    # Calculate effort level
+    all_text = ' '.join(questions.values())
     total_words = len(all_text.split())
     if total_words < 30:
         effort_note = "VERY LOW EFFORT - Student wrote less than 30 words total. Score VERY strictly."
@@ -522,27 +614,59 @@ def evaluate_idea(submission: IdeaSubmission, force_reevaluate=False) -> AIEvalu
         effort_note = f"GOOD EFFORT - {total_words} words total. Evaluate based on content quality and depth."
 
     prompt = EVALUATION_PROMPT.format(
-        title=submission.title or problem_definition[:100],
-        problem_statement=problem_definition,
-        problem_description=problem_description,
-        proposed_solution=proposed_solution,
-        target_users=target_users,
-        problem_urgency=problem_urgency,
-        solution_benefits=solution_benefits,
-        why_best_equipped=why_best_equipped,
-        idea_stage=idea_stage,
+        q1=questions['q1'], q2=questions['q2'], q3=questions['q3'],
+        q4=questions['q4'], q5=questions['q5'], q6=questions['q6'],
+        q7=questions['q7'], q8=questions['q8'], q9=questions['q9'],
+        q10=questions['q10'], q11=questions['q11'], q12=questions['q12'],
         effort_note=effort_note
     )
 
-    try:
-        response = client.generate_completion(
+    # === Run evaluation, coherence checks, and attachment analysis in PARALLEL ===
+    has_files = submission.uploaded_files.exists()
+
+    def _run_main_eval():
+        return client.generate_completion(
             system_prompt="You are an expert idea evaluator. Return ONLY valid JSON, no other text.",
             user_prompt=prompt,
             model="anthropic/claude-3.5-sonnet",
-            max_tokens=1500
+            max_tokens=2000
         )
-    except Exception as e:
-        raise RuntimeError(f"AI API call failed: {str(e)}")
+
+    def _run_coherence():
+        coherence_client = OpenRouterClient()
+        return run_coherence_checks(questions, coherence_client)
+
+    def _run_attachments():
+        if not has_files:
+            return None
+        attachment_client = OpenRouterClient()
+        return analyze_attachments(submission, attachment_client)
+
+    with ThreadPoolExecutor(max_workers=3) as executor:
+        eval_future = executor.submit(_run_main_eval)
+        coherence_future = executor.submit(_run_coherence)
+        attachment_future = executor.submit(_run_attachments)
+
+        # Wait for main evaluation
+        try:
+            response = eval_future.result()
+        except Exception as e:
+            raise RuntimeError(f"AI API call failed: {str(e)}")
+
+        # Wait for coherence checks
+        try:
+            check_results = coherence_future.result()
+        except Exception:
+            check_results = [
+                {'name': name, 'passed': True, 'reason': 'Check failed - passed by default'}
+                for name in COHERENCE_PENALTY_MAP.keys()
+            ]
+
+        # Wait for attachment analysis
+        try:
+            attachment_result = attachment_future.result()
+        except Exception:
+            attachment_result = None
 
     if not response or 'content' not in response:
         raise RuntimeError("AI returned empty or invalid response")
@@ -551,76 +675,47 @@ def evaluate_idea(submission: IdeaSubmission, force_reevaluate=False) -> AIEvalu
         eval_data = parse_evaluation_response(response['content'])
     except ValueError as e:
         raise RuntimeError(f"Failed to parse AI response: {str(e)}")
-    
-    # Extract scores from parameter_scores array
-    scores = {p['parameter_name']: p for p in eval_data.get('parameter_scores', [])}
-    
-    # Check coherence status from AI response
-    is_coherent = eval_data.get('is_coherent', True)
 
-    def get_score(name, old_key=None, default=3):
-        if not is_coherent:
-            return 0  # Incoherent submissions get 0 marks
-        param = scores.get(name, {})
+    # Extract scores from parameter_scores array
+    scores_map = {p['parameter_name']: p for p in eval_data.get('parameter_scores', [])}
+
+    def get_score(name, old_key=None, default=5):
+        param = scores_map.get(name, {})
         new_score = param.get('score', default)
-        new_score = max(1, min(5, int(new_score)))  # Clamp to 1-5
-        # On re-evaluation: take the LOWER of old vs new to prevent score inflation
+        new_score = max(0, min(10, int(new_score)))  # Clamp to 0-10
+        # On re-evaluation: take the LOWER of old vs new
         if old_scores and old_key and old_scores.get('is_coherent', True):
             old_score = old_scores.get(old_key, new_score)
             return min(old_score, new_score)
         return new_score
 
     def get_reason(name, default=''):
-        return scores.get(name, {}).get('reason', default)
+        return scores_map.get(name, {}).get('reason', default)
 
-    evaluation = AIEvaluation.objects.create(
-        submission=submission,
-        is_coherent=is_coherent,
+    # Build score dict for coherence penalty application
+    score_dict = {
+        'uniqueness': get_score('Uniqueness', 'uniqueness'),
+        'ease_of_implementation': get_score('Ease of Implementation', 'ease_of_implementation'),
+        'feasibility': get_score('Feasibility', 'feasibility'),
+        'impactful': get_score('Impact', 'impactful'),
+        'sustainable': get_score('Sustainability', 'sustainable'),
+        'conceptual_clarity': get_score('Conceptual Clarity', 'conceptual_clarity'),
+        'empathy': get_score('Empathy', 'empathy'),
+        'creativity': get_score('Creativity', 'creativity'),
+        'communication': get_score('Communication', 'communication'),
+        'flexible_thinking': get_score('Flexible Thinking', 'flexible_thinking'),
+    }
 
-        # Idea parameters
-        uniqueness_score=get_score('Uniqueness', 'uniqueness'),
-        ease_of_implementation_score=get_score('Ease of Implementation', 'ease_of_implementation'),
-        scalable_score=get_score('Scalable', 'scalable'),
-        impactful_score=get_score('Impactful', 'impactful'),
-        sustainable_score=get_score('Sustainable', 'sustainable'),
+    # Apply coherence penalties
+    score_dict, coherence_failures, is_disqualified = apply_coherence_penalties(score_dict, check_results)
+    is_coherent = coherence_failures <= 5
 
-        # Team parameters
-        conceptual_clarity_score=get_score('Conceptual Clarity', 'conceptual_clarity'),
-        empathy_score=get_score('Empathy', 'empathy'),
-        creativity_score=get_score('Creativity', 'creativity'),
-        communication_score=get_score('Communication', 'communication'),
-        flexible_thinking_score=get_score('Flexible Thinking', 'flexible_thinking'),
-        
-        # Justifications
-        uniqueness_justification=get_reason('Uniqueness'),
-        ease_of_implementation_justification=get_reason('Ease of Implementation'),
-        scalable_justification=get_reason('Scalable'),
-        impactful_justification=get_reason('Impactful'),
-        sustainable_justification=get_reason('Sustainable'),
-        conceptual_clarity_justification=get_reason('Conceptual Clarity'),
-        empathy_justification=get_reason('Empathy'),
-        creativity_justification=get_reason('Creativity'),
-        communication_justification=get_reason('Communication'),
-        flexible_thinking_justification=get_reason('Flexible Thinking'),
-        overall_justification=eval_data.get('overall_justification', ''),
-        
-        # Metadata
-        confidence_level=eval_data.get('confidence', 'medium'),
-        model_used=response.get('model', 'anthropic/claude-3.5-sonnet'),
-        tokens_used=response.get('tokens', 0),
-        processing_time=response.get('time', 0),
-        raw_response=response.get('raw_response', '')
-    )
-
-    # === Attachment Analysis & Content Mismatch Penalty ===
-    # ALWAYS run fresh attachment analysis (Gemini now handles videos natively)
+    # === Process attachment results ===
     mismatch_penalty = 0
     mismatch_severity = 'none'
     attachment_mismatch_flag = False
     mismatch_reasons = []
     attachment_summaries = {}
-
-    has_files = submission.uploaded_files.exists()
 
     if not has_files:
         mismatch_penalty = 3
@@ -633,8 +728,9 @@ def evaluate_idea(submission: IdeaSubmission, force_reevaluate=False) -> AIEvalu
             'has_content_mismatch': False
         }
     else:
-        attachment_summaries = analyze_attachments(submission, client)
-
+        attachment_summaries = attachment_result or {
+            'file_analyses': [], 'missing_types': [], 'has_content_mismatch': False
+        }
         has_mismatch = attachment_summaries.get('has_content_mismatch', False)
 
         if has_mismatch:
@@ -675,13 +771,12 @@ def evaluate_idea(submission: IdeaSubmission, force_reevaluate=False) -> AIEvalu
             except AISummary.DoesNotExist:
                 pass
 
-    # === Missing Attachment Types Penalty ===
-    # -1 per missing type (max -2, since no-files case is already -3)
+    # Missing attachment types penalty
     if has_files:
         missing_types = attachment_summaries.get('missing_types', [])
         missing_count = len(missing_types)
         if missing_count > 0:
-            missing_penalty = min(missing_count, 2)  # -1 per missing type, max -2
+            missing_penalty = min(missing_count, 2)
             mismatch_penalty += missing_penalty
             attachment_mismatch_flag = True
             if mismatch_severity == 'none':
@@ -692,20 +787,64 @@ def evaluate_idea(submission: IdeaSubmission, force_reevaluate=False) -> AIEvalu
     # Cap total penalty at -5
     mismatch_penalty = min(mismatch_penalty, 5)
 
-    evaluation.attachment_mismatch = attachment_mismatch_flag
-    evaluation.mismatch_severity = mismatch_severity
-    evaluation.mismatch_penalty = mismatch_penalty
-    evaluation.mismatch_reasons = mismatch_reasons
-    evaluation.attachment_summaries = attachment_summaries
-    evaluation.save()
+    # === Create evaluation record with all data ===
+    evaluation = AIEvaluation.objects.create(
+        submission=submission,
+        is_coherent=is_coherent,
+        coherence_checks={'checks': check_results},
+        coherence_failures=coherence_failures,
+        is_disqualified=is_disqualified,
 
+        # Idea parameters (after coherence penalties applied)
+        uniqueness_score=score_dict['uniqueness'],
+        ease_of_implementation_score=score_dict['ease_of_implementation'],
+        feasibility_score=score_dict['feasibility'],
+        impactful_score=score_dict['impactful'],
+        sustainable_score=score_dict['sustainable'],
+
+        # Team parameters (after coherence penalties applied)
+        conceptual_clarity_score=score_dict['conceptual_clarity'],
+        empathy_score=score_dict['empathy'],
+        creativity_score=score_dict['creativity'],
+        communication_score=score_dict['communication'],
+        flexible_thinking_score=score_dict['flexible_thinking'],
+
+        # Justifications
+        uniqueness_justification=get_reason('Uniqueness'),
+        ease_of_implementation_justification=get_reason('Ease of Implementation'),
+        feasibility_justification=get_reason('Feasibility'),
+        impactful_justification=get_reason('Impact'),
+        sustainable_justification=get_reason('Sustainability'),
+        conceptual_clarity_justification=get_reason('Conceptual Clarity'),
+        empathy_justification=get_reason('Empathy'),
+        creativity_justification=get_reason('Creativity'),
+        communication_justification=get_reason('Communication'),
+        flexible_thinking_justification=get_reason('Flexible Thinking'),
+        overall_justification=eval_data.get('overall_justification', ''),
+
+        # Metadata
+        confidence_level=eval_data.get('confidence', 'medium'),
+        model_used=response.get('model', 'anthropic/claude-3.5-sonnet'),
+        tokens_used=response.get('tokens', 0),
+        processing_time=response.get('time', 0),
+        raw_response=response.get('raw_response', ''),
+
+        # Attachment data (set directly instead of separate save)
+        attachment_mismatch=attachment_mismatch_flag,
+        mismatch_severity=mismatch_severity,
+        mismatch_penalty=mismatch_penalty,
+        mismatch_reasons=mismatch_reasons,
+        attachment_summaries=attachment_summaries,
+    )
+
+    # === Step 5: Update submission status ===
     submission.status = 'evaluated'
-    if not is_coherent:
+    if is_disqualified:
         submission.final_category = 'incoherent'
         submission.save(update_fields=['status', 'final_category'])
     else:
         submission.save(update_fields=['status'])
-    
+
     return evaluation
 
 
@@ -717,10 +856,10 @@ def batch_evaluate(submissions=None, limit=None):
         ).exclude(
             ai_evaluation__isnull=False
         )
-    
+
     if limit:
         submissions = submissions[:limit]
-    
+
     results = []
     for submission in submissions:
         try:
@@ -728,17 +867,19 @@ def batch_evaluate(submissions=None, limit=None):
             results.append((submission, evaluation, None))
         except Exception as e:
             results.append((submission, None, str(e)))
-    
+
     return results
 
 
 def update_rankings():
     """
     Update rank fields for all evaluated submissions.
-    Rankings are ordered by final_score descending (higher score = better, since 5=BEST, 1=WORST).
-    Top 400 requires score >= 34 (average of 3.4+ per parameter).
+    Rankings ordered by final_score descending. Disqualified submissions excluded from top 400.
+    Top 400 requires score >= 68 (68% of max 100).
     """
-    evaluations = AIEvaluation.objects.all().order_by(
+    evaluations = AIEvaluation.objects.filter(
+        is_disqualified=False
+    ).order_by(
         '-final_score',
         '-uniqueness_score',
         '-impactful_score'
@@ -747,17 +888,22 @@ def update_rankings():
     prev_score = None
     prev_rank = None
     for i, evaluation in enumerate(evaluations, start=1):
-        # Tied scores get the same rank
         if evaluation.final_score == prev_score:
             evaluation.rank = prev_rank
         else:
             evaluation.rank = i
             prev_rank = i
         prev_score = evaluation.final_score
-        # Top 400: rank within 400 AND score >= 34 (68% of max 50)
-        evaluation.is_top_400 = (evaluation.rank <= 400) and (evaluation.final_score >= 34)
+        evaluation.is_top_400 = (evaluation.rank <= 400) and (evaluation.final_score >= 68)
         evaluation.save(update_fields=['rank', 'is_top_400'])
-    
+
+    # Disqualified submissions get no rank
+    disqualified = AIEvaluation.objects.filter(is_disqualified=True)
+    for evaluation in disqualified:
+        evaluation.rank = None
+        evaluation.is_top_400 = False
+        evaluation.save(update_fields=['rank', 'is_top_400'])
+
     return evaluations.count()
 
 

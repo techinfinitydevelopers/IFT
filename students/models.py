@@ -51,54 +51,90 @@ class IdeaSubmission(models.Model):
     
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='submissions')
     
-    # Question 1: Problem Definition
+    # ===== v3 Questions (12 questions) =====
+    q1_target_group = models.TextField(
+        blank=True, default='',
+        help_text="Describe the person/group you're trying to help. Who are they, what is their daily struggle?"
+    )
+    q2_exact_problem = models.TextField(
+        blank=True, default='',
+        help_text="What exact problem are they facing? When, where, and why does this problem matter?"
+    )
+    q3_solution_simple = models.TextField(
+        blank=True, default='',
+        help_text="What is your solution, explained simply as if talking to a 10-year-old?"
+    )
+    q4_differentiation = models.TextField(
+        blank=True, default='',
+        help_text="How is your solution different from what already exists?"
+    )
+    q5_build_steps = models.TextField(
+        blank=True, default='',
+        help_text="What are the key steps required to build and test your solution?"
+    )
+    q6_resources = models.TextField(
+        blank=True, default='',
+        help_text="What resources (skills, tools, money, tech, people) are required? Which do you already have?"
+    )
+    q7_positive_change = models.TextField(
+        blank=True, default='',
+        help_text="If your solution succeeds, what positive change will it create for users and society?"
+    )
+    q8_challenges = models.TextField(
+        blank=True, default='',
+        help_text="What challenges could come while building or using this idea? How will you deal with them?"
+    )
+    q9_team_fit = models.TextField(
+        blank=True, default='',
+        help_text="Why do you think your team is rightly placed to solve this problem?"
+    )
+    q10_feedback = models.TextField(
+        blank=True, default='',
+        help_text="Have you taken any user feedback? Describe one situation where your thinking changed after feedback."
+    )
+    q11_creative_element = models.TextField(
+        blank=True, default='',
+        help_text="What is the most creative or unexpected element in your solution, and why did you think of it?"
+    )
+    q12_pitch = models.TextField(
+        blank=True, default='',
+        help_text="If you had 60 seconds to convince someone to try or support your idea, what would you say?"
+    )
+
+    # ===== Legacy v2 Questions (kept for backward compatibility) =====
     problem_definition = models.TextField(
         blank=True, default='',
-        help_text="It's always better to define the problem before we attempt to solve it. Be précised in articulating it."
+        help_text="[Legacy-v2] Problem definition"
     )
-    
-    # Question 2: Detailed Problem Description
     problem_description = models.TextField(
         blank=True, default='',
-        help_text="Give us a detailed description of the problem."
+        help_text="[Legacy-v2] Detailed problem description"
     )
-    
-    # Question 3: Target User Group
     target_user_group = models.TextField(
         blank=True, default='',
-        help_text="Describe the 'user' group whose problem you are attempting to solve?"
+        help_text="[Legacy-v2] Target user group"
     )
-    
-    # Question 4: Problem Urgency
     problem_urgency = models.TextField(
         blank=True, default='',
-        help_text="Why do you believe that this problem is critical and needs an urgent solution?"
+        help_text="[Legacy-v2] Problem urgency"
     )
-    
-    # Question 5: Solution
     solution = models.TextField(
         blank=True, default='',
-        help_text="What is your solution?"
+        help_text="[Legacy-v2] Solution"
     )
-    
-    # Question 6: Solution Benefits
     solution_benefits = models.TextField(
         blank=True, default='',
-        help_text="How your solution gives a distinct benefit to users or reduce their pain?"
+        help_text="[Legacy-v2] Solution benefits"
     )
-    
-    # Question 7: Why Best Equipped
     why_best_equipped = models.TextField(
         blank=True, default='',
-        help_text="Why do you think you are the best equipped to offer this solution?"
+        help_text="[Legacy-v2] Why best equipped"
     )
-    
-    # Question 8: Idea Stage (dropdown)
     idea_stage = models.CharField(
         max_length=30,
         choices=IDEA_STAGE_CHOICES,
         default='idea',
-        help_text="Mention the stage of your idea at this moment"
+        help_text="[Legacy-v2] Idea stage"
     )
     
     # Legacy fields for backward compatibility (kept for existing data)

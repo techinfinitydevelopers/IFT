@@ -70,7 +70,7 @@ def admin_dashboard(request):
     for s in page_obj:
         submissions_list.append({
             'id': s.id,
-            'title': (s.problem_definition or s.title or 'Untitled')[:80] + ('...' if len(s.problem_definition or s.title or '') > 80 else ''),
+            'title': (s.title or s.q3_solution_simple or s.q2_exact_problem or s.problem_definition or 'Untitled')[:80] + ('...' if len(s.title or s.q3_solution_simple or s.q2_exact_problem or s.problem_definition or '') > 80 else ''),
             'description': (s.problem_description or s.description or '')[:150] + ('...' if len(s.problem_description or s.description or '') > 150 else ''),
             'student_name': s.student.user.get_full_name() or s.student.user.username,
             'school_name': s.student.school_name or '',
@@ -125,18 +125,18 @@ def submission_detail(request, submission_id):
     uploaded_files = submission.uploaded_files.all()
     files_with_text_count = sum(1 for f in uploaded_files if f.extracted_text)
     
-    # Pre-calculate for template
+    # Pre-calculate for template — Idea Parameters
     un_score = ai_evaluation.uniqueness_score if ai_evaluation else 0
     un_just = ai_evaluation.uniqueness_justification if ai_evaluation else ""
     ease_score = ai_evaluation.ease_of_implementation_score if ai_evaluation else 0
     ease_just = ai_evaluation.ease_of_implementation_justification if ai_evaluation else ""
-    scale_score = ai_evaluation.scalable_score if ai_evaluation else 0
-    scale_just = ai_evaluation.scalable_justification if ai_evaluation else ""
+    feas_score = ai_evaluation.feasibility_score if ai_evaluation else 0
+    feas_just = ai_evaluation.feasibility_justification if ai_evaluation else ""
     impact_score = ai_evaluation.impactful_score if ai_evaluation else 0
     impact_just = ai_evaluation.impactful_justification if ai_evaluation else ""
     sust_score = ai_evaluation.sustainable_score if ai_evaluation else 0
     sust_just = ai_evaluation.sustainable_justification if ai_evaluation else ""
-    
+
     # Team Parameters
     clarity_score = ai_evaluation.conceptual_clarity_score if ai_evaluation else 0
     clarity_just = ai_evaluation.conceptual_clarity_justification if ai_evaluation else ""
@@ -162,34 +162,41 @@ def submission_detail(request, submission_id):
         'status_label': submission.get_status_display(),
         'category_label': submission.get_final_category_display() or submission.get_ai_suggested_category_display() or "Other",
         'submitted_date': submission.submitted_at.strftime("%B %d, %Y") if submission.submitted_at else "Not submitted",
-        
-        # Flattened Questions
-        'q1_problem': submission.problem_definition or submission.problem_statement or "Not provided",
-        'q2_description': submission.problem_description or submission.description or "Not provided",
-        'q3_target': submission.target_user_group or submission.target_audience or "Not provided",
-        'q4_urgency': submission.problem_urgency or "Not provided",
-        'q5_solution': submission.solution or submission.proposed_solution or "Not provided",
-        'q6_benefits': submission.solution_benefits or submission.impact_assessment or "Not provided",
-        'q7_why': submission.why_best_equipped or "Not provided",
-        'q8_stage': submission.get_idea_stage_display(),
-        
+
+        # Flattened Questions (v3 with fallback to v2)
+        'q1': submission.q1_target_group or submission.target_user_group or "Not provided",
+        'q2': submission.q2_exact_problem or submission.problem_definition or "Not provided",
+        'q3': submission.q3_solution_simple or submission.solution or "Not provided",
+        'q4': submission.q4_differentiation or "Not provided",
+        'q5': submission.q5_build_steps or "Not provided",
+        'q6': submission.q6_resources or "Not provided",
+        'q7': submission.q7_positive_change or submission.solution_benefits or "Not provided",
+        'q8': submission.q8_challenges or "Not provided",
+        'q9': submission.q9_team_fit or submission.why_best_equipped or "Not provided",
+        'q10': submission.q10_feedback or "Not provided",
+        'q11': submission.q11_creative_element or "Not provided",
+        'q12': submission.q12_pitch or "Not provided",
+
         # Flattened Idea scores
         'un_score': un_score, 'un_just': un_just,
         'ease_score': ease_score, 'ease_just': ease_just,
-        'scale_score': scale_score, 'scale_just': scale_just,
+        'feas_score': feas_score, 'feas_just': feas_just,
         'impact_score': impact_score, 'impact_just': impact_just,
         'sust_score': sust_score, 'sust_just': sust_just,
-        
+
         # Flattened Team scores
         'clarity_score': clarity_score, 'clarity_just': clarity_just,
         'empathy_score': empathy_score, 'empathy_just': empathy_just,
         'creativity_score': creativity_score, 'creativity_just': creativity_just,
         'comm_score': comm_score, 'comm_just': comm_just,
         'flex_score': flex_score, 'flex_just': flex_just,
-        
+
         'final_score': ai_evaluation.final_score if ai_evaluation else 0,
         'rank': ai_evaluation.rank if ai_evaluation else "TBD",
         'is_coherent': ai_evaluation.is_coherent if ai_evaluation else True,
+        'is_disqualified': ai_evaluation.is_disqualified if ai_evaluation else False,
+        'coherence_checks': (ai_evaluation.coherence_checks or {}).get('checks', []) if ai_evaluation else [],
+        'coherence_failures': ai_evaluation.coherence_failures if ai_evaluation else 0,
         'ai_summary_text': ai_summary.summary if ai_summary else "AI Summary is being processed...",
         # Content mismatch
         'attachment_mismatch': ai_evaluation.attachment_mismatch if ai_evaluation else False,
@@ -201,7 +208,7 @@ def submission_detail(request, submission_id):
         'attachment_file_analyses': (ai_evaluation.attachment_summaries or {}).get('file_analyses', []) if ai_evaluation else [],
         'attachment_missing_types': (ai_evaluation.attachment_summaries or {}).get('missing_types', []) if ai_evaluation else [],
     }
-    
+
     return render(request, 'admins/submission_detail_v2.html', context)
 
 
@@ -265,7 +272,7 @@ def evaluate_submission(request, submission_id):
             evaluation = evaluate_idea(submission, force_reevaluate=force_reevaluate)
             messages.success(
                 request, 
-                f'Evaluation complete! Score: {evaluation.final_score}/50 (Rank: #{evaluation.rank or "TBD"})'
+                f'Evaluation complete! Score: {evaluation.final_score}/100 (Rank: #{evaluation.rank or "TBD"})'
             )
             
         except Exception as e:
@@ -323,19 +330,21 @@ def rankings_view(request):
     
     top_400_data = []
     for e in top_400_evaluations:
+        t = e.submission.title or e.submission.q3_solution_simple or e.submission.q2_exact_problem or 'Untitled'
         top_400_data.append({
             'rank': e.rank,
             'score': e.final_score,
-            'title': (e.submission.title[:30] + '..') if len(e.submission.title) > 30 else e.submission.title,
+            'title': (t[:30] + '..') if len(t) > 30 else t,
             'name': e.submission.student.user.get_full_name() or e.submission.student.user.username,
             'id': e.submission.id
         })
 
     normal_data = []
     for e in normal_evaluations:
+        t = e.submission.title or e.submission.q3_solution_simple or e.submission.q2_exact_problem or 'Untitled'
         normal_data.append({
             'score': e.final_score,
-            'title': (e.submission.title[:30] + '..') if len(e.submission.title) > 30 else e.submission.title,
+            'title': (t[:30] + '..') if len(t) > 30 else t,
             'name': e.submission.student.user.get_full_name() or e.submission.student.user.username,
             'id': e.submission.id
         })
@@ -368,9 +377,9 @@ def export_top_400(request):
     writer = csv.writer(response)
     writer.writerow([
         'Rank', 'Final Score', 'Title', 'Student Name', 'School',
-        'Uniqueness', 'Ease of Implementation', 'Scalable', 'Impactful', 'Sustainable',
+        'Uniqueness', 'Ease of Implementation', 'Feasibility', 'Impact', 'Sustainability',
         'Conceptual Clarity', 'Empathy', 'Creativity', 'Communication', 'Flexible Thinking',
-        'Idea Stage', 'Confidence'
+        'Coherence Failures', 'Disqualified', 'Confidence'
     ])
 
     for e in evaluations:
@@ -382,7 +391,7 @@ def export_top_400(request):
             e.submission.student.school_name,
             e.uniqueness_score,
             e.ease_of_implementation_score,
-            e.scalable_score,
+            e.feasibility_score,
             e.impactful_score,
             e.sustainable_score,
             e.conceptual_clarity_score,
@@ -390,7 +399,8 @@ def export_top_400(request):
             e.creativity_score,
             e.communication_score,
             e.flexible_thinking_score,
-            e.submission.get_idea_stage_display(),
+            e.coherence_failures,
+            'Yes' if e.is_disqualified else 'No',
             e.confidence_level,
         ])
     
@@ -407,21 +417,27 @@ def download_template(request):
     writer = csv.writer(response)
     writer.writerow([
         'first_name', 'last_name', 'email', 'school_name', 'grade', 'title',
-        'problem_definition', 'problem_description', 'target_user_group',
-        'problem_urgency', 'solution', 'solution_benefits',
-        'why_best_equipped', 'idea_stage'
+        'q1_target_group', 'q2_exact_problem', 'q3_solution_simple',
+        'q4_differentiation', 'q5_build_steps', 'q6_resources',
+        'q7_positive_change', 'q8_challenges', 'q9_team_fit',
+        'q10_feedback', 'q11_creative_element', 'q12_pitch'
     ])
     # Example row
     writer.writerow([
         'Rahul', 'Sharma', 'rahul.sharma@example.com', 'Delhi Public School', '10',
-        'Smart Water Monitor', 'Water wastage in urban households',
-        'Many households waste water due to lack of real-time monitoring of usage.',
-        'Urban households and apartment complexes',
-        'Water scarcity is increasing and current meters only show monthly usage.',
-        'An IoT-based smart water meter that tracks real-time usage via a mobile app.',
-        'Users save 30% water and get alerts for leaks, reducing bills and waste.',
-        'I have experience building IoT prototypes and won a science fair for a similar project.',
-        'concept_prototype'
+        'Smart Water Monitor',
+        'Urban households who struggle with high water bills and wastage daily.',
+        'Water wastage in urban homes. Taps left running, leaks unnoticed. Matters because water scarcity is increasing.',
+        'A smart meter on your tap that shows water usage on your phone, like a speedometer for water.',
+        'Unlike monthly meters, this shows real-time usage and sends leak alerts instantly.',
+        '1. Build IoT sensor prototype 2. Develop mobile app 3. Test in 10 homes 4. Iterate based on feedback.',
+        'Need: Arduino sensors, app developer, Rs 50K. Have: IoT skills, science fair experience, mentor support.',
+        'Families save 30% water, reduce bills, detect leaks early. At scale, saves millions of liters citywide.',
+        'Hardware durability in wet conditions. Will use waterproof casing and cloud backup for data.',
+        'Won science fair for similar project. Team has IoT + app development skills. Live in water-scarce area.',
+        'Yes, tested with 3 neighbors. They wanted simpler UI, so we redesigned the dashboard to show just one number.',
+        'The leak detection AI learns your household pattern and alerts only for unusual usage, reducing false alarms.',
+        'Imagine never worrying about a water leak again. Our smart meter watches your water 24/7 and saves you 30% on bills.'
     ])
 
     return response
@@ -468,8 +484,6 @@ def bulk_upload_ideas(request):
         django.setup()
         from django.db import connection
         tracker = PROGRESS_TRACKER[task_id]
-        valid_stages = ['idea', 'concept_prototype', 'working_prototype', 'running_business']
-
         for i, row in enumerate(rows):
             try:
                 email = (row.get('email') or '').strip()
@@ -511,21 +525,21 @@ def bulk_upload_ideas(request):
                     }
                 )
 
-                idea_stage = (row.get('idea_stage') or 'idea').strip()
-                if idea_stage not in valid_stages:
-                    idea_stage = 'idea'
-
                 IdeaSubmission.objects.create(
                     student=student,
                     title=title,
-                    problem_definition=row.get('problem_definition', '').strip(),
-                    problem_description=row.get('problem_description', '').strip(),
-                    target_user_group=row.get('target_user_group', '').strip(),
-                    problem_urgency=row.get('problem_urgency', '').strip(),
-                    solution=row.get('solution', '').strip(),
-                    solution_benefits=row.get('solution_benefits', '').strip(),
-                    why_best_equipped=row.get('why_best_equipped', '').strip(),
-                    idea_stage=idea_stage,
+                    q1_target_group=row.get('q1_target_group', '').strip(),
+                    q2_exact_problem=row.get('q2_exact_problem', '').strip(),
+                    q3_solution_simple=row.get('q3_solution_simple', '').strip(),
+                    q4_differentiation=row.get('q4_differentiation', '').strip(),
+                    q5_build_steps=row.get('q5_build_steps', '').strip(),
+                    q6_resources=row.get('q6_resources', '').strip(),
+                    q7_positive_change=row.get('q7_positive_change', '').strip(),
+                    q8_challenges=row.get('q8_challenges', '').strip(),
+                    q9_team_fit=row.get('q9_team_fit', '').strip(),
+                    q10_feedback=row.get('q10_feedback', '').strip(),
+                    q11_creative_element=row.get('q11_creative_element', '').strip(),
+                    q12_pitch=row.get('q12_pitch', '').strip(),
                     status='submitted',
                     submitted_at=timezone.now(),
                 )
@@ -652,9 +666,9 @@ def evaluate_submission_async(request, submission_id):
                     'score': evaluation.ease_of_implementation_score,
                     'justification': evaluation.ease_of_implementation_justification or ''
                 },
-                'scalable': {
-                    'score': evaluation.scalable_score,
-                    'justification': evaluation.scalable_justification or ''
+                'feasibility': {
+                    'score': evaluation.feasibility_score,
+                    'justification': evaluation.feasibility_justification or ''
                 },
                 'impactful': {
                     'score': evaluation.impactful_score,
@@ -688,6 +702,11 @@ def evaluate_submission_async(request, submission_id):
             'final_score': evaluation.final_score,
             'rank': evaluation.rank,
             'confidence': evaluation.confidence_level or 'medium',
+            'coherence': {
+                'checks': (evaluation.coherence_checks or {}).get('checks', []),
+                'failures': evaluation.coherence_failures,
+                'is_disqualified': evaluation.is_disqualified,
+            },
             'mismatch': {
                 'has_mismatch': evaluation.attachment_mismatch,
                 'severity': evaluation.mismatch_severity,

@@ -73,9 +73,11 @@ def extract_video_frames(video_path, num_frames=3):
 def validate_submission(submission):
     """Validate if submission is complete"""
     missing = []
-    if not submission.problem_definition or len(submission.problem_definition.strip()) < 10:
-        missing.append("Problem Definition too short")
-    if not submission.solution or len(submission.solution.strip()) < 10:
+    problem = submission.q2_exact_problem or submission.problem_definition or ''
+    if len(problem.strip()) < 10:
+        missing.append("Problem description too short")
+    solution = submission.q3_solution_simple or submission.solution or ''
+    if len(solution.strip()) < 10:
         missing.append("Solution too short")
     return len(missing) == 0, "; ".join(missing) if missing else "Complete"
 
@@ -165,21 +167,25 @@ Describe what you see in each image.
 Check if uploaded files match the idea description.
 If they don't match, explain exactly what the image shows vs what the idea is about."""
     
-    # Compile idea text using the 8 new questions
+    # Compile idea text using the 12 v3 questions (with fallback to v2)
     idea_text = f"""STUDENT IDEA SUBMISSION:
-1. Problem: {submission.problem_definition}
-2. Details: {submission.problem_description}
-3. Target: {submission.target_user_group}
-4. Urgency: {submission.problem_urgency}
-5. Solution: {submission.solution}
-6. Benefits: {submission.solution_benefits}
-7. Team/Why: {submission.why_best_equipped}
-8. Stage: {submission.get_idea_stage_display()}"""
-    
+1. Target Group: {submission.q1_target_group or submission.target_user_group or 'N/A'}
+2. Exact Problem: {submission.q2_exact_problem or submission.problem_definition or 'N/A'}
+3. Solution (Simple): {submission.q3_solution_simple or submission.solution or 'N/A'}
+4. Differentiation: {submission.q4_differentiation or 'N/A'}
+5. Build Steps: {submission.q5_build_steps or 'N/A'}
+6. Resources: {submission.q6_resources or 'N/A'}
+7. Positive Change: {submission.q7_positive_change or submission.solution_benefits or 'N/A'}
+8. Challenges: {submission.q8_challenges or 'N/A'}
+9. Team Fit: {submission.q9_team_fit or submission.why_best_equipped or 'N/A'}
+10. Feedback: {submission.q10_feedback or 'N/A'}
+11. Creative Element: {submission.q11_creative_element or 'N/A'}
+12. Pitch: {submission.q12_pitch or 'N/A'}"""
+
     # Context for video analysis
     idea_context = {
-        'problem': submission.problem_definition,
-        'solution': submission.solution,
+        'problem': submission.q2_exact_problem or submission.problem_definition or '',
+        'solution': submission.q3_solution_simple or submission.solution or '',
     }
     
     # Collect files for analysis - HYBRID APPROACH
@@ -376,8 +382,8 @@ Return JSON:
             if not submission.final_category:
                 submission.final_category = submission.ai_suggested_category
         
-        # Auto-generate title from AI if not already set
-        if ai_data.get('title') and not submission.title:
+        # Auto-generate title from AI (always overwrite with better AI title)
+        if ai_data.get('title'):
             submission.title = ai_data['title'][:300]  # Limit to field max length
         
         submission.ai_processed = True

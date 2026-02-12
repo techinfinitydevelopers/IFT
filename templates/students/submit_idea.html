@@ -7,7 +7,7 @@
     <div style="max-width: 800px; margin: 0 auto;">
         <div class="mb-4">
             <h1 style="font-size: 2rem; margin-bottom: 0.5rem;">Submit Your Innovation</h1>
-            <p style="margin: 0; color: var(--text-muted);">Answer the questions below to submit your idea. Our AI will help evaluate it.</p>
+            <p style="margin: 0; color: var(--text-muted);">Answer all 12 questions below to submit your idea. Our AI will evaluate it.</p>
         </div>
 
         <form method="post" enctype="multipart/form-data">
@@ -19,69 +19,15 @@
                     <h3 class="card-title">Innovation Questionnaire</h3>
                 </div>
 
-                <!-- Question 1 -->
-                <div class="form-group" style="margin-bottom: 1.5rem;">
-                    <label class="form-label" style="font-weight: 600; font-size: 1rem; color: var(--text-main);">{{ form.problem_definition.label }}</label>
-                    {{ form.problem_definition }}
-                    <div style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.25rem;">Define the problem precisely and clearly.</div>
-                    {% if form.problem_definition.errors %}<div style="color: var(--danger); font-size: 0.8rem;">{{ form.problem_definition.errors.0 }}</div>{% endif %}
-                </div>
-
-                <!-- Question 2 -->
-                <div class="form-group" style="margin-bottom: 1.5rem;">
-                    <label class="form-label" style="font-weight: 600; font-size: 1rem; color: var(--text-main);">{{ form.problem_description.label }}</label>
-                    {{ form.problem_description }}
-                    <div style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.25rem;">Include context, current situation, and scope of the problem.</div>
-                    {% if form.problem_description.errors %}<div style="color: var(--danger); font-size: 0.8rem;">{{ form.problem_description.errors.0 }}</div>{% endif %}
-                </div>
-
-                <!-- Question 3 -->
-                <div class="form-group" style="margin-bottom: 1.5rem;">
-                    <label class="form-label" style="font-weight: 600; font-size: 1rem; color: var(--text-main);">{{ form.target_user_group.label }}</label>
-                    {{ form.target_user_group }}
-                    <div style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.25rem;">Who are they? What are their demographics, behavior, and characteristics?</div>
-                    {% if form.target_user_group.errors %}<div style="color: var(--danger); font-size: 0.8rem;">{{ form.target_user_group.errors.0 }}</div>{% endif %}
-                </div>
-
-                <!-- Question 4 -->
-                <div class="form-group" style="margin-bottom: 1.5rem;">
-                    <label class="form-label" style="font-weight: 600; font-size: 1rem; color: var(--text-main);">{{ form.problem_urgency.label }}</label>
-                    {{ form.problem_urgency }}
-                    <div style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.25rem;">What happens if this problem remains unsolved?</div>
-                    {% if form.problem_urgency.errors %}<div style="color: var(--danger); font-size: 0.8rem;">{{ form.problem_urgency.errors.0 }}</div>{% endif %}
-                </div>
-
-                <!-- Question 5 -->
-                <div class="form-group" style="margin-bottom: 1.5rem;">
-                    <label class="form-label" style="font-weight: 600; font-size: 1rem; color: var(--text-main);">{{ form.solution.label }}</label>
-                    {{ form.solution }}
-                    <div style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.25rem;">Describe your solution in detail. How does it work?</div>
-                    {% if form.solution.errors %}<div style="color: var(--danger); font-size: 0.8rem;">{{ form.solution.errors.0 }}</div>{% endif %}
-                </div>
-
-                <!-- Question 6 -->
-                <div class="form-group" style="margin-bottom: 1.5rem;">
-                    <label class="form-label" style="font-weight: 600; font-size: 1rem; color: var(--text-main);">{{ form.solution_benefits.label }}</label>
-                    {{ form.solution_benefits }}
-                    <div style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.25rem;">What pain does it reduce or eliminate for users?</div>
-                    {% if form.solution_benefits.errors %}<div style="color: var(--danger); font-size: 0.8rem;">{{ form.solution_benefits.errors.0 }}</div>{% endif %}
-                </div>
-
-                <!-- Question 7 -->
-                <div class="form-group" style="margin-bottom: 1.5rem;">
-                    <label class="form-label" style="font-weight: 600; font-size: 1rem; color: var(--text-main);">{{ form.why_best_equipped.label }}</label>
-                    {{ form.why_best_equipped }}
-                    <div style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.25rem;">What unique skills, experience, or resources do you have?</div>
-                    {% if form.why_best_equipped.errors %}<div style="color: var(--danger); font-size: 0.8rem;">{{ form.why_best_equipped.errors.0 }}</div>{% endif %}
-                </div>
-
-                <!-- Question 8 -->
-                <div class="form-group" style="margin-bottom: 1rem;">
-                    <label class="form-label" style="font-weight: 600; font-size: 1rem; color: var(--text-main);">{{ form.idea_stage.label }}</label>
-                    {{ form.idea_stage }}
-                    <div style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.25rem;">Select the current stage of your idea.</div>
-                    {% if form.idea_stage.errors %}<div style="color: var(--danger); font-size: 0.8rem;">{{ form.idea_stage.errors.0 }}</div>{% endif %}
-                </div>
+                {% for field in form %}
+                    {% if field.name != 'document_file' and field.name != 'image_file' and field.name != 'video_file' %}
+                    <div class="form-group" style="margin-bottom: 1.5rem;">
+                        <label class="form-label" style="font-weight: 600; font-size: 1rem; color: var(--text-main);">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}<div style="color: var(--danger); font-size: 0.8rem;">{{ field.errors.0 }}</div>{% endif %}
+                    </div>
+                    {% endif %}
+                {% endfor %}
             </div>
 
             <!-- File Uploads -->
@@ -92,15 +38,15 @@
 
                 <div class="grid grid-3">
                     <div class="form-group">
-                        <label class="form-label">📄 Document/PPT</label>
+                        <label class="form-label">Document/PPT</label>
                         {{ form.document_file }}
                     </div>
                     <div class="form-group">
-                        <label class="form-label">📷 Images</label>
+                        <label class="form-label">Images</label>
                         {{ form.image_file }}
                     </div>
                     <div class="form-group">
-                        <label class="form-label">🎥 Video</label>
+                        <label class="form-label">Video</label>
                         {{ form.video_file }}
                     </div>
                 </div>
@@ -108,7 +54,7 @@
 
             <!-- Actions -->
             <div class="flex gap-2 mb-4" style="padding-bottom: 2rem;">
-                <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">Submit Innovation 🚀</button>
+                <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">Submit Innovation</button>
                 <a href="{% url 'students:dashboard' %}" class="btn btn-secondary btn-lg">Cancel</a>
             </div>
         </form>

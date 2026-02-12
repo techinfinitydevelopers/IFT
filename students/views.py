@@ -116,6 +116,17 @@ def submit_idea(request):
             submission.student = student
             submission.status = 'submitted'
             submission.submitted_at = timezone.now()
+
+            # Auto-generate title from solution (Q3) or problem (Q2) immediately
+            title_source = (submission.q3_solution_simple or submission.q2_exact_problem or '').strip()
+            if title_source:
+                title = title_source[:80]
+                if len(title_source) > 80:
+                    last_space = title.rfind(' ')
+                    if last_space > 40:
+                        title = title[:last_space]
+                submission.title = title
+
             submission.save()
             
             # Handle file uploads
@@ -195,15 +206,19 @@ def submission_detail(request, submission_id):
         'submitted_at': submission.submitted_at.strftime("%B %d, %Y") if submission.submitted_at else "Not submitted",
         'status_label': submission.get_status_display(),
         
-        # Questions
-        'q1_problem': submission.problem_definition or "Not provided",
-        'q2_description': submission.problem_description or "Not provided",
-        'q3_target': submission.target_user_group or "Not provided",
-        'q4_urgency': submission.problem_urgency or "Not provided",
-        'q5_solution': submission.solution or "Not provided",
-        'q6_benefits': submission.solution_benefits or "Not provided",
-        'q7_why': submission.why_best_equipped or "Not provided",
-        'q8_stage': submission.get_idea_stage_display(),
+        # Questions (v3 with fallback to v2)
+        'q1': submission.q1_target_group or submission.target_user_group or "Not provided",
+        'q2': submission.q2_exact_problem or submission.problem_definition or "Not provided",
+        'q3': submission.q3_solution_simple or submission.solution or "Not provided",
+        'q4': submission.q4_differentiation or "Not provided",
+        'q5': submission.q5_build_steps or "Not provided",
+        'q6': submission.q6_resources or "Not provided",
+        'q7': submission.q7_positive_change or submission.solution_benefits or "Not provided",
+        'q8': submission.q8_challenges or "Not provided",
+        'q9': submission.q9_team_fit or submission.why_best_equipped or "Not provided",
+        'q10': submission.q10_feedback or "Not provided",
+        'q11': submission.q11_creative_element or "Not provided",
+        'q12': submission.q12_pitch or "Not provided",
         
         'uploaded_files': submission.uploaded_files.all(),
     }

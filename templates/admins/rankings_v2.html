@@ -138,7 +138,7 @@
                 <tbody>{% for e in top_400_evaluations %}
                     <tr style="border-bottom:1px solid var(--border);">
                         <td style="padding:0.75rem;"><strong>#{{e.rank}}</strong></td>
-                        <td style="padding:0.75rem;"><span class="badge badge-success">{{e.score}}/50</span></td>
+                        <td style="padding:0.75rem;"><span class="badge badge-success">{{e.score}}/100</span></td>
                         <td style="padding:0.75rem;"><a href="{% url 'admins:submission_detail' e.id %}">{{e.title}}</a>
                         </td>
                         <td style="padding:0.75rem;">{{e.name}}</td>
@@ -162,7 +162,7 @@
                 <tbody>{% for e in normal_evaluations %}
                     <tr style="border-bottom:1px solid var(--border);">
                         <td style="padding:0.75rem;"><span
-                                class="badge {% if e.score >= 30 %}badge-warning{% else %}badge-danger{% endif %}">{{e.score}}/50</span>
+                                class="badge {% if e.score >= 60 %}badge-warning{% else %}badge-danger{% endif %}">{{e.score}}/100</span>
                         </td>
                         <td style="padding:0.75rem;"><a href="{% url 'admins:submission_detail' e.id %}">{{e.title}}</a>
                         </td>
