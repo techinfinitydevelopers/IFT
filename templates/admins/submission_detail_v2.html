@@ -779,8 +779,8 @@
             addLine('<div class="ai-line"><span class="w">Rank: #' + data.rank + '</span></div>');
         }
 
-        let status = data.final_score >= 68 ? '&#10003; QUALIFIED FOR TOP 400' : '&#9675; BELOW THRESHOLD';
-        let color = data.final_score >= 68 ? '#22c55e' : '#f59e0b';
+        let status = data.rank && data.rank <= 400 ? '&#10003; QUALIFIED FOR TOP 400 (Rank #' + data.rank + ')' : '&#9675; NOT IN TOP 400 YET';
+        let color = data.rank && data.rank <= 400 ? '#22c55e' : '#f59e0b';
         addLine('<div class="ai-line"><span style="color:' + color + ';">' + status + '</span></div>');
 
         addLine('<button class="ai-done-btn show" onclick="closeTerminal()">Done</button>');

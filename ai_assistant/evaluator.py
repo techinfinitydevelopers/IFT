@@ -875,7 +875,7 @@ def update_rankings():
     """
     Update rank fields for all evaluated submissions.
     Rankings ordered by final_score descending. Disqualified submissions excluded from top 400.
-    Top 400 requires score >= 68 (68% of max 100).
+    Top 400 = best 400 submissions by score (no minimum threshold).
     """
     evaluations = AIEvaluation.objects.filter(
         is_disqualified=False
@@ -894,7 +894,7 @@ def update_rankings():
             evaluation.rank = i
             prev_rank = i
         prev_score = evaluation.final_score
-        evaluation.is_top_400 = (evaluation.rank <= 400) and (evaluation.final_score >= 68)
+        evaluation.is_top_400 = (evaluation.rank <= 400)
         evaluation.save(update_fields=['rank', 'is_top_400'])
 
     # Disqualified submissions get no rank

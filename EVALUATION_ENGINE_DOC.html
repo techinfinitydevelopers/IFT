@@ -126,15 +126,18 @@
 <h3 style="color:#fff; margin-top:0;">Table of Contents</h3>
 <ol>
   <li><a href="#overview">Overview</a></li>
-  <li><a href="#flow">Evaluation Flow</a></li>
-  <li><a href="#parameters">Scoring System - 10 Parameters</a></li>
-  <li><a href="#coherence">Coherence Check</a></li>
+  <li><a href="#questions">12-Question Submission System</a></li>
+  <li><a href="#flow">Evaluation Flow (Parallel Architecture)</a></li>
+  <li><a href="#parameters">Scoring System - 10 Parameters (0-10 Scale)</a></li>
+  <li><a href="#mapping">Primary/Secondary Question-Parameter Mapping (60/40)</a></li>
+  <li><a href="#coherence">10 Coherence Cross-Checks</a></li>
   <li><a href="#effort">Effort Level Detection</a></li>
   <li><a href="#attachments">Attachment Analysis</a></li>
   <li><a href="#penalties">Penalty System</a></li>
   <li><a href="#finalscore">Final Score Calculation</a></li>
   <li><a href="#reeval">Re-Evaluation Logic</a></li>
-  <li><a href="#ranking">Ranking System</a></li>
+  <li><a href="#ranking">Ranking &amp; Top 400 System</a></li>
+  <li><a href="#title">Auto Title Generation</a></li>
   <li><a href="#scenarios">Complete Scenario Table</a></li>
 </ol>
 </div>
@@ -145,123 +148,180 @@
 <h2 id="overview">1. Overview</h2>
 <p>The IFT (India Future Tycoon) Evaluation Engine is an AI-powered system that evaluates student innovation idea submissions. It uses a <strong>hybrid AI approach</strong>:</p>
 <ul>
-  <li><strong>Claude 3.5 Sonnet</strong> — Evaluates text answers, analyzes images, and checks document relevance.</li>
-  <li><strong>Gemini 2.0 Flash</strong> — Natively analyzes video files for content and relevance.</li>
+  <li><strong>Claude 3.5 Sonnet</strong> (via OpenRouter) &mdash; Evaluates text answers, runs coherence checks, analyzes images, and checks document relevance.</li>
+  <li><strong>Gemini 2.0 Flash</strong> (via OpenRouter) &mdash; Natively analyzes video files for content and relevance.</li>
 </ul>
-<p>Each submission is scored on a <strong>50-point scale</strong> (10 parameters x 5 marks each), with penalties deducted for attachment issues. The system is designed to be <strong>strict and rigorous</strong> — only truly strong ideas score high.</p>
+<p>Each submission is scored on a <strong>0-100 scale</strong> (10 parameters &times; 0-10 marks each), with coherence penalties (-1 per failed check) and attachment penalties (up to -5). The system is designed to be <strong>strict and rigorous</strong> &mdash; only truly strong ideas score high.</p>
+<div class="note"><strong>Key Change (v3):</strong> The system now uses <strong>12 questions</strong> (Q1-Q12), a <strong>0-10 scoring scale</strong> per parameter (max 100), <strong>10 coherence cross-checks</strong> with penalty mapping, and <strong>parallel execution</strong> of evaluation, coherence, and attachment analysis for faster results.</div>
 
 <hr>
 
-<!-- 2. EVALUATION FLOW -->
-<h2 id="flow">2. Evaluation Flow</h2>
-<p>When a submission is evaluated, the engine follows these steps in order:</p>
+<!-- 2. 12-QUESTION SUBMISSION SYSTEM -->
+<h2 id="questions">2. 12-Question Submission System</h2>
+<p>Students answer <strong>12 structured questions</strong> (minimum 20 characters each):</p>
+<table>
+  <tr><th>#</th><th>Question</th><th>What It Captures</th></tr>
+  <tr><td>Q1</td><td><strong>Target Group &amp; Struggle</strong></td><td>Who are the users and what struggle do they face?</td></tr>
+  <tr><td>Q2</td><td><strong>Exact Problem &amp; Why It Matters</strong></td><td>What specific problem are you solving and why is it important?</td></tr>
+  <tr><td>Q3</td><td><strong>Solution (Explained Simply)</strong></td><td>Explain your solution so a 10-year-old would understand.</td></tr>
+  <tr><td>Q4</td><td><strong>How Solution Is Different</strong></td><td>What makes your solution different from existing alternatives?</td></tr>
+  <tr><td>Q5</td><td><strong>Key Steps to Build &amp; Test</strong></td><td>What are the key steps to build and test your idea?</td></tr>
+  <tr><td>Q6</td><td><strong>Resources Required &amp; Available</strong></td><td>What resources do you need and what do you already have?</td></tr>
+  <tr><td>Q7</td><td><strong>Positive Change If Successful</strong></td><td>What positive change will your solution create?</td></tr>
+  <tr><td>Q8</td><td><strong>Challenges &amp; How to Deal</strong></td><td>What challenges do you foresee and how will you handle them?</td></tr>
+  <tr><td>Q9</td><td><strong>Why Team Is Best Placed</strong></td><td>Why is your team the best to execute this idea?</td></tr>
+  <tr><td>Q10</td><td><strong>User Feedback &amp; Learning</strong></td><td>Have you received feedback? What did you learn and change?</td></tr>
+  <tr><td>Q11</td><td><strong>Most Creative Element</strong></td><td>What is the single most creative or unexpected part of your idea?</td></tr>
+  <tr><td>Q12</td><td><strong>60-Second Pitch</strong></td><td>Pitch your idea in 60 seconds as if presenting to an investor.</td></tr>
+</table>
+<p>Students can also upload <strong>3 types of attachments</strong>: image, document, and video.</p>
+
+<hr>
+
+<!-- 3. EVALUATION FLOW -->
+<h2 id="flow">3. Evaluation Flow (Parallel Architecture)</h2>
+<p>When a submission is evaluated, the engine runs <strong>3 major tasks in parallel</strong> using a ThreadPoolExecutor for maximum speed:</p>
 <pre>
-Step 1: COHERENCE CHECK
-   Is the submission talking about ONE consistent idea?
-   |-- NO  --> All scores = 0, submission marked "Incoherent", STOP scoring
-   '-- YES --> Proceed to Step 2
+                    +---> [Main AI Evaluation] ---> 10 parameter scores (0-10 each)
+                    |         (Claude 3.5 Sonnet)
+                    |
+Submission Data --->+---> [Coherence Checks]   ---> 10 cross-check results (pass/fail)
+                    |         (Claude 3.5 Sonnet, separate client)
+                    |
+                    +---> [Attachment Analysis]  ---> file relevance + mismatch info
+                              (Claude + Gemini, separate client)
 
-Step 2: EFFORT LEVEL DETECTION
-   Count total words across all 8 answers
-   '-- Tag submission as VERY LOW / LOW / MODERATE / GOOD effort
+                              === All 3 run simultaneously ===
 
-Step 3: 10-PARAMETER SCORING (by Claude AI)
-   Score each parameter 1-5 based on the jury rubric
-   '-- Raw Score = Sum of all 10 parameters (max 50)
-
-Step 4: ATTACHMENT ANALYSIS
-   |-- Images    --> Analyzed by Claude (visual analysis)
-   |-- Videos    --> Analyzed by Gemini (native video understanding)
-   '-- Documents --> Text extracted, then analyzed by Claude
-
-Step 5: PENALTY CALCULATION
-   |-- Content Mismatch Penalty (irrelevant files)
-   |-- Missing Attachment Types Penalty
-   '-- Total Penalty capped at -5
-
-Step 6: FINAL SCORE
-   Final Score = Raw Score - Total Penalty (minimum 0)
+Then sequentially:
+  1. Parse evaluation scores
+  2. Apply coherence penalties (-1 per failed check to affected parameters)
+  3. If >5 coherence failures: DISQUALIFY (all scores = 0)
+  4. Process attachment mismatch penalties
+  5. Create AIEvaluation record with all data in one DB write
+  6. Update submission status to 'evaluated'
 </pre>
+<div class="note"><strong>Performance:</strong> Before parallelization, evaluation took 40-65+ seconds (sequential API calls). Now it takes <strong>max(eval, coherence, attachments)</strong> &mdash; typically <strong>20-35 seconds</strong>, a 40-60% improvement.</div>
 
 <hr>
 
-<!-- 3. SCORING SYSTEM -->
-<h2 id="parameters">3. Scoring System - 10 Parameters</h2>
-<p>The evaluation uses exactly <strong>10 parameters</strong> divided into two categories. Each parameter is scored on a <strong>1-5 scale</strong> (1 = worst, 5 = best).</p>
+<!-- 4. SCORING SYSTEM -->
+<h2 id="parameters">4. Scoring System - 10 Parameters (0-10 Scale)</h2>
+<p>The evaluation uses exactly <strong>10 parameters</strong> divided into two categories. Each parameter is scored on a <strong>0-10 scale</strong> (0 = worst, 10 = best).</p>
 
 <h3>Idea Parameters (5 parameters)</h3>
 <table>
-  <tr><th>#</th><th>Parameter</th><th>What It Measures</th><th>Score 5 (Best)</th><th>Score 1 (Worst)</th></tr>
-  <tr><td>1</td><td><strong>Uniqueness</strong></td><td>How original is the idea?</td><td>Completely new — even a targeted Google search shows nothing similar</td><td>Same as existing alternatives, no differentiator</td></tr>
-  <tr><td>2</td><td><strong>Ease of Implementation</strong></td><td>Can this idea be built?</td><td>Resources available, team has expertise, clear feature-to-benefit plan</td><td>Resources unavailable, no expertise, no plan</td></tr>
-  <tr><td>3</td><td><strong>Scalable</strong></td><td>Can the business grow?</td><td>Potential for X to 30X growth in 2 years</td><td>Unlikely to grow at all without major changes</td></tr>
-  <tr><td>4</td><td><strong>Impactful</strong></td><td>How many people benefit?</td><td>Widespread customer base, critical for users, removes pains AND adds new benefits</td><td>Sporadic users, no visible positive difference</td></tr>
-  <tr><td>5</td><td><strong>Sustainable</strong></td><td>Will it last?</td><td>Solves common problem + users would pay + lasts more than a year (all YES)</td><td>Any of the three questions is a clear NO</td></tr>
+  <tr><th>#</th><th>Parameter</th><th>What It Measures</th><th>Score 8-10 (Best)</th><th>Score 0-3 (Worst)</th></tr>
+  <tr><td>1</td><td><strong>Uniqueness</strong></td><td>How original is the idea?</td><td>Completely new &mdash; even a targeted Google search shows nothing similar. Clear differentiator explained.</td><td>Same as existing alternatives, no differentiator</td></tr>
+  <tr><td>2</td><td><strong>Ease of Implementation</strong></td><td>Can this idea be built?</td><td>Clear step-by-step plan. Resources available and listed. Team has expertise.</td><td>No clear plan. Resources unavailable. No expertise.</td></tr>
+  <tr><td>3</td><td><strong>Feasibility</strong></td><td>Is the plan realistic?</td><td>Resources realistically available. Practical plan with milestones. Challenges acknowledged with mitigation.</td><td>Plan seems unrealistic. Resources unavailable. No awareness of constraints.</td></tr>
+  <tr><td>4</td><td><strong>Impact</strong></td><td>How many people benefit?</td><td>Widespread customer base. Solution critical for users. Removes pains AND adds new benefits. Shows scale.</td><td>Sporadic users, no visible positive difference</td></tr>
+  <tr><td>5</td><td><strong>Sustainability</strong></td><td>Will it last?</td><td>Solves common problem + users would pay + lasts more than a year. Revenue model clear.</td><td>Not a common problem, users won't pay, won't last. No long-term plan.</td></tr>
 </table>
 
 <h3>Team Parameters (5 parameters)</h3>
 <p>Since this is a text-based submission (not face-to-face), team qualities are <strong>inferred from the writing</strong>:</p>
 <table>
-  <tr><th>#</th><th>Parameter</th><th>What It Measures</th><th>Score 5 (Best)</th><th>Score 1 (Worst)</th></tr>
-  <tr><td>6</td><td><strong>Conceptual Clarity</strong></td><td>Does the team understand their own idea?</td><td>Clear on idea AND execution, knows which features are non-negotiable vs nice-to-have</td><td>Still unclear about the idea, no execution plan</td></tr>
-  <tr><td>7</td><td><strong>Empathy</strong></td><td>Does the team understand user pain?</td><td>Deep empathy — felt user challenges, removes pains AND brings extra gains</td><td>Focused on thrill of ideation, ignored user needs</td></tr>
-  <tr><td>8</td><td><strong>Creativity</strong></td><td>Is the approach innovative?</td><td>Divergent/out-of-box thinking, trend-setter, creative presentation</td><td>Average problem-solving, no creative temperament</td></tr>
-  <tr><td>9</td><td><strong>Communication</strong></td><td>Is the idea clearly written?</td><td>Well-structured writing, uses examples, effectively conveys the vision</td><td>Confusing, unclear, fails to convey the idea</td></tr>
-  <tr><td>10</td><td><strong>Flexible Thinking</strong></td><td>Is the team willing to adapt?</td><td>Mentions willingness to learn, adapt, iterate; aware idea may evolve</td><td>Completely closed to any change or iteration</td></tr>
+  <tr><th>#</th><th>Parameter</th><th>What It Measures</th><th>Score 8-10 (Best)</th><th>Score 0-3 (Worst)</th></tr>
+  <tr><td>6</td><td><strong>Conceptual Clarity</strong></td><td>Does the team understand their own idea?</td><td>Clear on idea AND execution. Knows non-negotiable vs nice-to-have features. Problem-solution link crystal clear.</td><td>Still unclear about the idea itself. No execution plan.</td></tr>
+  <tr><td>7</td><td><strong>Empathy</strong></td><td>Does the team understand user pain?</td><td>Deep empathy &mdash; put themselves in users' shoes. Describes real user stories. Removes pains AND brings extra gains.</td><td>Focused on thrill of ideation, ignored user needs</td></tr>
+  <tr><td>8</td><td><strong>Creativity</strong></td><td>Is the approach innovative?</td><td>Divergent/out-of-box thinking. Trend-setter. Unexpected element clearly described.</td><td>Average approach. No creative temperament. Copy of existing solutions.</td></tr>
+  <tr><td>9</td><td><strong>Communication</strong></td><td>Is the idea clearly written?</td><td>Well-structured writing. Uses examples. Vision effectively conveyed. Pitch is compelling.</td><td>Confusing, unclear. Fails to convey the idea.</td></tr>
+  <tr><td>10</td><td><strong>Flexible Thinking</strong></td><td>Is the team willing to adapt?</td><td>Mentions willingness to learn, adapt, iterate. Shows actual pivot or change after feedback.</td><td>No mention of adaptability. Closed to iteration.</td></tr>
 </table>
 
 <h3>Scoring Guidelines</h3>
 <ul>
-  <li><span class="score-green">Score 5</span> — Should be <strong>rare</strong> (top 5% quality only)</li>
-  <li><strong>Score 4</strong> — Strong submission</li>
-  <li><strong>Score 3</strong> — Average</li>
-  <li><strong>Score 2</strong> — Below average</li>
-  <li><span class="penalty-red">Score 1</span> — Poor</li>
-  <li><span class="penalty-red">Score 0</span> — Only for <strong>incoherent</strong> submissions (all parameters get 0)</li>
+  <li><span class="score-green">Score 8-10</span> &mdash; Should be <strong>rare</strong> (top 5% quality only)</li>
+  <li><strong>Score 6-7</strong> &mdash; Strong submission</li>
+  <li><strong>Score 4-5</strong> &mdash; Average</li>
+  <li><strong>Score 2-3</strong> &mdash; Below average</li>
+  <li><span class="penalty-red">Score 0-1</span> &mdash; Poor</li>
 </ul>
 
 <h3>Strict Rules Applied During Scoring</h3>
 <ul>
-  <li>Vague, short, or generic answers → score LOW</li>
-  <li>Generic ideas ("make an app to solve X") without differentiation → Uniqueness and Creativity score 1-2</li>
-  <li>No explanation of why solution is better than alternatives → Uniqueness and Impact score LOW</li>
-  <li>No understanding of user pain points with examples → Empathy score LOW</li>
-  <li>No mention of adaptability or willingness to learn → Flexible Thinking MUST be 1-2</li>
+  <li>Vague, short, or generic answers &rarr; score LOW</li>
+  <li>Generic ideas ("make an app to solve X") without differentiation &rarr; Uniqueness and Creativity score 0-3</li>
+  <li>No explanation of why solution is better than alternatives &rarr; Uniqueness and Impact score LOW</li>
+  <li>No understanding of user pain points with examples &rarr; Empathy score LOW</li>
+  <li>No mention of adaptability or willingness to learn &rarr; Flexible Thinking MUST be 0-3</li>
+  <li>Remember the <strong>60/40 primary/secondary weightage</strong> for each parameter (see next section)</li>
 </ul>
 
 <hr>
 
-<!-- 4. COHERENCE CHECK -->
-<h2 id="coherence">4. Coherence Check</h2>
-<div class="note"><strong>This is done FIRST, before any scoring.</strong></div>
-<p>The AI checks whether ALL 8 answers in the submission are talking about the <strong>same idea</strong>:</p>
-<ol>
-  <li>Does the Problem Statement describe ONE clear problem?</li>
-  <li>Does the Proposed Solution DIRECTLY address that specific problem?</li>
-  <li>Are the Target Users the people who would face that specific problem?</li>
-  <li>Do all fields logically connect and make sense together?</li>
-</ol>
-
-<h3>If Incoherent:</h3>
-<ul>
-  <li>All 10 parameter scores = <span class="penalty-red">0</span></li>
-  <li>Submission marked as <code>incoherent</code> category</li>
-  <li>Overall justification clearly states: "INCOHERENT SUBMISSION"</li>
-  <li>Final score = <span class="penalty-red">0</span></li>
-</ul>
-
-<h3>Examples of Incoherent Submissions:</h3>
-<ul>
-  <li>Problem says "water pollution" but solution talks about "online education"</li>
-  <li>Target users are "farmers" but the idea is about "gaming for teenagers"</li>
-  <li>Different fields appear to be copied from different ideas</li>
-</ul>
+<!-- 5. PRIMARY/SECONDARY MAPPING -->
+<h2 id="mapping">5. Primary/Secondary Question-Parameter Mapping (60/40)</h2>
+<p>Each parameter's score is based on specific questions with a <strong>60% primary / 40% secondary</strong> weightage split:</p>
+<table>
+  <tr><th>Parameter</th><th>Primary Questions (60%)</th><th>Secondary Questions (40%)</th></tr>
+  <tr><td><strong>1. Uniqueness</strong></td><td>Q4 (Differentiation)</td><td>Q11 (Creative Element)</td></tr>
+  <tr><td><strong>2. Ease of Implementation</strong></td><td>Q5 (Build Steps)</td><td>Q6 (Resources)</td></tr>
+  <tr><td><strong>3. Feasibility</strong></td><td>Q6 (Resources)</td><td>Q5 (Build Steps), Q8 (Challenges)</td></tr>
+  <tr><td><strong>4. Impact</strong></td><td>Q1 (Target Group), Q7 (Positive Change)</td><td>Q12 (Pitch)</td></tr>
+  <tr><td><strong>5. Sustainability</strong></td><td>Q7 (Positive Change)</td><td>Q1 (Target Group)</td></tr>
+  <tr><td><strong>6. Conceptual Clarity</strong></td><td>Q2 (Problem), Q3 (Solution)</td><td>Q4 (Differentiation), Q9 (Team Fit)</td></tr>
+  <tr><td><strong>7. Empathy</strong></td><td>Q1 (Target Group)</td><td>Q2 (Problem), Q10 (Feedback)</td></tr>
+  <tr><td><strong>8. Creativity</strong></td><td>Q11 (Creative Element)</td><td>Q4 (Differentiation)</td></tr>
+  <tr><td><strong>9. Communication</strong></td><td>Q12 (Pitch)</td><td>Q3 (Solution), Q9 (Team Fit)</td></tr>
+  <tr><td><strong>10. Flexible Thinking</strong></td><td>Q8 (Challenges), Q10 (Feedback)</td><td>Q6 (Resources)</td></tr>
+</table>
+<p>This ensures each parameter is evaluated from the most relevant answers, not the entire submission generically.</p>
 
 <hr>
 
-<!-- 5. EFFORT LEVEL -->
-<h2 id="effort">5. Effort Level Detection</h2>
-<p>Before sending to AI, the system counts the <strong>total words</strong> across all 7 text fields (Q1 to Q7) and tags the submission:</p>
+<!-- 6. COHERENCE CHECK -->
+<h2 id="coherence">6. 10 Coherence Cross-Checks</h2>
+<div class="note"><strong>Coherence checks run in PARALLEL with main evaluation.</strong> Penalties are applied to scores after both complete.</div>
+<p>The AI performs <strong>10 specific logical consistency checks</strong> between pairs of questions:</p>
+
+<table>
+  <tr><th>#</th><th>Check Name</th><th>Questions Compared</th><th>What It Verifies</th></tr>
+  <tr><td>1</td><td><strong>User-Problem Fit</strong></td><td>Q1 vs Q2</td><td>Does the target group match the problem described?</td></tr>
+  <tr><td>2</td><td><strong>Problem-Solution Fit</strong></td><td>Q2 vs Q3</td><td>Does the solution DIRECTLY address the problem?</td></tr>
+  <tr><td>3</td><td><strong>Difference Validity</strong></td><td>Q3 vs Q4</td><td>Is the claimed difference actually visible in the solution?</td></tr>
+  <tr><td>4</td><td><strong>Execution Reality</strong></td><td>Q3 vs Q5</td><td>Are the build steps needed to create the solution?</td></tr>
+  <tr><td>5</td><td><strong>Resources Alignment</strong></td><td>Q5 vs Q6</td><td>Do the resources support the steps listed?</td></tr>
+  <tr><td>6</td><td><strong>Risk Awareness</strong></td><td>Q6 vs Q8</td><td>Do challenges reflect real constraints from resources?</td></tr>
+  <tr><td>7</td><td><strong>Impact Continuity</strong></td><td>Q7 vs Q8</td><td>Do challenges contradict the claimed positive impact?</td></tr>
+  <tr><td>8</td><td><strong>Sustainability Logic</strong></td><td>Q7 vs Q9</td><td>Does the team's positioning support long-term impact?</td></tr>
+  <tr><td>9</td><td><strong>Team Fit</strong></td><td>Q5+Q6 vs Q9</td><td>Does the team have skills/resources for the steps?</td></tr>
+  <tr><td>10</td><td><strong>Learning Loop</strong></td><td>Q10 vs Q3+Q5</td><td>Has feedback actually influenced the solution or steps?</td></tr>
+</table>
+
+<h3>Coherence Rules</h3>
+<ul>
+  <li>Only <strong>PASS</strong> if there is a CLEAR logical connection</li>
+  <li>If an answer is empty or too short (&lt;10 words), that check <strong>FAILS</strong></li>
+  <li>If answers contradict each other, that check <strong>FAILS</strong></li>
+  <li>If answers seem to be about different topics, that check <strong>FAILS</strong></li>
+</ul>
+
+<h3>Coherence Penalty Mapping</h3>
+<p>Each failed check deducts <span class="penalty-red">-1</span> from specific parameters:</p>
+<table>
+  <tr><th>Failed Check</th><th>Parameters Penalized (-1 each)</th></tr>
+  <tr><td>User-Problem Fit</td><td>Empathy, Conceptual Clarity</td></tr>
+  <tr><td>Problem-Solution Fit</td><td>Conceptual Clarity, Impact</td></tr>
+  <tr><td>Difference Validity</td><td>Uniqueness</td></tr>
+  <tr><td>Execution Reality</td><td>Ease of Implementation, Feasibility</td></tr>
+  <tr><td>Resources Alignment</td><td>Feasibility</td></tr>
+  <tr><td>Risk Awareness</td><td>Flexible Thinking</td></tr>
+  <tr><td>Impact Continuity</td><td>Impact</td></tr>
+  <tr><td>Sustainability Logic</td><td>Sustainability</td></tr>
+  <tr><td>Team Fit</td><td>Communication</td></tr>
+  <tr><td>Learning Loop</td><td>Flexible Thinking</td></tr>
+</table>
+
+<h3>Disqualification Rule</h3>
+<div class="note"><strong>If more than 5 coherence checks FAIL:</strong> ALL 10 parameter scores are set to <span class="penalty-red">0</span>. The submission is marked as <code>DISQUALIFIED</code> and categorized as <code>incoherent</code>. Final score = 0.</div>
+
+<hr>
+
+<!-- 7. EFFORT LEVEL -->
+<h2 id="effort">7. Effort Level Detection</h2>
+<p>Before scoring, the system counts <strong>total words across all 12 question answers</strong> and tags the submission:</p>
 <table>
   <tr><th>Total Words</th><th>Effort Tag</th><th>AI Instruction</th></tr>
   <tr><td>&lt; 30 words</td><td><span class="penalty-red">VERY LOW EFFORT</span></td><td>"Score VERY strictly"</td></tr>
@@ -269,36 +329,37 @@ Step 6: FINAL SCORE
   <tr><td>80 - 149 words</td><td><span class="highlight">MODERATE EFFORT</span></td><td>"Evaluate based on content quality"</td></tr>
   <tr><td>150+ words</td><td><span class="score-green">GOOD EFFORT</span></td><td>"Evaluate based on content quality and depth"</td></tr>
 </table>
-<p>This tag is included in the AI prompt so the evaluator knows to penalize lazy submissions.</p>
+<p>This tag is included in the AI prompt so the evaluator knows to penalize lazy or low-effort submissions more heavily.</p>
 
 <hr>
 
-<!-- 6. ATTACHMENT ANALYSIS -->
-<h2 id="attachments">6. Attachment Analysis</h2>
-<p>Students can upload 3 types of files:</p>
+<!-- 8. ATTACHMENT ANALYSIS -->
+<h2 id="attachments">8. Attachment Analysis</h2>
+<p>Students can upload 3 types of files. Attachment analysis runs <strong>in parallel</strong> with main evaluation and coherence checks.</p>
 <table>
   <tr><th>File Type</th><th>Accepted Formats</th><th>Max Size</th><th>How It's Analyzed</th></tr>
   <tr><td><strong>Image</strong></td><td>JPG, JPEG, PNG, GIF, WEBP</td><td>5 MB</td><td>Sent directly to Claude for visual analysis</td></tr>
   <tr><td><strong>Document</strong></td><td>PDF, DOC, DOCX, PPT, PPTX, TXT</td><td>10 MB</td><td>Text extracted first, then sent to Claude</td></tr>
-  <tr><td><strong>Video</strong></td><td>MP4, WEBM, MOV, MPEG, MPG</td><td>20 MB</td><td>Sent directly to Gemini for native video analysis</td></tr>
+  <tr><td><strong>Video</strong></td><td>MP4, WEBM, MOV, MPEG, MPG</td><td>20 MB</td><td>Sent directly to Gemini 2.0 Flash for native video analysis</td></tr>
 </table>
 
 <h3>How Each File Type is Analyzed</h3>
 
 <p><strong>Images:</strong></p>
 <ul>
-  <li>The actual image is sent to Claude AI</li>
+  <li>The actual image is sent to Claude AI (base64 encoded)</li>
   <li>Claude describes EXACTLY what it sees (objects, text, diagrams, scenes)</li>
   <li>Claude then judges if the image DIRECTLY relates to the student's idea</li>
-  <li>Stock photos, random images, memes → marked IRRELEVANT</li>
+  <li>Stock photos, random images, memes &rarr; marked IRRELEVANT</li>
 </ul>
 
 <p><strong>Videos:</strong></p>
 <ul>
-  <li>The video file is sent to Gemini 2.0 Flash for native analysis</li>
+  <li>The video file is sent to Gemini 2.0 Flash for native analysis (base64 encoded)</li>
   <li>Gemini watches the video and describes what it shows</li>
   <li>Gemini checks if the content specifically relates to the idea</li>
-  <li>Random footage, stock video, unrelated demos → marked IRRELEVANT</li>
+  <li>Random footage, stock video, unrelated demos &rarr; marked IRRELEVANT</li>
+  <li>Fallback: If Gemini fails, frame extraction is attempted using OpenCV</li>
 </ul>
 
 <p><strong>Documents:</strong></p>
@@ -321,20 +382,24 @@ Step 6: FINAL SCORE
 <h3>Edge Cases Handled</h3>
 <table>
   <tr><th>Situation</th><th>What Happens</th></tr>
-  <tr><td>Image file missing from disk</td><td>AI is told "Image file missing" — NOT "image attached"</td></tr>
-  <tr><td>Unsupported video format (.avi, .mkv)</td><td>Marked as "unverified — manual review needed"</td></tr>
-  <tr><td>Video analysis fails (API error, timeout)</td><td>Marked as "analysis failed — manual review needed"</td></tr>
+  <tr><td>Image file missing from disk</td><td>AI is told "Image file missing" &mdash; marked irrelevant</td></tr>
+  <tr><td>Unsupported video format (.avi, .mkv)</td><td>Marked as "unverified &mdash; manual review needed"</td></tr>
+  <tr><td>Video analysis fails (API error, timeout)</td><td>Marked as "analysis failed &mdash; manual review needed"</td></tr>
   <tr><td>Video file &gt; 20MB</td><td>Rejected with clear error message</td></tr>
   <tr><td>Document text extraction fails</td><td>AI sees only the filename (limited analysis)</td></tr>
 </table>
 
 <hr>
 
-<!-- 7. PENALTY SYSTEM -->
-<h2 id="penalties">7. Penalty System</h2>
-<p>Penalties are deducted from the raw score. <strong>Maximum total penalty is capped at <span class="penalty-red">-5</span>.</strong></p>
+<!-- 9. PENALTY SYSTEM -->
+<h2 id="penalties">9. Penalty System</h2>
+<p>There are two types of penalties: <strong>coherence penalties</strong> (per failed check) and <strong>attachment penalties</strong> (for missing/irrelevant files).</p>
 
-<h3>Penalty Table</h3>
+<h3>Coherence Penalties</h3>
+<p>Applied to individual parameters (see Section 6). Each failed check = <span class="penalty-red">-1</span> to affected parameters (minimum 0). More than 5 failures = <span class="penalty-red">DISQUALIFIED</span> (all scores = 0).</p>
+
+<h3>Attachment Penalties</h3>
+<p>Deducted from the final score. <strong>Maximum total attachment penalty is capped at <span class="penalty-red">-5</span>.</strong></p>
 <table>
   <tr><th>Scenario</th><th>Penalty</th><th>Severity</th><th>Reason</th></tr>
   <tr><td><strong>No files uploaded at all</strong></td><td><span class="penalty-red">-3</span></td><td>Missing</td><td>No evidence to support the idea</td></tr>
@@ -343,121 +408,147 @@ Step 6: FINAL SCORE
   <tr><td><strong>1 attachment type missing</strong> (e.g., no video)</td><td><span class="penalty-red">-1</span></td><td>Minor</td><td>Incomplete submission</td></tr>
   <tr><td><strong>2 attachment types missing</strong> (e.g., only image uploaded)</td><td><span class="penalty-red">-2</span></td><td>Minor</td><td>Incomplete submission</td></tr>
   <tr><td><strong>Video analysis failed</strong></td><td>counts as irrelevant</td><td>Varies</td><td>Cannot verify video content</td></tr>
-  <tr><td><strong>Unsupported video format</strong></td><td>counts as irrelevant</td><td>Varies</td><td>Cannot verify video content</td></tr>
 </table>
 
-<h3>How Penalties Stack</h3>
+<h3>How Attachment Penalties Stack</h3>
 <p>Mismatch penalty and missing types penalty <strong>add together</strong>, but are <strong>capped at -5</strong>.</p>
 
-<h3>Examples:</h3>
+<h3>Penalty Examples</h3>
 <table>
-  <tr><th>Student Uploaded</th><th>Files Relevant?</th><th>Mismatch Penalty</th><th>Missing Types</th><th>Total Penalty</th></tr>
+  <tr><th>Student Uploaded</th><th>Files Relevant?</th><th>Mismatch Penalty</th><th>Missing Types</th><th>Total Attachment Penalty</th></tr>
   <tr><td>Image + Video + Document</td><td>All relevant</td><td>0</td><td>0</td><td><span class="score-green"><strong>0</strong></span></td></tr>
   <tr><td>Image + Video + Document</td><td>1 irrelevant</td><td>-2</td><td>0</td><td><span class="penalty-red"><strong>-2</strong></span></td></tr>
   <tr><td>Image + Video + Document</td><td>All irrelevant</td><td>-5</td><td>0</td><td><span class="penalty-red"><strong>-5</strong></span></td></tr>
   <tr><td>Only Image</td><td>Relevant</td><td>0</td><td>-2 (video + doc missing)</td><td><span class="penalty-red"><strong>-2</strong></span></td></tr>
   <tr><td>Only Image</td><td>Irrelevant</td><td>-5</td><td>-2 (video + doc missing)</td><td><span class="penalty-red"><strong>-5 (capped)</strong></span></td></tr>
   <tr><td>Image + Document</td><td>Both relevant</td><td>0</td><td>-1 (video missing)</td><td><span class="penalty-red"><strong>-1</strong></span></td></tr>
-  <tr><td>Image + Document</td><td>Image irrelevant</td><td>-2</td><td>-1 (video missing)</td><td><span class="penalty-red"><strong>-3</strong></span></td></tr>
   <tr><td>Nothing uploaded</td><td>N/A</td><td>-3</td><td>0</td><td><span class="penalty-red"><strong>-3</strong></span></td></tr>
 </table>
 
 <hr>
 
-<!-- 8. FINAL SCORE -->
-<h2 id="finalscore">8. Final Score Calculation</h2>
+<!-- 10. FINAL SCORE -->
+<h2 id="finalscore">10. Final Score Calculation</h2>
 <pre>
-Raw Score    = Sum of all 10 parameter scores (range: 0-50)
-Penalty      = Mismatch Penalty + Missing Types Penalty (capped at 5)
-Final Score  = max(0, Raw Score - Penalty)
+Step 1: AI scores 10 parameters (0-10 each)         = Raw AI Scores
+Step 2: Apply coherence penalties (-1 per fail)       = Adjusted Scores
+        If >5 checks fail: ALL scores = 0 (disqualified)
+Step 3: Sum all 10 adjusted scores                    = Parameter Total (0-100)
+Step 4: Subtract attachment penalty (capped at -5)    = Final Score
+
+Final Score = max(0, Parameter Total - Attachment Penalty)
 </pre>
-<p><strong>Final Score Range: 0 to 50</strong></p>
+<p><strong>Final Score Range: 0 to 100</strong></p>
 
 <h3>Score Breakdown Example</h3>
 <table>
-  <tr><th>Component</th><th>Value</th></tr>
-  <tr><td>Uniqueness</td><td>3</td></tr>
-  <tr><td>Ease of Implementation</td><td>4</td></tr>
-  <tr><td>Scalable</td><td>3</td></tr>
-  <tr><td>Impactful</td><td>4</td></tr>
-  <tr><td>Sustainable</td><td>3</td></tr>
-  <tr><td>Conceptual Clarity</td><td>4</td></tr>
-  <tr><td>Empathy</td><td>3</td></tr>
-  <tr><td>Creativity</td><td>3</td></tr>
-  <tr><td>Communication</td><td>4</td></tr>
-  <tr><td>Flexible Thinking</td><td>2</td></tr>
-  <tr><td><strong>Raw Score</strong></td><td><strong>33</strong></td></tr>
-  <tr><td>Penalty (1 file irrelevant + 1 type missing)</td><td><span class="penalty-red">-3</span></td></tr>
-  <tr><td><strong>Final Score</strong></td><td><span class="highlight"><strong>30 / 50</strong></span></td></tr>
+  <tr><th>Component</th><th>AI Score</th><th>Coherence Penalty</th><th>Adjusted</th></tr>
+  <tr><td>Uniqueness</td><td>6</td><td>-1 (Difference Validity failed)</td><td>5</td></tr>
+  <tr><td>Ease of Implementation</td><td>7</td><td>0</td><td>7</td></tr>
+  <tr><td>Feasibility</td><td>6</td><td>0</td><td>6</td></tr>
+  <tr><td>Impact</td><td>8</td><td>0</td><td>8</td></tr>
+  <tr><td>Sustainability</td><td>5</td><td>0</td><td>5</td></tr>
+  <tr><td>Conceptual Clarity</td><td>7</td><td>0</td><td>7</td></tr>
+  <tr><td>Empathy</td><td>6</td><td>0</td><td>6</td></tr>
+  <tr><td>Creativity</td><td>5</td><td>0</td><td>5</td></tr>
+  <tr><td>Communication</td><td>7</td><td>0</td><td>7</td></tr>
+  <tr><td>Flexible Thinking</td><td>4</td><td>-1 (Learning Loop failed)</td><td>3</td></tr>
+  <tr><td colspan="3"><strong>Parameter Total</strong></td><td><strong>59</strong></td></tr>
+  <tr><td colspan="3">Attachment Penalty (1 file irrelevant + 1 type missing)</td><td><span class="penalty-red">-3</span></td></tr>
+  <tr><td colspan="3"><strong>Final Score</strong></td><td><span class="highlight"><strong>56 / 100</strong></span></td></tr>
 </table>
 
 <hr>
 
-<!-- 9. RE-EVALUATION -->
-<h2 id="reeval">9. Re-Evaluation Logic</h2>
+<!-- 11. RE-EVALUATION -->
+<h2 id="reeval">11. Re-Evaluation Logic</h2>
 <p>When an admin triggers re-evaluation for a submission:</p>
 
 <h3>Score Protection (Anti-Inflation)</h3>
 <p>To prevent score inflation from repeated re-evaluations, the system takes the <strong>LOWER</strong> of the old score and new score for each parameter:</p>
-<pre>Re-evaluated Score = min(Old Score, New Score)</pre>
+<pre>Re-evaluated Score = min(Old Score, New Score)  [for each parameter]</pre>
 <p>This ensures scores can only go <strong>down or stay the same</strong> on re-evaluation, never up.</p>
 
 <h3>Exception: Coherence Change</h3>
 <table>
   <tr><th>Old Eval</th><th>New Eval</th><th>What Happens</th></tr>
   <tr><td>Coherent</td><td>Coherent</td><td>min(old, new) for each parameter</td></tr>
-  <tr><td>Coherent</td><td>Incoherent</td><td>All scores become <span class="penalty-red">0</span></td></tr>
-  <tr><td>Incoherent</td><td>Coherent</td><td>New scores are used (since old was 0)</td></tr>
-  <tr><td>Incoherent</td><td>Incoherent</td><td>All scores remain <span class="penalty-red">0</span></td></tr>
+  <tr><td>Coherent</td><td>Disqualified (&gt;5 fails)</td><td>All scores become <span class="penalty-red">0</span></td></tr>
+  <tr><td>Disqualified</td><td>Coherent</td><td>New scores are used (since old was 0)</td></tr>
+  <tr><td>Disqualified</td><td>Disqualified</td><td>All scores remain <span class="penalty-red">0</span></td></tr>
 </table>
 
 <h3>Attachment Re-Analysis</h3>
-<p>On re-evaluation, attachment analysis always runs <strong>fresh</strong> (not reused from old evaluation). This means:</p>
-<ul>
-  <li>If files changed relevance judgment, the new result is used</li>
-  <li>Missing types penalty is recalculated</li>
-  <li>Total penalty is still capped at -5</li>
-</ul>
+<p>On re-evaluation, all 3 tasks (scoring, coherence, attachments) run <strong>fresh in parallel</strong>. Old evaluation is deleted before creating the new one.</p>
 
 <hr>
 
-<!-- 10. RANKING -->
-<h2 id="ranking">10. Ranking System</h2>
+<!-- 12. RANKING -->
+<h2 id="ranking">12. Ranking &amp; Top 400 System</h2>
 <p>After evaluation, submissions are ranked by <code>final_score</code> in descending order (higher = better).</p>
 
 <h3>Ranking Rules</h3>
 <ul>
   <li><strong>Tied scores</strong> get the <strong>same rank</strong> (competition-style ranking)</li>
-  <li>Tiebreaker order: Uniqueness Score &gt; Impactful Score</li>
+  <li>Tiebreaker order: Uniqueness Score &gt; Impact Score</li>
   <li>Rankings update automatically after each evaluation or batch evaluation</li>
+  <li>Disqualified submissions are excluded from ranking (rank = null)</li>
 </ul>
 
 <h3>Top 400 Selection</h3>
-<p>A submission qualifies for <strong>Top 400</strong> only if BOTH conditions are met:</p>
+<p>A submission qualifies for <strong>Top 400</strong> based on a single condition:</p>
 <ol>
   <li>Rank is within top 400 positions</li>
-  <li>Final score is <strong>&gt;= 34</strong> (average of 3.4+ per parameter, i.e., 68% of max 50)</li>
 </ol>
-<p>This means even if fewer than 400 submissions exist, only those scoring 34+ are selected.</p>
+<p><strong>There is no minimum score threshold.</strong> The best 400 ideas by score are automatically selected, regardless of their absolute score. If only 200 submissions exist, all 200 are in the Top 400. If 1000 exist, only the highest-scoring 400 qualify.</p>
+
+<div class="note"><strong>Dynamic &amp; Flexible:</strong> Rankings are recalculated after every evaluation. If a new submission scores higher than the current 400th-ranked submission, it enters the Top 400 and pushes the previous 400th out. This means even the last student to submit can be Rank 1 if their idea is the best. The leaderboard is always live and fair.</div>
+
+<h3>Example</h3>
+<table>
+  <tr><th>Student</th><th>When Submitted</th><th>Score</th><th>Rank</th><th>Top 400?</th></tr>
+  <tr><td>Rahul</td><td>Day 1 (first)</td><td>35</td><td>800</td><td><span class="penalty-red">No</span> (rank > 400)</td></tr>
+  <tr><td>Priya</td><td>Day 5</td><td>92</td><td>1</td><td><span class="score-green">Yes</span></td></tr>
+  <tr><td>Amit</td><td>Last day (latest)</td><td>88</td><td>5</td><td><span class="score-green">Yes</span></td></tr>
+  <tr><td>Neha</td><td>Day 2</td><td>20</td><td>399</td><td><span class="score-green">Yes</span> (rank &le; 400, no min score)</td></tr>
+</table>
 
 <hr>
 
-<!-- 11. SCENARIO TABLE -->
-<h2 id="scenarios">11. Complete Scenario Table</h2>
+<!-- 13. TITLE GENERATION -->
+<h2 id="title">13. Auto Title Generation</h2>
+<p>Idea titles are generated in two stages:</p>
+
+<h3>Stage 1: Immediate (on submission)</h3>
+<p>When a student submits their idea, the system immediately auto-generates a title from <strong>Q3 (Solution)</strong> or <strong>Q2 (Problem)</strong>, truncated to ~80 characters at a word boundary. This ensures the title is <strong>visible immediately</strong> in the admin dashboard and rankings.</p>
+
+<h3>Stage 2: AI-Enhanced (background)</h3>
+<p>After submission, a background thread runs the AI summary processor. The AI generates a <strong>short, catchy title (5-8 words)</strong> from the full submission context. This AI-generated title <strong>overwrites</strong> the initial auto-generated title, providing a more polished display name.</p>
+
+<h3>Title Display Fallback Chain</h3>
+<pre>
+Admin Dashboard:  title &rarr; q3_solution_simple &rarr; q2_exact_problem &rarr; problem_definition &rarr; 'Untitled'
+Rankings:         title &rarr; q3_solution_simple &rarr; q2_exact_problem &rarr; 'Untitled'
+</pre>
+
+<hr>
+
+<!-- 14. SCENARIO TABLE -->
+<h2 id="scenarios">14. Complete Scenario Table</h2>
 <table>
-  <tr><th>#</th><th>Scenario</th><th>Coherent?</th><th>Raw Score</th><th>Penalty</th><th>Final Score</th></tr>
-  <tr><td>1</td><td>Strong idea, all 3 files relevant</td><td>Yes</td><td>40</td><td>0</td><td><span class="score-green"><strong>40</strong></span></td></tr>
-  <tr><td>2</td><td>Strong idea, 1 file irrelevant</td><td>Yes</td><td>40</td><td>-2</td><td><strong>38</strong></td></tr>
-  <tr><td>3</td><td>Strong idea, no files uploaded</td><td>Yes</td><td>40</td><td>-3</td><td><strong>37</strong></td></tr>
-  <tr><td>4</td><td>Strong idea, only image (relevant)</td><td>Yes</td><td>40</td><td>-2</td><td><strong>38</strong></td></tr>
-  <tr><td>5</td><td>Average idea, all files relevant</td><td>Yes</td><td>30</td><td>0</td><td><strong>30</strong></td></tr>
-  <tr><td>6</td><td>Average idea, all files irrelevant</td><td>Yes</td><td>30</td><td>-5</td><td><span class="penalty-red"><strong>25</strong></span></td></tr>
-  <tr><td>7</td><td>Weak idea (&lt; 30 words), no files</td><td>Yes</td><td>15</td><td>-3</td><td><span class="penalty-red"><strong>12</strong></span></td></tr>
-  <tr><td>8</td><td>Incoherent submission, has files</td><td>No</td><td>0</td><td>varies</td><td><span class="penalty-red"><strong>0</strong></span></td></tr>
-  <tr><td>9</td><td>Incoherent submission, no files</td><td>No</td><td>0</td><td>-3</td><td><span class="penalty-red"><strong>0</strong></span></td></tr>
-  <tr><td>10</td><td>Average idea, only irrelevant image</td><td>Yes</td><td>30</td><td>-5 (capped)</td><td><span class="penalty-red"><strong>25</strong></span></td></tr>
-  <tr><td>11</td><td>Good idea, image+doc relevant, no video</td><td>Yes</td><td>35</td><td>-1</td><td><span class="score-green"><strong>34</strong></span></td></tr>
-  <tr><td>12</td><td>Good idea, video analysis failed</td><td>Yes</td><td>35</td><td>-2 to -3</td><td><strong>32-33</strong></td></tr>
+  <tr><th>#</th><th>Scenario</th><th>Coherence</th><th>Parameter Total</th><th>Attach. Penalty</th><th>Final Score</th></tr>
+  <tr><td>1</td><td>Strong idea, all 3 files relevant, 0 coherence fails</td><td>Pass</td><td>80</td><td>0</td><td><span class="score-green"><strong>80</strong></span></td></tr>
+  <tr><td>2</td><td>Strong idea, 1 file irrelevant</td><td>Pass</td><td>80</td><td>-2</td><td><strong>78</strong></td></tr>
+  <tr><td>3</td><td>Strong idea, no files uploaded</td><td>Pass</td><td>80</td><td>-3</td><td><strong>77</strong></td></tr>
+  <tr><td>4</td><td>Strong idea, only image (relevant)</td><td>Pass</td><td>80</td><td>-2</td><td><strong>78</strong></td></tr>
+  <tr><td>5</td><td>Good idea, 2 coherence fails</td><td>Pass (2 fails)</td><td>68 (after -1 each)</td><td>0</td><td><span class="score-green"><strong>68</strong></span></td></tr>
+  <tr><td>6</td><td>Average idea, all files relevant</td><td>Pass</td><td>55</td><td>0</td><td><strong>55</strong></td></tr>
+  <tr><td>7</td><td>Average idea, all files irrelevant</td><td>Pass</td><td>55</td><td>-5</td><td><span class="penalty-red"><strong>50</strong></span></td></tr>
+  <tr><td>8</td><td>Weak idea (&lt; 30 words), no files</td><td>Pass</td><td>25</td><td>-3</td><td><span class="penalty-red"><strong>22</strong></span></td></tr>
+  <tr><td>9</td><td>Any idea, 6+ coherence failures</td><td><span class="penalty-red">DISQUALIFIED</span></td><td>0</td><td>varies</td><td><span class="penalty-red"><strong>0</strong></span></td></tr>
+  <tr><td>10</td><td>Average idea, only irrelevant image</td><td>Pass</td><td>55</td><td>-5 (capped)</td><td><span class="penalty-red"><strong>50</strong></span></td></tr>
+  <tr><td>11</td><td>Good idea, image+doc relevant, no video</td><td>Pass</td><td>70</td><td>-1</td><td><span class="score-green"><strong>69</strong></span></td></tr>
+  <tr><td>12</td><td>Good idea, video analysis failed</td><td>Pass</td><td>70</td><td>-2 to -3</td><td><strong>67-68</strong></td></tr>
 </table>
 
 <hr>
@@ -465,12 +556,13 @@ Final Score  = max(0, Raw Score - Penalty)
 <!-- AI MODELS -->
 <h2>AI Models Used</h2>
 <table>
-  <tr><th>Purpose</th><th>Model</th><th>Provider</th></tr>
-  <tr><td>Text evaluation (10 parameters)</td><td>Claude 3.5 Sonnet</td><td>Anthropic</td></tr>
-  <tr><td>Image analysis</td><td>Claude 3.5 Sonnet</td><td>Anthropic</td></tr>
-  <tr><td>Video analysis</td><td>Gemini 2.0 Flash</td><td>Google</td></tr>
-  <tr><td>Summary generation</td><td>Claude 3.5 Sonnet</td><td>Anthropic</td></tr>
-  <tr><td>Premium deep review</td><td>Claude 3 Opus</td><td>Anthropic</td></tr>
+  <tr><th>Purpose</th><th>Model</th><th>Provider</th><th>Max Tokens</th></tr>
+  <tr><td>10-parameter scoring</td><td>Claude 3.5 Sonnet</td><td>Anthropic (via OpenRouter)</td><td>2000</td></tr>
+  <tr><td>Coherence cross-checks</td><td>Claude 3.5 Sonnet</td><td>Anthropic (via OpenRouter)</td><td>1200</td></tr>
+  <tr><td>Image analysis &amp; attachment relevance</td><td>Claude 3.5 Sonnet</td><td>Anthropic (via OpenRouter)</td><td>1000</td></tr>
+  <tr><td>Video analysis</td><td>Gemini 2.0 Flash</td><td>Google (via OpenRouter)</td><td>800</td></tr>
+  <tr><td>Summary &amp; title generation</td><td>Claude 3.5 Sonnet</td><td>Anthropic (via OpenRouter)</td><td>1200</td></tr>
+  <tr><td>Premium deep review</td><td>Claude 3 Opus</td><td>Anthropic (via OpenRouter)</td><td>1200</td></tr>
 </table>
 
 <hr>
@@ -486,10 +578,9 @@ Final Score  = max(0, Raw Score - Penalty)
 
 <footer>
   <p>Document last updated: February 2026</p>
-  <p>System Version: IFT Platform v2 - Hybrid AI Evaluation Engine</p>
+  <p>System Version: IFT Platform v3 - Parallel Hybrid AI Evaluation Engine</p>
 </footer>
 
 </div>
 </body>
 </html>
-  
