@@ -27,6 +27,7 @@
                 <li><a href="{% url 'admins:dashboard' %}"
                         class="nav-link {% if 'admins' in request.path %}active{% endif %}">Admin Dashboard</a></li>
                 <li><a href="{% url 'admins:all_submissions' %}" class="nav-link">All Submissions</a></li>
+                <li><a href="{% url 're_evaluation:list' %}" class="nav-link {% if 're-evaluation' in request.path %}active{% endif %}">Re-Evaluation</a></li>
                 {% else %}
                 <li><a href="{% url 'students:dashboard' %}"
                         class="nav-link {% if 'dashboard' in request.path %}active{% endif %}">Dashboard</a></li>

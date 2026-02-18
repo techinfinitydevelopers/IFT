@@ -23,6 +23,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('students.urls')),
     path('jury/', include('admins.urls')),
+    # Re-Evaluation module (remove this line to uninstall)
+    path('jury/re-evaluation/', include('re_evaluation.urls')),
 ]
 
 # Serve media files during development

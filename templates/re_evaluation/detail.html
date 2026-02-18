@@ -1,0 +1,395 @@
+{% extends 'base.html' %}
+{% block title %}{{ submission.project_name }} - Re-Evaluation{% endblock %}
+{% block content %}
+<style>
+    .re-card {
+        background: var(--bg-surface);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 1.2rem;
+        margin-bottom: 1rem;
+    }
+    .re-card h3 {
+        margin: 0 0 0.8rem 0;
+        font-size: 1rem;
+        font-weight: 700;
+    }
+    .compare-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+    }
+    .compare-table th, .compare-table td {
+        padding: 0.6rem 0.5rem;
+        border-bottom: 1px solid var(--border);
+        text-align: center;
+    }
+    .compare-table th {
+        font-weight: 700;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        color: var(--text-muted);
+    }
+    .compare-table td:first-child, .compare-table th:first-child {
+        text-align: left;
+        font-weight: 600;
+    }
+    .score-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-weight: 700;
+        font-size: 0.85rem;
+    }
+    .ai-badge { background: #3b82f6; color: white; }
+    .mentor-badge { background: #7c3aed; color: white; }
+    .diff-positive { color: #22c55e; font-weight: 700; }
+    .diff-negative { color: #ef4444; font-weight: 700; }
+    .diff-zero { color: var(--text-muted); }
+
+    /* Mentor form grid */
+    .mentor-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.6rem 1rem;
+    }
+    .mentor-grid label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: block;
+        margin-bottom: 0.2rem;
+    }
+    .score-input {
+        width: 80px !important;
+        text-align: center;
+    }
+
+    /* Terminal for AI eval */
+    .ai-terminal {
+        background: #0d0d0d;
+        border: 1px solid #333;
+        border-radius: 6px;
+        font-family: 'Consolas', 'Monaco', monospace;
+        font-size: 12px;
+        color: #ccc;
+        padding: 0.8rem;
+        display: none;
+        margin-top: 0.8rem;
+    }
+    .ai-terminal.active { display: block; }
+    .ai-terminal .step { margin-bottom: 0.3rem; }
+    .ai-terminal .step.done { color: #22c55e; }
+    .ai-terminal .step.active { color: #3b82f6; }
+    .ai-terminal .spinner {
+        display: inline-block;
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .file-chip {
+        display: inline-block;
+        background: rgba(59,130,246,0.1);
+        border: 1px solid rgba(59,130,246,0.2);
+        padding: 0.3rem 0.6rem;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        margin: 0.2rem 0.2rem 0.2rem 0;
+    }
+</style>
+
+<div class="container" style="padding-top: 2rem; max-width: 1000px;">
+    <!-- Back link -->
+    <a href="{% url 're_evaluation:list' %}" style="color: var(--text-muted); text-decoration: none; font-size: 0.9rem;">&larr; Back to List</a>
+
+    <!-- Header -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-top: 0.8rem; margin-bottom: 1.5rem;">
+        <div>
+            <h2 style="margin: 0; font-weight: 800;">{{ submission.project_name }}</h2>
+            <p style="color: var(--text-muted); margin-top: 0.2rem;">
+                {% if submission.student_name %}{{ submission.student_name }} | {% endif %}
+                {% if submission.industry %}{{ submission.industry }} | {% endif %}
+                Submitted {{ submission.created_at|date:"M d, Y" }}
+            </p>
+        </div>
+        <form method="post" action="{% url 're_evaluation:delete' pk=submission.pk %}" style="margin: 0;"
+              onsubmit="return confirm('Delete this idea?');">
+            {% csrf_token %}
+            <button type="submit" style="background: none; border: 1px solid #ef4444; color: #ef4444; padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
+                Delete
+            </button>
+        </form>
+    </div>
+
+    <!-- Idea Description -->
+    <div class="re-card">
+        <h3>Idea Description</h3>
+        <p style="line-height: 1.6; color: var(--text-body);">{{ submission.idea_description }}</p>
+
+        {% if files %}
+        <div style="margin-top: 0.8rem;">
+            <span style="font-weight: 600; font-size: 0.85rem; color: var(--text-muted);">Attachments:</span>
+            {% for f in files %}
+                <span class="file-chip">{{ f.original_filename }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Two columns: AI Eval + Mentor Scores -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+
+        <!-- AI Evaluation -->
+        <div class="re-card">
+            <h3 style="color: #3b82f6;">AI Evaluation</h3>
+            {% if submission.is_evaluated %}
+                <div style="text-align: center; margin-bottom: 0.8rem;">
+                    <span style="font-size: 2rem; font-weight: 800; color: #3b82f6;">{{ submission.ai_total_score }}</span>
+                    <span style="color: var(--text-muted);">/100</span>
+                    <br>
+                    <span style="font-size: 0.8rem; color: var(--text-muted);">Confidence: {{ submission.ai_confidence }}</span>
+                </div>
+                {% for item in comparison %}
+                <div style="display: flex; justify-content: space-between; padding: 0.35rem 0; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 0.85rem;">
+                    <span>{{ item.label }}</span>
+                    <span class="score-badge ai-badge">{{ item.ai_score }}</span>
+                </div>
+                {% endfor %}
+
+                <div style="margin-top: 0.8rem;">
+                    <button id="reEvalBtn" onclick="runEvaluation(true)"
+                            style="width: 100%; padding: 0.5rem; background: #1e40af; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                        Re-Evaluate with AI
+                    </button>
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 2rem 0;">
+                    <p style="color: var(--text-muted); margin-bottom: 1rem;">Not evaluated yet.</p>
+                    <button id="evalBtn" onclick="runEvaluation(false)"
+                            class="btn btn-primary" style="padding: 0.6rem 2rem;">
+                        Evaluate with AI
+                    </button>
+                </div>
+            {% endif %}
+
+            <!-- AI Terminal -->
+            <div id="aiTerminal" class="ai-terminal">
+                <div id="terminalContent"></div>
+            </div>
+        </div>
+
+        <!-- Mentor Scores -->
+        <div class="re-card">
+            <h3 style="color: #7c3aed;">Mentor Score</h3>
+            {% if mentor %}
+                <div style="text-align: center; margin-bottom: 0.8rem;">
+                    <span style="font-size: 2rem; font-weight: 800; color: #7c3aed;">{{ mentor.mentor_total_score }}</span>
+                    <span style="color: var(--text-muted);">/100</span>
+                    <br>
+                    <span style="font-size: 0.8rem; color: var(--text-muted);">By: {{ mentor.mentor_name|default:"Unknown" }}</span>
+                </div>
+            {% endif %}
+
+            <form method="post" action="{% url 're_evaluation:save_mentor' pk=submission.pk %}">
+                {% csrf_token %}
+                <div style="margin-bottom: 0.6rem;">
+                    <label style="font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 0.2rem;">Mentor Name</label>
+                    {{ mentor_form.mentor_name }}
+                </div>
+                <div class="mentor-grid">
+                    <div>
+                        <label>Uniqueness (0-10)</label>
+                        {{ mentor_form.uniqueness_score }}
+                    </div>
+                    <div>
+                        <label>Ease of Impl. (0-10)</label>
+                        {{ mentor_form.ease_of_implementation_score }}
+                    </div>
+                    <div>
+                        <label>Feasibility (0-10)</label>
+                        {{ mentor_form.feasibility_score }}
+                    </div>
+                    <div>
+                        <label>Impact (0-10)</label>
+                        {{ mentor_form.impactful_score }}
+                    </div>
+                    <div>
+                        <label>Sustainability (0-10)</label>
+                        {{ mentor_form.sustainable_score }}
+                    </div>
+                    <div>
+                        <label>Conceptual Clarity (0-10)</label>
+                        {{ mentor_form.conceptual_clarity_score }}
+                    </div>
+                    <div>
+                        <label>Empathy (0-10)</label>
+                        {{ mentor_form.empathy_score }}
+                    </div>
+                    <div>
+                        <label>Creativity (0-10)</label>
+                        {{ mentor_form.creativity_score }}
+                    </div>
+                    <div>
+                        <label>Communication (0-10)</label>
+                        {{ mentor_form.communication_score }}
+                    </div>
+                    <div>
+                        <label>Flexible Thinking (0-10)</label>
+                        {{ mentor_form.flexible_thinking_score }}
+                    </div>
+                </div>
+                <button type="submit" style="margin-top: 0.8rem; width: 100%; padding: 0.5rem; background: #7c3aed; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                    {% if mentor %}Update Mentor Scores{% else %}Save Mentor Scores{% endif %}
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Comparison Table (only if both scores exist) -->
+    {% if submission.is_evaluated and mentor %}
+    <div class="re-card" style="margin-top: 0.5rem;">
+        <h3>Side-by-Side Comparison</h3>
+        <table class="compare-table">
+            <thead>
+                <tr>
+                    <th>Parameter</th>
+                    <th style="color: #3b82f6;">AI Score</th>
+                    <th style="color: #7c3aed;">Mentor Score</th>
+                    <th>Difference</th>
+                    <th>AI Justification</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in comparison %}
+                <tr>
+                    <td>{{ item.label }}</td>
+                    <td><span class="score-badge ai-badge">{{ item.ai_score }}</span></td>
+                    <td><span class="score-badge mentor-badge">{{ item.mentor_score }}</span></td>
+                    <td>
+                        {% if item.diff > 0 %}
+                            <span class="diff-positive">+{{ item.diff }}</span>
+                        {% elif item.diff < 0 %}
+                            <span class="diff-negative">{{ item.diff }}</span>
+                        {% else %}
+                            <span class="diff-zero">0</span>
+                        {% endif %}
+                    </td>
+                    <td style="font-size: 0.8rem; color: var(--text-muted); text-align: left; max-width: 250px;">
+                        {{ item.justification|truncatechars:80 }}
+                    </td>
+                </tr>
+                {% endfor %}
+                <tr style="font-weight: 800; border-top: 2px solid var(--border);">
+                    <td>TOTAL</td>
+                    <td><span class="score-badge ai-badge">{{ submission.ai_total_score }}</span></td>
+                    <td><span class="score-badge mentor-badge">{{ mentor.mentor_total_score }}</span></td>
+                    <td>
+                        <span style="font-weight: 800;">
+                            {{ submission.ai_total_score }} vs {{ mentor.mentor_total_score }}
+                        </span>
+                    </td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Summary Stats -->
+        <div style="margin-top: 1rem; padding: 0.8rem; background: rgba(59,130,246,0.05); border-radius: 8px; display: flex; gap: 2rem; flex-wrap: wrap;">
+            <div>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">AI Total</span><br>
+                <span style="font-size: 1.3rem; font-weight: 800; color: #3b82f6;">{{ submission.ai_total_score }}/100</span>
+            </div>
+            <div>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">Mentor Total</span><br>
+                <span style="font-size: 1.3rem; font-weight: 800; color: #7c3aed;">{{ mentor.mentor_total_score }}/100</span>
+            </div>
+            <div>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">Absolute Difference</span><br>
+                <span style="font-size: 1.3rem; font-weight: 800;">
+                    {% widthratio submission.ai_total_score 1 1 as ai_s %}
+                    {{ submission.ai_total_score }} - {{ mentor.mentor_total_score }}
+                </span>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Overall Justification -->
+    {% if submission.is_evaluated and submission.overall_justification %}
+    <div class="re-card">
+        <h3>AI Overall Justification</h3>
+        <p style="line-height: 1.6; color: var(--text-body); font-size: 0.9rem;">{{ submission.overall_justification }}</p>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function runEvaluation(isReeval) {
+    const terminal = document.getElementById('aiTerminal');
+    const content = document.getElementById('terminalContent');
+    const btn = document.getElementById(isReeval ? 'reEvalBtn' : 'evalBtn');
+
+    terminal.classList.add('active');
+    if (btn) btn.disabled = true;
+    content.innerHTML = '<div class="step active"><span class="spinner">&#9696;</span> Starting evaluation...</div>';
+
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    // Step 1: Start evaluation (returns task_id immediately)
+    fetch('{% url "re_evaluation:evaluate" pk=submission.pk %}', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.task_id) {
+            content.innerHTML = '<div class="step active"><span class="spinner">&#9696;</span> Analyzing idea with AI (this may take 1-3 minutes for videos)...</div>';
+            pollStatus(data.task_id, btn);
+        } else {
+            content.innerHTML += '<div class="step" style="color:#ef4444;">&#10007; Error starting evaluation</div>';
+            if (btn) btn.disabled = false;
+        }
+    })
+    .catch(err => {
+        content.innerHTML += '<div class="step" style="color:#ef4444;">&#10007; Network error: ' + err.message + '</div>';
+        if (btn) btn.disabled = false;
+    });
+}
+
+function pollStatus(taskId, btn) {
+    const content = document.getElementById('terminalContent');
+    let elapsed = 0;
+
+    const interval = setInterval(() => {
+        elapsed += 3;
+        fetch('/jury/re-evaluation/eval-status/' + taskId + '/')
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'running') {
+                content.innerHTML = '<div class="step active"><span class="spinner">&#9696;</span> ' + data.step + ' (' + elapsed + 's)</div>';
+            } else if (data.status === 'completed') {
+                clearInterval(interval);
+                content.innerHTML = '<div class="step done">&#10003; Evaluation complete! Score: ' + data.total_score + '/100</div>';
+                setTimeout(() => location.reload(), 1200);
+            } else if (data.status === 'failed') {
+                clearInterval(interval);
+                content.innerHTML += '<div class="step" style="color:#ef4444;">&#10007; Error: ' + (data.error || 'Unknown error') + '</div>';
+                if (btn) btn.disabled = false;
+            }
+        })
+        .catch(() => {
+            // Network glitch, keep polling
+        });
+    }, 3000);
+
+    // Safety timeout: stop polling after 5 minutes
+    setTimeout(() => {
+        clearInterval(interval);
+        content.innerHTML += '<div class="step" style="color:#f59e0b;">&#9888; Timeout - evaluation may still be running. Refresh page to check.</div>';
+        if (btn) btn.disabled = false;
+    }, 300000);
+}
+</script>
+{% endblock %}

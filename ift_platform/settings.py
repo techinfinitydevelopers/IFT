@@ -33,6 +33,10 @@ if not os.getenv('SECRET_KEY') and not os.getenv('DEBUG', 'True').lower() in ('t
 DEBUG = os.getenv('DEBUG', 'True').lower() in ('true', '1')
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+# Allow ngrok tunneling (remove this line when not using ngrok)
+CSRF_TRUSTED_ORIGINS = [origin for origin in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',') if origin]
+CSRF_TRUSTED_ORIGINS += ['https://*.ngrok-free.app', 'https://*.ngrok.io']
+ALLOWED_HOSTS += ['*']  # ngrok support (remove when not needed)
 
 
 # Application definition
@@ -48,6 +52,8 @@ INSTALLED_APPS = [
     'students',
     'admins',
     'ai_assistant',
+    # Re-Evaluation module (remove this line + re_evaluation/ folder to uninstall)
+    're_evaluation',
 ]
 
 MIDDLEWARE = [

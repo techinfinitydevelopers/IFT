@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}Submit Idea - Re-Evaluation{% endblock %}
+{% block content %}
+<div class="container" style="padding-top: 2rem; max-width: 700px;">
+    <div style="margin-bottom: 1.5rem;">
+        <a href="{% url 're_evaluation:list' %}" style="color: var(--text-muted); text-decoration: none; font-size: 0.9rem;">&larr; Back to List</a>
+    </div>
+
+    <h2 style="font-weight: 800; margin-bottom: 0.3rem;">Submit Idea for Re-Evaluation</h2>
+    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Enter the idea details from the re-evaluation sheet. Only project name and description are required.</p>
+
+    <form method="post" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 1.2rem;">
+        {% csrf_token %}
+
+        <div>
+            <label style="font-weight: 600; font-size: 0.9rem; display: block; margin-bottom: 0.3rem;">Project Name *</label>
+            {{ form.project_name }}
+            {% if form.project_name.errors %}
+                <p style="color: #ef4444; font-size: 0.8rem; margin-top: 0.2rem;">{{ form.project_name.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <div>
+            <label style="font-weight: 600; font-size: 0.9rem; display: block; margin-bottom: 0.3rem;">Student Name</label>
+            {{ form.student_name }}
+        </div>
+
+        <div>
+            <label style="font-weight: 600; font-size: 0.9rem; display: block; margin-bottom: 0.3rem;">Industry</label>
+            {{ form.industry }}
+        </div>
+
+        <div>
+            <label style="font-weight: 600; font-size: 0.9rem; display: block; margin-bottom: 0.3rem;">Idea Description *</label>
+            {{ form.idea_description }}
+            {% if form.idea_description.errors %}
+                <p style="color: #ef4444; font-size: 0.8rem; margin-top: 0.2rem;">{{ form.idea_description.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <div>
+            <label style="font-weight: 600; font-size: 0.9rem; display: block; margin-bottom: 0.3rem;">Attachments (optional)</label>
+            <input type="file" name="attachments" multiple
+                   style="width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-surface);">
+            <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 0.2rem;">Images, documents, videos. Multiple files allowed.</p>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="align-self: flex-start; padding: 0.6rem 2rem;">
+            Submit Idea
+        </button>
+    </form>
+</div>
+{% endblock %}

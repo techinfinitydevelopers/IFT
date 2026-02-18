@@ -1,0 +1,268 @@
+{% extends 'base.html' %}
+{% block title %}Re-Evaluation - Mentor vs AI{% endblock %}
+{% block content %}
+<div class="container" style="padding-top: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <div>
+            <h2 style="margin: 0; font-weight: 800;">Re-Evaluation: Mentor vs AI</h2>
+            <p style="color: var(--text-muted); margin-top: 0.3rem;">
+                {{ total }} ideas | {{ evaluated }} evaluated | {{ with_mentor }} with mentor scores
+                {% if pending_count %} | <strong style="color: #f59e0b;">{{ pending_count }} pending</strong>{% endif %}
+            </p>
+        </div>
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+            {% if pending_count %}
+            <button id="batchEvalBtn" onclick="startBatchEval()" class="btn" style="background: #f59e0b; color: #000; font-weight: 700; border: none; padding: 0.5rem 1.2rem; border-radius: 6px; cursor: pointer;">
+                Evaluate All Pending ({{ pending_count }})
+            </button>
+            {% endif %}
+            <a href="{% url 're_evaluation:submit' %}" class="btn btn-primary">+ Submit New Idea</a>
+        </div>
+    </div>
+
+    <!-- Batch Evaluation Progress -->
+    <div id="batchProgress" style="display: none; background: #1a1a2e; border: 1px solid #333; border-radius: 8px; padding: 1.25rem; margin-bottom: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+            <span style="font-weight: 700; color: #f59e0b;" id="batchTitle">Batch Evaluation Running...</span>
+            <span style="color: var(--text-muted); font-size: 0.85rem;" id="batchCount">0 / 0</span>
+        </div>
+        <div style="background: #333; border-radius: 4px; height: 8px; overflow: hidden; margin-bottom: 0.75rem;">
+            <div id="batchBar" style="background: linear-gradient(90deg, #f59e0b, #22c55e); height: 100%; width: 0%; transition: width 0.5s ease;"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: var(--text-muted); font-size: 0.85rem;" id="batchCurrent">Starting...</span>
+            <div>
+                <span style="color: #22c55e; font-size: 0.85rem;" id="batchSuccess">0 done</span>
+                <span style="color: #ef4444; font-size: 0.85rem; margin-left: 0.75rem;" id="batchFailed" style="display:none;">0 failed</span>
+            </div>
+        </div>
+    </div>
+
+    {% if items %}
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+            <thead>
+                <tr style="border-bottom: 2px solid var(--border); text-align: left;">
+                    <th style="padding: 0.75rem 0.5rem;">#</th>
+                    <th style="padding: 0.75rem 0.5rem;">Project Name</th>
+                    <th style="padding: 0.75rem 0.5rem;">Student</th>
+                    <th style="padding: 0.75rem 0.5rem; text-align: center;">AI Score</th>
+                    <th style="padding: 0.75rem 0.5rem; text-align: center;">Mentor Score</th>
+                    <th style="padding: 0.75rem 0.5rem; text-align: center;">Diff</th>
+                    <th style="padding: 0.75rem 0.5rem; text-align: center;">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr style="border-bottom: 1px solid var(--border); cursor: pointer;"
+                    onclick="window.location='{% url 're_evaluation:detail' pk=item.submission.pk %}'">
+                    <td style="padding: 0.75rem 0.5rem; color: var(--text-muted);">{{ forloop.counter }}</td>
+                    <td style="padding: 0.75rem 0.5rem; font-weight: 600;">
+                        {{ item.submission.project_name|truncatechars:40 }}
+                    </td>
+                    <td style="padding: 0.75rem 0.5rem; color: var(--text-muted);">
+                        {{ item.submission.student_name|default:"-" }}
+                    </td>
+                    <td style="padding: 0.75rem 0.5rem; text-align: center;">
+                        {% if item.submission.is_evaluated %}
+                            <span style="background: var(--primary); color: white; padding: 2px 8px; border-radius: 4px; font-weight: 700;">
+                                {{ item.submission.ai_total_score }}
+                            </span>
+                        {% else %}
+                            <span style="color: var(--text-muted);">-</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 0.75rem 0.5rem; text-align: center;">
+                        {% if item.mentor %}
+                            <span style="background: #7c3aed; color: white; padding: 2px 8px; border-radius: 4px; font-weight: 700;">
+                                {{ item.mentor.mentor_total_score }}
+                            </span>
+                        {% else %}
+                            <span style="color: var(--text-muted);">-</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 0.75rem 0.5rem; text-align: center; font-weight: 700;">
+                        {% if item.diff is not None %}
+                            <span style="color: {% if item.diff > 0 %}#22c55e{% elif item.diff < 0 %}#ef4444{% else %}var(--text-muted){% endif %};">
+                                {% if item.diff > 0 %}+{% endif %}{{ item.diff }}
+                            </span>
+                        {% else %}
+                            <span style="color: var(--text-muted);">-</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 0.75rem 0.5rem; text-align: center;">
+                        {% if item.submission.is_evaluated and item.mentor %}
+                            <span style="background: #22c55e22; color: #22c55e; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">Complete</span>
+                        {% elif item.submission.is_evaluated %}
+                            <span style="background: #3b82f622; color: #3b82f6; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">AI Done</span>
+                        {% else %}
+                            <span style="background: #f59e0b22; color: #f59e0b; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">Pending</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if stats %}
+    <!-- Simple Stats -->
+    <div style="margin-top: 2rem; border-top: 2px solid var(--border); padding-top: 1.5rem;">
+        <h3 style="font-weight: 800; margin-bottom: 1.25rem;">AI vs Mentor: Summary</h3>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+            <div style="background: #1a1a2e; border: 1px solid #333; border-radius: 8px; padding: 1.25rem; text-align: center;">
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.3rem;">Avg AI Score</div>
+                <div style="font-size: 2.2rem; font-weight: 800; color: var(--primary);">{{ stats.avg_ai }}</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">out of 100</div>
+            </div>
+            <div style="background: #1a1a2e; border: 1px solid #333; border-radius: 8px; padding: 1.25rem; text-align: center;">
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.3rem;">Avg Mentor Score</div>
+                <div style="font-size: 2.2rem; font-weight: 800; color: #7c3aed;">{{ stats.avg_mentor }}</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">out of 100</div>
+            </div>
+            <div style="background: #1a1a2e; border: 1px solid #333; border-radius: 8px; padding: 1.25rem; text-align: center;">
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.3rem;">Avg Difference</div>
+                <div style="font-size: 2.2rem; font-weight: 800; color: {% if stats.avg_diff <= 10 %}#22c55e{% elif stats.avg_diff <= 15 %}#f59e0b{% else %}#ef4444{% endif %};">{{ stats.avg_diff }}</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">points ({{ stats.compared }} ideas compared)</div>
+            </div>
+        </div>
+
+        <div style="background: #1a1a2e; border: 1px solid #333; border-radius: 8px; padding: 1.25rem;">
+            <h4 style="font-weight: 700; margin: 0 0 1rem 0; font-size: 0.95rem;">Score Difference Breakdown</h4>
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                <thead>
+                    <tr style="border-bottom: 1px solid #444;">
+                        <th style="padding: 0.6rem; text-align: left;">Difference Range</th>
+                        <th style="padding: 0.6rem; text-align: center;">Ideas</th>
+                        <th style="padding: 0.6rem; text-align: center;">Percentage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom: 1px solid #333;">
+                        <td style="padding: 0.6rem;"><span style="color: #22c55e; font-weight: 700;">Within 5 points</span></td>
+                        <td style="padding: 0.6rem; text-align: center; font-weight: 700;">{{ stats.within_5 }} / {{ stats.compared }}</td>
+                        <td style="padding: 0.6rem; text-align: center; font-weight: 700; color: #22c55e;">{{ stats.within_5_pct }}%</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #333;">
+                        <td style="padding: 0.6rem;"><span style="color: #3b82f6; font-weight: 700;">Within 10 points</span></td>
+                        <td style="padding: 0.6rem; text-align: center; font-weight: 700;">{{ stats.within_10 }} / {{ stats.compared }}</td>
+                        <td style="padding: 0.6rem; text-align: center; font-weight: 700; color: #3b82f6;">{{ stats.within_10_pct }}%</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #333;">
+                        <td style="padding: 0.6rem;"><span style="color: #f59e0b; font-weight: 700;">Within 15 points</span></td>
+                        <td style="padding: 0.6rem; text-align: center; font-weight: 700;">{{ stats.within_15 }} / {{ stats.compared }}</td>
+                        <td style="padding: 0.6rem; text-align: center; font-weight: 700; color: #f59e0b;">{{ stats.within_15_pct }}%</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #333;">
+                        <td style="padding: 0.6rem;"><span style="color: #ef4444; font-weight: 700;">Within 20 points</span></td>
+                        <td style="padding: 0.6rem; text-align: center; font-weight: 700;">{{ stats.within_20 }} / {{ stats.compared }}</td>
+                        <td style="padding: 0.6rem; text-align: center; font-weight: 700; color: #ef4444;">{{ stats.within_20_pct }}%</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.6rem;"><span style="color: var(--text-muted); font-weight: 700;">Above 20 points</span></td>
+                        <td style="padding: 0.6rem; text-align: center; font-weight: 700;">{{ stats.above_20 }} / {{ stats.compared }}</td>
+                        <td style="padding: 0.6rem; text-align: center; font-weight: 700; color: var(--text-muted);">{{ stats.above_20_pct }}%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div style="text-align: center; padding: 4rem 2rem; color: var(--text-muted);">
+        <p style="font-size: 1.2rem;">No re-evaluation ideas yet.</p>
+        <a href="{% url 're_evaluation:submit' %}" class="btn btn-primary" style="margin-top: 1rem;">Submit First Idea</a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+let batchTaskId = null;
+let pollInterval = null;
+
+function startBatchEval() {
+    const btn = document.getElementById('batchEvalBtn');
+    btn.disabled = true;
+    btn.textContent = 'Starting...';
+    btn.style.opacity = '0.6';
+
+    fetch("{% url 're_evaluation:batch_evaluate' %}", {
+        method: 'POST',
+        headers: {'X-CSRFToken': '{{ csrf_token }}'},
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.error) {
+            alert(data.error);
+            btn.disabled = false;
+            btn.textContent = 'Evaluate All Pending';
+            btn.style.opacity = '1';
+            if (data.task_id) {
+                // Resume polling for already-running batch
+                batchTaskId = data.task_id;
+                showProgress();
+                pollInterval = setInterval(pollBatchStatus, 3000);
+            }
+            return;
+        }
+        batchTaskId = data.task_id;
+        document.getElementById('batchCount').textContent = '0 / ' + data.total;
+        showProgress();
+        pollInterval = setInterval(pollBatchStatus, 3000);
+    })
+    .catch(err => {
+        alert('Failed to start batch evaluation: ' + err);
+        btn.disabled = false;
+        btn.textContent = 'Evaluate All Pending';
+        btn.style.opacity = '1';
+    });
+}
+
+function showProgress() {
+    document.getElementById('batchProgress').style.display = 'block';
+    const btn = document.getElementById('batchEvalBtn');
+    if (btn) btn.style.display = 'none';
+}
+
+function pollBatchStatus() {
+    if (!batchTaskId) return;
+
+    fetch(`/jury/re-evaluation/batch-status/${batchTaskId}/`)
+    .then(r => r.json())
+    .then(data => {
+        const done = data.completed + data.failed;
+        document.getElementById('batchCount').textContent = done + ' / ' + data.total;
+        document.getElementById('batchBar').style.width = data.progress_pct + '%';
+        document.getElementById('batchSuccess').textContent = data.completed + ' done';
+
+        if (data.failed > 0) {
+            const failEl = document.getElementById('batchFailed');
+            failEl.textContent = data.failed + ' failed';
+            failEl.style.display = 'inline';
+        }
+
+        // Show all currently evaluating ideas (parallel)
+        if (data.in_progress && data.in_progress.length > 0) {
+            const names = data.in_progress.map(n => n.length > 25 ? n.substring(0, 25) + '...' : n);
+            document.getElementById('batchCurrent').textContent = 'Evaluating (' + data.in_progress.length + ' parallel): ' + names.join(', ');
+        } else if (data.status === 'running') {
+            document.getElementById('batchCurrent').textContent = 'Preparing next batch...';
+        }
+
+        if (data.status === 'completed') {
+            clearInterval(pollInterval);
+            document.getElementById('batchTitle').textContent = 'Batch Evaluation Complete!';
+            document.getElementById('batchTitle').style.color = '#22c55e';
+            document.getElementById('batchCurrent').textContent = 'All done! Reloading...';
+            document.getElementById('batchBar').style.width = '100%';
+            setTimeout(() => window.location.reload(), 2000);
+        }
+    })
+    .catch(err => {
+        console.error('Poll error:', err);
+    });
+}
+</script>
+{% endblock %}

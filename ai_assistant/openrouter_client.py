@@ -150,10 +150,10 @@ class OpenRouterClient:
                 if not video_mime:
                     raise ValueError(f"Unsupported video format: {ext}. Supported: mp4, webm, mov, mpeg")
 
-                # Check file size (max 20MB to prevent OOM and timeout)
+                # Check file size (max 200MB for large competition videos)
                 file_size_mb = os.path.getsize(video_path) / (1024 * 1024)
-                if file_size_mb > 20:
-                    raise ValueError(f"Video too large ({file_size_mb:.1f}MB). Max allowed: 20MB")
+                if file_size_mb > 200:
+                    raise ValueError(f"Video too large ({file_size_mb:.1f}MB). Max allowed: 200MB")
 
                 # Read and encode video
                 with open(video_path, 'rb') as f:
@@ -188,7 +188,7 @@ class OpenRouterClient:
                 self.base_url,
                 headers=headers,
                 json=payload,
-                timeout=120  # Longer timeout for video processing
+                timeout=300  # 5 min timeout for large video processing
             )
             
             if not response.ok:
