@@ -1,0 +1,588 @@
+<style>
+    /* Sidebar Styles */
+    .sidebar {
+        width: 280px;
+        background: #FFFFFF;
+        border-right: 1px solid #EEEEEE;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        position: sticky;
+        top: 0;
+        font-family: 'Poppins', sans-serif;
+        transition: all 0.3s ease;
+    }
+
+    .sidebar.collapsed {
+        width: 80px;
+    }
+
+    .sidebar.collapsed .sidebar-title,
+    .sidebar.collapsed .sidebar-subtitle,
+    .sidebar.collapsed .nav-text,
+    .sidebar.collapsed .user-info {
+        opacity: 0;
+        width: 0;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+
+    .sidebar.collapsed .logo-img {
+        width: 50px;
+        height: 50px;
+        margin: 0 auto;
+        background-position: center;
+    }
+
+    .sidebar.collapsed .nav-item {
+        justify-content: center;
+        padding-left: 1.7rem;
+    }
+
+    .sidebar.collapsed .nav-item .material-symbols-outlined {
+        margin: 0;
+    }
+
+    .sidebar.collapsed .user-avatar {
+        margin: 0 auto;
+    }
+
+    .sidebar.collapsed .logout-btn {
+        display: none;
+    }
+
+    .sidebar.collapsed .user-profile {
+        justify-content: center;
+    }
+
+    .sidebar.collapsed .notification-badge {
+        display: none;
+    }
+
+    .sidebar-header {
+        border-bottom: 1px solid #F7F7F7;
+    }
+
+    .logo-img {
+        width: 250px;
+        height: 50px;
+        background-size: contain;
+        background-position: left center;
+        background-repeat: no-repeat;
+        flex-shrink: 0;
+    }
+
+    .sidebar-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #222222;
+        margin: 0;
+        line-height: 1.2;
+    }
+
+    .sidebar-subtitle {
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: #5E2A97;
+        margin: 0;
+        line-height: 1.2;
+    }
+
+    /* Navigation Items */
+    .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        color: #222222;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        margin-bottom: 0.25rem;
+    }
+
+    .nav-item:hover {
+        background: #F7F7F7;
+        color: #222222;
+    }
+
+    .nav-item .material-symbols-outlined {
+        font-size: 24px;
+        color: #666666;
+        transition: all 0.2s ease;
+    }
+
+    .nav-item.nav-item-active {
+        background: rgba(94, 42, 151, 0.1);
+        color: #5E2A97;
+        /* border-left: 4px solid #5E2A97; */
+        padding-left: calc(1rem - 4px);
+    }
+
+    .nav-item.nav-item-active .material-symbols-outlined {
+        color: #5E2A97;
+        font-variation-settings: 'FILL' 1;
+    }
+
+    .nav-item .material-symbols-outlined.filled {
+        font-variation-settings: 'FILL' 1;
+    }
+
+    .nav-text {
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .notification-badge {
+        margin-left: auto;
+        font-size: 0.625rem;
+        font-weight: 700;
+        background: #EF4444;
+        color: white;
+        padding: 0.125rem 0.375rem;
+        border-radius: 9999px;
+        min-width: 1.125rem;
+        text-align: center;
+        line-height: 1.2;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 1.125rem;
+    }
+
+    /* Dropdown Styles */
+    .nav-dropdown {
+        position: relative;
+    }
+
+    .nav-dropdown-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    .nav-dropdown-icon {
+        font-size: 18px !important;
+        transition: transform 0.2s ease;
+    }
+
+    .nav-dropdown.open .nav-dropdown-icon {
+        transform: rotate(180deg);
+    }
+
+    .nav-dropdown-menu {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+        padding-left: 2.5rem;
+    }
+
+    .nav-dropdown.open .nav-dropdown-menu {
+        max-height: 200px;
+        margin-top: 0.25rem;
+    }
+
+    .nav-dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.625rem 1rem;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        color: #666666;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        margin-bottom: 0.25rem;
+    }
+
+    .nav-dropdown-item:hover {
+        background: #F7F7F7;
+        color: #5E2A97;
+    }
+
+    .nav-dropdown-item.active {
+        background: rgba(94, 42, 151, 0.1);
+        color: #5E2A97;
+    }
+
+    /* Collapsed sidebar - center dropdown icon */
+    .sidebar.collapsed .nav-dropdown-toggle {
+        justify-content: center;
+    }
+
+    .sidebar.collapsed .nav-dropdown-icon {
+        display: none;
+    }
+
+    .sidebar.collapsed .nav-dropdown-menu{
+        padding-left: 0rem;
+    }
+
+    .sidebar.collapsed .nav-dropdown-item {
+        padding-left: 0.6rem;
+    }
+
+    /* Sidebar Footer */
+    .sidebar-footer {
+        border-top: 1px solid #EEEEEE;
+        margin-top: auto;
+    }
+
+    .user-profile {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+    .user-profile:hover {
+        background: #F7F7F7;
+    }
+
+    .user-avatar {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 50%;
+        overflow: hidden;
+        flex-shrink: 0;
+        border: 2px solid #EEEEEE;
+    }
+
+    .user-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .user-info {
+        flex: 1;
+    }
+
+    .user-name {
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: #222222;
+        margin: 0 0 0.125rem 0;
+        line-height: 1.2;
+    }
+
+    .user-role {
+        font-size: 0.75rem;
+        color: #666666;
+        margin: 0;
+        line-height: 1.2;
+    }
+
+    .logout-btn {
+        background: none;
+        border: none;
+        color: #666666;
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 0.375rem;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .logout-btn:hover {
+        background: rgba(94, 42, 151, 0.1);
+        color: #5E2A97;
+    }
+
+    .logout-btn .material-symbols-outlined {
+        font-size: 20px;
+    }
+
+    /* Mobile Overlay */
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 998;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .sidebar-overlay.active {
+        display: block;
+        opacity: 1;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .sidebar {
+            position: fixed;
+            left: -280px;
+            z-index: 999;
+            transition: left 0.3s ease;
+        }
+
+        .sidebar.mobile-open {
+            left: 0;
+        }
+
+        .sidebar.collapsed {
+            left: -80px;
+        }
+
+        .sidebar.collapsed.mobile-open {
+            left: 0;
+        }
+    }
+</style>
+
+<!-- Sidebar -->
+<aside class="sidebar d-md-flex flex-column" id="superAdminAppSidebar">
+    <div class="sidebar-header p-3 pb-1">
+        <div class="d-flex align-items-center">
+            <div class="logo-img"
+                style='background-image: url("../../assets/IFT_logo.png");'>
+            </div>
+            <!-- <div class="d-flex flex-column" style="margin-left: 10px;">
+                <h1 class="sidebar-title">IFT Admin Panel</h1>
+                <p class="sidebar-subtitle">India's Future Tycoon</p>
+            </div> -->
+        </div>
+    </div>
+    <nav class="flex-grow-1 px-3 d-flex flex-column gap-2 mt-3">
+        <!-- Dashboard -->
+        <a class="nav-item" href="dashboard.html">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span class="nav-text">Dashboard</span>
+        </a>
+
+        <!-- User Management Dropdown -->
+        <div class="nav-dropdown">
+            <div class="nav-item nav-dropdown-toggle" id="userManagementToggle">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <span class="material-symbols-outlined">manage_accounts</span>
+                    <span class="nav-text">User Management</span>
+                </div>
+                <span class="material-symbols-outlined nav-dropdown-icon">expand_more</span>
+            </div>
+            <div class="nav-dropdown-menu">
+                <a class="nav-dropdown-item" href="student.html">
+                    <span class="material-symbols-outlined">school</span>
+                    <span class="nav-text">Student</span>
+                </a>
+                <a class="nav-dropdown-item" href="jury.html">
+                    <span class="material-symbols-outlined">gavel</span>
+                    <span class="nav-text">Jury</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Questionnaire -->
+        <a class="nav-item" href="questionnaire.html">
+            <span class="material-symbols-outlined">quiz</span>
+            <span class="nav-text">Questionnaire</span>
+        </a>
+
+        <!-- Submissions -->
+        <a class="nav-item" href="submissions.html">
+            <span class="material-symbols-outlined">assignment</span>
+            <span class="nav-text">Submissions</span>
+        </a>
+
+        <!-- Jury Management -->
+        <a class="nav-item" href="jury-management.html">
+            <span class="material-symbols-outlined">gavel</span>
+            <span class="nav-text">Jury Management</span>
+        </a>
+
+        <!-- Content -->
+        <a class="nav-item" href="content.html">
+            <span class="material-symbols-outlined">article</span>
+            <span class="nav-text">Content</span>
+        </a>
+
+        <!-- Reports -->
+        <a class="nav-item" href="reports.html">
+            <span class="material-symbols-outlined">analytics</span>
+            <span class="nav-text">Reports</span>
+        </a>
+    </nav>
+    <div class="sidebar-footer p-3 mt-auto">
+        <div class="user-profile">
+            <div class="user-avatar">
+                <img alt="Admin Profile Avatar"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCuvM4h22-G2QJVfQTcNUIEkq41Xunl8wpGK2jUUAu1aPfGpxMyu9nIHKPfFL9ubW7jB_SNhu36Y0R_JZKln8oxW-kLtMx7bFkPpcDJGj8S3-cEZUar5_XyCsUeXbxGAMApRQNx5Pmch6G_kpZ1Iovfm-lhUFqL5YE8DTyTXppH1Bvgj1IElUzBt3-UBgCcTe9x5mK4ipf8KjfSK8vzW4H_awp6bjKWG7ziak6vUxK4E3_0jOND2-QqTIxDY1vLP1u2pBUPtryYKwM" />
+            </div>
+            <div class="user-info flex-grow-1" id="userInfoDiv">
+                <p class="user-name">Admin User</p>
+                <p class="user-role">Super Administrator</p>
+            </div>
+            <button class="logout-btn" id="logoutBtn">
+                <span class="material-symbols-outlined">logout</span>
+            </button>
+        </div>
+    </div>
+</aside>
+
+<script>
+    // Sidebar JavaScript Functionality
+    (function() {
+        // Set active navigation item based on current page
+        function setActiveNavItem() {
+            const currentPage = window.location.pathname.split('/').pop() || 'dashboard.html';
+            const navItems = document.querySelectorAll('.nav-item');
+
+            navItems.forEach(item => {
+                const href = item.getAttribute('href');
+
+                // Remove active class from all items first
+                item.classList.remove('nav-item-active');
+
+                // Find the icon and update fill state
+                const icon = item.querySelector('.material-symbols-outlined');
+                if (icon) {
+                    icon.classList.remove('filled');
+                }
+
+                // Add active class to matching item
+                if (href === currentPage ||
+                    (currentPage === '' && href === 'dashboard.html') ||
+                    (currentPage === 'index.html' && href === 'dashboard.html')) {
+                    item.classList.add('nav-item-active');
+                    if (icon) {
+                        icon.classList.add('filled');
+                    }
+                }
+            });
+        }
+
+        // Profile redirect functionality
+        function handleProfileRedirect() {
+            const userInfoDiv = document.getElementById('userInfoDiv');
+            console.log('Profile redirect - userInfoDiv:', userInfoDiv);
+            if (userInfoDiv) {
+                userInfoDiv.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('User info clicked, redirecting to profile...');
+                    // Redirect to profile page
+                    window.location.href = 'profile.html';
+                });
+
+                // Add pointer cursor to indicate clickability
+                userInfoDiv.style.cursor = 'pointer';
+            }
+        }
+
+        // Logout functionality
+        function handleLogout() {
+            const logoutBtn = document.getElementById('logoutBtn');
+            console.log('Logout - logoutBtn:', logoutBtn);
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    console.log('Logout clicked');
+                    // Show confirmation dialog
+                    if (confirm('Are you sure you want to logout?')) {
+                        // Clear any stored user data
+                        sessionStorage.clear();
+                        localStorage.removeItem('userToken');
+
+                        console.log('Redirecting to sign-in...');
+                        // Redirect to sign-in page
+                        window.location.href = '../auth/sign-in.html';
+                    }
+                });
+            }
+        }
+
+        // Add hover effects to navigation items
+        function addNavHoverEffects() {
+            const navItems = document.querySelectorAll('.nav-item');
+
+            navItems.forEach(item => {
+                item.addEventListener('mouseenter', function() {
+                    if (!this.classList.contains('nav-item-active')) {
+                        const icon = this.querySelector('.material-symbols-outlined');
+                        if (icon && !icon.classList.contains('filled')) {
+                            icon.style.fontVariationSettings = "'FILL' 0.5";
+                        }
+                    }
+                });
+
+                item.addEventListener('mouseleave', function() {
+                    if (!this.classList.contains('nav-item-active')) {
+                        const icon = this.querySelector('.material-symbols-outlined');
+                        if (icon && !icon.classList.contains('filled')) {
+                            icon.style.fontVariationSettings = "'FILL' 0";
+                        }
+                    }
+                });
+            });
+        }
+
+        // Add CSS for animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes pulse {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.1); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Handle dropdown toggle
+        function handleDropdownToggle() {
+            const userManagementToggle = document.getElementById('userManagementToggle');
+            const navDropdown = document.querySelector('.nav-dropdown');
+
+            if (userManagementToggle && navDropdown) {
+                userManagementToggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    navDropdown.classList.toggle('open');
+                });
+            }
+
+            // Set active state for dropdown items
+            const currentPage = window.location.pathname.split('/').pop();
+            const dropdownItems = document.querySelectorAll('.nav-dropdown-item');
+
+            dropdownItems.forEach(item => {
+                const href = item.getAttribute('href');
+                if (href === currentPage) {
+                    item.classList.add('active');
+                    // Auto-open dropdown if a child is active
+                    if (navDropdown) {
+                        navDropdown.classList.add('open');
+                        userManagementToggle.classList.add('nav-item-active');
+                    }
+                }
+            });
+        }
+
+        // Initialize all functionality
+        function initializeSidebar() {
+            console.log('Initializing super admin sidebar...');
+            setActiveNavItem();
+            handleProfileRedirect();
+            handleLogout();
+            addNavHoverEffects();
+            handleDropdownToggle();
+            console.log('Super admin sidebar initialization complete');
+        }
+
+        // Since this script is executed after sidebar HTML is inserted,
+        // we can initialize immediately
+        initializeSidebar();
+    })();
+</script>

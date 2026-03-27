@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create New Questionnaire - IFT Admin Panel</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Material Symbols Outlined -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #5E2A97;
+            --secondary: #DEDE50;
+            --background-light: #F7F7F7;
+            --text-primary: #222222;
+            --text-muted: #666666;
+            --border-light: #EEEEEE;
+            --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--background-light);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        .main-wrapper {
+            display: flex;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .content-wrapper {
+            flex: 1;
+            padding: 2rem 2rem 8rem 2rem;
+            margin: 0 auto;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        /* Warning Banner */
+        .warning-banner {
+            background: #FEF3C7;
+            border-bottom: 1px solid #F59E0B;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .warning-banner .material-symbols-outlined {
+            color: #D97706;
+            font-size: 24px;
+        }
+
+        .warning-banner p {
+            margin: 0;
+            color: #92400E;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        /* Page Header */
+        .page-header {
+            text-align: left;
+            margin-bottom: 2.5rem;
+        }
+
+        .page-header h1 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            font-size: 0.9375rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* Cards */
+        .config-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 2rem;
+        }
+
+        .form-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .form-control {
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.875rem;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(94, 42, 151, 0.1);
+            outline: none;
+        }
+
+        .form-control::placeholder {
+            color: #AAAAAA;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        /* File Upload Configuration */
+        .file-upload-config {
+            background: #F8F9FF;
+            border: 1px solid #E0E7FF;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .file-upload-config h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .file-upload-config h3 .material-symbols-outlined {
+            color: var(--primary);
+            font-size: 20px;
+        }
+
+        .file-type-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            background: white;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .file-type-checkbox:hover {
+            border-color: var(--primary);
+            background: #FAFAFA;
+        }
+
+        .file-type-checkbox input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+
+        .file-type-checkbox label {
+            flex: 1;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin: 0;
+        }
+
+        .file-type-checkbox .material-symbols-outlined {
+            color: var(--text-muted);
+            font-size: 20px;
+        }
+
+        /* Questions List */
+        .questions-container {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 2rem;
+        }
+
+        .questions-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .questions-header h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .question-count {
+            background: var(--primary);
+            color: white;
+            padding: 0.375rem 0.875rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .question-item {
+            background: #FAFAFA;
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .question-item:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .question-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .question-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            font-size: 0.875rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .question-title-input {
+            flex: 1;
+        }
+
+        .delete-question-btn {
+            background: #FEE2E2;
+            color: #DC2626;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .delete-question-btn:hover {
+            background: #FECACA;
+        }
+
+        .delete-question-btn .material-symbols-outlined {
+            font-size: 20px;
+        }
+
+        .question-controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin-top: 1rem;
+        }
+
+        .question-type-select {
+            flex: 1;
+        }
+
+        .required-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: white;
+            padding: 0.625rem 1rem;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+        }
+
+        .required-toggle input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+
+        .required-toggle label {
+            font-size: 0.8125rem;
+            font-weight: 500;
+            cursor: pointer;
+            margin: 0;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            background: #FAFAFA;
+            border: 2px dashed var(--border-light);
+            border-radius: 12px;
+        }
+
+        .empty-state .material-symbols-outlined {
+            font-size: 48px;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .empty-state p {
+            color: var(--text-muted);
+            font-size: 0.9375rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .add-question-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .add-question-btn:hover:not(:disabled) {
+            background: #4A1F75;
+        }
+
+        .add-question-btn:disabled {
+            background: #CCCCCC;
+            cursor: not-allowed;
+        }
+
+        .limit-message {
+            display: inline-block;
+            margin-left: 1rem;
+            padding: 0.5rem 1rem;
+            background: #FEF3C7;
+            border: 1px solid #F59E0B;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            color: #92400E;
+            font-weight: 500;
+        }
+
+        /* Buttons */
+        .btn-primary-custom {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(94, 42, 151, 0.2);
+        }
+
+        .btn-primary-custom:hover {
+            background: #4A1F75;
+            box-shadow: 0 6px 16px rgba(94, 42, 151, 0.3);
+        }
+
+        .btn-primary-custom:active {
+            transform: scale(0.98);
+        }
+
+        .btn-secondary-custom {
+            background: white;
+            color: var(--text-primary);
+            border: 1px solid var(--border-light);
+            padding: 0.625rem 1.5rem;
+            border-radius: 8px;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary-custom:hover {
+            background: var(--background-light);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Sticky Footer */
+        .sticky-footer {
+            position: fixed;
+            bottom: 0;
+            left: 280px;
+            right: 0;
+            background: white;
+            border-top: 1px solid var(--border-light);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 100;
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.04);
+        }
+
+        .autosave-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .autosave-status .material-symbols-outlined {
+            font-size: 18px;
+        }
+
+        .footer-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        /* Validation Messages */
+        .validation-error {
+            background: #FEE2E2;
+            border: 1px solid #EF4444;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .validation-error.show {
+            display: block;
+        }
+
+        .validation-error-content {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .validation-error .material-symbols-outlined {
+            color: #DC2626;
+            font-size: 24px;
+        }
+
+        .validation-error-text {
+            flex: 1;
+        }
+
+        .validation-error-text strong {
+            color: #DC2626;
+            font-weight: 700;
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .validation-error-text ul {
+            margin: 0.5rem 0 0 0;
+            padding-left: 1.25rem;
+            color: #991B1B;
+        }
+
+        .validation-error-text li {
+            margin-bottom: 0.25rem;
+            font-size: 0.875rem;
+        }
+
+        /* Preview Modal */
+        .preview-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .preview-modal.show {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .preview-content {
+            background: white;
+            border-radius: 16px;
+            max-width: 900px;
+            width: 100%;
+            margin: 2rem auto;
+        }
+
+        .preview-header {
+            background: var(--primary);
+            color: white;
+            padding: 2rem;
+            border-radius: 16px 16px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .preview-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .close-preview-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .close-preview-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .preview-body {
+            padding: 2rem;
+        }
+
+        .preview-section {
+            margin-bottom: 2rem;
+        }
+
+        .preview-section h3 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .preview-question {
+            background: #FAFAFA;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .preview-question-title {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .preview-question-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .preview-file-requirements {
+            background: #F8F9FF;
+            border: 1px solid #E0E7FF;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .preview-file-requirements h4 {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+        }
+
+        .preview-file-requirements ul {
+            margin: 0;
+            padding-left: 1.25rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0;
+            }
+
+            .content-wrapper {
+                padding: 1.5rem 1rem 8rem 1rem;
+            }
+
+            .sticky-footer {
+                left: 0;
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            .footer-actions {
+                width: 100%;
+                justify-content: stretch;
+            }
+
+            .footer-actions button {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-wrapper">
+        <!-- Sidebar -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div id="header-container"></div>
+
+            <!-- Warning Banner -->
+            <div class="warning-banner">
+                <span class="material-symbols-outlined">warning</span>
+                <p>Warning: Creating a new questionnaire will be saved as draft. You can publish it when ready.</p>
+            </div>
+
+            <!-- Content Wrapper -->
+            <div class="content-wrapper">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <h1>Create New Questionnaire</h1>
+                    <p>Create a questionnaire with exactly 12 questions and configure submission requirements.</p>
+                </div>
+
+                <!-- Validation Error -->
+                <div class="validation-error" id="validationError">
+                    <div class="validation-error-content">
+                        <span class="material-symbols-outlined">error</span>
+                        <div class="validation-error-text">
+                            <strong>Validation Failed</strong>
+                            <ul id="validationErrorList"></ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Configuration Card -->
+                <div class="config-card">
+                    <div class="mb-4">
+                        <label class="form-label" for="questionnaireTitle">Questionnaire Title *</label>
+                        <input type="text" class="form-control" id="questionnaireTitle"
+                            placeholder="e.g., Round 1 Assessment - Innovation Track 2024">
+                    </div>
+                    <div>
+                        <label class="form-label" for="submissionInstructions">Submission Instructions *</label>
+                        <textarea class="form-control" id="submissionInstructions"
+                            placeholder="Provide clear guidance for students on how to complete this questionnaire..."></textarea>
+                    </div>
+
+                    <!-- File Upload Configuration -->
+                    <div class="file-upload-config">
+                        <h3>
+                            <span class="material-symbols-outlined">upload_file</span>
+                            Compulsory File Submission Settings *
+                        </h3>
+                        <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1rem;">
+                            Select at least one file type that students must submit along with their questionnaire responses.
+                        </p>
+                        <div class="file-type-checkbox">
+                            <input type="checkbox" id="requirePPT" value="PPT">
+                            <span class="material-symbols-outlined">slideshow</span>
+                            <label for="requirePPT">PPT Upload Required</label>
+                        </div>
+                        <div class="file-type-checkbox">
+                            <input type="checkbox" id="requirePDF" value="PDF/DOC">
+                            <span class="material-symbols-outlined">description</span>
+                            <label for="requirePDF">PDF/DOC Upload Required</label>
+                        </div>
+                        <div class="file-type-checkbox">
+                            <input type="checkbox" id="requireVideo" value="Video">
+                            <span class="material-symbols-outlined">videocam</span>
+                            <label for="requireVideo">Video Upload Required</label>
+                        </div>
+                        <div class="file-type-checkbox">
+                            <input type="checkbox" id="requireImage" value="Image">
+                            <span class="material-symbols-outlined">image</span>
+                            <label for="requireImage">Image Upload Required</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Questions Container -->
+                <div class="questions-container">
+                    <div class="questions-header">
+                        <h2>Questions</h2>
+                        <span class="question-count" id="questionCount">0 / 12</span>
+                    </div>
+
+                    <div id="questionsList"></div>
+
+                    <div class="text-center" style="margin-top: 1.5rem;">
+                        <button class="add-question-btn" id="addQuestionBtn" onclick="addQuestion()">
+                            <span class="material-symbols-outlined">add_circle</span>
+                            Add Question
+                        </button>
+                        <span class="limit-message" id="limitMessage" style="display: none;">
+                            Maximum of 12 questions reached.
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sticky Footer -->
+            <div class="sticky-footer">
+                <div class="autosave-status">
+                    <span class="material-symbols-outlined">info</span>
+                    <span>Remember to save your questionnaire</span>
+                </div>
+                <div class="footer-actions">
+                    <button class="btn-secondary-custom" onclick="previewQuestionnaire()">
+                        <span class="material-symbols-outlined">visibility</span>
+                        Preview
+                    </button>
+                    <button class="btn-primary-custom" onclick="saveQuestionnaire()">
+                        <span class="material-symbols-outlined">save</span>
+                        Save Questionnaire
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview Modal -->
+    <div class="preview-modal" id="previewModal">
+        <div class="preview-content">
+            <div class="preview-header">
+                <h2>Questionnaire Preview</h2>
+                <button class="close-preview-btn" onclick="closePreview()">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="preview-body" id="previewBody"></div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Load Header and Sidebar -->
+    <script>
+        // Fetch and insert header
+        fetch('header.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('header-container').innerHTML = data;
+            })
+            .catch(error => console.error('Error loading header:', error));
+
+        // Fetch and insert sidebar
+        fetch('sidebar.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('sidebar-container').innerHTML = data;
+            })
+            .catch(error => console.error('Error loading sidebar:', error));
+    </script>
+
+    <!-- Page Functionality -->
+    <script>
+        const MAX_QUESTIONS = 12;
+        let questions = [];
+
+        // Initialize empty questions list
+        function initializeQuestions() {
+            updateQuestionsList();
+            updateQuestionCount();
+        }
+
+        // Add a new question
+        function addQuestion() {
+            if (questions.length >= MAX_QUESTIONS) {
+                return;
+            }
+
+            const questionId = Date.now();
+            const question = {
+                id: questionId,
+                title: '',
+                type: 'short-text',
+                required: false
+            };
+
+            questions.push(question);
+            updateQuestionsList();
+            updateQuestionCount();
+            checkQuestionLimit();
+        }
+
+        // Delete a question
+        function deleteQuestion(questionId) {
+            if (confirm('Are you sure you want to delete this question?')) {
+                questions = questions.filter(q => q.id !== questionId);
+                updateQuestionsList();
+                updateQuestionCount();
+                checkQuestionLimit();
+            }
+        }
+
+        // Update question data
+        function updateQuestion(questionId, field, value) {
+            const question = questions.find(q => q.id === questionId);
+            if (question) {
+                question[field] = value;
+            }
+        }
+
+        // Update questions list display
+        function updateQuestionsList() {
+            const questionsList = document.getElementById('questionsList');
+
+            if (questions.length === 0) {
+                questionsList.innerHTML = `
+                    <div class="empty-state">
+                        <span class="material-symbols-outlined">quiz</span>
+                        <p>No questions added yet. Click "Add Question" to start building your questionnaire.</p>
+                    </div>
+                `;
+            } else {
+                questionsList.innerHTML = questions.map((question, index) => `
+                    <div class="question-item">
+                        <div class="question-header">
+                            <div class="question-number">${index + 1}</div>
+                            <div class="question-title-input">
+                                <input type="text"
+                                       class="form-control"
+                                       placeholder="Enter question text..."
+                                       value="${question.title}"
+                                       onchange="updateQuestion(${question.id}, 'title', this.value)">
+                            </div>
+                            <button class="delete-question-btn" onclick="deleteQuestion(${question.id})">
+                                <span class="material-symbols-outlined">delete</span>
+                            </button>
+                        </div>
+                        <div class="question-controls">
+                            <select class="form-control question-type-select"
+                                    onchange="updateQuestion(${question.id}, 'type', this.value)">
+                                <option value="short-text" ${question.type === 'short-text' ? 'selected' : ''}>Short Text</option>
+                                <option value="long-text" ${question.type === 'long-text' ? 'selected' : ''}>Long Text</option>
+                                <option value="multiple-choice" ${question.type === 'multiple-choice' ? 'selected' : ''}>Multiple Choice</option>
+                                <option value="checkbox" ${question.type === 'checkbox' ? 'selected' : ''}>Checkbox</option>
+                            </select>
+                            <div class="required-toggle">
+                                <input type="checkbox"
+                                       id="required-${question.id}"
+                                       ${question.required ? 'checked' : ''}
+                                       onchange="updateQuestion(${question.id}, 'required', this.checked)">
+                                <label for="required-${question.id}">Required</label>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Update question count display
+        function updateQuestionCount() {
+            document.getElementById('questionCount').textContent = `${questions.length} / ${MAX_QUESTIONS}`;
+        }
+
+        // Check question limit
+        function checkQuestionLimit() {
+            const addBtn = document.getElementById('addQuestionBtn');
+            const limitMsg = document.getElementById('limitMessage');
+
+            if (questions.length >= MAX_QUESTIONS) {
+                addBtn.disabled = true;
+                limitMsg.style.display = 'inline-block';
+            } else {
+                addBtn.disabled = false;
+                limitMsg.style.display = 'none';
+            }
+        }
+
+        // Validate questionnaire
+        function validateQuestionnaire() {
+            const errors = [];
+            const title = document.getElementById('questionnaireTitle').value.trim();
+            const instructions = document.getElementById('submissionInstructions').value.trim();
+
+            // Check title
+            if (!title) {
+                errors.push('Questionnaire title is required.');
+            }
+
+            // Check instructions
+            if (!instructions) {
+                errors.push('Submission instructions are required.');
+            }
+
+            // Check exactly 12 questions
+            if (questions.length !== MAX_QUESTIONS) {
+                errors.push(`Exactly ${MAX_QUESTIONS} questions are required. Currently: ${questions.length} questions.`);
+            }
+
+            // Check for empty question titles
+            const emptyQuestions = questions.filter(q => !q.title.trim());
+            if (emptyQuestions.length > 0) {
+                errors.push(`${emptyQuestions.length} question(s) have empty titles.`);
+            }
+
+            // Check file upload requirements
+            const fileTypes = [
+                document.getElementById('requirePPT'),
+                document.getElementById('requirePDF'),
+                document.getElementById('requireVideo'),
+                document.getElementById('requireImage')
+            ];
+            const selectedFiles = fileTypes.filter(cb => cb.checked);
+
+            if (selectedFiles.length === 0) {
+                errors.push('At least one file type must be required for submission.');
+            }
+
+            return errors;
+        }
+
+        // Show validation errors
+        function showValidationErrors(errors) {
+            const errorDiv = document.getElementById('validationError');
+            const errorList = document.getElementById('validationErrorList');
+
+            errorList.innerHTML = errors.map(error => `<li>${error}</li>`).join('');
+            errorDiv.classList.add('show');
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                errorDiv.classList.remove('show');
+            }, 5000);
+        }
+
+        // Hide validation errors
+        function hideValidationErrors() {
+            document.getElementById('validationError').classList.remove('show');
+        }
+
+        // Preview questionnaire
+        function previewQuestionnaire() {
+            const title = document.getElementById('questionnaireTitle').value.trim() || 'Untitled Questionnaire';
+            const instructions = document.getElementById('submissionInstructions').value.trim() || 'No instructions provided.';
+
+            const fileTypes = [];
+            if (document.getElementById('requirePPT').checked) fileTypes.push('PPT');
+            if (document.getElementById('requirePDF').checked) fileTypes.push('PDF/DOC');
+            if (document.getElementById('requireVideo').checked) fileTypes.push('Video');
+            if (document.getElementById('requireImage').checked) fileTypes.push('Image');
+
+            const previewBody = document.getElementById('previewBody');
+            previewBody.innerHTML = `
+                <div class="preview-section">
+                    <h3>${title}</h3>
+                    <p style="color: var(--text-muted); font-size: 0.9375rem;">${instructions}</p>
+                </div>
+
+                <div class="preview-section">
+                    <h3>Questions (${questions.length} / ${MAX_QUESTIONS})</h3>
+                    ${questions.length === 0 ?
+                        '<p style="color: var(--text-muted);">No questions added yet.</p>' :
+                        questions.map((q, index) => `
+                            <div class="preview-question">
+                                <div class="preview-question-title">
+                                    ${index + 1}. ${q.title || '(Untitled Question)'}
+                                    ${q.required ? '<span style="color: #DC2626;">*</span>' : ''}
+                                </div>
+                                <div class="preview-question-meta">
+                                    <span>Type: ${formatQuestionType(q.type)}</span>
+                                    ${q.required ? '<span style="color: #DC2626; font-weight: 600;">Required</span>' : '<span>Optional</span>'}
+                                </div>
+                            </div>
+                        `).join('')
+                    }
+                </div>
+
+                <div class="preview-section">
+                    <h3>Required File Submissions</h3>
+                    <div class="preview-file-requirements">
+                        <h4>Students must submit the following files:</h4>
+                        ${fileTypes.length === 0 ?
+                            '<p style="color: var(--text-muted); margin: 0;">No file types selected.</p>' :
+                            `<ul>${fileTypes.map(type => `<li>${type}</li>`).join('')}</ul>`
+                        }
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('previewModal').classList.add('show');
+        }
+
+        // Close preview
+        function closePreview() {
+            document.getElementById('previewModal').classList.remove('show');
+        }
+
+        // Format question type
+        function formatQuestionType(type) {
+            const types = {
+                'short-text': 'Short Text',
+                'long-text': 'Long Text',
+                'multiple-choice': 'Multiple Choice',
+                'checkbox': 'Checkbox'
+            };
+            return types[type] || type;
+        }
+
+        // Save questionnaire
+        function saveQuestionnaire() {
+            hideValidationErrors();
+
+            const errors = validateQuestionnaire();
+            if (errors.length > 0) {
+                showValidationErrors(errors);
+                return;
+            }
+
+            const title = document.getElementById('questionnaireTitle').value.trim();
+            const instructions = document.getElementById('submissionInstructions').value.trim();
+
+            const fileTypes = [];
+            if (document.getElementById('requirePPT').checked) fileTypes.push('PPT');
+            if (document.getElementById('requirePDF').checked) fileTypes.push('PDF/DOC');
+            if (document.getElementById('requireVideo').checked) fileTypes.push('Video');
+            if (document.getElementById('requireImage').checked) fileTypes.push('Image');
+
+            const questionnaireData = {
+                title,
+                instructions,
+                questions,
+                fileRequirements: fileTypes,
+                status: 'Draft',
+                totalQuestions: questions.length,
+                createdAt: new Date().toISOString(),
+                lastModified: new Date().toISOString()
+            };
+
+            // Save to localStorage
+            let savedQuestionnaires = JSON.parse(localStorage.getItem('questionnaires') || '[]');
+            savedQuestionnaires.push(questionnaireData);
+            localStorage.setItem('questionnaires', JSON.stringify(savedQuestionnaires));
+
+            // Show success message and redirect
+            alert('Questionnaire saved successfully as Draft!');
+            window.location.href = 'questionnaire.html';
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeQuestions();
+        });
+
+        // Close preview on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closePreview();
+            }
+        });
+
+        // Close preview when clicking outside
+        document.getElementById('previewModal').addEventListener('click', (e) => {
+            if (e.target.id === 'previewModal') {
+                closePreview();
+            }
+        });
+    </script>
+</body>
+
+</html>

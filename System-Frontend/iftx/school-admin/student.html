@@ -1,0 +1,1546 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Student Management | Super Admin | ENpower IFT</title>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+
+    <!-- Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary: #5E2A97;
+            --secondary: #DEDE50;
+            --primary-light: #E8D4F0;
+            --background-light: #F7F7F7;
+            --surface-light: #FFFFFF;
+            --border-light: #EEEEEE;
+            --text-dark: #222222;
+            --text-muted: #666666;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            overflow: hidden;
+        }
+
+        .main-container {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow-y: auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        .content-wrapper {
+            flex: 1;
+            padding: 32px;
+            max-width: 100%;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Page Header */
+        .page-header {
+            margin-bottom: 32px;
+        }
+
+        .page-header h1 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+
+        .breadcrumb {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            background: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .breadcrumb-item a {
+            color: var(--text-muted);
+            text-decoration: none;
+        }
+
+        .breadcrumb-item a:hover {
+            color: var(--primary);
+        }
+
+        .breadcrumb-item.active {
+            color: var(--text-dark);
+        }
+
+        /* Stats Cards */
+        .stat-card {
+            background: var(--surface-light);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            border: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .stat-icon.blue {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+
+        .stat-icon.amber {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+        }
+
+        .stat-icon.green {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin: 0;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin: 0;
+        }
+
+        /* Main Card */
+        .main-card {
+            background: var(--surface-light);
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            border: 1px solid var(--border-light);
+            overflow: hidden;
+        }
+
+        .main-card-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        /* Search & Filter */
+        .search-input {
+            position: relative;
+        }
+
+        .search-input .material-symbols-outlined {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 20px;
+        }
+
+        .search-input input {
+            width: 100%;
+            padding: 10px 12px 10px 44px;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            font-size: 0.875rem;
+            background: #f8fafc;
+        }
+
+        .search-input input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(94, 42, 151, 0.1);
+        }
+
+        /* Table */
+        .custom-table {
+            width: 100%;
+            font-size: 0.875rem;
+        }
+
+        .custom-table thead {
+            background: #f8fafc;
+        }
+
+        .custom-table th {
+            padding: 16px 24px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            text-align: left;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .custom-table td {
+            padding: 16px 24px;
+            vertical-align: middle;
+            border-bottom: 1px solid #f8f9fa;
+        }
+
+        .custom-table tbody tr {
+            transition: background 0.2s;
+        }
+
+        .custom-table tbody tr:hover {
+            background: rgba(94, 42, 151, 0.03);
+        }
+
+        .custom-table tbody tr.highlighted {
+            background: rgba(94, 42, 151, 0.05);
+        }
+
+        .avatar-circle {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .avatar-circle.default {
+            background: #e2e8f0;
+            color: #64748b;
+        }
+
+        .avatar-circle.primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .student-name {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin: 0;
+        }
+
+        .student-grade {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .badge-status {
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 999px;
+            text-transform: uppercase;
+        }
+
+        .badge-status.submitted {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-status.under-review {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-status.pending {
+            background: #e2e8f0;
+            color: #475569;
+        }
+
+        /* Pagination */
+        .pagination-custom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            border-top: 1px solid var(--border-light);
+        }
+
+        .pagination-info {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .page-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--border-light);
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .page-btn:hover {
+            background: #f8fafc;
+        }
+
+        .page-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Buttons */
+        .btn-primary-custom {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px rgba(94, 42, 151, 0.3);
+        }
+
+        .btn-primary-custom:hover {
+            background: #7B3FB5;
+        }
+
+        .btn-secondary-custom {
+            background: white;
+            color: var(--text-dark);
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary-custom:hover {
+            background: #f8fafc;
+        }
+
+        .btn-icon-action {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--border-light);
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-muted);
+        }
+
+        .btn-icon-action:hover {
+            background: rgba(94, 42, 151, 0.1);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .btn-icon-action .material-symbols-outlined {
+            font-size: 18px;
+        }
+
+        /* Details Sidebar */
+        .details-sidebar {
+            position: fixed;
+            top: 0;
+            right: -450px;
+            width: 450px;
+            height: 100vh;
+            background: var(--surface-light);
+            box-shadow: -4px 0 24px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            transition: right 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .details-sidebar.open {
+            right: 0;
+        }
+
+        .details-sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .details-sidebar-overlay.show {
+            display: block;
+            opacity: 1;
+        }
+
+        .details-sidebar-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .details-sidebar-header h2 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .details-sidebar-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--border-light);
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-muted);
+        }
+
+        .details-sidebar-close:hover {
+            background: #f8fafc;
+            color: var(--text-dark);
+        }
+
+        .details-sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        .detail-section {
+            margin-bottom: 32px;
+        }
+
+        .detail-section-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .detail-profile {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .detail-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(94, 42, 151, 0.2);
+        }
+
+        .detail-profile-info h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0 0 4px 0;
+        }
+
+        .detail-profile-info p {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .detail-item {
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+
+        .detail-item-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+        }
+
+        .detail-item-value {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .detail-info-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .detail-info-row .material-symbols-outlined {
+            color: var(--primary);
+            font-size: 20px;
+        }
+
+        .detail-info-row-content h4 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin: 0 0 4px 0;
+        }
+
+        .detail-info-row-content p {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .team-card {
+            padding: 16px;
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+
+        .team-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .team-card-title {
+            font-size: 0.875rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .team-leader-badge {
+            font-size: 0.625rem;
+            font-weight: 700;
+            padding: 4px 8px;
+            background: rgba(94, 42, 151, 0.1);
+            color: var(--primary);
+            border-radius: 4px;
+        }
+
+        .team-member {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .team-member-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.625rem;
+            font-weight: 700;
+        }
+
+        .team-member-name {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .idea-card {
+            padding: 20px;
+            background: rgba(94, 42, 151, 0.05);
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+
+        .idea-card h4 {
+            font-size: 0.875rem;
+            font-weight: 700;
+            margin: 0 0 8px 0;
+        }
+
+        .idea-card p {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            font-style: italic;
+            margin: 0;
+        }
+
+        .tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tag {
+            font-size: 0.625rem;
+            font-weight: 700;
+            padding: 4px 12px;
+            background: #e2e8f0;
+            color: var(--text-dark);
+            border-radius: 4px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .content-wrapper {
+                padding: 16px;
+            }
+
+            .details-sidebar {
+                width: 100%;
+                right: -100%;
+            }
+
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-container">
+        <!-- Include Sidebar -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Include Header -->
+            <div id="header-container"></div>
+
+            <div class="content-wrapper">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div class="row align-items-center">
+                        <div class="col-12 col-md-6">
+                            <h1>Student Management</h1>
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="dashboard.html">Admin</a></li>
+                                    <li class="breadcrumb-item active">Students</li>
+                                </ol>
+                            </nav>
+                        </div>
+                        <div class="col-12 col-md-6 d-flex justify-content-md-end align-items-center gap-3 mt-3 mt-md-0">
+                            <button class="btn-secondary-custom">
+                                <span class="material-symbols-outlined" style="font-size: 18px;">file_download</span>
+                                Export CSV
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="row g-4 mb-4">
+                    <div class="col-12 col-md-4">
+                        <div class="stat-card">
+                            <div class="stat-icon blue">
+                                <span class="material-symbols-outlined">groups</span>
+                            </div>
+                            <div>
+                                <p class="stat-label">Total Teams</p>
+                                <h3 class="stat-value">1,284</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                        <div class="stat-card">
+                            <div class="stat-icon amber">
+                                <span class="material-symbols-outlined">pending_actions</span>
+                            </div>
+                            <div>
+                                <p class="stat-label">Pending Ideas</p>
+                                <h3 class="stat-value">42</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                        <div class="stat-card">
+                            <div class="stat-icon green">
+                                <span class="material-symbols-outlined">check_circle</span>
+                            </div>
+                            <div>
+                                <p class="stat-label">Approved</p>
+                                <h3 class="stat-value">896</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Data Card -->
+                <div class="main-card">
+                    <!-- Search & Filters -->
+                    <div class="main-card-header">
+                        <div class="row align-items-center g-3">
+                            <div class="col-12 col-md-6">
+                                <div class="search-input">
+                                    <span class="material-symbols-outlined">search</span>
+                                    <input type="text" id="searchInput" placeholder="Search by name, school, or team...">
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6 d-flex align-items-center gap-3 justify-content-md-end">
+                                <select class="form-select" id="statusFilter" style="width: auto; font-size: 0.875rem;">
+                                    <option value="">All Statuses</option>
+                                    <option value="submitted">Submitted</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="under-review">Under Review</option>
+                                </select>
+                                <!-- <button class="btn" style="padding: 8px;">
+                                    <span class="material-symbols-outlined" style="color: var(--text-muted);">tune</span>
+                                </button> -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Table -->
+                    <div class="table-responsive">
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Student Name</th>
+                                    <th>School</th>
+                                    <th>Team Name</th>
+                                    <th>Submission Status</th>
+                                    <th style="text-align: right;">Last Updated</th>
+                                    <th style="text-align: center;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Row 1 -->
+                                <tr data-student-name="Arjun Jain" data-school="Heritage International School" data-team="Eco-Warriors" data-status="submitted" data-page="1">
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="avatar-circle default">AJ</div>
+                                            <div>
+                                                <p class="student-name">Arjun Jain</p>
+                                                <p class="student-grade">Grade 11</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="color: var(--text-muted);">Heritage International School</td>
+                                    <td style="font-weight: 500;">Eco-Warriors</td>
+                                    <td>
+                                        <span class="badge-status submitted">Submitted</span>
+                                    </td>
+                                    <td style="text-align: right; color: var(--text-muted);">2h ago</td>
+                                    <td style="text-align: center;">
+                                        <button class="btn-icon-action" title="View Details">
+                                            <span class="material-symbols-outlined">visibility</span>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Row 2 -->
+                                <tr class="highlighted" data-student-name="Sara Mehta" data-school="St. Xavier's Academy" data-team="FinTech Future" data-status="under-review" data-page="1">
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="avatar-circle primary">SM</div>
+                                            <div>
+                                                <p class="student-name">Sara Mehta</p>
+                                                <p class="student-grade">Grade 9</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="color: var(--text-muted);">St. Xavier's Academy</td>
+                                    <td style="font-weight: 500;">FinTech Future</td>
+                                    <td>
+                                        <span class="badge-status under-review">Under Review</span>
+                                    </td>
+                                    <td style="text-align: right; color: var(--text-muted);">Oct 24, 2023</td>
+                                    <td style="text-align: center;">
+                                        <button class="btn-icon-action" title="View Details">
+                                            <span class="material-symbols-outlined">visibility</span>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Row 3 -->
+                                <tr data-student-name="Rohan Khanna" data-school="Delhi Public School" data-team="Med-Botics" data-status="pending" data-page="1">
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="avatar-circle default">RK</div>
+                                            <div>
+                                                <p class="student-name">Rohan Khanna</p>
+                                                <p class="student-grade">Grade 12</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="color: var(--text-muted);">Delhi Public School</td>
+                                    <td style="font-weight: 500;">Med-Botics</td>
+                                    <td>
+                                        <span class="badge-status pending">Pending</span>
+                                    </td>
+                                    <td style="text-align: right; color: var(--text-muted);">Oct 22, 2023</td>
+                                    <td style="text-align: center;">
+                                        <button class="btn-icon-action" title="View Details">
+                                            <span class="material-symbols-outlined">visibility</span>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Row 4 -->
+                                <tr data-student-name="Priya Iyer" data-school="Global Academy" data-team="Agri-Grow" data-status="submitted" data-page="1">
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="avatar-circle default">PI</div>
+                                            <div>
+                                                <p class="student-name">Priya Iyer</p>
+                                                <p class="student-grade">Grade 10</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="color: var(--text-muted);">Global Academy</td>
+                                    <td style="font-weight: 500;">Agri-Grow</td>
+                                    <td>
+                                        <span class="badge-status submitted">Submitted</span>
+                                    </td>
+                                    <td style="text-align: right; color: var(--text-muted);">Oct 21, 2023</td>
+                                    <td style="text-align: center;">
+                                        <button class="btn-icon-action" title="View Details">
+                                            <span class="material-symbols-outlined">visibility</span>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Row 5 -->
+                                <tr data-student-name="Vikram Singh" data-school="Modern High School" data-team="Smart City Solutions" data-status="under-review" data-page="1">
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="avatar-circle default">VS</div>
+                                            <div>
+                                                <p class="student-name">Vikram Singh</p>
+                                                <p class="student-grade">Grade 11</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="color: var(--text-muted);">Modern High School</td>
+                                    <td style="font-weight: 500;">Smart City Solutions</td>
+                                    <td>
+                                        <span class="badge-status under-review">Under Review</span>
+                                    </td>
+                                    <td style="text-align: right; color: var(--text-muted);">Oct 20, 2023</td>
+                                    <td style="text-align: center;">
+                                        <button class="btn-icon-action" title="View Details">
+                                            <span class="material-symbols-outlined">visibility</span>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Page 2 Students -->
+                                <!-- Row 6 -->
+                                <tr data-student-name="Ananya Patel" data-school="Greenwood International" data-team="EduTech Innovators" data-status="submitted" data-page="2" style="display: none;">
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="avatar-circle default">AP</div>
+                                            <div>
+                                                <p class="student-name">Ananya Patel</p>
+                                                <p class="student-grade">Grade 12</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="color: var(--text-muted);">Greenwood International</td>
+                                    <td style="font-weight: 500;">EduTech Innovators</td>
+                                    <td>
+                                        <span class="badge-status submitted">Submitted</span>
+                                    </td>
+                                    <td style="text-align: right; color: var(--text-muted);">Oct 19, 2023</td>
+                                    <td style="text-align: center;">
+                                        <button class="btn-icon-action" title="View Details">
+                                            <span class="material-symbols-outlined">visibility</span>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Row 7 -->
+                                <tr data-student-name="Karthik Reddy" data-school="Cambridge School" data-team="Health Plus" data-status="pending" data-page="2" style="display: none;">
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="avatar-circle default">KR</div>
+                                            <div>
+                                                <p class="student-name">Karthik Reddy</p>
+                                                <p class="student-grade">Grade 10</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="color: var(--text-muted);">Cambridge School</td>
+                                    <td style="font-weight: 500;">Health Plus</td>
+                                    <td>
+                                        <span class="badge-status pending">Pending</span>
+                                    </td>
+                                    <td style="text-align: right; color: var(--text-muted);">Oct 18, 2023</td>
+                                    <td style="text-align: center;">
+                                        <button class="btn-icon-action" title="View Details">
+                                            <span class="material-symbols-outlined">visibility</span>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Row 8 -->
+                                <tr data-student-name="Meera Nair" data-school="The Valley School" data-team="Green Energy Warriors" data-status="submitted" data-page="2" style="display: none;">
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="avatar-circle default">MN</div>
+                                            <div>
+                                                <p class="student-name">Meera Nair</p>
+                                                <p class="student-grade">Grade 11</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="color: var(--text-muted);">The Valley School</td>
+                                    <td style="font-weight: 500;">Green Energy Warriors</td>
+                                    <td>
+                                        <span class="badge-status submitted">Submitted</span>
+                                    </td>
+                                    <td style="text-align: right; color: var(--text-muted);">Oct 17, 2023</td>
+                                    <td style="text-align: center;">
+                                        <button class="btn-icon-action" title="View Details">
+                                            <span class="material-symbols-outlined">visibility</span>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Row 9 -->
+                                <tr data-student-name="Aditya Kumar" data-school="Ryan International" data-team="AI Revolution" data-status="under-review" data-page="2" style="display: none;">
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="avatar-circle default">AK</div>
+                                            <div>
+                                                <p class="student-name">Aditya Kumar</p>
+                                                <p class="student-grade">Grade 12</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="color: var(--text-muted);">Ryan International</td>
+                                    <td style="font-weight: 500;">AI Revolution</td>
+                                    <td>
+                                        <span class="badge-status under-review">Under Review</span>
+                                    </td>
+                                    <td style="text-align: right; color: var(--text-muted);">Oct 16, 2023</td>
+                                    <td style="text-align: center;">
+                                        <button class="btn-icon-action" title="View Details">
+                                            <span class="material-symbols-outlined">visibility</span>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Row 10 -->
+                                <tr data-student-name="Neha Sharma" data-school="Bangalore International" data-team="Fashion Forward" data-status="pending" data-page="2" style="display: none;">
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="avatar-circle default">NS</div>
+                                            <div>
+                                                <p class="student-name">Neha Sharma</p>
+                                                <p class="student-grade">Grade 9</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="color: var(--text-muted);">Bangalore International</td>
+                                    <td style="font-weight: 500;">Fashion Forward</td>
+                                    <td>
+                                        <span class="badge-status pending">Pending</span>
+                                    </td>
+                                    <td style="text-align: right; color: var(--text-muted);">Oct 15, 2023</td>
+                                    <td style="text-align: center;">
+                                        <button class="btn-icon-action" title="View Details">
+                                            <span class="material-symbols-outlined">visibility</span>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Page 3 Students -->
+                                <!-- Row 11 -->
+                                <tr data-student-name="Rahul Desai" data-school="National Public School" data-team="Clean Water Initiative" data-status="submitted" data-page="3" style="display: none;">
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="avatar-circle default">RD</div>
+                                            <div>
+                                                <p class="student-name">Rahul Desai</p>
+                                                <p class="student-grade">Grade 11</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="color: var(--text-muted);">National Public School</td>
+                                    <td style="font-weight: 500;">Clean Water Initiative</td>
+                                    <td>
+                                        <span class="badge-status submitted">Submitted</span>
+                                    </td>
+                                    <td style="text-align: right; color: var(--text-muted);">Oct 14, 2023</td>
+                                    <td style="text-align: center;">
+                                        <button class="btn-icon-action" title="View Details">
+                                            <span class="material-symbols-outlined">visibility</span>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Row 12 -->
+                                <tr data-student-name="Divya Kapoor" data-school="Lotus Valley School" data-team="Smart Farming" data-status="under-review" data-page="3" style="display: none;">
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="avatar-circle default">DK</div>
+                                            <div>
+                                                <p class="student-name">Divya Kapoor</p>
+                                                <p class="student-grade">Grade 10</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="color: var(--text-muted);">Lotus Valley School</td>
+                                    <td style="font-weight: 500;">Smart Farming</td>
+                                    <td>
+                                        <span class="badge-status under-review">Under Review</span>
+                                    </td>
+                                    <td style="text-align: right; color: var(--text-muted);">Oct 13, 2023</td>
+                                    <td style="text-align: center;">
+                                        <button class="btn-icon-action" title="View Details">
+                                            <span class="material-symbols-outlined">visibility</span>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Row 13 -->
+                                <tr data-student-name="Siddharth Gupta" data-school="Birla School" data-team="Digital Literacy" data-status="pending" data-page="3" style="display: none;">
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="avatar-circle default">SG</div>
+                                            <div>
+                                                <p class="student-name">Siddharth Gupta</p>
+                                                <p class="student-grade">Grade 12</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="color: var(--text-muted);">Birla School</td>
+                                    <td style="font-weight: 500;">Digital Literacy</td>
+                                    <td>
+                                        <span class="badge-status pending">Pending</span>
+                                    </td>
+                                    <td style="text-align: right; color: var(--text-muted);">Oct 12, 2023</td>
+                                    <td style="text-align: center;">
+                                        <button class="btn-icon-action" title="View Details">
+                                            <span class="material-symbols-outlined">visibility</span>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Row 14 -->
+                                <tr data-student-name="Ishita Malhotra" data-school="Emerald Heights" data-team="Women Empowerment" data-status="submitted" data-page="3" style="display: none;">
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="avatar-circle default">IM</div>
+                                            <div>
+                                                <p class="student-name">Ishita Malhotra</p>
+                                                <p class="student-grade">Grade 11</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="color: var(--text-muted);">Emerald Heights</td>
+                                    <td style="font-weight: 500;">Women Empowerment</td>
+                                    <td>
+                                        <span class="badge-status submitted">Submitted</span>
+                                    </td>
+                                    <td style="text-align: right; color: var(--text-muted);">Oct 11, 2023</td>
+                                    <td style="text-align: center;">
+                                        <button class="btn-icon-action" title="View Details">
+                                            <span class="material-symbols-outlined">visibility</span>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Row 15 -->
+                                <tr data-student-name="Arnav Chatterjee" data-school="Mount Litera School" data-team="Waste Management Pro" data-status="under-review" data-page="3" style="display: none;">
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="avatar-circle default">AC</div>
+                                            <div>
+                                                <p class="student-name">Arnav Chatterjee</p>
+                                                <p class="student-grade">Grade 9</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="color: var(--text-muted);">Mount Litera School</td>
+                                    <td style="font-weight: 500;">Waste Management Pro</td>
+                                    <td>
+                                        <span class="badge-status under-review">Under Review</span>
+                                    </td>
+                                    <td style="text-align: right; color: var(--text-muted);">Oct 10, 2023</td>
+                                    <td style="text-align: center;">
+                                        <button class="btn-icon-action" title="View Details">
+                                            <span class="material-symbols-outlined">visibility</span>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="pagination-custom">
+                        <p class="pagination-info" id="paginationInfo">
+                            Showing <span style="font-weight: 600;">1-5</span> of <span style="font-weight: 600;">15</span> results
+                        </p>
+                        <div class="pagination-controls">
+                            <button class="page-btn" id="prevPageBtn" disabled>
+                                <span class="material-symbols-outlined" style="font-size: 18px;">chevron_left</span>
+                            </button>
+                            <button class="page-btn active page-number" data-page="1">1</button>
+                            <button class="page-btn page-number" data-page="2">2</button>
+                            <button class="page-btn page-number" data-page="3">3</button>
+                            <button class="page-btn" id="nextPageBtn">
+                                <span class="material-symbols-outlined" style="font-size: 18px;">chevron_right</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Details Sidebar Overlay -->
+    <div class="details-sidebar-overlay" id="detailsOverlay"></div>
+
+    <!-- Details Sidebar -->
+    <div class="details-sidebar" id="detailsSidebar">
+        <div class="details-sidebar-header">
+            <h2>Student Details</h2>
+            <button class="details-sidebar-close" id="closeSidebar">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div class="details-sidebar-content" id="sidebarContent">
+            <!-- Content will be dynamically loaded here -->
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Load External Components -->
+    <script>
+        // Load sidebar
+        fetch('sidebar.html')
+            .then(response => response.text())
+            .then(data => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = data;
+
+                // Extract and append all elements EXCEPT script
+                const elements = tempDiv.childNodes;
+                elements.forEach(node => {
+                    if (node.nodeType === 1 && node.tagName !== 'SCRIPT') {
+                        document.getElementById('sidebar-container').appendChild(node.cloneNode(true));
+                    } else if (node.nodeType === 3) {
+                        document.getElementById('sidebar-container').appendChild(node.cloneNode(true));
+                    }
+                });
+
+                // Now execute the script AFTER HTML is in DOM
+                const script = tempDiv.querySelector('script');
+                if (script) {
+                    const newScript = document.createElement('script');
+                    newScript.textContent = script.textContent;
+                    document.body.appendChild(newScript);
+                }
+
+                console.log('Sidebar loaded and script executed');
+            })
+            .catch(error => console.error('Error loading sidebar:', error));
+
+        // Load header
+        fetch('header.html')
+            .then(response => response.text())
+            .then(data => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = data;
+
+                // Extract and append all elements
+                const elements = tempDiv.childNodes;
+                elements.forEach(node => {
+                    if (node.nodeType === 1 || node.nodeType === 3) {
+                        document.getElementById('header-container').appendChild(node.cloneNode(true));
+                    }
+                });
+
+                // Find and execute the script
+                const script = tempDiv.querySelector('script');
+                if (script) {
+                    const newScript = document.createElement('script');
+                    newScript.textContent = script.textContent;
+                    document.body.appendChild(newScript);
+                }
+            })
+            .catch(error => console.error('Error loading header:', error));
+
+        // Search and Filter Functionality
+        const searchInput = document.getElementById('searchInput');
+        const statusFilter = document.getElementById('statusFilter');
+        const tableRows = document.querySelectorAll('.custom-table tbody tr');
+
+        function filterTable() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const statusValue = statusFilter.value.toLowerCase();
+
+            tableRows.forEach(row => {
+                const studentName = row.getAttribute('data-student-name').toLowerCase();
+                const school = row.getAttribute('data-school').toLowerCase();
+                const team = row.getAttribute('data-team').toLowerCase();
+                const status = row.getAttribute('data-status').toLowerCase();
+
+                // Check if row matches search term
+                const matchesSearch = studentName.includes(searchTerm) ||
+                                    school.includes(searchTerm) ||
+                                    team.includes(searchTerm);
+
+                // Check if row matches status filter
+                const matchesStatus = statusValue === '' || status === statusValue;
+
+                // Show/hide row based on both conditions
+                if (matchesSearch && matchesStatus) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        // Add event listeners
+        searchInput.addEventListener('input', filterTable);
+        statusFilter.addEventListener('change', filterTable);
+
+        // Student data for details view
+        const studentData = {
+            'Sara Mehta': {
+                initials: 'SM',
+                name: 'Sara Mehta',
+                email: 'sara.mehta@school.edu',
+                grade: 'Grade 9',
+                registration: 'Sep 15, 2023',
+                gender: 'Female',
+                school: "St. Xavier's Academy, Mumbai",
+                location: 'Maharashtra, India',
+                team: 'FinTech Future',
+                teamRole: 'TEAM LEADER',
+                teamMembers: [
+                    { initials: 'AV', name: 'Armaan Verma' },
+                    { initials: 'LS', name: 'Lisa Singh' }
+                ],
+                ideaTitle: 'Micro-Savings for Students',
+                ideaDescription: 'A blockchain-based platform designed to help high school students automate small savings from their monthly pocket money into ESG-focused mutual funds.',
+                tags: ['FINTECH', 'BLOCKCHAIN', 'SUSTAINABILITY']
+            },
+            'Arjun Jain': {
+                initials: 'AJ',
+                name: 'Arjun Jain',
+                email: 'arjun.jain@heritage.edu',
+                grade: 'Grade 11',
+                registration: 'Sep 12, 2023',
+                gender: 'Male',
+                school: 'Heritage International School',
+                location: 'Delhi, India',
+                team: 'Eco-Warriors',
+                teamRole: 'TEAM MEMBER',
+                teamMembers: [
+                    { initials: 'NK', name: 'Nisha Kumar' },
+                    { initials: 'RT', name: 'Rahul Tiwari' }
+                ],
+                ideaTitle: 'Plastic-Free Future',
+                ideaDescription: 'An innovative solution to reduce single-use plastics in schools through a reward-based recycling program and eco-friendly alternatives.',
+                tags: ['ENVIRONMENT', 'SUSTAINABILITY', 'SOCIAL IMPACT']
+            }
+        };
+
+        // Details Sidebar functionality
+        const detailsSidebar = document.getElementById('detailsSidebar');
+        const detailsOverlay = document.getElementById('detailsOverlay');
+        const closeSidebar = document.getElementById('closeSidebar');
+        const sidebarContent = document.getElementById('sidebarContent');
+
+        function openDetailsSidebar(studentName) {
+            const student = studentData[studentName] || {
+                initials: studentName.split(' ').map(n => n[0]).join(''),
+                name: studentName,
+                email: studentName.toLowerCase().replace(' ', '.') + '@school.edu',
+                grade: 'Grade 10',
+                registration: 'Sep 10, 2023',
+                gender: 'N/A',
+                school: 'School Name',
+                location: 'India',
+                team: 'Team Name',
+                teamRole: 'TEAM MEMBER',
+                teamMembers: [
+                    { initials: 'XX', name: 'Team Member 1' }
+                ],
+                ideaTitle: 'Project Idea',
+                ideaDescription: 'An innovative solution to address real-world challenges.',
+                tags: ['INNOVATION', 'TECHNOLOGY']
+            };
+
+            const avatarColor = student.teamRole === 'TEAM LEADER' ? 'var(--primary)' : '#64748b';
+            const avatarBg = student.teamRole === 'TEAM LEADER' ? 'var(--primary)' : '#e2e8f0';
+
+            sidebarContent.innerHTML = `
+                <!-- Profile Section -->
+                <div class="detail-section">
+                    <div class="detail-profile">
+                        <div class="detail-avatar" style="background: ${avatarBg}; color: white;">
+                            ${student.initials}
+                        </div>
+                        <div class="detail-profile-info">
+                            <h3>${student.name}</h3>
+                            <p>${student.email}</p>
+                        </div>
+                    </div>
+
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <p class="detail-item-label">Registration</p>
+                            <p class="detail-item-value">${student.registration}</p>
+                        </div>
+                        <div class="detail-item">
+                            <p class="detail-item-label">Gender</p>
+                            <p class="detail-item-value">${student.gender}</p>
+                        </div>
+                    </div>
+
+                    <div class="detail-info-row">
+                        <span class="material-symbols-outlined">school</span>
+                        <div class="detail-info-row-content">
+                            <h4>Institution</h4>
+                            <p>${student.school}</p>
+                        </div>
+                    </div>
+
+                    <div class="detail-info-row">
+                        <span class="material-symbols-outlined">location_on</span>
+                        <div class="detail-info-row-content">
+                            <h4>Location</h4>
+                            <p>${student.location}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Team Section -->
+                <div class="detail-section">
+                    <div class="detail-section-title">
+                        <span class="material-symbols-outlined">groups</span>
+                        Team Information
+                    </div>
+                    <div class="team-card">
+                        <div class="team-card-header">
+                            <h4 class="team-card-title">${student.team}</h4>
+                            <span class="team-leader-badge">${student.teamRole}</span>
+                        </div>
+                        ${student.teamMembers.map(member => `
+                            <div class="team-member">
+                                <div class="team-member-avatar">${member.initials}</div>
+                                <span class="team-member-name">${member.name}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <!-- Idea Section -->
+                <div class="detail-section">
+                    <div class="detail-section-title">
+                        <span class="material-symbols-outlined">emoji_objects</span>
+                        Project Concept
+                    </div>
+                    <div class="idea-card">
+                        <h4>${student.ideaTitle}</h4>
+                        <p>"${student.ideaDescription}"</p>
+                    </div>
+                    <div class="tag-list">
+                        ${student.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                    </div>
+                </div>
+            `;
+
+            detailsSidebar.classList.add('open');
+            detailsOverlay.classList.add('show');
+        }
+
+        function closeDetailsSidebar() {
+            detailsSidebar.classList.remove('open');
+            detailsOverlay.classList.remove('show');
+        }
+
+        // View button functionality
+        document.querySelectorAll('.btn-icon-action').forEach(button => {
+            button.addEventListener('click', function() {
+                const row = this.closest('tr');
+                const studentName = row.getAttribute('data-student-name');
+                openDetailsSidebar(studentName);
+            });
+        });
+
+        // Close sidebar events
+        closeSidebar.addEventListener('click', closeDetailsSidebar);
+        detailsOverlay.addEventListener('click', closeDetailsSidebar);
+
+        // Close sidebar on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && detailsSidebar.classList.contains('open')) {
+                closeDetailsSidebar();
+            }
+        });
+
+        // Pagination functionality
+        let currentPage = 1;
+        const rowsPerPage = 5;
+        const totalRows = 15;
+        const totalPages = Math.ceil(totalRows / rowsPerPage);
+
+        const prevPageBtn = document.getElementById('prevPageBtn');
+        const nextPageBtn = document.getElementById('nextPageBtn');
+        const paginationInfo = document.getElementById('paginationInfo');
+        const pageNumbers = document.querySelectorAll('.page-number');
+        const allTableRows = document.querySelectorAll('.custom-table tbody tr');
+
+        function showPage(page) {
+            currentPage = page;
+
+            // Hide all rows
+            allTableRows.forEach(row => {
+                const rowPage = parseInt(row.getAttribute('data-page'));
+                if (rowPage === currentPage) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            // Update pagination info
+            const startRow = (currentPage - 1) * rowsPerPage + 1;
+            const endRow = Math.min(currentPage * rowsPerPage, totalRows);
+            paginationInfo.innerHTML = `Showing <span style="font-weight: 600;">${startRow}-${endRow}</span> of <span style="font-weight: 600;">${totalRows}</span> results`;
+
+            // Update page buttons
+            pageNumbers.forEach(btn => {
+                if (parseInt(btn.getAttribute('data-page')) === currentPage) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            // Update prev/next buttons
+            prevPageBtn.disabled = currentPage === 1;
+            nextPageBtn.disabled = currentPage === totalPages;
+
+            // Scroll to top
+            document.querySelector('.main-content').scrollTop = 0;
+        }
+
+        // Page number click handlers
+        pageNumbers.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const page = parseInt(this.getAttribute('data-page'));
+                showPage(page);
+            });
+        });
+
+        // Previous button
+        prevPageBtn.addEventListener('click', function() {
+            if (currentPage > 1) {
+                showPage(currentPage - 1);
+            }
+        });
+
+        // Next button
+        nextPageBtn.addEventListener('click', function() {
+            if (currentPage < totalPages) {
+                showPage(currentPage + 1);
+            }
+        });
+
+        // Initialize pagination
+        showPage(1);
+    </script>
+</body>
+
+</html>

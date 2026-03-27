@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - IFT</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Remix Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+
+    <!-- Iconify -->
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #5E2A97;
+            --primary-hover: #7B3FB5;
+            --primary-light: #E8D4F0;
+            --background: #F7F7F7;
+            --white: #FFFFFF;
+            --border: #EEEEEE;
+            --text-dark: #222222;
+            --text-muted: #666666;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--background);
+            color: var(--text-dark);
+        }
+
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+        }
+
+        .auth-left {
+            flex: 1;
+            background: var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+        }
+
+        .auth-left img {
+            max-width: 70%;
+            height: auto;
+        }
+
+        .auth-right {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            background: var(--white);
+            overflow-y: auto;
+        }
+
+        .form-container {
+            width: 100%;
+            max-width: 450px;
+            padding: 2rem 0;
+        }
+
+        .logo {
+            max-width: 180px;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .form-group .icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 1.25rem;
+            z-index: 1;
+        }
+
+        .form-control {
+            width: 100%;
+            height: 56px;
+            padding: 0 1rem 0 3rem;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--background);
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--white);
+            box-shadow: 0 0 0 3px rgba(94, 42, 151, 0.1);
+        }
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 1.25rem;
+            transition: color 0.3s;
+        }
+
+        .toggle-password:hover {
+            color: var(--primary);
+        }
+
+        .dropdown-btn {
+            width: 100%;
+            height: 56px;
+            padding: 0 1rem 0 3rem;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--background);
+            text-align: left;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-btn:focus {
+            border-color: var(--primary);
+            background: var(--white);
+            box-shadow: 0 0 0 3px rgba(94, 42, 151, 0.1);
+        }
+
+        .dropdown-menu {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .dropdown-item {
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            color: var(--text-dark);
+        }
+
+        .dropdown-item:hover {
+            background: rgba(94, 42, 151, 0.1);
+            color: var(--primary);
+        }
+
+        .form-check {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-check-input {
+            width: 18px;
+            height: 18px;
+            margin-top: 0.2rem;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .form-check-input:checked {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .form-check-label {
+            font-size: 0.875rem;
+            color: var(--text-dark);
+            cursor: pointer;
+            line-height: 1.5;
+        }
+
+        a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        a:hover {
+            color: var(--primary-hover);
+        }
+
+        .btn-primary {
+            width: 100%;
+            height: 56px;
+            background: var(--primary);
+            border: none;
+            border-radius: 12px;
+            color: var(--white);
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(94, 42, 151, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(94, 42, 151, 0.4);
+        }
+
+        .divider {
+            position: relative;
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 50%;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .divider span {
+            position: relative;
+            background: var(--white);
+            padding: 0 1rem;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .social-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .btn-social {
+            flex: 1;
+            height: 56px;
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--text-dark);
+            transition: all 0.3s ease;
+        }
+
+        .btn-social:hover {
+            background: var(--background);
+            border-color: var(--primary);
+        }
+
+        .signin-link {
+            text-align: center;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .password-hint {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        .error-message {
+            color: #dc2626;
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        @media (max-width: 991px) {
+            .auth-left {
+                display: none;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .auth-right {
+                padding: 1.5rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .social-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <!-- Left Side -->
+        <div class="auth-left">
+            <img src="form image.png" alt="Authentication illustration">
+        </div>
+
+        <!-- Right Side -->
+        <div class="auth-right">
+            <div class="form-container">
+                <!-- Logo -->
+                <a href="#">
+                    <img src="../assets/IFT_logo.png" alt="IFT Logo" class="logo">
+                </a>
+
+                <!-- Title -->
+                <h1>Create your Account</h1>
+                <p class="subtitle">Join India's Future Tycoon! Please enter your details</p>
+
+                <form id="signUpForm">
+                    <!-- Username -->
+                    <div class="form-group">
+                        <div class="icon">
+                            <iconify-icon icon="f7:person"></iconify-icon>
+                        </div>
+                        <input type="text" class="form-control" id="username" placeholder="Username" required>
+                    </div>
+
+                    <!-- Role Selection -->
+                    <!-- <div class="form-group">
+                        <div class="icon">
+                            <iconify-icon icon="mdi:account-supervisor-circle-outline"></iconify-icon>
+                        </div>
+                        <div class="dropdown">
+                            <button class="dropdown-btn" type="button" data-bs-toggle="dropdown">
+                                <span id="roleText">Select Your Role</span>
+                                <iconify-icon icon="mingcute:down-line"></iconify-icon>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item role-option" href="#" data-value="Thinking Coach">Thinking Coach</a></li>
+                                <li><a class="dropdown-item role-option" href="#" data-value="School Admin">School Admin</a></li>
+                                <li><a class="dropdown-item role-option" href="#" data-value="Master Teacher">Master Teacher</a></li>
+                                <li><a class="dropdown-item role-option" href="#" data-value="Principal">Principal</a></li>
+                                <li><a class="dropdown-item role-option" href="#" data-value="Admin">Admin</a></li>
+                                <li><a class="dropdown-item role-option" href="#" data-value="Super Admin">Super Admin</a></li>
+                                <li><a class="dropdown-item role-option" href="#" data-value="Trustee">Trustee</a></li>
+                                <li><a class="dropdown-item role-option" href="#" data-value="Lab Support">Lab Support</a></li>
+                            </ul>
+                        </div>
+                        <input type="hidden" id="role" name="role">
+                        <p class="error-message" id="roleError">Please select a role</p>
+                    </div> -->
+
+                    <!-- Email -->
+                    <div class="form-group">
+                        <div class="icon">
+                            <iconify-icon icon="mage:email"></iconify-icon>
+                        </div>
+                        <input type="email" class="form-control" id="email" placeholder="Email" required>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="form-group">
+                        <div class="password-wrapper">
+                            <div class="icon">
+                                <iconify-icon icon="solar:lock-password-outline"></iconify-icon>
+                            </div>
+                            <input type="password" class="form-control" id="password" placeholder="Password" required>
+                            <i class="ri-eye-line toggle-password" data-target="password"></i>
+                        </div>
+                        <p class="password-hint">Your password must have at least 8 characters</p>
+                    </div>
+
+                    <!-- Terms & Conditions -->
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="terms" required>
+                        <label class="form-check-label" for="terms">
+                            By creating an account means you agree to the <a href="#">Terms & Conditions</a> and our <a href="#">Privacy Policy</a>
+                        </label>
+                    </div>
+
+                    <!-- Sign Up Button -->
+                    <button type="submit" class="btn-primary">Sign Up</button>
+                </form>
+
+                <!-- Divider -->
+                <div class="divider">
+                    <span>Or sign up with</span>
+                </div>
+
+                <!-- Social Login -->
+                <div class="social-buttons">
+                    <button type="button" class="btn-social">
+                        <iconify-icon icon="ic:baseline-facebook" style="font-size: 20px; color: #1877F2;"></iconify-icon>
+                        Facebook
+                    </button>
+                    <button type="button" class="btn-social">
+                        <iconify-icon icon="flat-color-icons:google" style="font-size: 20px;"></iconify-icon>
+                        Google
+                    </button>
+                </div>
+
+                <!-- Sign In Link -->
+                <div class="signin-link">
+                    Already have an account? <a href="sign-in.html">Sign In</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Role Selection
+        $('.role-option').on('click', function(e) {
+            e.preventDefault();
+            const value = $(this).data('value');
+            const text = $(this).text();
+
+            $('#roleText').text(text);
+            $('#role').val(value);
+            $('#roleError').removeClass('show');
+        });
+
+        // Password Toggle
+        $('.toggle-password').on('click', function() {
+            const target = $(this).data('target');
+            const input = $('#' + target);
+
+            if (input.attr('type') === 'password') {
+                input.attr('type', 'text');
+                $(this).removeClass('ri-eye-line').addClass('ri-eye-off-line');
+            } else {
+                input.attr('type', 'password');
+                $(this).removeClass('ri-eye-off-line').addClass('ri-eye-line');
+            }
+        });
+
+        // Form Submit
+        $('#signUpForm').on('submit', function(e) {
+            e.preventDefault();
+
+            // Validate role
+            if (!$('#role').val()) {
+                $('#roleError').addClass('show');
+                return;
+            }
+
+            // Validate username
+            const username = $('#username').val().trim();
+            if (username.length < 3) {
+                alert('Username must be at least 3 characters');
+                return;
+            }
+
+            // Validate password
+            const password = $('#password').val();
+            if (password.length < 8) {
+                alert('Password must be at least 8 characters');
+                return;
+            }
+
+            // Validate terms
+            if (!$('#terms').is(':checked')) {
+                alert('Please agree to the Terms & Conditions');
+                return;
+            }
+
+            // If validation passes, redirect
+            window.location.href = 'otp-verification.html';
+        });
+    </script>
+</body>
+</html>

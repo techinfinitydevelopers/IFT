@@ -1,0 +1,3193 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>IFT - India's Future Tycoons | ENpower</title>
+    <meta
+        content="India's Future Tycoons (IFT) - India's first national entrepreneurship search & mentorship platform for young innovators aged 13-18."
+        name="description" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#7B2D8E",
+                        "primary-dark": "#5A1D6B",
+                        "primary-light": "#9B4DBA",
+                        "primary-soft": "#C78DD8",
+                        "accent": "#F5C518",
+                        "accent-dark": "#D4A80F",
+                        "accent-light": "#FFD94A",
+                        "bg-dark": "#0A0A0A",
+                        "bg-card": "#111111",
+                        "bg-elevated": "#1A1A1A",
+                        "glass": "rgba(123, 45, 142, 0.05)",
+                        "glass-border": "rgba(123, 45, 142, 0.12)",
+                    },
+                    fontFamily: { "display": ["Inter", "sans-serif"] },
+                },
+            },
+        }
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0A0A0A
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #7B2D8E;
+            border-radius: 3px
+        }
+
+        html {
+            scroll-behavior: auto
+        }
+
+        body {
+            overflow-x: hidden
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(123, 45, 142, 0.15)
+        }
+
+        .text-gradient {
+            background: linear-gradient(90deg, rgba(105, 38, 125, 1) 0%, rgba(250, 206, 72, 1) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent
+        }
+
+        .text-gradient-gold {
+            background: linear-gradient(135deg, #F5C518, #FFD94A);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent
+        }
+
+        .card-3d {
+            transition: transform .4s cubic-bezier(.25, .46, .45, .94), box-shadow .4s ease
+        }
+
+        .card-3d:hover {
+            transform: translateY(-8px) rotateX(2deg) rotateY(-2deg);
+            /* box-shadow: 0 25px 60px rgba(123, 45, 142, 0.25) */
+            box-shadow: 0 5px 20px rgba(123, 45, 142, 0.12);
+        }
+
+        .timeline-line::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 2px;
+            background: rgba(123, 45, 142, 0.15);
+            transform: translateX(-50%);
+            z-index: 0
+        }
+
+        .timeline-fill {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 3px;
+            height: 0%;
+            background: linear-gradient(to bottom, #9B4DBA, #c06dde);
+            transform: translateX(-50%);
+            z-index: 0;
+            border-radius: 2px;
+            box-shadow: 0 0 8px rgba(123, 45, 142, 0.5), 0 0 20px rgba(123, 45, 142, 0.3);
+        }
+
+        .glow-purple {
+            box-shadow: 0 0 30px rgba(123, 45, 142, 0.4)
+        }
+
+        .glow-purple-sm {
+            box-shadow: 0 0 15px rgba(123, 45, 142, 0.25)
+        }
+
+        .glow-gold {
+            box-shadow: 0 0 25px rgba(245, 197, 24, 0.3)
+        }
+
+        .hero-title-glow {
+            text-shadow: 0 0 20px rgba(123, 45, 142, 0.3), 0 0 40px rgba(123, 45, 142, 0.12);
+        }
+
+        .hero-grid {
+            background-image: linear-gradient(rgba(123, 45, 142, 0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(123, 45, 142, 0.04) 1px, transparent 1px);
+            background-size: 60px 60px
+        }
+
+        .float-anim {
+            animation: floaty 6s ease-in-out infinite
+        }
+
+        @keyframes floaty {
+
+            0%,
+            100% {
+                transform: translateY(0)
+            }
+
+            50% {
+                transform: translateY(-20px)
+            }
+        }
+
+        .perspective-container {
+            perspective: 1200px
+        }
+
+        .tilt-card {
+            transform-style: preserve-3d
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height .4s cubic-bezier(.25, .46, .45, .94), padding .3s ease
+        }
+
+        .faq-answer.open {
+            max-height: 300px;
+            padding: 0 24px 20px
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none
+        }
+
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none
+        }
+
+        .parallax-section {
+            transform-style: preserve-3d
+        }
+
+        .counter {
+            font-variant-numeric: tabular-nums
+        }
+
+        .marquee-row-rtl {
+            animation: marqueeRTL 25s linear infinite;
+        }
+
+        .marquee-row-ltr {
+            animation: marqueeLTR 25s linear infinite;
+        }
+
+        .marquee-row-rtl:hover,
+        .marquee-row-ltr:hover {
+            animation-play-state: paused;
+        }
+
+        @keyframes marqueeRTL {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        @keyframes marqueeLTR {
+            0% {
+                transform: translateX(-50%);
+            }
+
+            100% {
+                transform: translateX(0);
+            }
+        }
+
+        /* Partner Logo Hover Effect */
+        #partners img {
+            filter: grayscale(100%);
+            opacity: 0.7;
+            transition: all 0.3s ease;
+        }
+
+        #partners img:hover {
+            filter: grayscale(0%) brightness(1.2) contrast(1.1);
+            opacity: 1;
+        }
+
+        .btn-glow-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .btn-glow-hover:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 0 20px rgba(245, 197, 24, 0.4), 0 8px 25px rgba(245, 197, 24, 0.2);
+        }
+
+        .btn-glow-hover.border-primary:hover {
+            box-shadow: 0 0 20px rgba(123, 45, 142, 0.4), 0 8px 25px rgba(123, 45, 142, 0.2);
+        }
+
+        .btn-glow-hover:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .btn-glow-shine {
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: none;
+            z-index: 5;
+        }
+
+        .btn-glow-hover:hover .btn-glow-shine {
+            animation: btnShine 0.6s ease forwards;
+        }
+
+        @keyframes btnShine {
+            0% {
+                left: -100%;
+            }
+
+            100% {
+                left: 100%;
+            }
+        }
+
+        /* ── STATS CARDS ── */
+        .stats-card {
+            position: relative;
+            border-radius: 24px;
+            padding: 32px;
+        }
+
+        .stats-card .border-gradient {
+            position: absolute;
+            inset: 0;
+            border-radius: 24px;
+            padding: 1px;
+            background: linear-gradient(160deg, #3d1f6e 0%, #6b21a8 18%, #a855f7 35%, #d8b4fe 48%, #f3e8ff 52%, #d8b4fe 56%, #a855f7 68%, #7c3aed 82%, #4c1d95 100%);
+            background-size: 400% 400%;
+            animation: statsFlowInside 8s ease-in-out infinite;
+            transition: opacity 0.9s ease-in-out;
+            opacity: 0;
+            z-index: 0;
+        }
+
+        .stats-card .border-gradient::after {
+            content: '';
+            display: block;
+            width: 100%;
+            height: 100%;
+            border-radius: 23px;
+            background: #161618;
+        }
+
+        .stats-card .border-plain {
+            position: absolute;
+            inset: 0;
+            border-radius: 24px;
+            background: #161618;
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            transition: opacity 0.9s ease-in-out;
+            opacity: 1;
+            z-index: 0;
+        }
+
+        .stats-card.active .border-gradient {
+            opacity: 1;
+        }
+
+        .stats-card.active .border-plain {
+            opacity: 0;
+        }
+
+        .stats-card .card-content {
+            position: relative;
+            z-index: 10;
+        }
+
+        .stats-card .card-label {
+            font-size: 0.95rem;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.38);
+            margin-bottom: 10px;
+            letter-spacing: 0.01em;
+        }
+
+        .stats-card .number-area {
+            position: relative;
+            margin-bottom: 28px;
+            line-height: 1;
+        }
+
+        .stats-card .number-base {
+            font-size: 2.5rem;
+            font-weight: 300;
+            letter-spacing: -2px;
+            color: #ffffff;
+            white-space: nowrap;
+            user-select: none;
+            display: block;
+        }
+
+        .stats-card .number-base .suffix {
+            font-size: clamp(1rem, 1.8vw, 1.4rem);
+            font-weight: 300;
+            color: rgba(255, 255, 255, 0.38);
+            margin-left: 4px;
+            letter-spacing: 0;
+        }
+
+        .stats-card .number-gradient {
+            position: absolute;
+            top: 0;
+            left: 0;
+            font-size: 2.5rem;
+            font-weight: 300;
+            letter-spacing: -2px;
+            white-space: nowrap;
+            user-select: none;
+            background: linear-gradient(160deg, #3d1f6e 0%, #6b21a8 18%, #a855f7 35%, #d8b4fe 48%, #f3e8ff 52%, #d8b4fe 56%, #a855f7 68%, #7c3aed 82%, #4c1d95 100%);
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: statsFlowInside 8s ease-in-out infinite;
+            opacity: 0;
+            transition: opacity 0.7s ease-in-out;
+        }
+
+        .stats-card .number-gradient .suffix {
+            font-size: clamp(1rem, 1.8vw, 1.4rem);
+            font-weight: 300;
+            -webkit-text-fill-color: transparent;
+            margin-left: 6px;
+            letter-spacing: 0;
+        }
+
+        .stats-card.active .number-gradient {
+            opacity: 1;
+        }
+
+        .stats-card .number-base {
+            transition: opacity 0.7s ease-in-out;
+        }
+
+        .stats-card.active .number-base {
+            opacity: 0;
+        }
+
+        @keyframes statsFlowInside {
+            0% {
+                background-position: 0% 30%;
+            }
+
+            33% {
+                background-position: 60% 70%;
+            }
+
+            66% {
+                background-position: 100% 30%;
+            }
+
+            100% {
+                background-position: 0% 30%;
+            }
+        }
+
+        .stats-card .stats-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.07);
+            margin-bottom: 20px;
+        }
+
+        .stats-card .stats-row {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .stats-card .stats-label {
+            font-size: 0.76rem;
+            color: rgba(255, 255, 255, 0.38);
+            min-width: 90px;
+            padding-top: 1px;
+            flex-shrink: 0;
+        }
+
+        .stats-card .stats-items {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .stats-card .stats-item {
+            display: flex;
+            gap: 7px;
+            font-size: 0.76rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .stats-card .stats-item .dash {
+            color: rgba(255, 255, 255, 0.22);
+            flex-shrink: 0;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(40px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        .video-glow-border {
+            position: relative;
+        }
+
+        .video-glow-border::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: -1px;
+            right: -1px;
+            bottom: -1px;
+            z-index: -1;
+            border-radius: 15px;
+            background: conic-gradient(from var(--glow-angle, 0deg), #7B2D8E 0%, #c06dde 15%, #7B2D8E 30%, #9B4DBA 45%, #7B2D8E 60%, #c06dde 75%, #9B4DBA 90%, #7B2D8E 100%);
+            animation: rotateBorderGlow 3s linear infinite;
+        }
+
+        .video-glow-border::after {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            z-index: -1;
+            border-radius: 15px;
+            background: conic-gradient(from var(--glow-angle, 0deg), #7B2D8E 0%, #c06dde 15%, #7B2D8E 30%, #9B4DBA 45%, #7B2D8E 60%, #c06dde 75%, #9B4DBA 90%, #7B2D8E 100%);
+            animation: rotateBorderGlow 3s linear infinite, glowPulse 2s ease-in-out infinite;
+            filter: blur(8px);
+            opacity: 0.4;
+        }
+
+        .video-glow-border .glow-corner {
+            position: absolute;
+            width: 60px;
+            height: 2px;
+            border-radius: 0;
+            background: #9B4DBA;
+            filter: blur(3px);
+            opacity: 0;
+            z-index: -1;
+            animation: cornerGlow 4s ease-in-out infinite;
+        }
+
+        .video-glow-border .glow-corner:nth-child(1) {
+            top: -2px;
+            left: 30%;
+            width: 40%;
+            height: 2px;
+            animation-delay: 0s;
+        }
+
+        .video-glow-border .glow-corner:nth-child(2) {
+            top: 30%;
+            right: -2px;
+            width: 2px;
+            height: 40%;
+            animation-delay: 1s;
+        }
+
+        .video-glow-border .glow-corner:nth-child(3) {
+            bottom: -2px;
+            left: 30%;
+            width: 40%;
+            height: 2px;
+            animation-delay: 2s;
+        }
+
+        .video-glow-border .glow-corner:nth-child(4) {
+            top: 30%;
+            left: -2px;
+            width: 2px;
+            height: 40%;
+            animation-delay: 3s;
+        }
+
+        @keyframes cornerGlow {
+
+            0%,
+            100% {
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 0.1;
+            }
+        }
+
+        @keyframes glowPulse {
+
+            0%,
+            100% {
+                filter: blur(2px);
+                opacity: 0.3;
+            }
+
+            50% {
+                filter: blur(2px);
+                opacity: 0.1;
+            }
+        }
+
+        @property --glow-angle {
+            syntax: '<angle>';
+            initial-value: 0deg;
+            inherits: false;
+        }
+
+        @keyframes rotateBorderGlow {
+            0% {
+                --glow-angle: 0deg;
+            }
+
+            100% {
+                --glow-angle: 360deg;
+            }
+        }
+
+        /* Mentor Cards with 3D Tilt */
+        .mentor-card {
+            position: relative;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(123, 45, 142, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            transform-style: preserve-3d;
+            cursor: pointer;
+            opacity: 1;
+            will-change: transform;
+        }
+
+        .mentor-card:hover {
+            border-color: rgba(123, 45, 142, 0.5);
+            box-shadow: 0 0px 20px rgba(123, 45, 142, 0.3)
+        }
+
+        .mentor-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid rgba(123, 45, 142, 0.3);
+            margin: 0 auto 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .mentor-card:hover .mentor-avatar {
+            border-color: rgba(123, 45, 142, 0.8);
+            transform: scale(1.05);
+        }
+
+        .mentor-icon {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            width: 40px;
+            height: 40px;
+            background: rgba(123, 45, 142, 0.15);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .mentor-card:hover .mentor-icon {
+            background: rgba(123, 45, 142, 0.3);
+            transform: rotate(10deg);
+        }
+
+        .mentor-icon .material-icons {
+            color: #9B4DBA;
+            font-size: 20px;
+        }
+
+        .mentor-card:hover .mentor-icon .material-icons {
+            color: #F5C518;
+        }
+
+        .mentor-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .mentor-card:hover .mentor-name {
+            color: #C78DD8;
+        }
+
+        .mentor-role {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 1.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .mentor-card:hover .mentor-role {
+            color: rgba(245, 197, 24, 0.9);
+        }
+
+        .mentor-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .mentor-tag {
+            padding: 0.4rem 0.8rem;
+            background: rgba(123, 45, 142, 0.15);
+            border: 1px solid rgba(123, 45, 142, 0.3);
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: #9B4DBA;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .mentor-card:hover .mentor-tag {
+            background: rgba(123, 45, 142, 0.3);
+            border-color: rgba(245, 197, 24, 0.5);
+            color: #F5C518;
+        }
+
+        select {
+            background-color: #111;
+            color: #fff;
+            border: 1px solid #6a0dad;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #a855f7;
+            box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.4);
+        }
+
+        option {
+            background-color: #111;
+            color: #fff;
+            padding: 10px;
+        }
+
+        option:hover,
+        option:focus,
+        option:checked {
+            background-color: #7B2D8E !important;
+            background: #7B2D8E !important;
+            color: #fff !important;
+        }
+
+        /* Season 5 Badge with Glass Shine Effect */
+        .season-badge {
+            position: relative;
+            overflow: hidden;
+            animation: fadeInBadge 2s ease-out forwards;
+        }
+
+        .season-badge::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg,
+                    transparent 30%,
+                    rgba(255, 255, 255, 0.1) 40%,
+                    rgba(255, 255, 255, 0.3) 50%,
+                    rgba(255, 255, 255, 0.1) 60%,
+                    transparent 70%);
+            animation: glassShine 3s infinite;
+        }
+
+        @keyframes glassShine {
+            0% {
+                transform: translateX(-100%) translateY(-100%) rotate(45deg);
+            }
+
+            100% {
+                transform: translateX(100%) translateY(100%) rotate(45deg);
+            }
+        }
+
+        @keyframes fadeInBadge {
+            0% {
+                opacity: 1;
+                background: rgba(123, 45, 142, 0.4);
+                border-color: rgba(155, 77, 186, 0.8);
+                transform: translateY(-10px);
+            }
+
+            50% {
+                opacity: 1;
+                background: rgba(123, 45, 142, 0.4);
+                border-color: rgba(155, 77, 186, 0.8);
+            }
+
+            100% {
+                opacity: 1;
+                background: rgba(123, 45, 142, 0.1);
+                border-color: rgba(155, 77, 186, 0.3);
+                transform: translateY(0);
+            }
+        }
+
+        .blinking-dot {
+            background-color: #F5C518 !important;
+            animation: blink 1.5s infinite;
+            box-shadow: 0 0 8px rgba(245, 197, 24, 0.6);
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+                box-shadow: 0 0 8px rgba(245, 197, 24, 0.8);
+            }
+
+            50% {
+                opacity: 0.3;
+                transform: scale(0.8);
+                box-shadow: 0 0 4px rgba(245, 197, 24, 0.3);
+            }
+        }
+
+        /* IFT for Schools - Cinematic Section */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .purple-radial-glow {
+            background: radial-gradient(circle at center, rgba(139, 92, 246, 0.3) 0%, transparent 70%);
+        }
+
+        /* ================================= */
+        /* IFT JOURNEY MOBILE ALIGN FIX */
+        /* ================================= */
+
+        @media (max-width:768px) {
+
+            /* vertical line centered to circle */
+            .timeline-line::before {
+                left: 25px !important;
+                transform: none !important;
+            }
+
+            /* animated fill line */
+            .timeline-fill {
+                left: 25px !important;
+                transform: none !important;
+            }
+
+            /* number circle */
+            .timeline-dot {
+                left: 0 !important;
+                transform: none !important;
+                width: 28px;
+                height: 28px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            /* stack timeline items */
+            .timeline-item {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                padding-left: 40px !important;
+            }
+
+            /* cards */
+            .timeline-item>div {
+                max-width: 95% !important;
+                margin-left: 6px !important;
+                text-align: left !important;
+            }
+
+            /* remove desktop spacer */
+            .timeline-item .hidden.md\:block {
+                display: none !important;
+            }
+
+        }
+
+        /* =============================== */
+        /* SAFE GLOBAL OVERFLOW FIX */
+        /* =============================== */
+
+        html,
+        body {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        /* prevent GSAP pinned elements from pushing layout */
+        #schools-pin,
+        #hero-pin-wrapper {
+            overflow: hidden;
+        }
+
+        /* prevent timeline cards from extending */
+        .timeline-item>div {
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* prevent glow elements from causing overflow */
+        .purple-radial-glow {
+            pointer-events: none;
+        }
+
+        /* =============================== */
+        /* TESTIMONIAL CAROUSEL MOBILE     */
+        /* =============================== */
+        @media (max-width:768px) {
+            .testimonial-card .flex.items-center.gap-4 {
+                flex-direction: column;
+                gap: 0;
+            }
+
+            /* hide side arrows on mobile */
+            #testi-prev,
+            #testi-next {
+                display: none !important;
+            }
+
+            /* constrain the glass-panel so slides don't overflow */
+            .testimonial-card .flex-1.glass-panel {
+                width: 100% !important;
+                min-width: 0 !important;
+                max-width: 100vw !important;
+            }
+
+            #testi-track {
+                width: 100%;
+            }
+
+            .testi-slide {
+                padding: 1.5rem 1rem !important;
+                min-width: 0 !important;
+                overflow: hidden;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+            }
+
+            .testi-slide .material-icons[style*="font-size:3rem"] {
+                font-size: 2rem !important;
+            }
+
+            .testi-slide p.text-lg {
+                font-size: 0.95rem !important;
+                line-height: 1.6 !important;
+            }
+
+            .testimonial-card {
+                max-width: 100% !important;
+                overflow: hidden;
+            }
+
+            /* mobile nav arrows below */
+            .testi-mobile-nav {
+                display: flex !important;
+            }
+        }
+
+        @media (min-width:769px) {
+            .testi-mobile-nav {
+                display: none !important;
+            }
+        }
+
+        /* =============================== */
+        /* IFT FOR SCHOOLS — MOBILE LAYOUT */
+        /* =============================== */
+        @media (max-width:1023px) {
+            #schools-pin {
+                height: auto !important;
+                min-height: auto !important;
+                padding: 3rem 0 2rem;
+            }
+
+            /* narrative stack — make static flow */
+            [data-purpose="narrative-stack"] {
+                height: auto !important;
+                position: static !important;
+                display: flex;
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+
+            [data-purpose="narrative-stack"] article {
+                position: static !important;
+                opacity: 1 !important;
+                transform: none !important;
+                pointer-events: auto !important;
+            }
+
+            /* cards — make static flow */
+            #schools-pin .w-full.lg\:w-1\/2.relative {
+                height: auto !important;
+                position: static !important;
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            #card-1,
+            #card-2,
+            #card-3 {
+                position: static !important;
+                opacity: 1 !important;
+                transform: none !important;
+                inset: auto !important;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-bg-dark text-gray-200 font-display antialiased">
+
+    <!-- Navbar -->
+    <nav id="navbar" class="fixed w-full z-50 top-0 transition-all duration-500 border-b border-transparent">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <a href="#" class="flex items-center gap-3 cursor-pointer group">
+                    <img src="assets/IFT Logo_02.png" alt="IFT - India's Future Tycoons"
+                        class="h-12 md:h-14 lg:h-16 w-auto object-contain transition-transform group-hover:scale-105" />
+                </a>
+                <div class="hidden md:block">
+                    <div class="flex items-center gap-1">
+                        <a class="text-white hover:text-[#F5C518] px-3 py-2 rounded-lg text-sm font-medium transition-all hover:bg-white/5"
+                            href="#about">What is IFT?</a>
+                        <a class="text-white hover:text-[#F5C518] px-3 py-2 rounded-lg text-sm font-medium transition-all hover:bg-white/5"
+                            href="#journey">Journey</a>
+                        <a class="text-white hover:text-[#F5C518] px-3 py-2 rounded-lg text-sm font-medium transition-all hover:bg-white/5"
+                            href="#schools">For Schools</a>
+                        <a class="text-white hover:text-[#F5C518] px-3 py-2 rounded-lg text-sm font-medium transition-all hover:bg-white/5"
+                            href="#mentors">Mentors</a>
+                        <a class="text-white hover:text-[#F5C518] px-3 py-2 rounded-lg text-sm font-medium transition-all hover:bg-white/5"
+                            href="#hall-of-fame">Hall of Fame</a>
+                        <a class="btn-glow-hover bg-accent text-bg-dark px-5 py-2.5 rounded-full text-sm font-bold shadow-lg ml-4 relative overflow-hidden"
+                            href="#contact">
+                            <span class="btn-glow-shine"></span>
+                            <span class="relative z-10">Register Now</span>
+                        </a>
+                    </div>
+                </div>
+                <!-- Mobile menu button -->
+                <button id="mobile-menu-btn" class="md:hidden text-white">
+                    <span class="material-icons text-3xl">menu</span>
+                </button>
+            </div>
+        </div>
+        <!-- Mobile menu -->
+        <div id="mobile-menu" class="hidden md:hidden glass-panel mx-4 mb-4 rounded-xl overflow-hidden">
+            <div class="flex flex-col p-4 gap-2">
+                <a class="text-gray-300 hover:text-primary px-3 py-2.5 rounded-lg text-sm font-medium transition-all hover:bg-white/5"
+                    href="#about">What is IFT?</a>
+                <a class="text-gray-300 hover:text-primary px-3 py-2.5 rounded-lg text-sm font-medium transition-all hover:bg-white/5"
+                    href="#journey">Journey</a>
+                <a class="text-gray-300 hover:text-primary px-3 py-2.5 rounded-lg text-sm font-medium transition-all hover:bg-white/5"
+                    href="#schools">For Schools</a>
+                <a class="text-gray-300 hover:text-primary px-3 py-2.5 rounded-lg text-sm font-medium transition-all hover:bg-white/5"
+                    href="#mentors">Mentors</a>
+                <a class="text-gray-300 hover:text-primary px-3 py-2.5 rounded-lg text-sm font-medium transition-all hover:bg-white/5"
+                    href="#hall-of-fame">Hall of Fame</a>
+                <a class="btn-glow-hover bg-accent text-bg-dark px-5 py-2.5 rounded-full text-sm font-bold text-center mt-2 relative overflow-hidden"
+                    href="#contact"><span class="btn-glow-shine"></span><span class="relative z-10">Register
+                        Now</span></a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section - Pinned with scroll-to-video -->
+    <section class="relative" id="hero-pin-wrapper">
+        <div class="flex flex-col items-center justify-center min-h-screen pt-48 pb-32" id="hero-sticky">
+            <!-- Background elements -->
+            <div class="absolute inset-0 bg-bg-dark z-0">
+                <canvas id="hero-star-canvas" class="absolute inset-0 w-full h-full" style="z-index:0;"></canvas>
+                <div class="absolute inset-0 bg-gradient-to-b from-bg-dark/40 via-transparent to-bg-dark/60"
+                    style="z-index:1;"></div>
+                <div class="absolute inset-0 hero-grid" style="z-index:2;"></div>
+                <div class="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-primary/10 rounded-full filter blur-[150px] animate-pulse"
+                    style="z-index:3;">
+                </div>
+                <div class="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-accent/10 rounded-full filter blur-[120px]"
+                    style="z-index:3;">
+                </div>
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-primary/5 rounded-full filter blur-[100px] float-anim"
+                    style="z-index:3;">
+                </div>
+            </div>
+            <!-- Hero content -->
+            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center w-full">
+                <div class="hero-content" id="hero-text-content">
+
+                    <h1
+                        class="text-4xl sm:text-5xl md:text-7xl tracking-tight mb-6 leading-[1.1] text-white hero-title-glow">
+                        <span id="type-line-1"></span><br />
+                        <span class="text-gradient" id="type-line-2"></span><br />
+                        <span id="type-line-3"></span>
+                    </h1>
+                    <p class="mt-4 max-w-2xl mx-auto text-lg md:text-xl text-gray-400 font-light leading-relaxed">
+                        IFT gives young adults an opportunity to showcase their ideas on a national platform and get
+                        recognized for it. <br />For Ages 13–18.
+                    </p>
+                    <div class="mt-10 flex flex-col sm:flex-row justify-center gap-4">
+                        <button
+                            class="btn-glow-hover px-5 py-2.5 bg-accent text-bg-dark text-sm font-bold rounded-lg glow-gold hover:bg-accent-dark transition-all flex items-center justify-center gap-1.5 relative overflow-hidden">
+                            <span class="btn-glow-shine"></span>
+                            <span class="relative z-10 flex items-center gap-1.5"><span
+                                    class="material-icons text-base">school</span> I'm a Student</span>
+                        </button>
+                        <button
+                            class="btn-glow-hover px-5 py-2.5 bg-transparent border-2 border-primary hover:border-accent text-white text-sm font-bold rounded-lg hover:bg-primary/10 transition-all flex items-center justify-center gap-1.5 relative overflow-hidden">
+                            <span class="btn-glow-shine"></span>
+                            <span class="relative z-10 flex items-center gap-1.5"><span
+                                    class="material-icons text-base">business</span> I'm a School</span>
+                        </button>
+                    </div>
+                </div>
+                <!-- Video Card - scales up on scroll -->
+                <div class="mt-16 mb-20 hidden" id="hero-video-wrapper">
+                    <div class="video-glow-border relative mx-auto w-full max-w-3xl h-64 md:h-96 glass-panel group tilt-card"
+                        style="border-radius:15px;" id="hero-card">
+                        <div class="glow-corner"></div>
+                        <div class="glow-corner"></div>
+                        <div class="glow-corner"></div>
+                        <div class="glow-corner"></div>
+                        <!-- Video Player (hidden by default) -->
+                        <video id="hero-video-player"
+                            class="absolute inset-0 w-full h-full z-[2] opacity-100 pointer-events-none object-cover"
+                            style="border-radius: 15px;" src="assets/IFT FINAL PROMO SEASON 4.mp4" preload="auto"
+                            playsinline></video>
+                        <!-- Poster/Overlay -->
+                        <div class="absolute inset-0 flex items-center justify-center z-10" id="hero-video-poster"
+                            style="background: radial-gradient(ellipse at center, rgba(123,45,142,0.2) 0%, rgba(90,29,107,0.35) 40%, rgba(10,10,10,0.65) 100%);">
+                            <div class="text-center">
+                                <div class="w-16 h-16 mx-auto rounded-full flex items-center justify-center glow-purple-sm group-hover:scale-110 transition-transform cursor-pointer shadow-lg"
+                                    id="hero-play-btn" style="background-color: rgba(250, 206, 72, 1);">
+                                    <span class="material-icons text-3xl text-bg-dark pl-0.5">play_arrow</span>
+                                </div>
+                                <p class="text-white text-sm mt-4 font-semibold">Watch the IFT Story</p>
+
+                            </div>
+                        </div>
+                        <div
+                            class="absolute inset-0 bg-gradient-to-t from-bg-dark/70 via-transparent to-transparent z-[5]">
+                        </div>
+                        <div class="absolute bottom-0 left-0 right-0 p-8 text-left z-[5]" id="hero-card-caption">
+                            <p class="text-primary-light font-mono text-sm mb-2 tracking-widest">FUTURE READY</p>
+                            <h3 class="text-2xl font-bold text-white">Where Ideas Become Empires</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Impact Ticker -->
+    <section class="relative z-20 overflow-hidden py-24" id="impact-section">
+        <canvas id="star-canvas" class="absolute inset-0 w-full h-full" style="z-index:0;"></canvas>
+        <div class="absolute inset-0 bg-gradient-to-b from-bg-dark/60 via-transparent to-bg-dark/60" style="z-index:1;">
+        </div>
+        <div class="absolute w-[600px] h-[600px] rounded-full bg-primary/5 filter blur-[120px]" id="impact-orb-1"
+            style="top:30%; left:10%; z-index:1;"></div>
+        <div class="absolute w-[400px] h-[400px] rounded-full bg-accent/5 filter blur-[100px]" id="impact-orb-2"
+            style="top:40%; right:10%; z-index:1;"></div>
+
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative w-full" style="z-index:2;">
+            <div class="text-center mb-16" id="impact-heading">
+                <p class="text-gray-500 uppercase tracking-[0.3em] text-xs font-semibold mb-3 impact-subtitle">Our
+                    Impact So Far</p>
+                <h2 class="text-3xl md:text-5xl font-bold text-white impact-title">
+                    <span class="text-primary-soft text-gradient">Numbers</span> That Speak
+                </h2>
+                <div class="h-1 w-0 mx-auto bg-primary-light rounded-full mt-4" id="impact-title-line"></div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5" id="stats-cards-wrapper">
+                <!-- CARD 1 -->
+                <div class="stats-card active">
+                    <div class="border-gradient"></div>
+                    <div class="border-plain"></div>
+                    <div class="card-content">
+                        <p class="card-label">Students</p>
+                        <div class="number-area">
+                            <span class="number-base"><span class="stats-counter" data-target="23000">0</span><span
+                                    class="suffix">+ Young Minds</span></span>
+                            <span class="number-gradient"><span class="stats-counter-ghost"
+                                    data-target="23000">0</span><span class="suffix">+ Young Minds</span></span>
+                        </div>
+                        <div class="stats-divider"></div>
+                        <div class="stats-row" style="justify-content:flex-start;">
+                            <span>Real Impact</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- CARD 2 -->
+                <div class="stats-card">
+                    <div class="border-gradient"></div>
+                    <div class="border-plain"></div>
+                    <div class="card-content">
+                        <p class="card-label">Learning Partners</p>
+                        <div class="number-area">
+                            <span class="number-base"><span class="stats-counter" data-target="600">0</span><span
+                                    class="suffix">+ Schools</span></span>
+                            <span class="number-gradient"><span class="stats-counter-ghost"
+                                    data-target="600">0</span><span class="suffix">+ Schools</span></span>
+                        </div>
+                        <div class="stats-divider"></div>
+                        <div class="stats-row" style="justify-content:flex-start;">
+                            <span>Nationwide Trust</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- CARD 3 -->
+                <div class="stats-card">
+                    <div class="border-gradient"></div>
+                    <div class="border-plain"></div>
+                    <div class="card-content">
+                        <p class="card-label">Across India</p>
+                        <div class="number-area">
+                            <span class="number-base"><span class="stats-counter" data-target="352">0</span><span
+                                    class="suffix">+ Cities</span></span>
+                            <span class="number-gradient"><span class="stats-counter-ghost"
+                                    data-target="352">0</span><span class="suffix">+ Cities</span></span>
+                        </div>
+                        <div class="stats-divider"></div>
+                        <div class="stats-row" style="justify-content:flex-start;">
+                            <span>Growing Movement</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- About Section -->
+    <section class="py-24 relative overflow-hidden" id="about">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <div class="about-text">
+                    <div
+                        class="inline-block px-3 py-1 bg-primary/10 border border-primary/20 rounded-lg text-xs font-bold text-primary uppercase tracking-widest mb-4">
+                        About IFT</div>
+                    <h2 class="text-4xl font-bold text-white mb-6">India's Launchpad for <br /><span
+                            class="text-primary-soft text-gradient">Young Entrepreneurs</span></h2>
+                    <p class="text-gray-300 text-base leading-relaxed mb-6">
+                        Children are a powerhouse of ideas! But they lack the right platforms to express creativity,
+                        solve real problems, and showcase their potential. India's Future Tycoons (IFT) bridges this gap
+                        for students between the ages 13-18 through this mentorship, founder bootcamps, and a national
+                        pitch stage, helping
+                        students build solutions, gain innovation confidence, earn recognition, access funding, and
+                        unlock global opportunities.
+                    </p>
+                    <div class="flex flex-wrap items-center gap-4 text-sm font-semibold [color:#f5c646]">
+                        <span class="flex items-center gap-2"><span class="material-icons text-base">check_circle</span>
+                            Skill Development</span>
+                        <span class="flex items-center gap-2"><span class="material-icons text-base">check_circle</span>
+                            Expert Mentorship</span>
+                        <span class="flex items-center gap-2"><span class="material-icons text-base">check_circle</span>
+                            Real-World Impact</span>
+                    </div>
+                </div>
+                <div class="relative about-visual">
+                    <div class="absolute -inset-4 bg-primary/10 rounded-2xl blur-2xl"></div>
+                    <div class="relative overflow-hidden border border-primary/20 bg-bg-card aspect-video group cursor-pointer"
+                        style="border-radius:15px;">
+                        <div
+                            class="absolute inset-0 bg-gradient-to-br from-primary/10 via-accent/5 to-bg-dark flex items-center justify-center">
+                            <div
+                                class="w-20 h-20 [background-color:#f5c646] rounded-full flex items-center justify-center glow-purple-sm group-hover:scale-110 transition-transform">
+                                <span class="material-icons text-4xl text-bg-dark pl-1">play_arrow</span>
+                            </div>
+                        </div>
+                        <div class="absolute bottom-4 left-4">
+                            <span
+                                class="text-xs font-bold bg-bg-dark/70 px-3 py-1.5 rounded-lg [color:#f5c646] border border-primary/20">IFT
+                                PROMO VIDEO</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Experience Section -->
+    <section class="relative bg-bg-card/50" id="experience-wrapper">
+        <div class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent">
+        </div>
+        <div id="experience" class="relative" style="overflow: hidden;">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-center text-white mb-2">The IFT <span
+                        class="text-primary-soft text-gradient">Experience</span></h2>
+                <p class="text-center text-gray-400">From idea to venture, students experience entrepreneurship
+                    first-hand. They build ideas, pitch solutions & get recognised.<br />This is where ideas take
+                    flight!</p>
+            </div>
+            <div id="exp-cards-track" class="flex gap-6 pl-8 md:pl-20 pb-24 pr-8">
+                <div
+                    class="w-80 h-96 flex-shrink-0 glass-panel rounded-2xl p-8 flex flex-col justify-between card-3d relative group overflow-hidden exp-card">
+                    <div
+                        class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -mr-8 -mt-8 transition-all group-hover:bg-primary/15">
+                    </div>
+                    <div>
+                        <div
+                            class="w-14 h-14 bg-gradient-to-br from-primary to-primary-dark rounded-xl flex items-center justify-center mb-6 shadow-lg text-bg-dark">
+                            <img src="assets/gifs/idea.gif" alt="Idea Icon" style="width: 3rem; height: 3rem;" />
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-3">Innovate &amp; Solve</h3>
+                        <p class="text-sm text-gray-400">Identify pressing real-world problems and craft unique, viable
+                            solutions using design thinking methodology.</p>
+                    </div>
+                    <div class="text-right"><span
+                            class="text-5xl font-black text-white/5 group-hover:[color:#9b4dba] transition-colors">01</span>
+                    </div>
+                </div>
+                <div
+                    class="w-80 h-96 flex-shrink-0 glass-panel rounded-2xl p-8 flex flex-col justify-between card-3d relative group overflow-hidden exp-card">
+                    <div
+                        class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -mr-8 -mt-8 transition-all group-hover:bg-primary/15">
+                    </div>
+                    <div>
+                        <div
+                            class="w-14 h-14 bg-gradient-to-br from-accent to-accent-dark rounded-xl flex items-center justify-center mb-6 shadow-lg text-white">
+                            <img src="assets/gifs/mentorship.gif" alt="Mentorship Icon"
+                                style="width: 3rem; height: 3rem;" />
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-3">Industry-Led Mentorship</h3>
+                        <p class="text-sm text-gray-400">Get paired with industry leaders who guide you from raw idea to
+                            refined business model with 1-on-1 sessions.</p>
+                    </div>
+                    <div class="text-right"><span
+                            class="text-5xl font-black text-white/5 group-hover:[color:#9b4dba] transition-colors">02</span>
+                    </div>
+                </div>
+                <div
+                    class="w-80 h-96 flex-shrink-0 glass-panel rounded-2xl p-8 flex flex-col justify-between card-3d relative group overflow-hidden exp-card">
+                    <div
+                        class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -mr-8 -mt-8 transition-all group-hover:bg-primary/15">
+                    </div>
+                    <div>
+                        <div
+                            class="w-14 h-14 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center mb-6 shadow-lg text-white">
+                            <img src="assets/gifs/founder bootcamp.gif" alt="Bootcamp Icon"
+                                style="width: 3rem; height: 3rem;" />
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-3">Founders Bootcamp</h3>
+                        <p class="text-sm text-gray-400">3-day residential bootcamp covering BMC, MVP, GTM strategy, and
+                            real startup tools with pitching mastery.</p>
+                    </div>
+                    <div class="text-right"><span
+                            class="text-5xl font-black text-white/5 group-hover:[color:#9b4dba] transition-colors">03</span>
+                    </div>
+                </div>
+                <div
+                    class="w-80 h-96 flex-shrink-0 glass-panel rounded-2xl p-8 flex flex-col justify-between card-3d relative group overflow-hidden exp-card">
+                    <div
+                        class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -mr-8 -mt-8 transition-all group-hover:bg-primary/15">
+                    </div>
+                    <div>
+                        <div
+                            class="w-14 h-14 bg-gradient-to-br from-green-500 to-teal-500 rounded-xl flex items-center justify-center mb-6 shadow-lg text-white">
+                            <img src="assets/gifs/pitch.gif" alt="National Pitch Platform Icon"
+                                style="width: 3rem; height: 3rem;" />
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-3">National Pitch Platform</h3>
+                        <p class="text-sm text-gray-400">Present your startup on a grand national stage. Live pitch to a
+                            panel of VCs and angel investors.</p>
+                    </div>
+                    <div class="text-right"><span
+                            class="text-5xl font-black text-white/5 group-hover:[color:#9b4dba] transition-colors">04</span>
+                    </div>
+                </div>
+                <div
+                    class="w-80 h-96 flex-shrink-0 glass-panel rounded-2xl p-8 flex flex-col justify-between card-3d relative group overflow-hidden exp-card">
+                    <div
+                        class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -mr-8 -mt-8 transition-all group-hover:bg-primary/15">
+                    </div>
+                    <div>
+                        <div
+                            class="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center mb-6 shadow-lg text-white">
+                            <img src="assets/gifs/jury leaders.gif" alt="Jury of Leaders Icon"
+                                style="width: 3rem; height: 3rem;" />
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-3">Jury of Leaders</h3>
+                        <p class="text-sm text-gray-400">Feedback and evaluation from top entrepreneurs, VCs, and
+                            industry leaders who shape your journey.</p>
+                    </div>
+                    <div class="text-right"><span
+                            class="text-5xl font-black text-white/5 group-hover:[color:#9b4dba] transition-colors">05</span>
+                    </div>
+                </div>
+                <div
+                    class="w-80 h-96 flex-shrink-0 glass-panel rounded-2xl p-8 flex flex-col justify-between card-3d relative group overflow-hidden border-primary/30 exp-card">
+                    <div
+                        class="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-bl-full -mr-8 -mt-8 transition-all group-hover:bg-primary/20">
+                    </div>
+                    <div>
+                        <div
+                            class="w-14 h-14 bg-gradient-to-br from-primary to-primary-light rounded-xl flex items-center justify-center mb-6 shadow-lg text-bg-dark">
+                            <img src="assets/gifs/recognition.gif" alt="Seed Funding Icon"
+                                style="width: 3rem; height: 3rem;" />
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-3">Seed Funding &amp; Awards</h3>
+                        <p class="text-sm text-gray-400">Winners receive grants, seed funding, awards & exposure on
+                            national & international platforms like NFTE and UNGCNI.</p>
+                    </div>
+                    <div class="text-right"><span
+                            class="text-5xl font-black text-white/5 group-hover:[color:#9b4dba] transition-colors">06</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Journey Timeline -->
+    <section class="py-24 relative" id="journey">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-white mb-4">The IFT <span
+                    class="text-gradient">Journey</span></h2>
+            <p class="text-center text-gray-400 mb-16">Your path from idea to national recognition</p>
+            <div class="relative timeline-line space-y-16">
+                <div class="timeline-fill" id="timeline-fill"></div>
+                <!-- Step 1 - Registration -->
+                <div
+                    class="relative flex items-center justify-between md:flex-row flex-col-reverse group timeline-item">
+                    <div
+                        class="w-full md:w-5/12 p-6 glass-panel rounded-xl text-right md:pr-8 hover:bg-primary/5 transition-colors hover:border-primary/20">
+                        <h3 class="text-xl font-bold text-white">Registration</h3>
+                        <p class="text-gray-400 text-sm mt-2">School-led registrations</p>
+                        <span class="[color:#f5c646] text-xs font-bold mt-2 block tracking-widest">PHASE 1</span>
+                    </div>
+                    <div class="timeline-dot absolute left-1/2 transform -translate-x-1/2 w-10 h-10 rounded-full border-2 border-primary/30 z-20 flex items-center justify-center"
+                        style="background:#0a0a0a;">
+                        <span class="timeline-dot-num font-black text-xs" style="color:#f5c646;">1</span>
+                    </div>
+                    <div class="w-full md:w-5/12 hidden md:block"></div>
+                </div>
+                <!-- Step 2 - Idea Submission -->
+                <div class="relative flex items-center justify-between md:flex-row flex-col group timeline-item">
+                    <div class="w-full md:w-5/12 hidden md:block"></div>
+                    <div class="timeline-dot absolute left-1/2 transform -translate-x-1/2 w-10 h-10 rounded-full border-2 border-primary/30 z-20 flex items-center justify-center"
+                        style="background:#0A0A0A;">
+                        <span class="timeline-dot-num font-black text-xs" style="color:#f5c646;">2</span>
+                    </div>
+                    <div
+                        class="w-full md:w-5/12 p-6 glass-panel rounded-xl text-left md:pl-8 hover:bg-primary/5 transition-colors hover:border-primary/20">
+                        <h3 class="text-xl font-bold text-white">Idea Submission</h3>
+                        <p class="text-gray-400 text-sm mt-2">Problem-first approach</p>
+                        <span class="[color:#f5c646] text-xs font-bold mt-2 block tracking-widest">PHASE 2</span>
+                    </div>
+                </div>
+                <!-- Step 3 - Top 400 -->
+
+                <div
+                    class="relative flex items-center justify-between md:flex-row flex-col-reverse group timeline-item">
+                    <div
+                        class="w-full md:w-5/12 p-6 glass-panel rounded-xl text-right md:pr-8 hover:bg-primary/5 transition-colors hover:border-primary/20">
+                        <h3 class="text-xl font-bold text-white">Top 400 Ideas Showcase</h3>
+                        <p class="text-gray-400 text-sm mt-2">Zonal-level mentoring &amp; showcases</p>
+                        <span class="[color:#f5c646] text-xs font-bold mt-2 block tracking-widest">PHASE 3</span>
+                    </div>
+                    <div class="timeline-dot absolute left-1/2 transform -translate-x-1/2 w-10 h-10 rounded-full border-2 border-primary/30 z-20 flex items-center justify-center"
+                        style="background:#0A0A0A;">
+                        <span class="timeline-dot-num font-black text-xs" style="color:#f5c646;">3</span>
+                    </div>
+                    <div class="w-full md:w-5/12 hidden md:block"></div>
+                </div>
+                <!-- Step 4 - Top 100 -->
+                <div class="relative flex items-center justify-between md:flex-row flex-col group timeline-item">
+                    <div class="w-full md:w-5/12 hidden md:block"></div>
+                    <div class="timeline-dot absolute left-1/2 transform -translate-x-1/2 w-10 h-10 rounded-full border-2 border-primary/30 z-20 flex items-center justify-center"
+                        style="background:#0A0A0A;">
+                        <span class="timeline-dot-num font-black text-xs" style="color:#f5c646;">4</span>
+                    </div>
+                    <div
+                        class="w-full md:w-5/12 p-6 glass-panel rounded-xl text-left md:pl-8 hover:bg-primary/5 transition-colors hover:border-primary/20">
+                        <h3 class="text-xl font-bold text-white">Top 100 Ideas Showcase</h3>
+                        <p class="text-gray-400 text-sm mt-2">National-level mentoring &amp; showcases</p>
+                        <span class="[color:#f5c646] text-xs font-bold mt-2 block tracking-widest">PHASE 4</span>
+                    </div>
+                </div>
+                <!-- Step 5 - Hall of Fame -->
+                <div
+                    class="relative flex items-center justify-between md:flex-row flex-col-reverse group timeline-item">
+                    <div
+                        class="w-full md:w-5/12 p-6 glass-panel rounded-xl text-right md:pr-8 hover:bg-primary/5 transition-colors hover:border-primary/20">
+                        <h3 class="text-xl font-bold text-white">IFT Hall of Fame</h3>
+                        <p class="text-gray-400 text-sm mt-2">Top 24 ideas nationally recognized</p>
+                        <span class="[color:#f5c646] text-xs font-bold mt-2 block tracking-widest">PHASE 5</span>
+                    </div>
+                    <div class="timeline-dot absolute left-1/2 transform -translate-x-1/2 w-10 h-10 rounded-full border-2 border-primary/30 z-20 flex items-center justify-center"
+                        style="background:#0A0A0A;">
+                        <span class="timeline-dot-num font-black text-xs" style="color:#f5c646;">5</span>
+                    </div>
+                    <div class="w-full md:w-5/12 hidden md:block"></div>
+                </div>
+                <!-- Step 6 - Residential Bootcamp -->
+                <div class="relative flex items-center justify-between md:flex-row flex-col group timeline-item">
+                    <div class="w-full md:w-5/12 hidden md:block"></div>
+                    <div class="timeline-dot absolute left-1/2 transform -translate-x-1/2 w-10 h-10 rounded-full border-2 border-primary/30 z-20 flex items-center justify-center"
+                        style="background:#0A0A0A;">
+                        <span class="timeline-dot-num font-black text-xs" style="color:#f5c646;">6</span>
+                    </div>
+                    <div
+                        class="w-full md:w-5/12 p-6 glass-panel rounded-xl text-left md:pl-8 hover:bg-primary/5 transition-colors hover:border-primary/20">
+                        <h3 class="text-xl font-bold text-white">Residential Founder's Bootcamp</h3>
+                        <p class="text-gray-400 text-sm mt-2">3 days | Real startup tools</p>
+                        <p class="text-gray-400 text-sm mt-1">BMC | MVP | GTM | Pitching</p>
+                        <span class="[color:#f5c646] text-xs font-bold mt-2 block tracking-widest">PHASE 6</span>
+                    </div>
+                </div>
+                <!-- Step 7 - Grand National Showcase -->
+                <div
+                    class="relative flex items-center justify-between md:flex-row flex-col-reverse group timeline-item">
+                    <div
+                        class="w-full md:w-5/12 p-6 glass-panel rounded-xl text-right md:pr-8 hover:bg-primary/5 transition-colors hover:border-primary/20">
+                        <h3 class="text-xl font-bold text-white">Grand National Showcase</h3>
+                        <p class="text-gray-400 text-sm mt-2">Live pitch | Seed funding | Jury</p>
+                        <span class="[color:#f5c646] text-xs font-bold mt-2 block tracking-widest">PHASE 7</span>
+                    </div>
+                    <div class="timeline-dot absolute left-1/2 transform -translate-x-1/2 w-10 h-10 rounded-full border-2 border-primary/30 z-20 flex items-center justify-center"
+                        style="background:#0A0A0A;">
+                        <span class="timeline-dot-num font-black text-xs" style="color:#f5c646;">7</span>
+                    </div>
+                    <div class="w-full md:w-5/12 hidden md:block"></div>
+                </div>
+                <!-- Step 8 - National Recognition (Finale) -->
+                <div class="relative flex items-center justify-between md:flex-row flex-col group timeline-item">
+                    <div class="w-full md:w-5/12 hidden md:block"></div>
+                    <div class="timeline-dot absolute left-1/2 transform -translate-x-1/2 w-14 h-14 rounded-full border-2 z-20 flex items-center justify-center"
+                        style="background:#0A0A0A;border-color:rgba(245,198,70,0.6);">
+                        <span class="timeline-dot-num material-icons text-xl" style="color:#f5c646;">emoji_events</span>
+                    </div>
+                    <div class="w-full md:w-5/12 p-6 rounded-xl text-left md:pl-8 border"
+                        style="background:linear-gradient(135deg,rgba(245,198,70,0.12) 0%,rgba(245,198,70,0.04) 100%);border-color:rgba(245,198,70,0.3);">
+                        <h3 class="text-xl font-bold text-white">National Recognition</h3>
+                        <p class="text-gray-400 text-sm mt-2">Awards | Media | Global opportunities</p>
+                        <span class="text-xs font-bold mt-2 block tracking-widest" style="color:#f5c646;">FINALE</span>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-16">
+                <a href="#contact"
+                    class="btn-glow-hover inline-flex items-center gap-2 px-8 py-4 bg-accent text-bg-dark font-bold rounded-xl glow-gold hover:bg-accent-dark transition-all relative overflow-hidden">
+                    <span class="btn-glow-shine"></span>
+                    <span class="relative z-10 flex items-center gap-2">Start Your IFT Journey Today <span
+                            class="material-icons">arrow_forward</span></span>
+                </a>
+            </div>
+        </div>
+    </section>
+    <!-- Hall of Fame -->
+    <section class="py-24 bg-bg-card/60" id="hall-of-fame">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-end mb-12">
+                <div>
+                    <h2 class="text-3xl md:text-4xl font-bold text-white">IFT Hall of <span
+                            class="text-primary-soft text-gradient">Fame</span></h2>
+                    <p class="text-gray-400 mt-2">Small Ideas. Big Impact. Young
+                        Minds, Leading Real Change!</p>
+                </div>
+                <button
+                    class="hidden md:flex items-center gap-2 text-primary hover:text-white transition-colors text-sm font-semibold uppercase tracking-wider">
+                    Success Stories <span class="material-icons text-sm">arrow_forward</span>
+                </button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div
+                    class="group relative rounded-xl overflow-hidden aspect-[4/5] cursor-pointer hall-card glass-panel">
+                    <img src="assets/Aryan Singh_C.png" alt="Aryan Singh"
+                        class="absolute inset-0 w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-80">
+                    </div>
+                    <div
+                        class="absolute bottom-0 left-0 right-0 p-5 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                        <h3 class="text-lg font-bold text-white">Aryan Singh</h3>
+                        <p class="text-primary-light text-xs mb-2">Mera Sathi Agrotech</p>
+                        <p class="text-gray-300 text-xs opacity-0 group-hover:opacity-100 transition-opacity delay-100">
+                            Aryan's Mera Sathi Agrotech combines tech of the future with empathy & innovation — his idea
+                            earned recognition from Hon'ble PM of India for solving real agricultural challenges.</p>
+                    </div>
+                </div>
+                <div
+                    class="group relative rounded-xl overflow-hidden aspect-[4/5] cursor-pointer hall-card glass-panel">
+                    <img src="assets/Parth-and-Divya.png" alt="Divya & Parth"
+                        class="absolute inset-0 w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-80">
+                    </div>
+                    <div
+                        class="absolute bottom-0 left-0 right-0 p-5 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                        <h3 class="text-lg font-bold text-white">Divya & Parth</h3>
+                        <p class="text-primary-light text-xs mb-2">Tyron — Social Impact Startup</p>
+                        <p class="text-gray-300 text-xs opacity-0 group-hover:opacity-100 transition-opacity delay-100">
+                            Profit-making startup creating jobs for acid attack survivors, won NFTE's global challenge &
+                            recognised by Unstop and Better India.</p>
+                    </div>
+                </div>
+                <div
+                    class="group relative rounded-xl overflow-hidden aspect-[4/5] cursor-pointer hall-card glass-panel">
+                    <img src="assets/Akshit Bionic Hand.png" alt="Akshit"
+                        class="absolute inset-0 w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-80">
+                    </div>
+                    <div
+                        class="absolute bottom-0 left-0 right-0 p-5 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                        <h3 class="text-lg font-bold text-white">Akshit</h3>
+                        <p class="text-primary-light text-xs mb-2">The Bionic Hand</p>
+                        <p class="text-gray-300 text-xs opacity-0 group-hover:opacity-100 transition-opacity delay-100">
+                            Mentored by ENpower, Akshit turned The Bionic Hand prototype into an investor-backed
+                            prosthetic powered by design thinking and entrepreneurial skills.</p>
+                    </div>
+                </div>
+                <div class="group relative rounded-xl overflow-hidden aspect-[4/5] border border-primary/30 hall-card">
+                    <video class="absolute inset-0 w-full h-full object-cover" src="assets/IFT FINAL PROMO SEASON 4.mp4"
+                        preload="metadata" playsinline loop></video>
+                    <div class="absolute inset-0 bg-black/50 flex items-center justify-center z-10 group-hover:bg-black/20 transition-colors cursor-pointer"
+                        id="hof-video-overlay">
+                        <div class="text-center">
+                            <span
+                                class="material-icons text-5xl text-primary opacity-80 group-hover:scale-110 transition-transform">play_circle_outline</span>
+                            <p class="text-white text-sm mt-3 font-bold">Watch Success Stories</p>
+                        </div>
+                    </div>
+                    <div class="absolute bottom-0 left-0 right-0 p-4 bg-bg-dark/80 z-20">
+                        <h3 class="text-lg font-bold text-white">Season Recap</h3>
+                        <p class="text-gray-400 text-xs">Watch the full journey</p>
+                    </div>
+                </div>
+                <script>
+                        (function () {
+                            const overlay = document.getElementById('hof-video-overlay');
+                            const video = overlay.previousElementSibling;
+                            overlay.addEventListener('click', function () {
+                                overlay.style.display = 'none';
+                                video.controls = true;
+                                video.play();
+                            });
+                        })();
+                </script>
+            </div>
+        </div>
+    </section>
+
+    <!-- IFT for Schools -->
+    <!-- BEGIN: Cinematic Product Reveal Section -->
+    <!-- Outer wrapper is tall to provide scroll room; inner #schools-pin is what gets pinned -->
+    <div id="schools" style="position:relative;">
+        <!-- Pinnable inner panel — full viewport height, centered -->
+        <div id="schools-pin" class="relative w-full overflow-hidden flex items-center" style="height:100vh;">
+            <!-- Background Decorative Glows -->
+            <div class="absolute top-1/4 left-1/4 w-[500px] h-[500px] purple-radial-glow pointer-events-none"
+                style="z-index:0;"></div>
+            <div class="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] purple-radial-glow pointer-events-none"
+                style="z-index:0;"></div>
+
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative" style="z-index:1;">
+                <div class="flex flex-col lg:flex-row gap-12 items-center">
+                    <!-- LEFT: heading + narrative stack + button (always visible) -->
+                    <div class="w-full lg:w-1/2 z-10 pt-16">
+                        <!-- Section heading — left-aligned, matching site style -->
+                        <div class="mb-10">
+                            <p class="text-gray-500 uppercase tracking-[0.3em] text-xs font-semibold mb-3">Nurture
+                                Future Creators</p>
+                            <h2 class="text-3xl md:text-4xl font-bold text-white">IFT for <span
+                                    class="text-primary-soft text-gradient">Schools</span></h2>
+                            <p class="text-gray-400 mt-2">This is NEP 2020 into action with future skills, innovation,
+                                and national recognition.</p>
+                        </div>
+                        <!-- Narrative Blocks — stack on top of each other, animated by scroll -->
+                        <div class="relative" style="height:200px;" data-purpose="narrative-stack">
+                            <article class="absolute inset-0 flex flex-col justify-start pointer-events-none opacity-0"
+                                style="transform:translateY(30px);" id="narrative-1">
+                                <h3 class="text-xl md:text-2xl font-semibold mb-3 text-white">Your School can be a
+                                    'Future-Skills' Leader</h3>
+                                <p class="text-gray-400 leading-relaxed max-w-lg">Equip students with essential
+                                    21st-century skills through entrepreneurship, technology, and design thinking.
+                                    Prepare them to lead, innovate, and thrive in a rapidly changing world.</p>
+                            </article>
+                            <article class="absolute inset-0 flex flex-col justify-start pointer-events-none opacity-0"
+                                style="transform:translateY(30px);" id="narrative-2">
+                                <h3 class="text-xl md:text-2xl font-semibold mb-3 text-white">Gives Your Students a
+                                    National Recognition Platform</h3>
+                                <p class="text-gray-400 leading-relaxed max-w-lg">Enable students to showcase their
+                                    ideas on a national stage through pitch opportunities, mentorship, and recognition,
+                                    building confidence, visibility, and real-world relevance beyond classrooms.</p>
+                            </article>
+                            <article class="absolute inset-0 flex flex-col justify-start pointer-events-none opacity-0"
+                                style="transform:translateY(30px);" id="narrative-3">
+                                <h3 class="text-xl md:text-2xl font-semibold mb-3 text-white">Aligned with Global
+                                    Skills, NEP & NCF Frameworks</h3>
+                                <p class="text-gray-400 leading-relaxed max-w-lg">Prepare students for future careers
+                                    through competency-based learning aligned with global skill standards and India's
+                                    NEP–NCF focus on experiential, multidisciplinary education.</p>
+                            </article>
+                        </div>
+
+                        <!-- Button — always visible below narrative stack -->
+                        <div class="mt-8">
+                            <a href="#contact"
+                                class="btn-glow-hover inline-block bg-accent text-bg-dark font-bold px-8 py-3 rounded-xl glow-gold hover:bg-accent-dark transition-all relative overflow-hidden">
+                                <span class="btn-glow-shine"></span>
+                                <span class="relative z-10">Bring IFT to Your School</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT: stacked glass cards — all at same position, layer on top as you scroll -->
+                    <div class="w-full lg:w-1/2 relative flex items-center justify-center" style="height:320px;">
+
+                        <!-- Card 1 — NEP Compliant -->
+                        <div class="absolute inset-0 rounded-2xl overflow-hidden opacity-0"
+                            style="z-index:10;transform:translateX(80px);background:#1a0a2e;border:1px solid rgba(139,92,246,0.35);"
+                            id="card-1">
+                            <div style="height:3px;background:linear-gradient(90deg,#7c3aed,#a78bfa);"></div>
+                            <div class="flex flex-col justify-center p-7 h-full">
+                                <div class="w-9 h-9 rounded-lg overflow-hidden mb-4">
+                                    <img src="assets/gifs/idea.gif" alt="Innovation"
+                                        style="width:36px;height:36px;object-fit:cover;" />
+                                </div>
+                                <span class="text-purple-400 text-xs font-bold uppercase tracking-widest mb-1">NEP
+                                    2020</span>
+                                <h4 class="font-bold text-white text-xl leading-tight mb-3">NEP Compliant</h4>
+                                <p class="text-gray-300 text-sm leading-relaxed">Build problem-solving, creativity,
+                                    collaboration, and digital fluency through real-world mentorship, hands-on projects,
+                                    and national innovation challenges that turn classrooms into launchpads.</p>
+                            </div>
+                        </div>
+
+                        <!-- Card 2 — Future Ready -->
+                        <div class="absolute inset-0 rounded-2xl overflow-hidden opacity-0"
+                            style="z-index:20;transform:translateX(80px);background:#4f3119;border:1px solid rgba(59,130,246,0.35);"
+                            id="card-2">
+                            <div style="height:3px;background:#c08a5e;"></div>
+                            <div class="flex flex-col justify-center p-7 h-full">
+                                <div class="w-9 h-9 rounded-lg overflow-hidden mb-4">
+                                    <img src="assets/gifs/mentorship.gif" alt="Mentorship"
+                                        style="width:36px;height:36px;object-fit:cover;" />
+                                </div>
+                                <span class="[color:#c08a5e] text-xs font-bold uppercase tracking-widest mb-1">21st
+                                    Century</span>
+                                <h4 class="font-bold text-white text-xl leading-tight mb-3">Future Ready</h4>
+                                <p class="text-gray-300 text-sm leading-relaxed">Empower learners to turn concepts into
+                                    solutions while gaining exposure to industry experts, peer innovators, and funding
+                                    pathways that validate their potential.</p>
+                            </div>
+                        </div>
+
+                        <!-- Card 3 — National Recognition -->
+                        <div class="absolute inset-0 rounded-2xl overflow-hidden opacity-0"
+                            style="z-index:30;transform:translateX(80px);background:#1a1200;border:1px solid rgba(245,158,11,0.35);"
+                            id="card-3">
+                            <div style="height:3px;background:linear-gradient(90deg,#d97706,#fbbf24);"></div>
+                            <div class="flex flex-col justify-center p-7 h-full">
+                                <div class="w-9 h-9 rounded-lg overflow-hidden mb-4">
+                                    <img src="assets/gifs/recognition.gif" alt="Recognition"
+                                        style="width:36px;height:36px;object-fit:cover;" />
+                                </div>
+                                <span
+                                    class="text-amber-400 text-xs font-bold uppercase tracking-widest mb-1">Nationwide</span>
+                                <h4 class="font-bold text-white text-xl leading-tight mb-3">National Recognition</h4>
+                                <p class="text-gray-300 text-sm leading-relaxed">IFT integrates critical thinking,
+                                    creativity, collaboration, entrepreneurship, and real-world application, supporting
+                                    schools in delivering future-ready outcomes within national curriculum guidelines.
+                                </p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END: Cinematic Product Reveal Section -->
+
+    <!-- BEGIN: GSAP Schools Animation Logic -->
+    <script data-purpose="gsap-schools-setup">
+        (function () {
+            function initSchoolsAnimation() {
+                if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
+                    setTimeout(initSchoolsAnimation, 100);
+                    return;
+                }
+                gsap.registerPlugin(ScrollTrigger);
+                const mm = gsap.matchMedia();
+
+                // Desktop: pin the panel and sequence narratives + stacking cards
+                mm.add("(min-width: 1024px)", () => {
+                    const tl = gsap.timeline({
+                        scrollTrigger: {
+                            trigger: "#schools-pin",
+                            start: "top top",
+                            end: "+=2400",
+                            scrub: 1,
+                            pin: true,
+                            anticipatePin: 1,
+                        }
+                    });
+
+                    // Step 1: Narrative 1 in, Card 1 slides in from right — stays
+                    tl.to("#narrative-1", { opacity: 1, y: 0, duration: 1 }, 0)
+                        .to("#card-1", { opacity: 1, x: 0, duration: 1 }, 0);
+
+                    // Step 2: swap narrative, Card 2 slides in on top — Card 1 stays visible beneath
+                    tl.to("#narrative-1", { opacity: 0, y: -20, duration: 0.6 }, "+=0.8")
+                        .to("#narrative-2", { opacity: 1, y: 0, duration: 0.8 })
+                        .to("#card-2", { opacity: 1, x: 0, duration: 1 }, "<");
+
+                    // Step 3: swap narrative, Card 3 slides in on top — Cards 1 & 2 stay beneath
+                    tl.to("#narrative-2", { opacity: 0, y: -20, duration: 0.6 }, "+=0.8")
+                        .to("#narrative-3", { opacity: 1, y: 0, pointerEvents: "auto", duration: 0.8 })
+                        .to("#card-3", { opacity: 1, x: 0, duration: 1 }, "<");
+
+                    return () => tl.kill();
+                });
+
+                // Mobile: CSS handles the layout (static flow, no absolute/pinning).
+                // We just ensure everything is visible with a simple stagger fade-in.
+                mm.add("(max-width: 1023px)", () => {
+                    // Make narratives and cards visible with stagger
+                    gsap.set(["#narrative-1", "#narrative-2", "#narrative-3", "#card-1", "#card-2", "#card-3"], {
+                        opacity: 1, y: 0, x: 0, pointerEvents: 'auto'
+                    });
+                    // Gentle stagger fade-in for cards
+                    gsap.from("#card-1, #card-2, #card-3", {
+                        y: 30, opacity: 0, duration: 0.8, stagger: 0.15, ease: 'power3.out',
+                        scrollTrigger: { trigger: "#schools", start: "top 75%", toggleActions: "play none none none" }
+                    });
+                });
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initSchoolsAnimation);
+            } else {
+                initSchoolsAnimation();
+            }
+        })();
+    </script>
+    <!-- END: GSAP Schools Animation Logic -->
+
+    <!-- Mentors & Jury -->
+    <section class="py-24 bg-bg-dark" id="mentors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-white">Our Mentor <span
+                        class="text-primary-soft text-gradient">Network</span></h2>
+                <p class="text-gray-400 mt-2">A community of founders and educators empowering students to build
+                    meaningful real-world solutions.</p>
+            </div>
+
+            <!-- 3D Tilt Mentor Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+                <!-- Card 1 -->
+                <div class="mentor-card">
+                    <img src="assets/Mentors/KAUSTUBH DHARGALKAR - Design Thinking.jpg" alt="Kaustubh Dhargalkar"
+                        class="mentor-avatar" />
+                    <div class="mentor-icon">
+                        <span class="material-icons">palette</span>
+                    </div>
+                    <h3 class="mentor-name">Kaustubh Dhargalkar</h3>
+                    <p class="mentor-role">Design Thinking</p>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="mentor-card">
+                    <img src="assets/Mentors/MANDAR MHATRE - Tech.png" alt="Mandar Mhatre" class="mentor-avatar" />
+                    <div class="mentor-icon">
+                        <span class="material-icons">code</span>
+                    </div>
+                    <h3 class="mentor-name">Mandar Mhatre</h3>
+                    <p class="mentor-role">Tech</p>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="mentor-card">
+                    <img src="assets/Mentors/NIMISHA NAGARSEKAR -Otherwise.jpg" alt="Nimisha Nagarsekar"
+                        class="mentor-avatar" />
+                    <div class="mentor-icon">
+                        <span class="material-icons">lightbulb</span>
+                    </div>
+                    <h3 class="mentor-name">Nimisha Nagarsekar</h3>
+                    <p class="mentor-role">Finance</p>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="mentor-card">
+                    <img src="assets/Mentors/RAJENDRA BHAT - Tech.jpg" alt="Rajendra Bhat" class="mentor-avatar" />
+                    <div class="mentor-icon">
+                        <span class="material-icons">computer</span>
+                    </div>
+                    <h3 class="mentor-name">Rajendra Bhat</h3>
+                    <p class="mentor-role">Tech</p>
+                </div>
+
+            </div>
+            <!-- Testimonial -->
+            <!-- Testimonials Carousel -->
+            <div class="mt-16 mx-auto testimonial-card" style="max-width:60rem;">
+                <div class="flex items-center gap-4">
+                    <button id="testi-prev"
+                        class="flex-shrink-0 w-10 h-10 rounded-full bg-white/10 hover:bg-primary/40 flex items-center justify-center transition-colors">
+                        <span class="material-icons text-white text-lg">chevron_left</span>
+                    </button>
+                    <div class="flex-1 glass-panel rounded-xl overflow-hidden">
+                        <!-- Slides -->
+                        <div id="testi-track" class="flex" style="transition: transform 0.5s ease;">
+                            <!-- Slide 1 -->
+                            <div class="testi-slide p-8 md:p-10 text-center">
+                                <span class="material-icons"
+                                    style="font-size:3rem;color:rgba(123,45,142,0.25);">format_quote</span>
+                                <p class="text-lg text-gray-200 italic leading-relaxed mt-2">"IFT gave me the confidence
+                                    to believe that age is just a number. My idea is now a registered startup, and I'm
+                                    only 16!"</p>
+                                <div class="mt-5">
+                                    <div class="text-white font-bold">Aarav Sharma</div>
+                                    <div class="text-primary text-sm">Season 4 Winner</div>
+                                </div>
+                            </div>
+                            <!-- Slide 2 -->
+                            <div class="testi-slide p-8 md:p-10 text-center">
+                                <span class="material-icons"
+                                    style="font-size:3rem;color:rgba(123,45,142,0.25);">format_quote</span>
+                                <p class="text-lg text-gray-200 italic leading-relaxed mt-2">"I think it's a different
+                                    kind of competition. Kids are being encouraged to think as entrepreneurs — very
+                                    excited, very engaged. It's been a wonderful journey for them to think in a very
+                                    different way. All in all, just been fantastic."</p>
+                                <div class="mt-5">
+                                    <div class="text-white font-bold">Mrs. Ruma Rao</div>
+                                    <div class="text-primary text-sm">Parent of Winning Team</div>
+                                </div>
+                            </div>
+                            <!-- Slide 3 -->
+                            <div class="testi-slide p-8 md:p-10 text-center">
+                                <span class="material-icons"
+                                    style="font-size:3rem;color:rgba(123,45,142,0.25);">format_quote</span>
+                                <p class="text-lg text-gray-200 italic leading-relaxed mt-2">"Going through the whole
+                                    competition was truly a great experience. I never knew that entrepreneurship was so
+                                    exciting until this. Thank you so much IFT!"</p>
+                                <div class="mt-5">
+                                    <div class="text-white font-bold">Harsha Shah</div>
+                                    <div class="text-primary text-sm">Student, Shishuvan</div>
+                                </div>
+                            </div>
+                            <!-- Slide 4 -->
+                            <div class="testi-slide p-8 md:p-10 text-center">
+                                <span class="material-icons"
+                                    style="font-size:3rem;color:rgba(123,45,142,0.25);">format_quote</span>
+                                <p class="text-lg text-gray-200 italic leading-relaxed mt-2">"I learnt a lot about
+                                    entrepreneurship. Really got me thinking about innovative ideas. The teachers were
+                                    very friendly and encouraging. Sushil sir in particular is fun and thoughtful."</p>
+                                <div class="mt-5">
+                                    <div class="text-white font-bold">Priti Gangaramani</div>
+                                    <div class="text-primary text-sm">Student, Arya Vidya Mandir</div>
+                                </div>
+                            </div>
+                            <!-- Slide 5 -->
+                            <div class="testi-slide p-8 md:p-10 text-center">
+                                <span class="material-icons"
+                                    style="font-size:3rem;color:rgba(123,45,142,0.25);">format_quote</span>
+                                <p class="text-lg text-gray-200 italic leading-relaxed mt-2">"Thanks a lot for
+                                    encouraging our children. It is a great initiative where our kids are being exposed
+                                    to the skills of entrepreneurship at such a young age. Our students are given a
+                                    chance to realize that they are also innovators and are capable of doing out of the
+                                    box things."</p>
+                                <div class="mt-5">
+                                    <div class="text-white font-bold">Amita Bhatia</div>
+                                    <div class="text-primary text-sm">Teacher, RBK International School, Bhayandar</div>
+                                </div>
+                            </div>
+                            <!-- Slide 6 -->
+                            <div class="testi-slide p-8 md:p-10 text-center">
+                                <span class="material-icons"
+                                    style="font-size:3rem;color:rgba(123,45,142,0.25);">format_quote</span>
+                                <p class="text-lg text-gray-200 italic leading-relaxed mt-2">"IFT is an amazing platform
+                                    for children. They may not necessarily become entrepreneurs but they will harbour an
+                                    entrepreneurial mindset for life & that is an essential life skill today!"</p>
+                                <div class="mt-5">
+                                    <div class="text-white font-bold">Mr. Shantanu Deshpande</div>
+                                    <div class="text-primary text-sm">Founder, The Bombay Shaving Company (IFT Jury)
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Slide 7 -->
+                            <div class="testi-slide p-8 md:p-10 text-center">
+                                <span class="material-icons"
+                                    style="font-size:3rem;color:rgba(123,45,142,0.25);">format_quote</span>
+                                <p class="text-lg text-gray-200 italic leading-relaxed mt-2">"IFT's bootcamp &
+                                    mentorship will lead to many world-class startups & innovative entrepreneurs in
+                                    India."</p>
+                                <div class="mt-5">
+                                    <div class="text-white font-bold">Mr. Ramanan Ramanathan</div>
+                                    <div class="text-primary text-sm">Former First Mission Director, Atal Innovation
+                                        Mission (Advisor - ENpower)</div>
+                                </div>
+                            </div>
+                            <!-- Slide 8 -->
+                            <div class="testi-slide p-8 md:p-10 text-center">
+                                <span class="material-icons"
+                                    style="font-size:3rem;color:rgba(123,45,142,0.25);">format_quote</span>
+                                <p class="text-lg text-gray-200 italic leading-relaxed mt-2">"IFT is a great platform
+                                    for students to be the change they want to see in the future."</p>
+                                <div class="mt-5">
+                                    <div class="text-white font-bold">Mr. Nikhil Vora</div>
+                                    <div class="text-primary text-sm">Founder & CEO, Sixth Sense Ventures (IFT Jury)
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Slide 9 -->
+                            <div class="testi-slide p-8 md:p-10 text-center">
+                                <span class="material-icons"
+                                    style="font-size:3rem;color:rgba(123,45,142,0.25);">format_quote</span>
+                                <p class="text-lg text-gray-200 italic leading-relaxed mt-2">"IFT has given a chance to
+                                    a science student like me to dream of becoming an entrepreneur. I didn't know that
+                                    was possible."</p>
+                                <div class="mt-5">
+                                    <div class="text-white font-bold">Juhi Pant</div>
+                                    <div class="text-primary text-sm">Student, Dayavati Modi Academy, Meerut</div>
+                                </div>
+                            </div>
+                            <!-- Slide 10 -->
+                            <div class="testi-slide p-8 md:p-10 text-center">
+                                <span class="material-icons"
+                                    style="font-size:3rem;color:rgba(123,45,142,0.25);">format_quote</span>
+                                <p class="text-lg text-gray-200 italic leading-relaxed mt-2">"IFT's bootcamp &
+                                    mentorship will lead to many world-class startups & innovative entrepreneurs in
+                                    India."</p>
+                                <div class="mt-5">
+                                    <div class="text-white font-bold">Amey Kaval</div>
+                                    <div class="text-primary text-sm">Teacher, Podar International, Mumbai</div>
+                                </div>
+                            </div>
+                            <!-- Slide 11 -->
+                            <div class="testi-slide p-8 md:p-10 text-center">
+                                <span class="material-icons"
+                                    style="font-size:3rem;color:rgba(123,45,142,0.25);">format_quote</span>
+                                <p class="text-lg text-gray-200 italic leading-relaxed mt-2">"The concept of finding
+                                    solutions to real-world problems is empowering for 13-year-old children."</p>
+                                <div class="mt-5">
+                                    <div class="text-white font-bold">Aanchal Gupta</div>
+                                    <div class="text-primary text-sm">Parent, IFT #2</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button id="testi-next"
+                        class="flex-shrink-0 w-10 h-10 rounded-full bg-white/10 hover:bg-primary/40 flex items-center justify-center transition-colors">
+                        <span class="material-icons text-white text-lg">chevron_right</span>
+                    </button>
+                </div>
+                <!-- Mobile Nav Arrows (below carousel) -->
+                <div class="testi-mobile-nav justify-center items-center gap-6 mt-4" style="display:none;">
+                    <button id="testi-prev-mobile"
+                        class="w-10 h-10 rounded-full bg-white/10 hover:bg-primary/40 flex items-center justify-center transition-colors">
+                        <span class="material-icons text-white text-lg">chevron_left</span>
+                    </button>
+                    <span id="testi-counter" class="text-gray-400 text-sm font-medium tabular-nums">1 / 11</span>
+                    <button id="testi-next-mobile"
+                        class="w-10 h-10 rounded-full bg-white/10 hover:bg-primary/40 flex items-center justify-center transition-colors">
+                        <span class="material-icons text-white text-lg">chevron_right</span>
+                    </button>
+                </div>
+                <!-- Dots -->
+                <div id="testi-dots" class="flex justify-center gap-2 mt-4"></div>
+            </div>
+
+
+        </div>
+    </section>
+
+    <!-- Partners -->
+    <section class="py-20 border-y border-primary/10 bg-bg-card/40" id="partners">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <span class="text-gray-500 uppercase tracking-[0.2em] text-sm font-semibold">Our Strategic
+                    Partners</span>
+            </div>
+            <!-- Row 1: Right to Left -->
+            <div class="overflow-hidden mb-16">
+                <div class="marquee-row-rtl flex items-center whitespace-nowrap">
+                    <div class="flex-none mr-20">
+                        <img src="assets/Partners Logo/AIM.png" alt="AIM" class="h-12 object-contain cursor-pointer" />
+                    </div>
+                    <div class="flex-none mr-20">
+                        <img src="assets/Partners Logo/DY PATIL.PNG" alt="DY Patil"
+                            class="h-12 object-contain cursor-pointer" />
+                    </div>
+                    <div class="flex-none mr-20">
+                        <img src="assets/Partners Logo/EUPHEUS LEARNING.png" alt="Eupheus Learning"
+                            class="h-12 object-contain cursor-pointer" />
+                    </div>
+                    <div class="flex-none mr-20">
+                        <img src="assets/Partners Logo/GITHUB.png" alt="GitHub"
+                            class="h-12 object-contain cursor-pointer" />
+                    </div>
+                    <div class="flex-none mr-20">
+                        <img src="assets/Partners Logo/HSBC BANK.jpg" alt="HSBC Bank"
+                            class="h-12 object-contain cursor-pointer" />
+                    </div>
+                    <div class="flex-none mr-20">
+                        <img src="assets/Partners Logo/KOTAK MAHINDRA.png" alt="Kotak Mahindra"
+                            class="h-12 object-contain cursor-pointer" />
+                    </div>
+                    <!-- Duplicate for seamless loop -->
+                    <div class="flex-none mr-20">
+                        <img src="assets/Partners Logo/AIM.png" alt="AIM" class="h-12 object-contain cursor-pointer" />
+                    </div>
+                    <div class="flex-none mr-20">
+                        <img src="assets/Partners Logo/DY PATIL.PNG" alt="DY Patil"
+                            class="h-12 object-contain cursor-pointer" />
+                    </div>
+                    <div class="flex-none mr-20">
+                        <img src="assets/Partners Logo/EUPHEUS LEARNING.png" alt="Eupheus Learning"
+                            class="h-12 object-contain cursor-pointer" />
+                    </div>
+                    <div class="flex-none mr-20">
+                        <img src="assets/Partners Logo/GITHUB.png" alt="GitHub"
+                            class="h-12 object-contain cursor-pointer" />
+                    </div>
+                    <div class="flex-none mr-20">
+                        <img src="assets/Partners Logo/HSBC BANK.jpg" alt="HSBC Bank"
+                            class="h-12 object-contain cursor-pointer" />
+                    </div>
+                    <div class="flex-none mr-20">
+                        <img src="assets/Partners Logo/KOTAK MAHINDRA.png" alt="Kotak Mahindra"
+                            class="h-12 object-contain cursor-pointer" />
+                    </div>
+                </div>
+            </div>
+            <!-- Row 2: Left to Right -->
+            <div class="overflow-hidden">
+                <div class="marquee-row-ltr flex items-center whitespace-nowrap">
+                    <div class="flex-none mr-20">
+                        <img src="assets/Partners Logo/MICROSOFT.jpg" alt="Microsoft"
+                            class="h-12 object-contain cursor-pointer" />
+                    </div>
+                    <div class="flex-none mr-20">
+                        <img src="assets/Partners Logo/NEROLAC PAINT.png" alt="Nerolac Paint"
+                            class="h-12 object-contain cursor-pointer" />
+                    </div>
+                    <div class="flex-none mr-20">
+                        <img src="assets/Partners Logo/RASKIK.png" alt="Raskik"
+                            class="h-12 object-contain cursor-pointer" />
+                    </div>
+                    <div class="flex-none mr-20">
+                        <img src="assets/Partners Logo/SNAPCHAT.png" alt="Snapchat"
+                            class="h-12 object-contain cursor-pointer" />
+                    </div>
+                    <div class="flex-none mr-20">
+                        <img src="assets/Partners Logo/UN-GCNI.png" alt="UN-GCNI"
+                            class="h-12 object-contain cursor-pointer" />
+                    </div>
+                    <div class="flex-none mr-20">
+                        <img src="assets/Partners Logo/WOW KIDZ.jpg" alt="Wow Kidz"
+                            class="h-12 object-contain cursor-pointer" />
+                    </div>
+                    <!-- Duplicate for seamless loop -->
+                    <div class="flex-none mr-20">
+                        <img src="assets/Partners Logo/MICROSOFT.jpg" alt="Microsoft"
+                            class="h-12 object-contain cursor-pointer" />
+                    </div>
+                    <div class="flex-none mr-20">
+                        <img src="assets/Partners Logo/NEROLAC PAINT.png" alt="Nerolac Paint"
+                            class="h-12 object-contain cursor-pointer" />
+                    </div>
+                    <div class="flex-none mr-20">
+                        <img src="assets/Partners Logo/RASKIK.png" alt="Raskik"
+                            class="h-12 object-contain cursor-pointer" />
+                    </div>
+                    <div class="flex-none mr-20">
+                        <img src="assets/Partners Logo/SNAPCHAT.png" alt="Snapchat"
+                            class="h-12 object-contain cursor-pointer" />
+                    </div>
+                    <div class="flex-none mr-20">
+                        <img src="assets/Partners Logo/UN-GCNI.png" alt="UN-GCNI"
+                            class="h-12 object-contain cursor-pointer" />
+                    </div>
+                    <div class="flex-none mr-20">
+                        <img src="assets/Partners Logo/WOW KIDZ.jpg" alt="Wow Kidz"
+                            class="h-12 object-contain cursor-pointer" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- About ENpower -->
+            <div
+                class="mt-16 glass-panel p-8 rounded-xl flex flex-col md:flex-row items-center gap-8 border-l-4 border-primary">
+                <div class="md:w-1/4">
+                    <h3 class="text-2xl font-bold text-white">About <span
+                            class="text-primary text-gradient">ENpower</span>
+                    </h3>
+                </div>
+                <div class="md:w-3/4 text-gray-400 text-sm leading-relaxed border-l border-white/10 pl-0 md:pl-8">
+                    ENpower is a future-skills ecosystem enabling young minds to build the skills, mindset, and
+                    confidence required to create meaningful real-world impact. IFT, an initiative by ENpower, provides
+                    a national platform for students to showcase their innovation and entrepreneurial potential.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="py-24 relative" id="contact">
+        <div class="absolute inset-0 bg-gradient-to-b from-bg-dark to-primary/5 opacity-50 z-0"></div>
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-white">Join the <span class="text-gradient">Revolution</span></h2>
+                <p class="text-gray-400 mt-2">Whether you are a School or a Partner, we'd love to connect with you.</p>
+                <p class="text-gray-500 text-sm mt-1">contact@enlearning.in</p>
+            </div>
+            <div class="glass-panel rounded-2xl overflow-hidden shadow-2xl">
+                <div class="flex border-b border-white/10" id="contact-tabs">
+                    <button
+                        class="contact-tab flex-1 py-4 text-center font-bold text-bg-dark bg-accent border-b-2 border-accent active"
+                        data-tab="school">Bring IFT to My School</button>
+                    <button
+                        class="contact-tab flex-1 py-4 text-center font-bold text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
+                        data-tab="sponsor">Partner With IFT</button>
+                </div>
+                <!-- School Form -->
+                <div class="p-8 md:p-12 contact-form" id="form-school">
+                    <form class="space-y-6">
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label
+                                    class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Full
+                                    Name</label>
+                                <input
+                                    class="w-full bg-bg-dark/60 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+                                    placeholder="Your Name" type="text" />
+                            </div>
+                            <div>
+                                <label
+                                    class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Role</label>
+                                <select
+                                    class="w-full bg-bg-dark/60 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors">
+                                    <option>Teacher</option>
+                                    <option>Principal</option>
+                                    <option>School Leader</option>
+                                    <option>Coordinator</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label
+                                    class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Email
+                                    ID</label>
+                                <input
+                                    class="w-full bg-bg-dark/60 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+                                    placeholder="you@school.com" type="email" />
+                            </div>
+                            <div>
+                                <label
+                                    class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Contact
+                                    Number</label>
+                                <input
+                                    class="w-full bg-bg-dark/60 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+                                    placeholder="+91 98765 43210" type="tel" />
+                            </div>
+                        </div>
+                        <div>
+                            <label
+                                class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">School
+                                Name &amp; City</label>
+                            <input
+                                class="w-full bg-bg-dark/60 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+                                placeholder="St. Mary's High School, Mumbai" type="text" />
+                        </div>
+                        <button
+                            class="btn-glow-hover w-full py-4 bg-accent hover:bg-accent-dark text-bg-dark font-bold rounded-lg glow-gold transition-all mt-4 relative overflow-hidden"
+                            type="button"
+                            onclick="this.textContent='Thank you for reaching out!';this.disabled=true;this.classList.add('opacity-70')">
+                            <span class="btn-glow-shine"></span>
+                            <span class="relative z-10">Submit Inquiry</span></button>
+                    </form>
+                </div>
+                <!-- Sponsor Form -->
+                <div class="p-8 md:p-12 contact-form hidden" id="form-sponsor">
+                    <form class="space-y-6">
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label
+                                    class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Organization
+                                    / Foundation</label>
+                                <input
+                                    class="w-full bg-bg-dark/60 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+                                    placeholder="Organization Name" type="text" />
+                            </div>
+                            <div>
+                                <label
+                                    class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Designation</label>
+                                <input
+                                    class="w-full bg-bg-dark/60 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+                                    placeholder="Your Designation" type="text" />
+                            </div>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label
+                                    class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Email
+                                    ID</label>
+                                <input
+                                    class="w-full bg-bg-dark/60 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+                                    placeholder="you@company.com" type="email" />
+                            </div>
+                            <div>
+                                <label
+                                    class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Contact
+                                    Number</label>
+                                <input
+                                    class="w-full bg-bg-dark/60 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+                                    placeholder="+91 98765 43210" type="tel" />
+                            </div>
+                        </div>
+                        <button
+                            class="btn-glow-hover w-full py-4 bg-accent hover:bg-accent-dark text-bg-dark font-bold rounded-lg glow-gold transition-all mt-4 relative overflow-hidden"
+                            type="button"
+                            onclick="this.textContent='Thank you for reaching out!';this.disabled=true;this.classList.add('opacity-70')">
+                            <span class="btn-glow-shine"></span>
+                            <span class="relative z-10">Submit</span></button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="py-24 bg-bg-dark" id="faq">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold text-center text-white mb-12">Frequently Asked <span
+                    class="text-primary-soft text-gradient">Questions</span></h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="faq-container">
+                <!-- Left Column -->
+                <div class="space-y-4">
+                    <div
+                        class="faq-item border border-white/10 rounded-lg overflow-hidden bg-white/5 hover:border-primary/30 transition-colors">
+                        <button
+                            class="faq-btn w-full px-6 py-4 text-left flex justify-between items-center text-white font-medium focus:outline-none"
+                            onclick="toggleFaq(this)">
+                            <span>What is India's Future Tycoons (IFT)?</span>
+                            <span
+                                class="material-icons text-primary faq-icon transition-transform duration-300">add</span>
+                        </button>
+                        <div class="faq-answer text-gray-400 text-sm px-6">IFT is India's first-ever entrepreneurship
+                            search &amp; mentorship platform for young adults (students). It allows students to showcase
+                            ideas, get expert mentorship, and refine ventures that solve real-world problems.</div>
+                    </div>
+                    <div
+                        class="faq-item border border-white/10 rounded-lg overflow-hidden bg-white/5 hover:border-primary/30 transition-colors">
+                        <button
+                            class="faq-btn w-full px-6 py-4 text-left flex justify-between items-center text-white font-medium focus:outline-none"
+                            onclick="toggleFaq(this)">
+                            <span>How to bring IFT to our school?</span>
+                            <span
+                                class="material-icons text-primary faq-icon transition-transform duration-300">add</span>
+                        </button>
+                        <div class="faq-answer text-gray-400 text-sm px-6">Schools can fill in the form above &amp; our
+                            team will get in touch with your team.</div>
+                    </div>
+                    <div
+                        class="faq-item border border-white/10 rounded-lg overflow-hidden bg-white/5 hover:border-primary/30 transition-colors">
+                        <button
+                            class="faq-btn w-full px-6 py-4 text-left flex justify-between items-center text-white font-medium focus:outline-none"
+                            onclick="toggleFaq(this)">
+                            <span>Who can participate in IFT?</span>
+                            <span
+                                class="material-icons text-primary faq-icon transition-transform duration-300">add</span>
+                        </button>
+                        <div class="faq-answer text-gray-400 text-sm px-6">Students aged 13–18 years from any school in
+                            India can register and submit their ideas, either individually or as teams.</div>
+                    </div>
+                    <div
+                        class="faq-item border border-white/10 rounded-lg overflow-hidden bg-white/5 hover:border-primary/30 transition-colors">
+                        <button
+                            class="faq-btn w-full px-6 py-4 text-left flex justify-between items-center text-white font-medium focus:outline-none"
+                            onclick="toggleFaq(this)">
+                            <span>What are the fees to participate?</span>
+                            <span
+                                class="material-icons text-primary faq-icon transition-transform duration-300">add</span>
+                        </button>
+                        <div class="faq-answer text-gray-400 text-sm px-6">Participation in IFT is completely FREE for
+                            students.</div>
+                    </div>
+                    <div
+                        class="faq-item border border-white/10 rounded-lg overflow-hidden bg-white/5 hover:border-primary/30 transition-colors">
+                        <button
+                            class="faq-btn w-full px-6 py-4 text-left flex justify-between items-center text-white font-medium focus:outline-none"
+                            onclick="toggleFaq(this)">
+                            <span>What is the structure of the program?</span>
+                            <span
+                                class="material-icons text-primary faq-icon transition-transform duration-300">add</span>
+                        </button>
+                        <div class="faq-answer text-gray-400 text-sm px-6">IFT is carried out in multiple levels of
+                            learning and evaluation:
+                            <ul class="list-disc list-inside mt-2 space-y-1">
+                                <li>Idea submission &amp; shortlisting</li>
+                                <li>Interactive learning sessions</li>
+                                <li>Mentorship and refinement of ideas</li>
+                                <li>Residential boot camps</li>
+                                <li>Final pitch showcase to judges</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!-- Right Column -->
+                <div class="space-y-4">
+                    <div
+                        class="faq-item border border-white/10 rounded-lg overflow-hidden bg-white/5 hover:border-primary/30 transition-colors">
+                        <button
+                            class="faq-btn w-full px-6 py-4 text-left flex justify-between items-center text-white font-medium focus:outline-none"
+                            onclick="toggleFaq(this)">
+                            <span>What happens at the bootcamp and finale?</span>
+                            <span
+                                class="material-icons text-primary faq-icon transition-transform duration-300">add</span>
+                        </button>
+                        <div class="faq-answer text-gray-400 text-sm px-6">Top ideas of the year are invited to a 3-day
+                            residential bootcamp where:
+                            <ul class="list-disc list-inside mt-2 space-y-1">
+                                <li>Students get 1-on-1 mentorship from industry experts & entrepreneurs</li>
+                                <li>They prepare for the grand finale pitch</li>
+                                <li>They compete for prizes, recognition, and investor attention</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div
+                        class="faq-item border border-white/10 rounded-lg overflow-hidden bg-white/5 hover:border-primary/30 transition-colors">
+                        <button
+                            class="faq-btn w-full px-6 py-4 text-left flex justify-between items-center text-white font-medium focus:outline-none"
+                            onclick="toggleFaq(this)">
+                            <span>What can participants win?</span>
+                            <span
+                                class="material-icons text-primary faq-icon transition-transform duration-300">add</span>
+                        </button>
+                        <div class="faq-answer text-gray-400 text-sm px-6">
+                            <ul class="list-disc list-inside mt-2 space-y-1">
+                                <li>Cash prizes &amp; awards</li>
+                                <li>Mentorship and networking opportunities with expert judges</li>
+                                <li>Possibilities of seed funding for their venture ideas</li>
+                                <li>Exposure on national &amp; international platforms such as NFTE and UNGCNI events
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div
+                        class="faq-item border border-white/10 rounded-lg overflow-hidden bg-white/5 hover:border-primary/30 transition-colors">
+                        <button
+                            class="faq-btn w-full px-6 py-4 text-left flex justify-between items-center text-white font-medium focus:outline-none"
+                            onclick="toggleFaq(this)">
+                            <span>Is it just a competition?</span>
+                            <span
+                                class="material-icons text-primary faq-icon transition-transform duration-300">add</span>
+                        </button>
+                        <div class="faq-answer text-gray-400 text-sm px-6">No, it's more than a contest. IFT is an
+                            experiential learning journey that builds an entrepreneurial mindset and real-world
+                            problem-solving skills, not just idea pitching.</div>
+                    </div>
+                    <div
+                        class="faq-item border border-white/10 rounded-lg overflow-hidden bg-white/5 hover:border-primary/30 transition-colors">
+                        <button
+                            class="faq-btn w-full px-6 py-4 text-left flex justify-between items-center text-white font-medium focus:outline-none"
+                            onclick="toggleFaq(this)">
+                            <span>How do I register or learn more?</span>
+                            <span
+                                class="material-icons text-primary faq-icon transition-transform duration-300">add</span>
+                        </button>
+                        <div class="faq-answer text-gray-400 text-sm px-6">You can register or get more details on the
+                            official platform dedicated to IFT — India's Future Tycoons, via ENpower's website.</div>
+                    </div>
+                    <div
+                        class="faq-item border border-white/10 rounded-lg overflow-hidden bg-white/5 hover:border-primary/30 transition-colors">
+                        <button
+                            class="faq-btn w-full px-6 py-4 text-left flex justify-between items-center text-white font-medium focus:outline-none"
+                            onclick="toggleFaq(this)">
+                            <span>How does IFT benefit students beyond prizes?</span>
+                            <span
+                                class="material-icons text-primary faq-icon transition-transform duration-300">add</span>
+                        </button>
+                        <div class="faq-answer text-gray-400 text-sm px-6">IFT helps participants in building life
+                            skills like creativity, critical thinking, collaboration, and leadership, and learn to
+                            convert problems into solutions.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-primary/10 bg-bg-dark py-12">
+        <div
+            class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
+            <a href="#" class="flex items-center">
+                <img src="assets/IFT Logo_02.png" alt="IFT - India's Future Tycoons" class="h-12" />
+            </a>
+            <div class="text-gray-500 text-sm">© 2026 ENpower. All rights reserved.<br />
+                <span class="text-gray-500 text-sm">Designed & Developed By Techinfinity</span>
+            </div>
+            <div class="flex space-x-6">
+                <a class="text-gray-500 hover:text-primary transition-colors" href="#"><span
+                        class="material-icons">language</span></a>
+                <a class="text-gray-500 hover:text-primary transition-colors" href="#"><span
+                        class="material-icons">mail</span></a>
+                <a class="text-gray-500 hover:text-primary transition-colors" href="#"><span
+                        class="material-icons">videocam</span></a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Register GSAP ScrollTrigger
+        gsap.registerPlugin(ScrollTrigger);
+
+        // ===== NAVBAR SCROLL EFFECT =====
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('glass-panel', 'border-b', 'border-primary/10');
+            } else {
+                navbar.classList.remove('glass-panel', 'border-b', 'border-primary/10');
+            }
+        });
+
+        // ===== STAR STREAKS BACKGROUND =====
+        (function () {
+            const canvas = document.getElementById('star-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const section = document.getElementById('impact-section');
+            let W, H, cxS, cyS, stars = [];
+            const STAR_COUNT = 200;
+
+            function resizeCanvas() {
+                W = canvas.width = section.offsetWidth;
+                H = canvas.height = section.offsetHeight;
+                cxS = W / 2;
+                cyS = H / 2;
+            }
+
+            function getRandomInt(min, max) {
+                return Math.floor(Math.random() * (max - min + 1)) + min;
+            }
+            function remap(v, is, ie, os, oe) {
+                return os + (oe - os) * ((v - is) / (ie - is));
+            }
+
+            class StarStreak {
+                constructor() { this.reset(true); }
+                reset(initial = false) {
+                    this.x = getRandomInt(-cxS, cxS);
+                    this.y = getRandomInt(-cyS, cyS);
+                    this.counter = initial ? getRandomInt(1, W) : W;
+                    this.maxW = 0.3 + Math.random() * 1.4;
+                    this.speed = getRandomInt(2, 6);
+                    this.alpha = 0.25 + Math.random() * 0.55;
+                }
+                update() {
+                    this.counter -= this.speed;
+                    if (this.counter < 1) this.reset();
+                }
+                draw() {
+                    const xR = this.x / this.counter;
+                    const yR = this.y / this.counter;
+                    const headX = remap(xR, 0, 1, 0, W);
+                    const headY = remap(yR, 0, 1, 0, H);
+                    const prevC = this.counter + this.speed * 3;
+                    const tailX = remap(this.x / prevC, 0, 1, 0, W);
+                    const tailY = remap(this.y / prevC, 0, 1, 0, H);
+                    const lw = remap(this.counter, 0, W, this.maxW, 0);
+                    const grad = ctx.createLinearGradient(tailX, tailY, headX, headY);
+                    grad.addColorStop(0, 'rgba(255,255,255,0)');
+                    grad.addColorStop(1, `rgba(255,255,255,${this.alpha})`);
+                    ctx.beginPath();
+                    ctx.moveTo(tailX, tailY);
+                    ctx.lineTo(headX, headY);
+                    ctx.strokeStyle = grad;
+                    ctx.lineWidth = Math.max(lw, 0.15);
+                    ctx.stroke();
+                }
+            }
+
+            function initStars() {
+                resizeCanvas();
+                stars = Array.from({ length: STAR_COUNT }, () => new StarStreak());
+            }
+            initStars();
+            window.addEventListener('resize', initStars);
+
+            let isVisible = false;
+            const observer = new IntersectionObserver((entries) => {
+                isVisible = entries[0].isIntersecting;
+            }, { threshold: 0.1 });
+            observer.observe(section);
+
+            let prev = 0;
+            const FPS = 60, INTERVAL = 1000 / FPS;
+            function starLoop(ts) {
+                requestAnimationFrame(starLoop);
+                if (!isVisible) return;
+                const dt = ts - prev;
+                if (dt < INTERVAL) return;
+                prev = ts - (dt % INTERVAL);
+                ctx.fillStyle = 'rgba(10,10,10,0.82)';
+                ctx.fillRect(0, 0, W, H);
+                ctx.save();
+                ctx.translate(cxS, cyS);
+                for (const s of stars) { s.update(); s.draw(); }
+                ctx.restore();
+            }
+            requestAnimationFrame(starLoop);
+        })();
+
+        // ===== HERO STAR STREAKS BACKGROUND =====
+        (function () {
+            const canvas = document.getElementById('hero-star-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const heroSticky = document.getElementById('hero-sticky');
+            let W, H, cxS, cyS, stars = [];
+            const STAR_COUNT = 150;
+
+            function resizeCanvas() {
+                W = canvas.width = heroSticky.offsetWidth;
+                H = canvas.height = heroSticky.offsetHeight;
+                cxS = W / 2;
+                cyS = H / 2;
+            }
+
+            function getRandomInt(min, max) {
+                return Math.floor(Math.random() * (max - min + 1)) + min;
+            }
+            function remap(v, is, ie, os, oe) {
+                return os + (oe - os) * ((v - is) / (ie - is));
+            }
+
+            class StarStreak {
+                constructor() { this.reset(true); }
+                reset(initial = false) {
+                    this.x = getRandomInt(-cxS, cxS);
+                    this.y = getRandomInt(-cyS, cyS);
+                    this.counter = initial ? getRandomInt(1, W) : W;
+                    this.maxW = 0.3 + Math.random() * 1.4;
+                    this.speed = getRandomInt(2, 6);
+                    this.alpha = 0.25 + Math.random() * 0.55;
+                }
+                update() {
+                    this.counter -= this.speed;
+                    if (this.counter < 1) this.reset();
+                }
+                draw() {
+                    const xR = this.x / this.counter;
+                    const yR = this.y / this.counter;
+                    const headX = remap(xR, 0, 1, 0, W);
+                    const headY = remap(yR, 0, 1, 0, H);
+                    const prevC = this.counter + this.speed * 3;
+                    const tailX = remap(this.x / prevC, 0, 1, 0, W);
+                    const tailY = remap(this.y / prevC, 0, 1, 0, H);
+                    const lw = remap(this.counter, 0, W, this.maxW, 0);
+                    const grad = ctx.createLinearGradient(tailX, tailY, headX, headY);
+                    grad.addColorStop(0, 'rgba(255,255,255,0)');
+                    grad.addColorStop(1, `rgba(255,255,255,${this.alpha})`);
+                    ctx.beginPath();
+                    ctx.moveTo(tailX, tailY);
+                    ctx.lineTo(headX, headY);
+                    ctx.strokeStyle = grad;
+                    ctx.lineWidth = Math.max(lw, 0.15);
+                    ctx.stroke();
+                }
+            }
+
+            function initStars() {
+                resizeCanvas();
+                stars = Array.from({ length: STAR_COUNT }, () => new StarStreak());
+            }
+            initStars();
+            window.addEventListener('resize', initStars);
+
+            let prev = 0;
+            const FPS = 60, INTERVAL = 1000 / FPS;
+            function starLoop(ts) {
+                requestAnimationFrame(starLoop);
+                const dt = ts - prev;
+                if (dt < INTERVAL) return;
+                prev = ts - (dt % INTERVAL);
+                ctx.fillStyle = 'rgba(10,10,10,0.85)';
+                ctx.fillRect(0, 0, W, H);
+                ctx.save();
+                ctx.translate(cxS, cyS);
+                for (const s of stars) { s.update(); s.draw(); }
+                ctx.restore();
+            }
+            requestAnimationFrame(starLoop);
+        })();
+
+        // ===== MOBILE MENU =====
+        const mobileBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            const icon = mobileBtn.querySelector('.material-icons');
+            icon.textContent = mobileMenu.classList.contains('hidden') ? 'menu' : 'close';
+        });
+        document.querySelectorAll('#mobile-menu a').forEach(link => {
+            link.addEventListener('click', () => mobileMenu.classList.add('hidden'));
+        });
+
+        // ===== SMOOTH NAV SCROLL =====
+        const NAVBAR_HEIGHT = 88;
+
+        // For sections after GSAP-pinned blocks, getBoundingClientRect is wrong
+        // while pinned. Instead we snapshot each section's scroll position
+        // using ScrollTrigger's own coordinate system after all pins are set up.
+        const sectionScrollMap = {};
+
+        function buildScrollMap() {
+            sectionScrollMap['about'] = getScrollPos('about');
+            sectionScrollMap['journey'] = getScrollPos('journey');
+            sectionScrollMap['schools'] = getScrollPos('schools');
+            sectionScrollMap['mentors'] = getScrollPos('mentors');
+            sectionScrollMap['hall-of-fame'] = getScrollPos('hall-of-fame');
+        }
+
+        function getScrollPos(id) {
+            const el = document.getElementById(id);
+            if (!el) return 0;
+            // ScrollTrigger.getAll() gives us the start scroll value for each
+            // pinned trigger — the section's rect at rest is then correctly mapped.
+            // We temporarily scroll to 0, read offsetTop, then restore.
+            // Simpler: use el.getBoundingClientRect().top + window.scrollY,
+            // but call after ScrollTrigger.refresh() so all pins are recalculated.
+            ScrollTrigger.refresh();
+            return el.getBoundingClientRect().top + window.scrollY;
+        }
+
+        // Build after GSAP pins have initialised (500ms safety margin)
+        setTimeout(buildScrollMap, 800);
+        window.addEventListener('resize', () => setTimeout(buildScrollMap, 300));
+
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+                if (!href || href === '#') return;
+                const id = href.replace('#', '');
+                const target = document.querySelector(href);
+                if (!target) return;
+                e.preventDefault();
+
+                // Rebuild map at click time so position is always fresh
+                ScrollTrigger.refresh();
+                const docTop = target.getBoundingClientRect().top + window.scrollY;
+                window.scrollTo({ top: docTop - NAVBAR_HEIGHT, behavior: 'smooth' });
+            });
+        });
+
+        // ===== HERO SCROLL-TO-VIDEO ANIMATION =====
+        const heroTextContent = document.getElementById('hero-text-content');
+        const heroVideoWrapper = document.getElementById('hero-video-wrapper');
+        const heroCard = document.getElementById('hero-card');
+        const heroPinWrapper = document.getElementById('hero-pin-wrapper');
+
+        // ===== TYPING ANIMATION =====
+        function startTyping() {
+            const lines = [
+                { el: document.getElementById('type-line-1'), text: "India's First" },
+                { el: document.getElementById('type-line-2'), text: "Entrepreneurship" },
+                { el: document.getElementById('type-line-3'), text: "Search & Mentorship Platform" }
+            ];
+            let lineIndex = 0;
+            let charIndex = 0;
+            const speed = 50;
+            const lineDelay = 300;
+
+            function typeChar() {
+                if (lineIndex >= lines.length) {
+                    return;
+                }
+                const current = lines[lineIndex];
+                if (charIndex < current.text.length) {
+                    current.el.textContent += current.text[charIndex];
+                    charIndex++;
+                    setTimeout(typeChar, speed);
+                } else {
+                    // Move to next line
+                    lineIndex++;
+                    charIndex = 0;
+                    setTimeout(typeChar, lineDelay);
+                }
+            }
+            typeChar();
+        }
+
+        // Initial entrance animation — dramatic reveal
+        const heroTl = gsap.timeline({ defaults: { ease: 'power3.out' }, delay: 0.3 });
+        heroTl
+            // Badge slides down from top
+            .from('#hero-text-content > div:first-child', { y: -30, opacity: 0, scale: 0.8, duration: 0.6 })
+            // Typing starts after badge
+            .add(() => startTyping(), '-=0.1')
+            // Subtitle fades in after typing completes
+            .from('#hero-text-content p', { y: 40, opacity: 0, duration: 0.8 }, '+=2.8')
+            // CTA buttons pop in with stagger
+            .fromTo('#hero-text-content button', { y: 30, opacity: 0, scale: 0.9 }, { y: 0, opacity: 1, scale: 1, duration: 0.6, stagger: 0.15, ease: 'back.out(1.7)' }, '-=0.3')
+        // Video card animation removed (video section hidden)
+
+
+
+        // 3D Tilt on hover
+        if (heroCard) {
+            heroCard.addEventListener('mousemove', (e) => {
+                const rect = heroCard.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / rect.width - 0.5;
+                const y = (e.clientY - rect.top) / rect.height - 0.5;
+                gsap.to(heroCard, { rotateY: x * 12, rotateX: -y * 8, duration: 0.4, ease: 'power2.out' });
+            });
+            heroCard.addEventListener('mouseleave', () => {
+                gsap.to(heroCard, { rotateY: 0, rotateX: 0, duration: 0.6, ease: 'elastic.out(1, 0.5)' });
+            });
+        }
+
+        // Play Video on click
+        const playBtn = document.getElementById('hero-play-btn');
+        const videoPlayer = document.getElementById('hero-video-player');
+        const videoPoster = document.getElementById('hero-video-poster');
+        if (playBtn && videoPlayer) {
+            playBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                videoPlayer.style.zIndex = '30';
+                videoPlayer.controls = true;
+                videoPlayer.play();
+                gsap.to(videoPoster, { opacity: 0, duration: 0.5, onComplete: () => { videoPoster.style.display = 'none'; } });
+                videoPlayer.classList.remove('pointer-events-none');
+            });
+        }
+
+        // ===== IMPACT SECTION ANIMATION =====
+        gsap.set('.impact-subtitle', { y: 20, opacity: 0 });
+        gsap.set('.impact-title', { y: 40, opacity: 0, scale: 0.9 });
+        gsap.set('#impact-title-line', { width: 0 });
+        gsap.set('.stats-card', { y: 40, opacity: 0 });
+
+        ScrollTrigger.create({
+            trigger: '#impact-section',
+            start: 'top 75%',
+            once: true,
+            onEnter: () => {
+                const tl = gsap.timeline();
+                tl.to('.impact-subtitle', { y: 0, opacity: 1, duration: 0.5, ease: 'power3.out' });
+                tl.to('.impact-title', { y: 0, opacity: 1, scale: 1, duration: 0.6, ease: 'power3.out' }, '-=0.3');
+                tl.to('#impact-title-line', { width: '80px', duration: 0.5, ease: 'power2.out' }, '-=0.3');
+                tl.to('.stats-card', { y: 0, opacity: 1, duration: 0.7, stagger: 0.15, ease: 'power3.out' }, '-=0.2');
+
+                // Counter animation
+                document.querySelectorAll('.stats-counter').forEach(counter => {
+                    const target = parseInt(counter.dataset.target);
+                    const ghost = counter.closest('.number-area').querySelector('.stats-counter-ghost');
+                    gsap.to({ val: 0 }, {
+                        val: target,
+                        duration: 2.5,
+                        delay: 0.3,
+                        ease: 'power2.out',
+                        onUpdate: function () {
+                            const v = Math.floor(this.targets()[0].val).toLocaleString();
+                            counter.textContent = v;
+                            if (ghost) ghost.textContent = v;
+                        }
+                    });
+                });
+            }
+        });
+
+        // Stats cards cycling
+        (function () {
+            const statsCards = Array.from(document.querySelectorAll('.stats-card'));
+            if (!statsCards.length) return;
+            let currentCard = 0;
+            function cycleCards() {
+                statsCards[currentCard].classList.remove('active');
+                currentCard = (currentCard + 1) % statsCards.length;
+                statsCards[currentCard].classList.add('active');
+                setTimeout(cycleCards, 2800);
+            }
+            setTimeout(cycleCards, 2800);
+        })();
+
+        // BG orbs parallax on scroll
+        gsap.to('#impact-orb-1', {
+            x: 80, y: -30,
+            scrollTrigger: { trigger: '#impact-section', start: 'top bottom', end: 'bottom top', scrub: 1 }
+        });
+        gsap.to('#impact-orb-2', {
+            x: -60, y: 40,
+            scrollTrigger: { trigger: '#impact-section', start: 'top bottom', end: 'bottom top', scrub: 1 }
+        });
+
+        // ===== ABOUT SECTION =====
+        gsap.from('.about-text', {
+            scrollTrigger: { trigger: '.about-text', start: 'top 75%', toggleActions: 'play none none none' },
+            x: -40, opacity: 0, duration: 1.2, ease: 'power3.out'
+        });
+        gsap.from('.about-visual', {
+            scrollTrigger: { trigger: '.about-visual', start: 'top 75%', toggleActions: 'play none none none' },
+            x: 40, opacity: 0, duration: 1.2, ease: 'power3.out'
+        });
+
+        // ===== EXPERIENCE HORIZONTAL SCROLL =====
+        const expTrack = document.getElementById('exp-cards-track');
+        const expSection = document.getElementById('experience');
+        if (expTrack && expSection) {
+            const totalScrollWidth = expTrack.scrollWidth - window.innerWidth;
+
+            gsap.to(expTrack, {
+                x: -totalScrollWidth,
+                ease: 'none',
+                scrollTrigger: {
+                    trigger: '#experience-wrapper',
+                    pin: expSection,
+                    start: 'top top',
+                    end: () => '+=' + totalScrollWidth,
+                    scrub: 1,
+                    invalidateOnRefresh: true,
+                }
+            });
+
+            // Cards fade in
+            gsap.from('.exp-card', {
+                scrollTrigger: { trigger: '#experience-wrapper', start: 'top 75%', toggleActions: 'play none none none' },
+                y: 30, opacity: 0, duration: 1, stagger: 0.1, ease: 'power3.out'
+            });
+        }
+
+        // ===== TIMELINE ANIMATION (dots fill/unfill with timeline) =====
+        const timelineLine = document.querySelector('.timeline-line');
+        const timelineFill = document.getElementById('timeline-fill');
+        const timelineItems = document.querySelectorAll('.timeline-item');
+        const dotStates = [];
+
+        // Prepare dot fill animations (everything else stays visible)
+        timelineItems.forEach((item) => {
+            const dot = item.querySelector('.timeline-dot');
+            const numSpan = item.querySelector('.timeline-dot-num');
+            dotStates.push({ item, dot, numSpan, filled: false });
+        });
+
+        // Single ScrollTrigger — fill line + dot fills synced
+        if (timelineLine && timelineFill) {
+            ScrollTrigger.create({
+                trigger: timelineLine,
+                start: 'top 75%',
+                end: 'bottom 25%',
+                scrub: 1.5,
+                onUpdate: (self) => {
+                    const progress = self.progress;
+                    timelineFill.style.height = (progress * 100) + '%';
+
+                    const lineRect = timelineLine.getBoundingClientRect();
+                    const fillHeight = lineRect.height * progress;
+
+                    dotStates.forEach((entry) => {
+                        const itemRect = entry.item.getBoundingClientRect();
+                        const itemCenter = itemRect.top + itemRect.height / 2 - lineRect.top;
+
+                        if (fillHeight >= itemCenter && !entry.filled) {
+                            entry.filled = true;
+                            gsap.to(entry.dot, {
+                                backgroundColor: '#7B2D8E',
+                                borderColor: '#7B2D8E',
+                                boxShadow: '0 0 15px rgba(123, 45, 142, 0.5)',
+                                scale: 1.15,
+                                duration: 0.3,
+                                ease: 'power2.out',
+                                onComplete: () => gsap.to(entry.dot, { scale: 1, duration: 0.2 })
+                            });
+                            if (entry.numSpan) {
+                                gsap.to(entry.numSpan, { color: '#f5c646', duration: 0.3 });
+                            }
+                        } else if (fillHeight < itemCenter && entry.filled) {
+                            entry.filled = false;
+                            gsap.to(entry.dot, {
+                                backgroundColor: '#0A0A0A',
+                                borderColor: 'rgba(123, 45, 142, 0.3)',
+                                boxShadow: '0 0 0px rgba(123, 45, 142, 0)',
+                                scale: 1,
+                                duration: 0.3,
+                                ease: 'power2.out'
+                            });
+                            if (entry.numSpan) {
+                                gsap.to(entry.numSpan, { color: '#f5c646', duration: 0.3 });
+                            }
+                        }
+                    });
+                }
+            });
+        }
+
+        // ===== HALL OF FAME CARDS =====
+        gsap.from('.hall-card', {
+            scrollTrigger: { trigger: '#hall-of-fame', start: 'top 75%', toggleActions: 'play none none none' },
+            y: 40, opacity: 0, scale: 0.97, duration: 1, stagger: 0.1, ease: 'power3.out'
+        });
+
+        // ===== SCHOOL SECTION (handled inline by gsap-schools-setup script) =====
+
+        // ===== MENTOR CARDS =====
+        gsap.from('.mentor-card', {
+            scrollTrigger: {
+                trigger: '#mentors',
+                start: 'top 78%',
+                toggleActions: 'play none none none',
+                once: true
+            },
+            y: 30,
+            opacity: 0,
+            scale: 0.95,
+            duration: 1,
+            stagger: 0.1,
+            ease: 'power3.out',
+            clearProps: 'all'
+        });
+
+        // ===== TESTIMONIAL CAROUSEL =====
+        (function () {
+            const track = document.getElementById('testi-track');
+            const slides = document.querySelectorAll('.testi-slide');
+            const prevBtn = document.getElementById('testi-prev');
+            const nextBtn = document.getElementById('testi-next');
+            const prevBtnMobile = document.getElementById('testi-prev-mobile');
+            const nextBtnMobile = document.getElementById('testi-next-mobile');
+            const counterEl = document.getElementById('testi-counter');
+            const dotsContainer = document.getElementById('testi-dots');
+
+            if (!track || !slides.length) return;
+
+            // Ensure track is a flex container and slides don't shrink
+            slides.forEach(s => {
+                s.classList.add('w-full', 'flex-shrink-0');
+            });
+
+            let currentIndex = 0;
+            const totalSlides = slides.length;
+
+            // Create dots dynamically
+            for (let i = 0; i < totalSlides; i++) {
+                const dot = document.createElement('div');
+                dot.className = `w-2 h-2 rounded-full cursor-pointer transition-colors ${i === 0 ? 'bg-primary' : 'bg-white/20'}`;
+                dot.addEventListener('click', () => goToSlide(i));
+                dotsContainer.appendChild(dot);
+            }
+
+            const dots = dotsContainer.children;
+
+            function updateCarousel() {
+                track.style.transform = `translateX(-${currentIndex * 100}%)`;
+                Array.from(dots).forEach((dot, index) => {
+                    dot.className = `w-2 h-2 rounded-full cursor-pointer transition-colors ${index === currentIndex ? 'bg-primary' : 'bg-white/20 hover:bg-white/40'}`;
+                });
+                // Update mobile counter
+                if (counterEl) counterEl.textContent = `${currentIndex + 1} / ${totalSlides}`;
+            }
+
+            function goToSlide(index) {
+                currentIndex = index;
+                updateCarousel();
+            }
+
+            function nextSlide() {
+                currentIndex = (currentIndex + 1) % totalSlides;
+                updateCarousel();
+            }
+
+            function prevSlide() {
+                currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+                updateCarousel();
+            }
+
+            // Desktop arrows
+            if (nextBtn) nextBtn.addEventListener('click', nextSlide);
+            if (prevBtn) prevBtn.addEventListener('click', prevSlide);
+            // Mobile arrows
+            if (nextBtnMobile) nextBtnMobile.addEventListener('click', nextSlide);
+            if (prevBtnMobile) prevBtnMobile.addEventListener('click', prevSlide);
+
+            // Touch / Swipe support
+            let touchStartX = 0;
+            let touchEndX = 0;
+            const minSwipe = 50;
+
+            track.addEventListener('touchstart', (e) => {
+                touchStartX = e.changedTouches[0].screenX;
+            }, { passive: true });
+
+            track.addEventListener('touchend', (e) => {
+                touchEndX = e.changedTouches[0].screenX;
+                const diff = touchStartX - touchEndX;
+                if (Math.abs(diff) > minSwipe) {
+                    if (diff > 0) nextSlide();
+                    else prevSlide();
+                }
+            }, { passive: true });
+
+            // Auto-play
+            let autoPlay = setInterval(nextSlide, 5000);
+
+            // Pause auto-play on hover / touch
+            const testiCard = document.querySelector('.testimonial-card');
+            if (testiCard) {
+                testiCard.addEventListener('mouseenter', () => clearInterval(autoPlay));
+                testiCard.addEventListener('mouseleave', () => { clearInterval(autoPlay); autoPlay = setInterval(nextSlide, 5000); });
+                testiCard.addEventListener('touchstart', () => clearInterval(autoPlay), { passive: true });
+                testiCard.addEventListener('touchend', () => { clearInterval(autoPlay); autoPlay = setInterval(nextSlide, 5000); }, { passive: true });
+            }
+        })();
+
+        gsap.from('.testimonial-card', {
+            scrollTrigger: { trigger: '.testimonial-card', start: 'top 80%', toggleActions: 'play none none none' },
+            y: 25, opacity: 0, duration: 1.2, ease: 'power3.out'
+        });
+
+        // ===== FAQ ACCORDION =====
+        function toggleFaq(btn) {
+            const answer = btn.nextElementSibling;
+            const icon = btn.querySelector('.faq-icon');
+            const isOpen = answer.classList.contains('open');
+
+            // Close all others
+            document.querySelectorAll('.faq-answer').forEach(a => a.classList.remove('open'));
+            document.querySelectorAll('.faq-icon').forEach(ic => { ic.textContent = 'add'; ic.style.transform = 'rotate(0deg)'; });
+
+            if (!isOpen) {
+                answer.classList.add('open');
+                icon.textContent = 'remove';
+                icon.style.transform = 'rotate(180deg)';
+            }
+        }
+
+        // FAQ items scroll animation
+        gsap.from('.faq-item', {
+            scrollTrigger: { trigger: '#faq', start: 'top 75%', toggleActions: 'play none none none' },
+            y: 20, opacity: 0, duration: 0.8, stagger: 0.07, ease: 'power3.out'
+        });
+
+        // ===== CONTACT TABS =====
+        document.querySelectorAll('.contact-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.contact-tab').forEach(t => {
+                    t.classList.remove('active', 'text-bg-dark', 'bg-accent', 'border-b-2', 'border-accent');
+                    t.classList.add('text-gray-400');
+                });
+                tab.classList.add('active', 'text-bg-dark', 'bg-accent', 'border-b-2', 'border-accent');
+                tab.classList.remove('text-gray-400');
+
+                document.querySelectorAll('.contact-form').forEach(f => f.classList.add('hidden'));
+                document.getElementById('form-' + tab.dataset.tab).classList.remove('hidden');
+            });
+        });
+
+        // ===== PARALLAX ON MOUSE MOVE (3D DEPTH EFFECT) =====
+        document.addEventListener('mousemove', (e) => {
+            const moveX = (e.clientX / window.innerWidth - 0.5) * 2;
+            const moveY = (e.clientY / window.innerHeight - 0.5) * 2;
+
+            gsap.to('.float-anim', { x: moveX * 15, y: moveY * 10, duration: 1, ease: 'power2.out' });
+        });
+
+        // ===== SMOOTH SECTION HEADINGS =====
+        document.querySelectorAll('section h2').forEach(h2 => {
+            if (h2.closest('#impact-section')) return;
+            gsap.from(h2, {
+                scrollTrigger: { trigger: h2, start: 'top 80%', toggleActions: 'play none none none' },
+                y: 20, opacity: 0, duration: 1, ease: 'power3.out'
+            });
+        });
+
+        // ===== PARTNER LOGOS =====
+        gsap.from('#partners .flex > div', {
+            scrollTrigger: { trigger: '#partners', start: 'top 80%', toggleActions: 'play none none none' },
+            y: 20, opacity: 0, duration: 0.6, stagger: 0.1, ease: 'power3.out'
+        });
+
+        // ===== 3D TILT MENTOR CARDS =====
+        document.querySelectorAll('.mentor-card').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+
+                const rotateX = ((y - centerY) / centerY) * -10;
+                const rotateY = ((x - centerX) / centerX) * 10;
+
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            });
+
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)';
+            });
+        });
+    </script>
+</body>
+
+
+</html>

@@ -1,0 +1,1651 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>IFT Idea Submission Form</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+    <style>
+        :root {
+            --primary: #5E2A97;
+            --secondary: #DEDE50;
+            --primary-light: #E8D4F0;
+            --background-light: #F7F7F7;
+            --surface-light: #FFFFFF;
+            --border-light: #EEEEEE;
+            --text-dark: #222222;
+            --text-muted: #666666;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Layout */
+        .main-container {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+        }
+
+        /* Sidebar Container */
+        #sidebar-container {
+            flex-shrink: 0;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        /* Header Container */
+        #header-container {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .content-wrapper {
+            flex: 1;
+            padding: 2rem;
+            max-width: 960px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Page Header */
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 2.25rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+            line-height: 1.2;
+        }
+
+        .page-subtitle {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--primary);
+        }
+
+        .auto-save-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--surface-light);
+            border: 1px solid var(--border-light);
+            border-radius: 9999px;
+            padding: 0.375rem 0.75rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .auto-save-badge .material-symbols-outlined {
+            font-size: 14px;
+            color: var(--primary);
+        }
+
+        /* Progress Section */
+        .progress-section {
+            margin-bottom: 2rem;
+        }
+
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            margin-bottom: 0.5rem;
+            padding: 0 0.25rem;
+        }
+
+        .progress-label {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .progress-label.active {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .progress-bar-custom {
+            height: 0.625rem;
+            background: #e7ebf4;
+            border-radius: 9999px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 9999px;
+            transition: width 0.5s ease;
+            box-shadow: 0 0 10px rgba(94, 42, 151, 0.3);
+        }
+
+        .progress-text {
+            text-align: right;
+            font-size: 0.75rem;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        /* Form Card */
+        .form-card {
+            background: var(--surface-light);
+            border: 1px solid var(--border-light);
+            border-radius: 1rem;
+            padding: 2.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Section */
+        .form-section {
+            margin-bottom: 2.5rem;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-light);
+            margin-bottom: 1.5rem;
+        }
+
+        .section-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            background: rgba(94, 42, 151, 0.1);
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin: 0;
+        }
+
+        .section-badge {
+            margin-left: auto;
+            font-size: 0.75rem;
+            font-weight: 500;
+            background: #dcfce7;
+            color: #166534;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-label .required {
+            color: #ef4444;
+        }
+
+        .info-tooltip {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: help;
+        }
+
+        .info-tooltip .material-symbols-outlined {
+            font-size: 18px;
+            color: var(--text-muted);
+        }
+
+        .info-tooltip:hover .material-symbols-outlined {
+            color: var(--primary);
+        }
+
+        .info-tooltip .tooltip-text {
+            position: absolute;
+            bottom: 100%;
+            right: 0;
+            margin-bottom: 0.5rem;
+            width: 12rem;
+            background: var(--text-dark);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 400;
+            display: none;
+            z-index: 10;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .info-tooltip:hover .tooltip-text {
+            display: block;
+        }
+
+        .form-input,
+        .form-textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-light);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            background: #f8fafc;
+            color: var(--text-dark);
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--surface-light);
+            box-shadow: 0 0 0 3px rgba(94, 42, 151, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 6rem;
+        }
+
+        .char-count {
+            text-align: right;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        .form-group:focus-within .char-count {
+            color: var(--primary);
+        }
+
+        /* Upload Area */
+        .upload-area {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2.5rem 1.5rem;
+            border: 2px dashed rgba(94, 42, 151, 0.4);
+            border-radius: 1rem;
+            background: #f8fafc;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .upload-area:hover {
+            background: rgba(94, 42, 151, 0.05);
+            border-color: var(--primary);
+        }
+
+        .upload-area input[type="file"] {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .upload-icon {
+            width: 4rem;
+            height: 4rem;
+            background: rgba(94, 42, 151, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            transition: transform 0.2s ease;
+        }
+
+        .upload-area:hover .upload-icon {
+            transform: scale(1.1);
+        }
+
+        .upload-icon .material-symbols-outlined {
+            font-size: 32px;
+        }
+
+        .upload-text {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .upload-text .link {
+            color: var(--primary);
+            text-decoration: underline;
+        }
+
+        .upload-hint {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* File Item */
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem;
+            background: var(--surface-light);
+            border: 1px solid var(--border-light);
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            margin-top: 1rem;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .file-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            background: #fee2e2;
+            color: #dc2626;
+            border-radius: 0.375rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .file-details {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .file-name {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-dark);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .file-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .file-delete {
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .file-delete:hover {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        /* Action Footer */
+        .action-footer {
+            position: sticky;
+            bottom: 0;
+            margin: 2rem -2.5rem -2.5rem;
+            padding: 1.5rem 2.5rem;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid var(--border-light);
+            border-radius: 0 0 1rem 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            z-index: 20;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn-secondary {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1.25rem;
+            background: var(--surface-light);
+            border: 1px solid var(--border-light);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary:hover {
+            background: var(--background-light);
+            border-color: var(--text-muted);
+        }
+
+        .btn-secondary .material-symbols-outlined {
+            font-size: 18px;
+        }
+
+        .btn-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1.25rem;
+            background: none;
+            border: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--primary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-link:hover {
+            background: rgba(94, 42, 151, 0.1);
+            border-radius: 0.5rem;
+        }
+
+        .btn-primary {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 2rem;
+            background: var(--primary);
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(94, 42, 151, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: #7B3FB5;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(94, 42, 151, 0.4);
+        }
+
+        .btn-primary .material-symbols-outlined {
+            font-size: 18px;
+        }
+
+        /* Footer Meta */
+        .footer-meta {
+            text-align: center;
+            padding: 1rem 0 2rem;
+        }
+
+        .footer-text {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .footer-text a {
+            color: var(--primary);
+            text-decoration: underline;
+        }
+
+        .footer-text a:hover {
+            color: #7B3FB5;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .content-wrapper {
+                padding: 1rem;
+            }
+
+            .form-card {
+                padding: 1.5rem;
+            }
+
+            .page-title {
+                font-size: 1.75rem;
+            }
+
+            .action-footer {
+                flex-direction: column-reverse;
+                align-items: stretch;
+            }
+
+            .action-buttons {
+                width: 100%;
+            }
+
+            .btn-secondary,
+            .btn-link {
+                flex: 1;
+            }
+
+            .btn-primary {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .progress-labels {
+                font-size: 0.625rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-container">
+        <!-- Sidebar Container -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header Container -->
+            <div id="header-container"></div>
+
+            <!-- Page Content -->
+            <div class="content-wrapper">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-3">
+                        <div>
+                            <h1 class="page-title">Idea Submission</h1>
+                            <p class="page-subtitle">Step 3 of 4: Review & Finalize</p>
+                        </div>
+                    </div>
+
+                    <!-- Progress Section -->
+                    <div class="progress-section">
+                        <div class="progress-labels">
+                            <span class="progress-label">Basic Info</span>
+                            <span class="progress-label">Questionnaire</span>
+                            <span class="progress-label active">Detailed Input</span>
+                            <span class="progress-label">Review</span>
+                        </div>
+                        <div class="progress-bar-custom">
+                            <div class="progress-fill" style="width: 75%;"></div>
+                        </div>
+                        <div class="progress-text">75% Completed</div>
+                    </div>
+                </div>
+
+                <!-- Main Form Card -->
+                <div class="form-card">
+                    <!-- Section 1: Idea Details -->
+                    <section class="form-section">
+                        <div class="section-header">
+                            <div class="section-icon">
+                                <span class="material-symbols-outlined">lightbulb</span>
+                            </div>
+                            <h3 class="section-title">Idea Details</h3>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="project-title">
+                                <span>Project Title <span class="required">*</span></span>
+                            </label>
+                            <input class="form-input" id="project-title" type="text"
+                                placeholder="e.g. Solar-Powered Water Purification System" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="one-line-pitch">
+                                <span>One-line Pitch <span class="required">*</span></span>
+                            </label>
+                            <input class="form-input" id="one-line-pitch" type="text"
+                                placeholder="Describe your idea in one catchy sentence" />
+                            <div class="char-count">0/120 characters</div>
+                        </div>
+                    </section>
+
+                    <!-- Section 2: Tycoon Questionnaire -->
+                    <section class="form-section">
+                        <div class="section-header">
+                            <div class="section-icon">
+                                <span class="material-symbols-outlined">quiz</span>
+                            </div>
+                            <h3 class="section-title">The Tycoon Questionnaire</h3>
+                            <span class="section-badge">All questions required</span>
+                        </div>
+
+                        <!-- Q1 -->
+                        <div class="form-group">
+                            <label class="form-label" for="q1">
+                                <span>1. What specific problem are you solving? <span class="required">*</span></span>
+                                <div class="info-tooltip">
+                                    <span class="material-symbols-outlined">info</span>
+                                    <div class="tooltip-text">Focus on the pain points of your target user.</div>
+                                </div>
+                            </label>
+                            <textarea class="form-textarea" id="q1" rows="4"
+                                placeholder="Explain the core issue clearly..."></textarea>
+                            <div class="char-count">0/500 characters</div>
+                        </div>
+
+                        <!-- Q2 -->
+                        <div class="form-group">
+                            <label class="form-label" for="q2">
+                                <span>2. Who is your target audience? <span class="required">*</span></span>
+                            </label>
+                            <textarea class="form-textarea" id="q2" rows="3"
+                                placeholder="e.g. High school students in urban areas..."></textarea>
+                        </div>
+
+                        <!-- Q3 -->
+                        <div class="form-group">
+                            <label class="form-label" for="q3">
+                                <span>3. How is your idea innovative? <span class="required">*</span></span>
+                            </label>
+                            <textarea class="form-textarea" id="q3" rows="4"
+                                placeholder="What makes your solution different from existing ones?"></textarea>
+                        </div>
+                    </section>
+
+                    <!-- Section 3: Supporting Materials -->
+                    <section class="form-section">
+                        <div class="section-header">
+                            <div class="section-icon">
+                                <span class="material-symbols-outlined">folder_open</span>
+                            </div>
+                            <h3 class="section-title">Supporting Materials</h3>
+                        </div>
+
+                        <!-- PPT Upload -->
+                        <div class="form-group">
+                            <label class="form-label">Upload Presentation (PPT/PPTX)</label>
+                            <div class="upload-area" data-upload-type="ppt">
+                                <input type="file" accept=".ppt,.pptx" id="ppt-upload" />
+                                <div class="upload-icon">
+                                    <span class="material-symbols-outlined">slideshow</span>
+                                </div>
+                                <p class="upload-text">
+                                    <span class="link">Click to upload</span> or drag and drop
+                                </p>
+                                <p class="upload-hint">PPT, PPTX (Max 25MB)</p>
+                            </div>
+                        </div>
+
+                        <!-- PDF/DOC Upload -->
+                        <div class="form-group">
+                            <label class="form-label">Upload Document (PDF/DOC)</label>
+                            <div class="upload-area" data-upload-type="doc">
+                                <input type="file" accept=".pdf,.doc,.docx" id="doc-upload" />
+                                <div class="upload-icon">
+                                    <span class="material-symbols-outlined">description</span>
+                                </div>
+                                <p class="upload-text">
+                                    <span class="link">Click to upload</span> or drag and drop
+                                </p>
+                                <p class="upload-hint">PDF, DOC, DOCX (Max 25MB)</p>
+                            </div>
+                        </div>
+
+                        <!-- Video Upload -->
+                        <div class="form-group">
+                            <label class="form-label">Upload Video</label>
+                            <div class="upload-area" data-upload-type="video">
+                                <input type="file" accept=".mp4,.mov,.avi,.mkv" id="video-upload" />
+                                <div class="upload-icon">
+                                    <span class="material-symbols-outlined">videocam</span>
+                                </div>
+                                <p class="upload-text">
+                                    <span class="link">Click to upload</span> or drag and drop
+                                </p>
+                                <p class="upload-hint">MP4, MOV, AVI, MKV (Max 100MB)</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Action Footer -->
+                    <div class="action-footer">
+                        <div class="action-buttons">
+                            <button class="btn-secondary">
+                                <span class="material-symbols-outlined">save</span>
+                                Save as Draft
+                            </button>
+                            <button class="btn-link">
+                                <span class="material-symbols-outlined">visibility</span>
+                                Preview
+                            </button>
+                        </div>
+                        <button class="btn-primary">
+                            Publish Submission
+                            <span class="material-symbols-outlined">arrow_forward</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Footer Meta -->
+                <div class="footer-meta">
+                    <p class="footer-text">
+                        By submitting your idea, you agree to the <a href="#">Terms & Conditions</a> of the IFT Competition.
+                        Need help? <a href="#">Contact Support</a>.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Load Sidebar -->
+    <script>
+        fetch('sidebar.html')
+            .then(response => response.text())
+            .then(data => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = data;
+
+                const sidebar = tempDiv.querySelector('aside');
+                const sidebarScript = tempDiv.querySelector('script');
+                const sidebarStyle = tempDiv.querySelector('style');
+
+                if (sidebar) {
+                    document.getElementById('sidebar-container').appendChild(sidebar);
+                }
+
+                if (sidebarStyle) {
+                    document.head.appendChild(sidebarStyle);
+                }
+
+                if (sidebarScript) {
+                    const script = document.createElement('script');
+                    script.textContent = sidebarScript.textContent;
+                    document.body.appendChild(script);
+                }
+
+                // Set active sidebar menu item after sidebar is loaded
+                setTimeout(() => {
+                    const currentPage = window.location.pathname.split('/').pop() || 'idea-submissions.html';
+                    const navItems = document.querySelectorAll('.nav-item');
+
+                    navItems.forEach(item => {
+                        const href = item.getAttribute('href');
+
+                        // Remove active class from all items first
+                        item.classList.remove('nav-item-active');
+
+                        // Find the icon and update fill state
+                        const icon = item.querySelector('.material-symbols-outlined');
+                        if (icon) {
+                            icon.classList.remove('filled');
+                            icon.style.fontVariationSettings = "'FILL' 0";
+                        }
+
+                        // Add active class to matching item
+                        if (href === currentPage ||
+                            (currentPage === 'idea-submissions.html' && href === 'idea-submissions.html')) {
+                            item.classList.add('nav-item-active');
+                            if (icon) {
+                                icon.classList.add('filled');
+                                icon.style.fontVariationSettings = "'FILL' 1";
+                            }
+                        }
+                    });
+
+                    console.log('Sidebar active menu item set for:', currentPage);
+                }, 200);
+            })
+            .catch(error => console.error('Error loading sidebar:', error));
+    </script>
+
+    <!-- Load Header -->
+    <script>
+        fetch('header.html')
+            .then(response => response.text())
+            .then(data => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = data;
+
+                const header = tempDiv.querySelector('header');
+                const notificationPanel = tempDiv.querySelector('#notificationPanel');
+                const helpModal = tempDiv.querySelector('#helpModal');
+                const mobileMenuPanel = tempDiv.querySelector('#mobileMenuPanel');
+                const profileDropdown = tempDiv.querySelector('#profileDropdown');
+                const headerScript = tempDiv.querySelector('script');
+                const headerStyle = tempDiv.querySelector('style');
+
+                if (header) {
+                    document.getElementById('header-container').appendChild(header);
+                }
+
+                // Append dropdowns to body for proper z-index positioning
+                if (notificationPanel) document.body.appendChild(notificationPanel);
+                if (helpModal) document.body.appendChild(helpModal);
+                if (mobileMenuPanel) document.body.appendChild(mobileMenuPanel);
+                if (profileDropdown) document.body.appendChild(profileDropdown);
+
+                if (headerStyle) {
+                    document.head.appendChild(headerStyle);
+                }
+
+                if (headerScript) {
+                    const script = document.createElement('script');
+                    script.textContent = headerScript.textContent;
+                    document.body.appendChild(script);
+                }
+
+                // Initialize header functionality after everything is loaded
+                setTimeout(() => {
+                    console.log('Initializing student header functionality...');
+
+                    // Notification Panel
+                    const notificationBtn = document.querySelector('.header-icon-btn:has(.material-symbols-outlined:contains("notifications"))');
+                    const notificationBtnActual = Array.from(document.querySelectorAll('.header-icon-btn')).find(btn =>
+                        btn.querySelector('.material-symbols-outlined')?.textContent.trim() === 'notifications'
+                    );
+                    const notificationPanelElement = document.getElementById('notificationPanel');
+
+                    if (notificationBtnActual && notificationPanelElement) {
+                        notificationBtnActual.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            console.log('Notification button clicked');
+
+                            // Close other panels
+                            const helpModalElement = document.getElementById('helpModal');
+                            const profileDropdownElement = document.getElementById('profileDropdown');
+                            if (helpModalElement) helpModalElement.classList.remove('active');
+                            if (profileDropdownElement) profileDropdownElement.classList.remove('active');
+
+                            // Toggle notification panel
+                            notificationPanelElement.classList.toggle('active');
+                        });
+                    }
+
+                    // Help Modal
+                    const helpBtnActual = Array.from(document.querySelectorAll('.header-icon-btn')).find(btn =>
+                        btn.querySelector('.material-symbols-outlined')?.textContent.trim() === 'help'
+                    );
+                    const helpModalElement = document.getElementById('helpModal');
+
+                    if (helpBtnActual && helpModalElement) {
+                        helpBtnActual.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            console.log('Help button clicked');
+
+                            // Close other panels
+                            if (notificationPanelElement) notificationPanelElement.classList.remove('active');
+                            const profileDropdownElement = document.getElementById('profileDropdown');
+                            if (profileDropdownElement) profileDropdownElement.classList.remove('active');
+
+                            // Toggle help modal
+                            helpModalElement.classList.toggle('active');
+                        });
+
+                        // Close help modal when clicking close button
+                        const closeHelpBtn = helpModalElement.querySelector('.close-modal-btn');
+                        if (closeHelpBtn) {
+                            closeHelpBtn.addEventListener('click', function(e) {
+                                e.stopPropagation();
+                                helpModalElement.classList.remove('active');
+                            });
+                        }
+                    }
+
+                    // Profile Dropdown
+                    const headerAvatar = document.querySelector('.header-avatar');
+                    const profileDropdownElement = document.getElementById('profileDropdown');
+
+                    if (headerAvatar && profileDropdownElement) {
+                        headerAvatar.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            console.log('Profile avatar clicked');
+
+                            // Close other panels
+                            if (notificationPanelElement) notificationPanelElement.classList.remove('active');
+                            if (helpModalElement) helpModalElement.classList.remove('active');
+
+                            // Toggle profile dropdown
+                            profileDropdownElement.classList.toggle('active');
+                        });
+                    }
+
+                    // Close panels when clicking outside
+                    document.addEventListener('click', function(e) {
+                        if (notificationPanelElement && !notificationPanelElement.contains(e.target)) {
+                            notificationPanelElement.classList.remove('active');
+                        }
+                        if (helpModalElement && !helpModalElement.contains(e.target)) {
+                            helpModalElement.classList.remove('active');
+                        }
+                        if (profileDropdownElement && !profileDropdownElement.contains(e.target)) {
+                            profileDropdownElement.classList.remove('active');
+                        }
+                    });
+
+                    // Prevent clicks inside panels from closing them
+                    if (notificationPanelElement) {
+                        notificationPanelElement.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                        });
+                    }
+                    if (helpModalElement) {
+                        helpModalElement.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                        });
+                    }
+                    if (profileDropdownElement) {
+                        profileDropdownElement.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                        });
+                    }
+
+                    // Sidebar Toggle
+                    const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
+                    const sidebar = document.getElementById('studentAppSidebar');
+
+                    if (sidebarToggleBtn && sidebar) {
+                        sidebarToggleBtn.addEventListener('click', function() {
+                            sidebar.classList.toggle('collapsed');
+                            console.log('Sidebar toggled');
+                        });
+                    }
+
+                    console.log('Student header functionality initialized successfully');
+                }, 100);
+            })
+            .catch(error => console.error('Error loading header:', error));
+    </script>
+
+    <!-- Multi-Step Form Functionality -->
+    <script>
+        (function() {
+            // Form state
+            let currentStep = 1;
+            const totalSteps = 4;
+            const formData = {
+                step1: {},
+                step2: {},
+                step3: {},
+                step4: {}
+            };
+
+            // Step definitions
+            const steps = {
+                1: {
+                    title: 'Basic Info',
+                    subtitle: 'Step 1 of 4: Basic Information',
+                    progress: 25,
+                    sections: ['idea-details']
+                },
+                2: {
+                    title: 'Questionnaire',
+                    subtitle: 'Step 2 of 4: Answer Key Questions',
+                    progress: 50,
+                    sections: ['tycoon-questionnaire']
+                },
+                3: {
+                    title: 'Detailed Input',
+                    subtitle: 'Step 3 of 4: Supporting Materials',
+                    progress: 75,
+                    sections: ['supporting-materials']
+                },
+                4: {
+                    title: 'Review',
+                    subtitle: 'Step 4 of 4: Review & Submit',
+                    progress: 100,
+                    sections: ['review-summary']
+                }
+            };
+
+            // Initialize form
+            function init() {
+                setupSections();
+                updateStepDisplay();
+                setupCharacterCounters();
+                setupFileUpload();
+                setupNavigationButtons();
+                setupAutoSave();
+                loadSavedData();
+            }
+
+            // Setup sections with IDs
+            function setupSections() {
+                const sections = document.querySelectorAll('.form-section');
+                sections[0].id = 'idea-details';
+                sections[1].id = 'tycoon-questionnaire';
+                sections[2].id = 'supporting-materials';
+
+                // Create review section
+                createReviewSection();
+            }
+
+            // Create review section
+            function createReviewSection() {
+                const formCard = document.querySelector('.form-card');
+                const reviewSection = document.createElement('section');
+                reviewSection.className = 'form-section';
+                reviewSection.id = 'review-summary';
+                reviewSection.style.display = 'none';
+                reviewSection.innerHTML = `
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <span class="material-symbols-outlined">fact_check</span>
+                        </div>
+                        <h3 class="section-title">Review Your Submission</h3>
+                    </div>
+                    <div id="review-content" style="padding: 1.5rem; background: #f8fafc; border-radius: 0.75rem; border: 1px solid var(--border-light);">
+                        <!-- Review content will be populated here -->
+                    </div>
+                    <div style="margin-top: 2rem; padding: 1.5rem; background: #fef3c7; border: 1px solid #fde68a; border-radius: 0.75rem;">
+                        <div style="display: flex; align-items: start; gap: 1rem;">
+                            <span class="material-symbols-outlined" style="color: #d97706; font-size: 24px;">warning</span>
+                            <div>
+                                <p style="font-weight: 600; color: #92400e; margin-bottom: 0.5rem;">Before you submit:</p>
+                                <ul style="font-size: 0.875rem; color: #78350f; margin: 0; padding-left: 1.25rem;">
+                                    <li>Verify all information is accurate</li>
+                                    <li>Ensure supporting documents are uploaded</li>
+                                    <li>Once submitted, you cannot edit your submission</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                const actionFooter = formCard.querySelector('.action-footer');
+                formCard.insertBefore(reviewSection, actionFooter);
+            }
+
+            // Update step display
+            function updateStepDisplay() {
+                const step = steps[currentStep];
+
+                // Update subtitle
+                const pageSubtitle = document.querySelector('.page-subtitle');
+                if (pageSubtitle) {
+                    pageSubtitle.textContent = step.subtitle;
+                }
+
+                // Update progress bar
+                const progressFill = document.querySelector('.progress-fill');
+                if (progressFill) {
+                    progressFill.style.width = step.progress + '%';
+                }
+
+                // Update progress text
+                const progressText = document.querySelector('.progress-text');
+                if (progressText) {
+                    progressText.textContent = step.progress + '% Completed';
+                }
+
+                // Update progress labels
+                const progressLabels = document.querySelectorAll('.progress-label');
+                progressLabels.forEach((label, index) => {
+                    label.classList.toggle('active', index + 1 === currentStep);
+                });
+
+                // Show/hide sections
+                document.querySelectorAll('.form-section').forEach(section => {
+                    section.style.display = 'none';
+                });
+
+                step.sections.forEach(sectionId => {
+                    const section = document.getElementById(sectionId);
+                    if (section) {
+                        section.style.display = 'block';
+                    }
+                });
+
+                // Update buttons
+                updateButtons();
+
+                // Populate review if on step 4
+                if (currentStep === 4) {
+                    populateReview();
+                }
+            }
+
+            // Update navigation buttons
+            function updateButtons() {
+                const actionFooter = document.querySelector('.action-footer');
+                const actionButtons = actionFooter.querySelector('.action-buttons');
+                const primaryButton = actionFooter.querySelector('.btn-primary');
+
+                // Clear and rebuild action buttons
+                actionButtons.innerHTML = '';
+
+                // Add Previous button (except on step 1)
+                if (currentStep > 1) {
+                    const prevBtn = document.createElement('button');
+                    prevBtn.className = 'btn-secondary';
+                    prevBtn.innerHTML = `
+                        <span class="material-symbols-outlined">arrow_back</span>
+                        Previous
+                    `;
+                    prevBtn.onclick = previousStep;
+                    actionButtons.appendChild(prevBtn);
+                }
+
+                // Add Save Draft button
+                const saveDraftBtn = document.createElement('button');
+                saveDraftBtn.className = 'btn-secondary';
+                saveDraftBtn.innerHTML = `
+                    <span class="material-symbols-outlined">save</span>
+                    Save as Draft
+                `;
+                saveDraftBtn.onclick = saveDraft;
+                actionButtons.appendChild(saveDraftBtn);
+
+                // Update primary button based on step
+                if (currentStep === totalSteps) {
+                    primaryButton.innerHTML = `
+                        Submit for Review
+                        <span class="material-symbols-outlined">send</span>
+                    `;
+                    primaryButton.onclick = submitForm;
+                } else {
+                    primaryButton.innerHTML = `
+                        Next Step
+                        <span class="material-symbols-outlined">arrow_forward</span>
+                    `;
+                    primaryButton.onclick = nextStep;
+                }
+            }
+
+            // Navigate to next step
+            function nextStep() {
+                if (validateCurrentStep()) {
+                    saveCurrentStepData();
+                    if (currentStep < totalSteps) {
+                        currentStep++;
+                        updateStepDisplay();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                }
+            }
+
+            // Navigate to previous step
+            function previousStep() {
+                saveCurrentStepData();
+                if (currentStep > 1) {
+                    currentStep--;
+                    updateStepDisplay();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            }
+
+            // Validate current step
+            function validateCurrentStep() {
+                let isValid = true;
+                const currentSections = steps[currentStep].sections;
+
+                currentSections.forEach(sectionId => {
+                    const section = document.getElementById(sectionId);
+                    if (section) {
+                        const requiredInputs = section.querySelectorAll('[required], input[id*="project-title"], input[id*="one-line-pitch"], textarea[id*="q"]');
+
+                        requiredInputs.forEach(input => {
+                            if (!input.value.trim()) {
+                                isValid = false;
+                                input.style.borderColor = '#ef4444';
+                                setTimeout(() => {
+                                    input.style.borderColor = '';
+                                }, 2000);
+                            }
+                        });
+                    }
+                });
+
+                if (!isValid) {
+                    showToast('Please fill in all required fields', 'warning');
+                }
+
+                return isValid;
+            }
+
+            // Save current step data
+            function saveCurrentStepData() {
+                const currentSections = steps[currentStep].sections;
+                const stepData = {};
+
+                currentSections.forEach(sectionId => {
+                    const section = document.getElementById(sectionId);
+                    if (section) {
+                        section.querySelectorAll('input, textarea').forEach(input => {
+                            if (input.id) {
+                                stepData[input.id] = input.value;
+                            }
+                        });
+                    }
+                });
+
+                formData[`step${currentStep}`] = stepData;
+                localStorage.setItem('ift_submission_draft', JSON.stringify(formData));
+            }
+
+            // Load saved data
+            function loadSavedData() {
+                const savedData = localStorage.getItem('ift_submission_draft');
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    Object.keys(data).forEach(step => {
+                        const stepData = data[step];
+                        Object.keys(stepData).forEach(fieldId => {
+                            const field = document.getElementById(fieldId);
+                            if (field) {
+                                field.value = stepData[fieldId];
+                            }
+                        });
+                    });
+                    showToast('Draft loaded successfully', 'success');
+                }
+            }
+
+            // Save draft
+            function saveDraft() {
+                saveCurrentStepData();
+                showToast('Draft saved successfully', 'success');
+                updateAutoSaveBadge();
+            }
+
+            // Populate review section
+            function populateReview() {
+                const reviewContent = document.getElementById('review-content');
+                if (!reviewContent) return;
+
+                let html = '<div style="display: flex; flex-direction: column; gap: 2rem;">';
+
+                // Idea Details
+                const projectTitle = document.getElementById('project-title')?.value || 'Not provided';
+                const oneLine = document.getElementById('one-line-pitch')?.value || 'Not provided';
+
+                html += `
+                    <div>
+                        <h4 style="font-size: 1rem; font-weight: 700; color: var(--primary); margin-bottom: 1rem;">Basic Information</h4>
+                        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                            <div>
+                                <strong style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Project Title:</strong>
+                                <p style="margin: 0.25rem 0 0 0; font-size: 0.875rem;">${projectTitle}</p>
+                            </div>
+                            <div>
+                                <strong style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">One-line Pitch:</strong>
+                                <p style="margin: 0.25rem 0 0 0; font-size: 0.875rem;">${oneLine}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Questionnaire
+                const q1 = document.getElementById('q1')?.value || 'Not answered';
+                const q2 = document.getElementById('q2')?.value || 'Not answered';
+                const q3 = document.getElementById('q3')?.value || 'Not answered';
+
+                html += `
+                    <div>
+                        <h4 style="font-size: 1rem; font-weight: 700; color: var(--primary); margin-bottom: 1rem;">Questionnaire Responses</h4>
+                        <div style="display: flex; flex-direction: column; gap: 1rem;">
+                            <div>
+                                <strong style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Problem Statement:</strong>
+                                <p style="margin: 0.25rem 0 0 0; font-size: 0.875rem;">${q1}</p>
+                            </div>
+                            <div>
+                                <strong style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Target Audience:</strong>
+                                <p style="margin: 0.25rem 0 0 0; font-size: 0.875rem;">${q2}</p>
+                            </div>
+                            <div>
+                                <strong style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Innovation:</strong>
+                                <p style="margin: 0.25rem 0 0 0; font-size: 0.875rem;">${q3}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Files
+                const fileItem = document.querySelector('.file-item');
+                const fileName = fileItem?.querySelector('.file-name')?.textContent || 'No files uploaded';
+
+                html += `
+                    <div>
+                        <h4 style="font-size: 1rem; font-weight: 700; color: var(--primary); margin-bottom: 1rem;">Supporting Materials</h4>
+                        <div style="padding: 0.75rem; background: white; border: 1px solid var(--border-light); border-radius: 0.5rem;">
+                            <p style="margin: 0; font-size: 0.875rem;">${fileName}</p>
+                        </div>
+                    </div>
+                `;
+
+                html += '</div>';
+                reviewContent.innerHTML = html;
+            }
+
+            // Submit form
+            function submitForm() {
+                saveCurrentStepData();
+
+                // Show loading state
+                const btn = document.querySelector('.btn-primary');
+                const originalHTML = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = '<span class="material-symbols-outlined">hourglass_empty</span> Submitting...';
+
+                // Simulate submission
+                setTimeout(() => {
+                    localStorage.removeItem('ift_submission_draft');
+                    showToast('Submission successful! Redirecting...', 'success');
+
+                    setTimeout(() => {
+                        window.location.href = 'my-idea.html';
+                    }, 1500);
+                }, 2000);
+            }
+
+            // Setup character counters
+            function setupCharacterCounters() {
+                document.querySelectorAll('input, textarea').forEach(input => {
+                    const charCountDiv = input.parentElement.querySelector('.char-count');
+                    if (charCountDiv) {
+                        const maxChars = charCountDiv.textContent.match(/\d+/)?.[0] || 500;
+
+                        input.addEventListener('input', function() {
+                            const currentLength = this.value.length;
+                            charCountDiv.textContent = `${currentLength}/${maxChars} characters`;
+
+                            if (currentLength > maxChars * 0.9) {
+                                charCountDiv.style.color = '#ef4444';
+                            } else {
+                                charCountDiv.style.color = '';
+                            }
+                        });
+                    }
+                });
+            }
+
+            // Setup file upload
+            function setupFileUpload() {
+                const uploadAreas = document.querySelectorAll('.upload-area');
+
+                uploadAreas.forEach(uploadArea => {
+                    const fileInput = uploadArea.querySelector('input[type="file"]');
+                    const uploadType = uploadArea.getAttribute('data-upload-type');
+
+                    if (fileInput && uploadArea) {
+                        uploadArea.addEventListener('dragover', (e) => {
+                            e.preventDefault();
+                            uploadArea.style.background = 'rgba(94, 42, 151, 0.1)';
+                        });
+
+                        uploadArea.addEventListener('dragleave', () => {
+                            uploadArea.style.background = '';
+                        });
+
+                        uploadArea.addEventListener('drop', (e) => {
+                            e.preventDefault();
+                            uploadArea.style.background = '';
+                            const file = e.dataTransfer.files[0];
+                            handleFileUpload(file, uploadType, uploadArea);
+                        });
+
+                        fileInput.addEventListener('change', (e) => {
+                            const file = e.target.files[0];
+                            handleFileUpload(file, uploadType, uploadArea);
+                        });
+                    }
+                });
+            }
+
+            // Handle file upload
+            function handleFileUpload(file, uploadType, uploadArea) {
+                if (!file) return;
+
+                // Determine max size based on type
+                const maxSize = uploadType === 'video' ? 100 * 1024 * 1024 : 25 * 1024 * 1024;
+                const maxSizeLabel = uploadType === 'video' ? '100MB' : '25MB';
+
+                if (file.size > maxSize) {
+                    showToast(`File size exceeds ${maxSizeLabel} limit`, 'error');
+                    return;
+                }
+
+                // Validate file type
+                const extension = file.name.split('.').pop().toLowerCase();
+                const validExtensions = {
+                    'ppt': ['ppt', 'pptx'],
+                    'doc': ['pdf', 'doc', 'docx'],
+                    'video': ['mp4', 'mov', 'avi', 'mkv']
+                };
+
+                if (!validExtensions[uploadType].includes(extension)) {
+                    showToast(`Invalid file type for ${uploadType} upload`, 'error');
+                    return;
+                }
+
+                // Create and display file item
+                createFileItem(file, uploadType, uploadArea);
+                showToast(`File "${file.name}" uploaded successfully`, 'success');
+            }
+
+            // Create file item display
+            function createFileItem(file, uploadType, uploadArea) {
+                // Check if file item already exists
+                const existingFileItem = uploadArea.parentElement.querySelector('.file-item');
+                if (existingFileItem) {
+                    existingFileItem.remove();
+                }
+
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+
+                // Determine icon and color based on file type
+                const extension = file.name.split('.').pop().toLowerCase();
+                let icon = 'description';
+                let iconBg = '#fee2e2';
+                let iconColor = '#dc2626';
+
+                if (uploadType === 'ppt') {
+                    icon = 'slideshow';
+                    iconBg = '#fef3c7';
+                    iconColor = '#d97706';
+                } else if (uploadType === 'doc') {
+                    if (extension === 'pdf') {
+                        icon = 'picture_as_pdf';
+                        iconBg = '#fee2e2';
+                        iconColor = '#dc2626';
+                    } else {
+                        icon = 'description';
+                        iconBg = '#dbeafe';
+                        iconColor = '#2563eb';
+                    }
+                } else if (uploadType === 'video') {
+                    icon = 'videocam';
+                    iconBg = '#e0e7ff';
+                    iconColor = '#6366f1';
+                }
+
+                const fileSize = (file.size / (1024 * 1024)).toFixed(2);
+
+                fileItem.innerHTML = `
+                    <div class="file-info">
+                        <div class="file-icon" style="background: ${iconBg}; color: ${iconColor};">
+                            <span class="material-symbols-outlined">${icon}</span>
+                        </div>
+                        <div class="file-details">
+                            <div class="file-name">${file.name}</div>
+                            <div class="file-meta">${fileSize} MB • Uploaded just now</div>
+                        </div>
+                    </div>
+                    <button class="file-delete" data-upload-type="${uploadType}">
+                        <span class="material-symbols-outlined">delete</span>
+                    </button>
+                `;
+
+                uploadArea.parentElement.appendChild(fileItem);
+
+                // Add delete functionality
+                const deleteBtn = fileItem.querySelector('.file-delete');
+                deleteBtn.addEventListener('click', function() {
+                    if (confirm('Are you sure you want to remove this file?')) {
+                        fileItem.style.opacity = '0';
+                        fileItem.style.transform = 'translateX(-20px)';
+                        setTimeout(() => fileItem.remove(), 300);
+                        showToast('File removed', 'info');
+
+                        // Reset file input
+                        const input = uploadArea.querySelector('input[type="file"]');
+                        if (input) input.value = '';
+                    }
+                });
+            }
+
+            // Setup auto-save
+            function setupAutoSave() {
+                setInterval(() => {
+                    saveCurrentStepData();
+                    updateAutoSaveBadge();
+                }, 30000); // Auto-save every 30 seconds
+            }
+
+            // Update auto-save badge
+            function updateAutoSaveBadge() {
+                const badge = document.querySelector('.auto-save-badge span:last-child');
+                if (badge) {
+                    badge.textContent = 'Auto-saved: Just now';
+                }
+            }
+
+            // Setup navigation buttons (existing ones)
+            function setupNavigationButtons() {
+                // Handle any other existing button functionality
+            }
+
+            // Toast notification
+            function showToast(message, type = 'info') {
+                const toast = document.createElement('div');
+                const colors = {
+                    success: '#22c55e',
+                    error: '#ef4444',
+                    info: '#5E2A97',
+                    warning: '#f59e0b'
+                };
+
+                toast.style.cssText = `
+                    position: fixed;
+                    bottom: 24px;
+                    right: 24px;
+                    background: ${colors[type]};
+                    color: white;
+                    padding: 1rem 1.5rem;
+                    border-radius: 0.75rem;
+                    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+                    z-index: 9999;
+                    font-size: 0.875rem;
+                    font-weight: 500;
+                    animation: slideIn 0.3s ease;
+                `;
+
+                toast.textContent = message;
+                document.body.appendChild(toast);
+
+                setTimeout(() => {
+                    toast.style.animation = 'slideOut 0.3s ease';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+
+            // Add CSS animations
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(400px); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes slideOut {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(400px); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+
+            // Initialize when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                setTimeout(init, 500);
+            }
+        })();
+    </script>
+</body>
+
+</html>

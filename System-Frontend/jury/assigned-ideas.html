@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Jury Dashboard - Assigned Ideas</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+    <style>
+        :root {
+            --primary-color: #5E2A97;
+            --secondary-color: #DEDE50;
+            --background-light: #F7F7F7;
+            --text-dark: #222222;
+            --text-muted: #666666;
+            --border-color: #EEEEEE;
+            --white: #FFFFFF;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--background-light);
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Layout */
+        .dashboard-container {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            background: var(--background-light);
+        }
+
+        .content-wrapper {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 2rem 3rem;
+            width: 100%;
+        }
+
+        /* Sidebar Container */
+        #sidebar-container {
+            flex-shrink: 0;
+        }
+
+        /* Header Container */
+        #header-container {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        /* Page Header */
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+            line-height: 1.2;
+        }
+
+        .page-subtitle {
+            font-size: 1rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+
+        .status-dot {
+            width: 0.5rem;
+            height: 0.5rem;
+            background: #f59e0b;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .export-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1rem;
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .export-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            background: rgba(94, 42, 151, 0.05);
+        }
+
+        .export-btn .material-symbols-outlined {
+            font-size: 20px;
+        }
+
+        /* Filter Toolbar */
+        .filter-toolbar {
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 0.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .search-wrapper {
+            position: relative;
+            flex: 1;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 24px;
+            pointer-events: none;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 3rem;
+            border: none;
+            background: transparent;
+            font-size: 1rem;
+            color: var(--text-dark);
+            outline: none;
+        }
+
+        .search-input::placeholder {
+            color: #94a3b8;
+        }
+
+        .filter-divider {
+            width: 1px;
+            height: 2rem;
+            background: var(--border-color);
+            margin: 0 0.5rem;
+        }
+
+        .filter-select {
+            padding: 0.625rem 1rem;
+            border: none;
+            background: #f8fafc;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-dark);
+            cursor: pointer;
+            min-width: 10rem;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(94, 42, 151, 0.1);
+        }
+
+        /* Ideas Table */
+        .ideas-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 0.75rem;
+        }
+
+        .ideas-table thead th {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            padding: 0 1.5rem 0.5rem;
+            text-align: left;
+            border: none;
+        }
+
+        .ideas-table thead th:last-child {
+            text-align: right;
+        }
+
+        .ideas-table tbody tr {
+            background: var(--white);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease;
+        }
+
+        .ideas-table tbody tr:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(94, 42, 151, 0.15);
+        }
+
+        .ideas-table tbody td {
+            padding: 1.25rem 1.5rem;
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .ideas-table tbody tr:hover td {
+            border-color: rgba(94, 42, 151, 0.3);
+        }
+
+        .ideas-table tbody td:first-child {
+            border-left: 1px solid var(--border-color);
+            border-top-left-radius: 1rem;
+            border-bottom-left-radius: 1rem;
+        }
+
+        .ideas-table tbody tr:hover td:first-child {
+            border-left-color: rgba(94, 42, 151, 0.3);
+        }
+
+        .ideas-table tbody td:last-child {
+            border-right: 1px solid var(--border-color);
+            border-top-right-radius: 1rem;
+            border-bottom-right-radius: 1rem;
+            text-align: right;
+        }
+
+        .ideas-table tbody tr:hover td:last-child {
+            border-right-color: rgba(94, 42, 151, 0.3);
+        }
+
+        /* Idea Cell */
+        .idea-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .idea-icon.blue {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+
+        .idea-icon.purple {
+            background: rgba(168, 85, 247, 0.1);
+            color: #a855f7;
+        }
+
+        .idea-icon.green {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+        }
+
+        .idea-icon.orange {
+            background: rgba(249, 115, 22, 0.1);
+            color: #f97316;
+        }
+
+        .idea-icon.pink {
+            background: rgba(236, 72, 153, 0.1);
+            color: #ec4899;
+        }
+
+        .idea-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin: 0 0 0.25rem 0;
+        }
+
+        .idea-category {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* Team Cell */
+        .team-name {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-dark);
+            margin: 0 0 0.25rem 0;
+        }
+
+        .team-id {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin: 0;
+        }
+
+        /* Date Cell */
+        .date-text {
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.375rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border: 1px solid;
+        }
+
+        .status-badge.pending {
+            background: rgba(251, 191, 36, 0.1);
+            color: #d97706;
+            border-color: rgba(251, 191, 36, 0.2);
+        }
+
+        .status-badge.evaluated {
+            background: rgba(34, 197, 94, 0.1);
+            color: #16a34a;
+            border-color: rgba(34, 197, 94, 0.2);
+        }
+
+        .status-badge-dot {
+            width: 0.375rem;
+            height: 0.375rem;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        /* AI Badge */
+        .ai-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.375rem 0.625rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 0.6875rem;
+            font-weight: 700;
+            border-radius: 50px;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            margin-left: 0.5rem;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .ai-badge .material-symbols-outlined {
+            font-size: 14px;
+            font-variation-settings: 'FILL' 1;
+        }
+
+        /* Action Buttons */
+        .btn-evaluate {
+            padding: 0.5rem 1.25rem;
+            background: var(--primary-color);
+            color: #fff;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(13, 89, 242, 0.2);
+        }
+
+        .btn-evaluate:hover {
+            background: #7B3FB5;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(94, 42, 151, 0.4);
+        }
+
+        .btn-review {
+            padding: 0.5rem 1.25rem;
+            background: var(--white);
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-review:hover {
+            background: var(--background-light);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        /* Pagination */
+        .pagination-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0.5rem 2rem;
+        }
+
+        .pagination-info {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .pagination-btn {
+            width: 2.25rem;
+            height: 2.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border-color);
+            background: var(--white);
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            background: var(--background-light);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination-btn.active {
+            background: var(--primary-color);
+            color: var(--white);
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 12px rgba(94, 42, 151, 0.3);
+        }
+
+        .pagination-dots {
+            color: #94a3b8;
+            padding: 0 0.25rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .content-wrapper {
+                padding: 1.5rem;
+            }
+
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .ideas-table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .filter-toolbar {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 0.5rem;
+            }
+
+            .filter-divider {
+                display: none;
+            }
+
+            .filter-select {
+                width: 100%;
+            }
+
+            .ideas-table thead {
+                display: none;
+            }
+
+            .ideas-table tbody tr {
+                display: block;
+                margin-bottom: 1rem;
+            }
+
+            .ideas-table tbody td {
+                display: block;
+                text-align: left !important;
+                border: none !important;
+                padding: 0.75rem 1rem;
+            }
+
+            .ideas-table tbody td:first-child {
+                border-top-left-radius: 1rem !important;
+                border-top-right-radius: 1rem !important;
+                border-bottom-left-radius: 0 !important;
+            }
+
+            .ideas-table tbody td:last-child {
+                border-bottom-left-radius: 1rem !important;
+                border-bottom-right-radius: 1rem !important;
+                border-top-right-radius: 0 !important;
+            }
+
+            .btn-evaluate,
+            .btn-review {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar Container -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header Container -->
+            <div id="header-container"></div>
+
+            <!-- Page Content -->
+            <div class="content-wrapper">
+                <!-- Page Header -->
+                <div class="page-header d-flex justify-content-between align-items-end flex-wrap gap-3 mb-4">
+                    <div>
+                        <h1 class="page-title">Assigned Submissions</h1>
+                        <p class="page-subtitle">
+                            <span class="status-dot"></span>
+                            12 Pending Evaluation
+                        </p>
+                    </div>
+                    <!-- Export button hidden -->
+                    <!-- <button class="export-btn">
+                        <span class="material-symbols-outlined">file_download</span>
+                        Export List
+                    </button> -->
+                </div>
+
+                <!-- Filter Toolbar -->
+                <div class="filter-toolbar d-flex align-items-center">
+                    <div class="search-wrapper">
+                        <span class="material-symbols-outlined search-icon">search</span>
+                        <input type="text" class="search-input" placeholder="Search by idea or team name..." />
+                    </div>
+                    <div class="filter-divider d-none d-md-block"></div>
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <select class="filter-select">
+                            <option value="" selected disabled>Filter Status</option>
+                            <option value="all">All Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="evaluated">Evaluated</option>
+                        </select>
+                        <select class="filter-select">
+                            <option value="" selected disabled>Sort by Date</option>
+                            <option value="newest">Newest First</option>
+                            <option value="oldest">Oldest First</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Ideas Table -->
+                <table class="ideas-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 35%;">Idea Details</th>
+                            <th style="width: 20%;">Team</th>
+                            <th style="width: 15%;">Date</th>
+                            <th style="width: 15%;">Status</th>
+                            <th style="width: 15%;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Row 1 -->
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="idea-icon blue">
+                                        <span class="material-symbols-outlined">water_drop</span>
+                                    </div>
+                                    <div>
+                                        <p class="idea-title">Solar-Powered Water Purifier</p>
+                                        <p class="idea-category">Clean Tech Category</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <p class="team-name">Green Innovators</p>
+                                <p class="team-id">ID: #IFT-2034</p>
+                            </td>
+                            <td>
+                                <p class="date-text">Oct 24, 2023</p>
+                            </td>
+                            <td>
+                                <span class="status-badge pending">
+                                    <span class="status-badge-dot"></span>
+                                    Pending
+                                </span>
+                            </td>
+                            <td>
+                                <a href="idea-evaluation.html?ideaId=IFT-204" class="btn-evaluate" style="text-decoration: none; display: inline-block;">Evaluate</a>
+                            </td>
+                        </tr>
+
+                        <!-- Row 2 -->
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="idea-icon purple">
+                                        <span class="material-symbols-outlined">traffic</span>
+                                    </div>
+                                    <div>
+                                        <p class="idea-title">
+                                            AI Traffic Management
+                                            <span class="ai-badge">
+                                                <span class="material-symbols-outlined">smart_toy</span>
+                                                AI
+                                            </span>
+                                        </p>
+                                        <p class="idea-category">Smart City Category</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <p class="team-name">Urban Tech Squad</p>
+                                <p class="team-id">ID: #IFT-1902</p>
+                            </td>
+                            <td>
+                                <p class="date-text">Oct 22, 2023</p>
+                            </td>
+                            <td>
+                                <span class="status-badge evaluated">
+                                    <span class="material-symbols-outlined" style="font-size: 14px;">check</span>
+                                    Evaluated
+                                </span>
+                            </td>
+                            <td>
+                                <a href="view-evaluated-idea.html?ideaId=IFT-1902" class="btn-review" style="text-decoration: none; display: inline-block;">Review</a>
+                            </td>
+                        </tr>
+
+                        <!-- Row 3 -->
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="idea-icon green">
+                                        <span class="material-symbols-outlined">recycling</span>
+                                    </div>
+                                    <div>
+                                        <p class="idea-title">Biodegradable Packaging</p>
+                                        <p class="idea-category">Sustainability Category</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <p class="team-name">EcoWarriors</p>
+                                <p class="team-id">ID: #IFT-2110</p>
+                            </td>
+                            <td>
+                                <p class="date-text">Oct 20, 2023</p>
+                            </td>
+                            <td>
+                                <span class="status-badge pending">
+                                    <span class="status-badge-dot"></span>
+                                    Pending
+                                </span>
+                            </td>
+                            <td>
+                                <a href="idea-evaluation.html?ideaId=IFT-198" class="btn-evaluate" style="text-decoration: none; display: inline-block;">Evaluate</a>
+                            </td>
+                        </tr>
+
+                        <!-- Row 4 -->
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="idea-icon orange">
+                                        <span class="material-symbols-outlined">agriculture</span>
+                                    </div>
+                                    <div>
+                                        <p class="idea-title">Smart Agriculture Drone</p>
+                                        <p class="idea-category">AgriTech Category</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <p class="team-name">AgriFuture</p>
+                                <p class="team-id">ID: #IFT-2005</p>
+                            </td>
+                            <td>
+                                <p class="date-text">Oct 18, 2023</p>
+                            </td>
+                            <td>
+                                <span class="status-badge pending">
+                                    <span class="status-badge-dot"></span>
+                                    Pending
+                                </span>
+                            </td>
+                            <td>
+                                <a href="idea-evaluation.html?ideaId=IFT-211" class="btn-evaluate" style="text-decoration: none; display: inline-block;">Evaluate</a>
+                            </td>
+                        </tr>
+
+                        <!-- Row 5 -->
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="idea-icon pink">
+                                        <span class="material-symbols-outlined">devices</span>
+                                    </div>
+                                    <div>
+                                        <p class="idea-title">
+                                            Low-Cost Edu Tablet
+                                            <span class="ai-badge">
+                                                <span class="material-symbols-outlined">smart_toy</span>
+                                                AI
+                                            </span>
+                                        </p>
+                                        <p class="idea-category">EduTech Category</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <p class="team-name">EduTech Pioneers</p>
+                                <p class="team-id">ID: #IFT-1855</p>
+                            </td>
+                            <td>
+                                <p class="date-text">Oct 15, 2023</p>
+                            </td>
+                            <td>
+                                <span class="status-badge evaluated">
+                                    <span class="material-symbols-outlined" style="font-size: 14px;">check</span>
+                                    Evaluated
+                                </span>
+                            </td>
+                            <td>
+                                <a href="view-evaluated-idea.html?ideaId=IFT-1902" class="btn-review" style="text-decoration: none; display: inline-block;">Review</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Pagination -->
+                <div class="pagination-wrapper">
+                    <p class="pagination-info">Showing 1-5 of 12</p>
+                    <div class="pagination-controls">
+                        <button class="pagination-btn" disabled>
+                            <span class="material-symbols-outlined" style="font-size: 16px;">chevron_left</span>
+                        </button>
+                        <button class="pagination-btn active">1</button>
+                        <button class="pagination-btn">2</button>
+                        <button class="pagination-btn">3</button>
+                        <span class="pagination-dots">...</span>
+                        <button class="pagination-btn">
+                            <span class="material-symbols-outlined" style="font-size: 16px;">chevron_right</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Load Sidebar -->
+    <script>
+        fetch('sidebar.html')
+            .then(response => response.text())
+            .then(data => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = data;
+
+                const sidebar = tempDiv.querySelector('aside');
+                const sidebarScript = tempDiv.querySelector('script');
+                const sidebarStyle = tempDiv.querySelector('style');
+
+                if (sidebar) {
+                    document.getElementById('sidebar-container').appendChild(sidebar);
+                }
+
+                if (sidebarStyle) {
+                    document.head.appendChild(sidebarStyle);
+                }
+
+                if (sidebarScript) {
+                    const script = document.createElement('script');
+                    script.textContent = sidebarScript.textContent;
+                    document.body.appendChild(script);
+                }
+
+                // Manually trigger active menu highlighting after sidebar is loaded
+                setTimeout(() => {
+                    const currentPage = window.location.pathname.split('/').pop() || 'dashboard.html';
+                    const navItems = document.querySelectorAll('.nav-item');
+
+                    console.log('Setting active menu for page:', currentPage);
+
+                    navItems.forEach(item => {
+                        const href = item.getAttribute('href');
+
+                        // Remove active class from all items first
+                        item.classList.remove('nav-item-active');
+
+                        // Find the icon and update fill state
+                        const icon = item.querySelector('.material-symbols-outlined');
+                        if (icon) {
+                            icon.classList.remove('filled');
+                            icon.style.fontVariationSettings = "'FILL' 0";
+                        }
+
+                        // Add active class to matching item
+                        if (href === currentPage ||
+                            (currentPage === '' && href === 'dashboard.html') ||
+                            (currentPage === 'index.html' && href === 'dashboard.html')) {
+                            item.classList.add('nav-item-active');
+                            console.log('Active menu set to:', href);
+                            if (icon) {
+                                icon.classList.add('filled');
+                                icon.style.fontVariationSettings = "'FILL' 1";
+                            }
+                        }
+                    });
+                }, 200);
+            })
+            .catch(error => console.error('Error loading sidebar:', error));
+    </script>
+
+    <!-- Load Header -->
+    <script>
+        fetch('header.html')
+            .then(response => response.text())
+            .then(data => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = data;
+
+                const header = tempDiv.querySelector('header');
+                const notificationPanel = tempDiv.querySelector('#notificationPanel');
+                const helpModal = tempDiv.querySelector('#helpModal');
+                const profileDropdown = tempDiv.querySelector('#profileDropdown');
+                const headerStyle = tempDiv.querySelector('style');
+
+                if (header) {
+                    document.getElementById('header-container').appendChild(header);
+                }
+
+                // Append dropdowns to body for proper z-index positioning
+                if (notificationPanel) {
+                    document.body.appendChild(notificationPanel);
+                }
+
+                if (helpModal) {
+                    document.body.appendChild(helpModal);
+                }
+
+                if (profileDropdown) {
+                    document.body.appendChild(profileDropdown);
+                }
+
+                if (headerStyle) {
+                    document.head.appendChild(headerStyle);
+                }
+
+                // Initialize header functionality directly here
+                setTimeout(() => {
+                    console.log('Initializing header functionality...');
+
+                    const notificationBtn = document.getElementById('notificationBtn');
+                    const notificationPanelEl = document.getElementById('notificationPanel');
+                    const closeNotificationPanel = document.getElementById('closeNotificationPanel');
+                    const helpBtn = document.getElementById('helpBtn');
+                    const helpModalEl = document.getElementById('helpModal');
+                    const closeHelpModal = document.getElementById('closeHelpModal');
+                    const profileDropdownEl = document.getElementById('profileDropdown');
+                    const profileAvatarBtn = document.getElementById('profileAvatarBtn');
+                    const logoutLink = document.getElementById('logoutLink');
+                    const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
+                    const sidebar = document.getElementById('juryAppSidebar');
+
+                    console.log('Elements found:', {
+                        notificationBtn: !!notificationBtn,
+                        notificationPanel: !!notificationPanelEl,
+                        helpBtn: !!helpBtn,
+                        helpModal: !!helpModalEl,
+                        profileAvatarBtn: !!profileAvatarBtn,
+                        profileDropdown: !!profileDropdownEl,
+                        sidebarToggleBtn: !!sidebarToggleBtn,
+                        sidebar: !!sidebar
+                    });
+
+                    // Setup Notification Panel
+                    if (notificationBtn && notificationPanelEl) {
+                        notificationBtn.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            console.log('Notification button clicked');
+                            notificationPanelEl.classList.toggle('active');
+
+                            // Close other panels
+                            if (helpModalEl) helpModalEl.classList.remove('active');
+                            if (profileDropdownEl) profileDropdownEl.classList.remove('active');
+                        });
+
+                        if (closeNotificationPanel) {
+                            closeNotificationPanel.addEventListener('click', function() {
+                                notificationPanelEl.classList.remove('active');
+                            });
+                        }
+                    }
+
+                    // Setup Help Modal
+                    if (helpBtn && helpModalEl) {
+                        helpBtn.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            console.log('Help button clicked');
+                            helpModalEl.classList.toggle('active');
+
+                            // Close other panels
+                            if (notificationPanelEl) notificationPanelEl.classList.remove('active');
+                            if (profileDropdownEl) profileDropdownEl.classList.remove('active');
+                        });
+
+                        if (closeHelpModal) {
+                            closeHelpModal.addEventListener('click', function() {
+                                helpModalEl.classList.remove('active');
+                            });
+                        }
+                    }
+
+                    // Setup Profile Dropdown
+                    if (profileAvatarBtn && profileDropdownEl) {
+                        profileAvatarBtn.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            console.log('Profile avatar clicked');
+                            profileDropdownEl.classList.toggle('active');
+
+                            // Close other panels
+                            if (notificationPanelEl) notificationPanelEl.classList.remove('active');
+                            if (helpModalEl) helpModalEl.classList.remove('active');
+                        });
+                    }
+
+                    // Setup Logout
+                    if (logoutLink) {
+                        logoutLink.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+
+                            if (confirm('Are you sure you want to logout?')) {
+                                // Close dropdown
+                                if (profileDropdownEl) {
+                                    profileDropdownEl.classList.remove('active');
+                                }
+
+                                // Clear any stored user data
+                                sessionStorage.clear();
+                                localStorage.removeItem('userToken');
+
+                                // Redirect to login page
+                                window.location.href = '../auth/sign-in.html';
+                            }
+                        });
+                    }
+
+                    // Setup Sidebar Toggle
+                    if (sidebarToggleBtn && sidebar) {
+                        sidebarToggleBtn.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            console.log('Sidebar toggle clicked');
+
+                            // Toggle collapsed state on desktop
+                            if (window.innerWidth >= 768) {
+                                sidebar.classList.toggle('collapsed');
+                            } else {
+                                // Toggle mobile-open state on mobile
+                                sidebar.classList.toggle('mobile-open');
+                            }
+                        });
+                    }
+
+                    // Close dropdowns when clicking outside
+                    document.addEventListener('click', function(e) {
+                        if (notificationPanelEl && !e.target.closest('#notificationPanel') && !e.target.closest('#notificationBtn')) {
+                            notificationPanelEl.classList.remove('active');
+                        }
+
+                        if (helpModalEl && !e.target.closest('#helpModal') && !e.target.closest('#helpBtn')) {
+                            helpModalEl.classList.remove('active');
+                        }
+
+                        if (profileDropdownEl && !e.target.closest('#profileDropdown') && !e.target.closest('#profileAvatarBtn')) {
+                            profileDropdownEl.classList.remove('active');
+                        }
+
+                        // Close sidebar on mobile when clicking outside
+                        if (sidebar && window.innerWidth < 768) {
+                            if (!e.target.closest('#juryAppSidebar') && !e.target.closest('#sidebarToggleBtn')) {
+                                sidebar.classList.remove('mobile-open');
+                            }
+                        }
+                    });
+
+                    console.log('Header functionality initialized successfully');
+                }, 100);
+            })
+            .catch(error => console.error('Error loading header:', error));
+    </script>
+
+    <!-- Search and Filter Functionality -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.querySelector('.search-input');
+            const statusFilter = document.querySelectorAll('.filter-select')[0];
+            const sortFilter = document.querySelectorAll('.filter-select')[1];
+            const tableRows = document.querySelectorAll('.ideas-table tbody tr');
+
+            // Store original order
+            const rowsArray = Array.from(tableRows);
+
+            // Search functionality
+            if (searchInput) {
+                searchInput.addEventListener('input', function(e) {
+                    const searchTerm = e.target.value.toLowerCase().trim();
+                    filterAndSort();
+                });
+            }
+
+            // Status filter functionality
+            if (statusFilter) {
+                statusFilter.addEventListener('change', function() {
+                    filterAndSort();
+                });
+            }
+
+            // Sort filter functionality
+            if (sortFilter) {
+                sortFilter.addEventListener('change', function() {
+                    filterAndSort();
+                });
+            }
+
+            function filterAndSort() {
+                const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+                const statusValue = statusFilter ? statusFilter.value : 'all';
+                const sortValue = sortFilter ? sortFilter.value : '';
+
+                let visibleRows = rowsArray.filter(row => {
+                    // Search filter
+                    const ideaTitle = row.querySelector('.idea-title')?.textContent.toLowerCase() || '';
+                    const teamName = row.querySelector('.team-name')?.textContent.toLowerCase() || '';
+                    const teamId = row.querySelector('.team-id')?.textContent.toLowerCase() || '';
+                    const category = row.querySelector('.idea-category')?.textContent.toLowerCase() || '';
+
+                    const matchesSearch = !searchTerm ||
+                        ideaTitle.includes(searchTerm) ||
+                        teamName.includes(searchTerm) ||
+                        teamId.includes(searchTerm) ||
+                        category.includes(searchTerm);
+
+                    // Status filter
+                    let matchesStatus = true;
+                    if (statusValue && statusValue !== 'all') {
+                        const statusBadge = row.querySelector('.status-badge');
+                        if (statusBadge) {
+                            const rowStatus = statusBadge.classList.contains('pending') ? 'pending' : 'evaluated';
+                            matchesStatus = rowStatus === statusValue;
+                        }
+                    }
+
+                    return matchesSearch && matchesStatus;
+                });
+
+                // Sort by date
+                if (sortValue) {
+                    visibleRows.sort((a, b) => {
+                        const dateA = new Date(a.querySelector('.date-text')?.textContent || '');
+                        const dateB = new Date(b.querySelector('.date-text')?.textContent || '');
+
+                        if (sortValue === 'newest') {
+                            return dateB - dateA;
+                        } else if (sortValue === 'oldest') {
+                            return dateA - dateB;
+                        }
+                        return 0;
+                    });
+                }
+
+                // Hide all rows first
+                rowsArray.forEach(row => row.style.display = 'none');
+
+                // Show filtered and sorted rows
+                const tbody = document.querySelector('.ideas-table tbody');
+                visibleRows.forEach(row => {
+                    row.style.display = '';
+                    tbody.appendChild(row); // Re-append to maintain sort order
+                });
+
+                // Update pagination info
+                updatePaginationInfo(visibleRows.length);
+            }
+
+            function updatePaginationInfo(visibleCount) {
+                const paginationInfo = document.querySelector('.pagination-info');
+                if (paginationInfo) {
+                    const totalCount = rowsArray.length;
+                    if (visibleCount === 0) {
+                        paginationInfo.textContent = 'No results found';
+                    } else if (visibleCount === totalCount) {
+                        paginationInfo.textContent = `Showing 1-${visibleCount} of ${totalCount}`;
+                    } else {
+                        paginationInfo.textContent = `Showing ${visibleCount} of ${totalCount}`;
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

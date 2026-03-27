@@ -1,0 +1,2533 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Add New Student - Enpower Skill Lab</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+        rel="stylesheet" />
+
+    <!-- Sidebar & Header CSS -->
+    <!-- <link rel="stylesheet" href="sidebar.css">
+    <link rel="stylesheet" href="header.css"> -->
+
+    <!-- Sidebar & Header JS -->
+    <!-- <script src="sidebar.js"></script>
+    <script src="header.js"></script> -->
+
+    <style>
+        /* Prevent FOUC - hide containers until loaded */
+        #sidebar-container:empty,
+        #header-container:empty {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        #sidebar-container.loaded,
+        #header-container.loaded {
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.2s ease-in;
+        }
+
+        /* Main onboarding student styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #F3F4F6;
+            color: #1F2937;
+            min-height: 100vh;
+        }
+
+        body.dark {
+            background-color: #111827;
+            color: #E5E7EB;
+        }
+
+        /* Dashboard Container */
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Add Student Page */
+        .add-student-page {
+            padding: 1rem;
+            flex: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Form Header */
+        .form-header {
+            padding: 2rem;
+            border-radius: 1rem 1rem 0 0;
+            /* background: linear-gradient(135deg, #A67DB1 0%, #6b277e 100%); */
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #000;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 0 0 0.5rem 0;
+        }
+
+        .page-subtitle {
+            font-size: 1rem;
+            color: #000;
+            margin: 0;
+            opacity: 0.95;
+        }
+
+        .form-legend {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1.5rem;
+            margin-top: 0.75rem;
+            font-size: 0.875rem;
+            color: #ffffff;
+            opacity: 0.9;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .legend-indicator {
+            width: 1rem;
+            height: 0.25rem;
+            border-radius: 9999px;
+        }
+
+        .legend-indicator.required {
+            background-color: #ffffff;
+        }
+
+        .legend-indicator.optional {
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Stepper Container */
+        .stepper-container {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        body.dark .stepper-container {
+            background-color: #1F2937;
+            border-bottom-color: #374151;
+        }
+
+        /* Progress Stepper */
+        .stepper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            /* max-width: 900px; */
+            margin: 0 auto;
+            gap: 10px;
+        }
+
+        .stepper::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 5%;
+            right: 5%;
+            height: 2px;
+            background: #E5E7EB;
+            z-index: 0;
+        }
+
+        body.dark .stepper::before {
+            background: #374151;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .step-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #E5E7EB;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #6B7280;
+            transition: all 0.3s ease;
+        }
+
+        body.dark .step-icon {
+            background: #374151;
+            color: #9CA3AF;
+        }
+
+        .step.active .step-icon {
+            background: #6b277e;
+            color: white;
+            box-shadow: 0 0 0 4px rgba(107, 39, 126, 0.1);
+        }
+
+        body.dark .step.active .step-icon {
+            background: #A67DB1;
+            box-shadow: 0 0 0 4px rgba(166, 125, 177, 0.2);
+        }
+
+        .step.completed .step-icon {
+            background: #facd48;
+            color: white;
+        }
+
+        body.dark .step.completed .step-icon {
+            background: #facd48;
+        }
+
+        .step-label {
+            font-size: 12px;
+            color: #6B7280;
+            text-align: center;
+            font-weight: 500;
+            margin-top: 4px;
+        }
+
+        body.dark .step-label {
+            color: #9CA3AF;
+        }
+
+        .step.active .step-label {
+            color: #6b277e;
+            font-weight: 600;
+        }
+
+        body.dark .step.active .step-label {
+            color: #A67DB1;
+        }
+
+        .step.completed .step-label {
+            color: #facd48;
+        }
+
+        body.dark .step.completed .step-label {
+            color: #facd48;
+        }
+
+        /* Form Container */
+        .add-student-form {
+            background-color: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        body.dark .add-student-form {
+            background-color: #1F2937;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Form Section */
+        .form-section {
+            padding: 2rem;
+        }
+
+        body.dark .form-section {
+            border-bottom-color: #374151;
+        }
+
+        .section-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1F2937;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0;
+        }
+
+        body.dark .section-title {
+            color: #F9FAFB;
+        }
+
+        .section-title .material-symbols-outlined {
+            font-size: 1.75rem;
+            color: #6b277e;
+        }
+
+        body.dark .section-title .material-symbols-outlined {
+            color: #A67DB1;
+        }
+
+        /* Form Grid */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        /* Form Group */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-label {
+            font-size: 0.938rem;
+            font-weight: 500;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        body.dark .form-label {
+            color: #D1D5DB;
+        }
+
+        .required {
+            color: #EF4444;
+            font-weight: 600;
+        }
+
+        /* Form Inputs */
+        .form-input,
+        .form-textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #D1D5DB;
+            border-radius: 0.5rem;
+            background-color: #ffffff;
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
+            color: #1F2937;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        body.dark .form-input,
+        body.dark .form-textarea {
+            border-color: #4B5563;
+            background-color: #111827;
+            color: #E5E7EB;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus {
+            border-color: #6b277e;
+            box-shadow: 0 0 0 3px rgba(107, 39, 126, 0.1);
+        }
+
+        body.dark .form-input:focus,
+        body.dark .form-textarea:focus {
+            border-color: #A67DB1;
+            box-shadow: 0 0 0 3px rgba(166, 125, 177, 0.2);
+        }
+
+        .form-input::placeholder,
+        .form-textarea::placeholder {
+            color: #9CA3AF;
+        }
+
+        body.dark .form-input::placeholder,
+        body.dark .form-textarea::placeholder {
+            color: #6B7280;
+        }
+
+        .form-input[readonly] {
+            background-color: #F3F4F6;
+            cursor: not-allowed;
+        }
+
+        body.dark .form-input[readonly] {
+            background-color: #374151;
+        }
+
+        .form-input.error,
+        .form-textarea.error {
+            border-color: #EF4444;
+            background-color: #FEF2F2;
+        }
+
+        body.dark .form-input.error,
+        body.dark .form-textarea.error {
+            border-color: #F87171;
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+
+        .form-input.error:focus,
+        .form-textarea.error:focus {
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+            border-color: #EF4444;
+        }
+
+        body.dark .form-input.error:focus,
+        body.dark .form-textarea.error:focus {
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+            border-color: #F87171;
+        }
+
+        /* Error Messages */
+        .error-message {
+            display: none;
+            font-size: 0.813rem;
+            color: #EF4444;
+            margin-top: 0.25rem;
+            font-weight: 500;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        body.dark .error-message {
+            color: #F87171;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* Field Hint */
+        .field-hint {
+            font-size: 0.813rem;
+            color: #6B7280;
+            margin: 0;
+        }
+
+        body.dark .field-hint {
+            color: #9CA3AF;
+        }
+
+        /* Photo Upload */
+        .photo-upload-container {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .photo-preview {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 3px dashed #D1D5DB;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background-color: #F9FAFB;
+            color: #9CA3AF;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .photo-preview:hover {
+            border-color: #6b277e;
+        }
+
+        body.dark .photo-preview {
+            border-color: #4B5563;
+            background-color: #374151;
+            color: #6B7280;
+        }
+
+        .photo-preview .material-symbols-outlined {
+            font-size: 3rem;
+        }
+
+        .photo-preview-text {
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .photo-input {
+            display: none;
+        }
+
+        .upload-photo-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background-color: #6b277e;
+            color: #ffffff;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.938rem;
+            font-weight: 500;
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-photo-btn:hover {
+            background-color: #A67DB1;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(107, 39, 126, 0.3);
+        }
+
+        .upload-photo-btn .material-symbols-outlined {
+            font-size: 1.25rem;
+        }
+
+        /* Form Actions */
+        .form-actions {
+            padding: 2rem;
+            background-color: #F9FAFB;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            border-top: 1px solid #E5E7EB;
+        }
+
+        body.dark .form-actions {
+            background-color: #111827;
+            border-top-color: #374151;
+        }
+
+        .action-buttons-right {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-cancel,
+        .btn-back,
+        .btn-next,
+        .btn-submit {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-cancel {
+            background-color: #F3F4F6;
+            color: #6B7280;
+        }
+
+        .btn-cancel:hover {
+            background-color: #E5E7EB;
+            color: #374151;
+        }
+
+        body.dark .btn-cancel {
+            background-color: #374151;
+            color: #9CA3AF;
+        }
+
+        body.dark .btn-cancel:hover {
+            background-color: #4B5563;
+            color: #D1D5DB;
+        }
+
+        .btn-back {
+            background-color: #F3F4F6;
+            color: #6B7280;
+        }
+
+        .btn-back:hover {
+            background-color: #E5E7EB;
+            color: #374151;
+        }
+
+        body.dark .btn-back {
+            background-color: #374151;
+            color: #9CA3AF;
+        }
+
+        body.dark .btn-back:hover {
+            background-color: #4B5563;
+            color: #D1D5DB;
+        }
+
+        .btn-next {
+            background-color: #6b277e;
+            color: #ffffff;
+        }
+
+        .btn-next:hover {
+            background-color: #A67DB1;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(107, 39, 126, 0.3);
+        }
+
+        .btn-submit {
+            background-color: #10B981;
+            color: #ffffff;
+        }
+
+        .btn-submit:hover {
+            background-color: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-cancel .material-symbols-outlined,
+        .btn-back .material-symbols-outlined,
+        .btn-next .material-symbols-outlined,
+        .btn-submit .material-symbols-outlined {
+            font-size: 1.25rem;
+        }
+
+        /* Step Content Animation */
+        .step-content {
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .add-student-page {
+                padding: 1.5rem;
+            }
+
+            .form-section {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .add-student-page {
+                padding: 1rem;
+            }
+
+            .form-header {
+                padding: 1.5rem;
+            }
+
+            .page-title {
+                font-size: 1.75rem;
+            }
+
+            .stepper-container {
+                padding: 1.5rem;
+                overflow-x: auto;
+            }
+
+            .stepper {
+                min-width: 600px;
+            }
+
+            .step-label {
+                font-size: 10px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .form-section {
+                padding: 1.25rem;
+            }
+
+            .section-title {
+                font-size: 1.125rem;
+            }
+
+            .section-title .material-symbols-outlined {
+                font-size: 1.5rem;
+            }
+
+            .photo-upload-container {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .photo-preview {
+                width: 120px;
+                height: 120px;
+            }
+
+            .form-actions {
+                padding: 1.5rem;
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .action-buttons-right {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .stepper::before {
+                left: 3%;
+                right: 3%;
+            }
+
+            .step {
+                min-width: 70px;
+            }
+
+            .step-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 13px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .add-student-page {
+                padding: 0.75rem;
+            }
+
+            .form-header {
+                padding: 1.25rem;
+            }
+
+            .page-title {
+                font-size: 1.5rem;
+            }
+
+            .stepper-container {
+                padding: 1rem;
+            }
+
+            .stepper {
+                overflow-x: auto;
+                padding: 5px;
+                min-width: max-content;
+            }
+
+            .stepper::before {
+                left: 40px;
+                right: 40px;
+            }
+
+            .step {
+                min-width: 80px;
+            }
+
+            .step-icon {
+                width: 32px;
+                height: 32px;
+                font-size: 12px;
+            }
+
+            .step-label {
+                font-size: 10px;
+                max-width: 80px;
+            }
+
+            .form-section {
+                padding: 1rem;
+            }
+
+            .section-header {
+                margin-bottom: 1rem;
+            }
+
+            .form-grid {
+                gap: 0.875rem;
+            }
+
+            .form-input,
+            .form-textarea {
+                padding: 0.625rem 0.875rem;
+                font-size: 0.938rem;
+            }
+
+            .form-actions {
+                padding: 1rem;
+            }
+
+            .action-buttons-right {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .btn-cancel,
+            .btn-back,
+            .btn-next,
+            .btn-submit {
+                width: 100%;
+                justify-content: center;
+                padding: 0.875rem 1.25rem;
+            }
+
+            .photo-preview {
+                width: 130px;
+                height: 130px;
+            }
+
+            .photo-preview .material-symbols-outlined {
+                font-size: 2.5rem;
+            }
+
+            .upload-photo-btn {
+                width: 60%;
+                justify-content: center;
+            }
+        }
+
+        /* Focus visible for accessibility */
+        .btn-cancel:focus-visible,
+        .btn-back:focus-visible,
+        .btn-next:focus-visible,
+        .btn-submit:focus-visible,
+        .upload-photo-btn:focus-visible {
+            outline: 2px solid #6b277e;
+            outline-offset: 2px;
+        }
+
+        body.dark .btn-cancel:focus-visible,
+        body.dark .btn-back:focus-visible,
+        body.dark .btn-next:focus-visible,
+        body.dark .btn-submit:focus-visible,
+        body.dark .upload-photo-btn:focus-visible {
+            outline-color: #A67DB1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Include Sidebar Component -->
+        <div id="sidebar-container"></div>
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Include Header Component -->
+            <div id="header-container"></div>
+            <!-- Add Student Page -->
+            <div class="add-student-page">
+                <!-- Add Student Form -->
+                <form class="add-student-form" id="addStudentForm">
+                    <!-- Form Header -->
+                    <div class="form-header">
+                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; flex-direction: row;
+    gap: 1rem;">
+                            <div>
+                                <h1 class="page-title">
+                                    Onboard Student
+                                </h1>
+                                <p class="page-subtitle">Fill in the student information below to add a new student to
+                                    the
+                                    system</p>
+                            </div>
+                            <button type="button" class="btn btn-next" id="autoFillBtn"
+                                style="display: flex; align-items: center; gap: 8px;">
+                                <span class="material-symbols-outlined" style="font-size: 18px;">auto_fix_high</span>
+                                Auto Fill
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Progress Stepper -->
+                    <div class="stepper-container">
+                        <div class="stepper">
+                            <div class="step active" data-step="1">
+                                <div class="step-icon">1</div>
+                                <div class="step-label">Basic Info</div>
+                            </div>
+                            <div class="step" data-step="2">
+                                <div class="step-icon">2</div>
+                                <div class="step-label">Academic</div>
+                            </div>
+                            <div class="step" data-step="3">
+                                <div class="step-icon">3</div>
+                                <div class="step-label">Contact</div>
+                            </div>
+                            <div class="step" data-step="4">
+                                <div class="step-icon">4</div>
+                                <div class="step-label">Skill Lab</div>
+                            </div>
+                            <div class="step" data-step="5">
+                                <div class="step-icon">5</div>
+                                <div class="step-label">Health</div>
+                            </div>
+                            <div class="step" data-step="6">
+                                <div class="step-icon">6</div>
+                                <div class="step-label">Emergency</div>
+                            </div>
+                            <div class="step" data-step="7">
+                                <div class="step-icon">7</div>
+                                <div class="step-label">Family</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 1: Basic Information -->
+                    <div class="form-section step-content" id="step1">
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <span class="material-symbols-outlined">person</span>
+                                A. Basic Information
+                            </h2>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group full-width">
+                                <label for="studentPhoto" class="form-label">Student Photo</label>
+                                <div class="photo-upload-container">
+                                    <div class="photo-preview" id="photoPreview">
+                                        <span class="material-symbols-outlined">add_a_photo</span>
+                                        <span class="photo-preview-text">Upload Photo</span>
+                                    </div>
+                                    <input type="file" id="studentPhoto" name="studentPhoto" accept="image/*"
+                                        class="photo-input">
+                                    <button type="button" class="upload-photo-btn" id="uploadPhotoBtn">
+                                        <span class="material-symbols-outlined">upload</span>
+                                        Choose Photo
+                                    </button>
+                                    <p class="field-hint">Recommended: Square image, max 2MB</p>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="firstName" class="form-label">First Name <span
+                                        class="required">*</span></label>
+                                <input type="text" id="firstName" name="firstName" class="form-input"
+                                    placeholder="Enter first name" required>
+                                <span class="error-message" id="firstNameError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="middleName" class="form-label">Middle Name</label>
+                                <input type="text" id="middleName" name="middleName" class="form-input"
+                                    placeholder="Enter middle name">
+                                <span class="error-message" id="middleNameError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="lastName" class="form-label">Last Name <span
+                                        class="required">*</span></label>
+                                <input type="text" id="lastName" name="lastName" class="form-input"
+                                    placeholder="Enter last name" required>
+                                <span class="error-message" id="lastNameError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="gender" class="form-label">Gender <span class="required">*</span></label>
+                                <select id="gender" name="gender" class="form-input" required>
+                                    <option value="" disabled selected hidden>Select gender</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                    <option value="other">Other</option>
+                                </select>
+                                <span class="error-message" id="genderError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="dateOfBirth" class="form-label">Date of Birth <span
+                                        class="required">*</span></label>
+                                <input type="date" id="dateOfBirth" name="dateOfBirth" class="form-input" required>
+                                <span class="error-message" id="dateOfBirthError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="age" class="form-label">Age</label>
+                                <input type="text" id="age" name="age" class="form-input" placeholder="Auto-calculated"
+                                    readonly>
+                                <p class="field-hint">Auto-calculated from Date of Birth</p>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="nationality" class="form-label">Nationality <span
+                                        class="required">*</span></label>
+                                <input type="text" id="nationality" name="nationality" class="form-input"
+                                    placeholder="Enter nationality" required value="Indian">
+                                <span class="error-message" id="nationalityError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="motherTongue" class="form-label">Mother Tongue</label>
+                                <input type="text" id="motherTongue" name="motherTongue" class="form-input"
+                                    placeholder="Enter mother tongue">
+                                <span class="error-message" id="motherTongueError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="bloodGroup" class="form-label">Blood Group</label>
+                                <select id="bloodGroup" name="bloodGroup" class="form-input">
+                                    <option value="" disabled selected hidden>Select blood group</option>
+                                    <option value="A+">A+</option>
+                                    <option value="A-">A-</option>
+                                    <option value="B+">B+</option>
+                                    <option value="B-">B-</option>
+                                    <option value="AB+">AB+</option>
+                                    <option value="AB-">AB-</option>
+                                    <option value="O+">O+</option>
+                                    <option value="O-">O-</option>
+                                </select>
+                                <span class="error-message" id="bloodGroupError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="aadharNumber" class="form-label">Aadhar Number (Optional)</label>
+                                <input type="text" id="aadharNumber" name="aadharNumber" class="form-input"
+                                    placeholder="XXXX XXXX XXXX" maxlength="14">
+                                <span class="error-message" id="aadharNumberError"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Academic Details -->
+                    <div class="form-section step-content" id="step2" style="display: none;">
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <span class="material-symbols-outlined">school</span>
+                                B. Academic Details
+                            </h2>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="schoolName" class="form-label">School Name <span
+                                        class="required">*</span></label>
+                                <select id="schoolName" name="schoolName" class="form-input" required>
+                                    <option value="" disabled selected hidden>Select school</option>
+                                    <option value="greenwood">Greenwood High School</option>
+                                    <option value="springfield">Springfield Academy</option>
+                                    <option value="riverside">Riverside School</option>
+                                </select>
+                                <span class="error-message" id="schoolNameError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="schoolBranch" class="form-label">School Branch</label>
+                                <input type="text" id="schoolBranch" name="schoolBranch" class="form-input"
+                                    placeholder="Enter branch (if multiple)">
+                                <span class="error-message" id="schoolBranchError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="class" class="form-label">Class <span class="required">*</span></label>
+                                <select id="class" name="class" class="form-input" required>
+                                    <option value="" disabled selected hidden>Select class</option>
+                                    <option value="1">Class 1</option>
+                                    <option value="2">Class 2</option>
+                                    <option value="3">Class 3</option>
+                                    <option value="4">Class 4</option>
+                                    <option value="5">Class 5</option>
+                                    <option value="6">Class 6</option>
+                                    <option value="7">Class 7</option>
+                                    <option value="8">Class 8</option>
+                                    <option value="9">Class 9</option>
+                                    <option value="10">Class 10</option>
+                                    <option value="11">Class 11</option>
+                                    <option value="12">Class 12</option>
+                                </select>
+                                <span class="error-message" id="classError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="division" class="form-label">Division <span
+                                        class="required">*</span></label>
+                                <select id="division" name="division" class="form-input" required>
+                                    <option value="" disabled selected hidden>Select division</option>
+                                    <option value="A">Division A</option>
+                                    <option value="B">Division B</option>
+                                    <option value="C">Division C</option>
+                                    <option value="D">Division D</option>
+                                </select>
+                                <span class="error-message" id="divisionError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="rollNumber" class="form-label">Roll Number <span
+                                        class="required">*</span></label>
+                                <input type="text" id="rollNumber" name="rollNumber" class="form-input"
+                                    placeholder="Enter roll number" required>
+                                <span class="error-message" id="rollNumberError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="academicYear" class="form-label">Academic Year <span
+                                        class="required">*</span></label>
+                                <select id="academicYear" name="academicYear" class="form-input" required>
+                                    <option value="" disabled selected hidden>Select academic year</option>
+                                    <option value="2024-2025">2024-2025</option>
+                                    <option value="2025-2026">2025-2026</option>
+                                    <option value="2026-2027">2026-2027</option>
+                                </select>
+                                <span class="error-message" id="academicYearError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="grNumber" class="form-label">GR Number / Admission Number <span
+                                        class="required">*</span></label>
+                                <input type="text" id="grNumber" name="grNumber" class="form-input"
+                                    placeholder="Enter GR/Admission number" required>
+                                <span class="error-message" id="grNumberError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="previousSchool" class="form-label">Previous School (if applicable)</label>
+                                <input type="text" id="previousSchool" name="previousSchool" class="form-input"
+                                    placeholder="Enter previous school name">
+                                <span class="error-message" id="previousSchoolError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="stream" class="form-label">Stream (for higher grades)</label>
+                                <select id="stream" name="stream" class="form-input">
+                                    <option value="" disabled selected hidden>Select stream</option>
+                                    <option value="science">Science</option>
+                                    <option value="commerce">Commerce</option>
+                                    <option value="arts">Arts/Humanities</option>
+                                    <option value="na">Not Applicable</option>
+                                </select>
+                                <span class="error-message" id="streamError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="schoolBoard" class="form-label">School Board <span
+                                        class="required">*</span></label>
+                                <select id="schoolBoard" name="schoolBoard" class="form-input" required>
+                                    <option value="" disabled selected hidden>Select board</option>
+                                    <option value="CBSE">CBSE</option>
+                                    <option value="ICSE">ICSE</option>
+                                    <option value="SSC">SSC (State Board)</option>
+                                    <option value="IB">IB (International Baccalaureate)</option>
+                                    <option value="IGCSE">IGCSE</option>
+                                    <option value="other">Other</option>
+                                </select>
+                                <span class="error-message" id="schoolBoardError"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Contact Details -->
+                    <div class="form-section step-content" id="step3" style="display: none;">
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <span class="material-symbols-outlined">contact_phone</span>
+                                C. Contact Details
+                            </h2>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="studentMobile" class="form-label">Mobile Number (Student)</label>
+                                <input type="tel" id="studentMobile" name="studentMobile" class="form-input"
+                                    placeholder="+91 XXXXX XXXXX">
+                                <span class="error-message" id="studentMobileError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="schoolEmail" class="form-label">School Email ID <span
+                                        class="required">*</span></label>
+                                <input type="email" id="schoolEmail" name="schoolEmail" class="form-input"
+                                    placeholder="student@school.edu" required>
+                                <span class="error-message" id="schoolEmailError"></span>
+                                <p class="field-hint">Used for login</p>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="personalEmail" class="form-label">Personal Email ID (Optional)</label>
+                                <input type="email" id="personalEmail" name="personalEmail" class="form-input"
+                                    placeholder="student@gmail.com">
+                                <span class="error-message" id="personalEmailError"></span>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label for="address" class="form-label">Address</label>
+                                <textarea id="address" name="address" class="form-textarea" rows="3"
+                                    placeholder="Auto-linked from parent details" readonly></textarea>
+                                <p class="field-hint">Address is auto-linked from parent/guardian details</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Skill Lab Specific Details -->
+                    <div class="form-section step-content" id="step4" style="display: none;">
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <span class="material-symbols-outlined">psychology</span>
+                                D. Skill Lab Specific Details
+                            </h2>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="skillLabRegId" class="form-label">Skill Lab Registration ID</label>
+                                <input type="text" id="skillLabRegId" name="skillLabRegId" class="form-input"
+                                    placeholder="Auto-generated" readonly>
+                                <p class="field-hint">Auto-generated upon submission</p>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="enrollmentDate" class="form-label">Enrollment Date <span
+                                        class="required">*</span></label>
+                                <input type="date" id="enrollmentDate" name="enrollmentDate" class="form-input"
+                                    required>
+                                <span class="error-message" id="enrollmentDateError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="skillsEnrolled" class="form-label">Skills Enrolled</label>
+                                <input type="text" id="skillsEnrolled" name="skillsEnrolled" class="form-input"
+                                    placeholder="e.g., Critical Thinking, Problem Solving">
+                                <span class="error-message" id="skillsEnrolledError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="currentSkillLevel" class="form-label">Current Skill Level</label>
+                                <select id="currentSkillLevel" name="currentSkillLevel" class="form-input">
+                                    <option value="" disabled selected hidden>Select skill level</option>
+                                    <option value="beginner">Beginner</option>
+                                    <option value="intermediate">Intermediate</option>
+                                    <option value="advanced">Advanced</option>
+                                </select>
+                                <span class="error-message" id="currentSkillLevelError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="assignedTrainer" class="form-label">Assigned Trainer</label>
+                                <select id="assignedTrainer" name="assignedTrainer" class="form-input">
+                                    <option value="" disabled selected hidden>Select trainer</option>
+                                    <option value="trainer1">John Doe</option>
+                                    <option value="trainer2">Jane Smith</option>
+                                    <option value="trainer3">Mike Johnson</option>
+                                </select>
+                                <span class="error-message" id="assignedTrainerError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="batchTiming" class="form-label">Batch / Session Timings</label>
+                                <input type="text" id="batchTiming" name="batchTiming" class="form-input"
+                                    placeholder="e.g., Mon-Wed 10:00 AM - 12:00 PM">
+                                <span class="error-message" id="batchTimingError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="learningStyle" class="form-label">Learning Style (Optional)</label>
+                                <select id="learningStyle" name="learningStyle" class="form-input">
+                                    <option value="" disabled selected hidden>Select learning style</option>
+                                    <option value="visual">Visual</option>
+                                    <option value="auditory">Auditory</option>
+                                    <option value="kinesthetic">Kinesthetic</option>
+                                    <option value="mixed">Mixed</option>
+                                </select>
+                                <span class="error-message" id="learningStyleError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="interestsAptitude" class="form-label">Interests / Aptitude Areas</label>
+                                <input type="text" id="interestsAptitude" name="interestsAptitude" class="form-input"
+                                    placeholder="e.g., Mathematics, Science, Arts">
+                                <span class="error-message" id="interestsAptitudeError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="preferredLanguage" class="form-label">Preferred Language of
+                                    Instruction</label>
+                                <select id="preferredLanguage" name="preferredLanguage" class="form-input">
+                                    <option value="" disabled selected hidden>Select language</option>
+                                    <option value="english">English</option>
+                                    <option value="hindi">Hindi</option>
+                                    <option value="marathi">Marathi</option>
+                                    <option value="other">Other</option>
+                                </select>
+                                <span class="error-message" id="preferredLanguageError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="attendanceStatus" class="form-label">Attendance Status</label>
+                                <select id="attendanceStatus" name="attendanceStatus" class="form-input">
+                                    <option value="" disabled selected hidden>Select status</option>
+                                    <option value="active">Active</option>
+                                    <option value="inactive">Inactive</option>
+                                    <option value="on-leave">On Leave</option>
+                                </select>
+                                <span class="error-message" id="attendanceStatusError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="practiceHours" class="form-label">Practice Hours Logged</label>
+                                <input type="number" id="practiceHours" name="practiceHours" class="form-input"
+                                    placeholder="0" min="0" value="0" readonly>
+                                <p class="field-hint">Auto-tracked from system</p>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="certificatesEarned" class="form-label">Certificates Earned</label>
+                                <input type="text" id="certificatesEarned" name="certificatesEarned" class="form-input"
+                                    placeholder="None" readonly>
+                                <p class="field-hint">Auto-updated from achievements</p>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="badgesEarned" class="form-label">Badges Earned</label>
+                                <input type="text" id="badgesEarned" name="badgesEarned" class="form-input"
+                                    placeholder="None" readonly>
+                                <p class="field-hint">Auto-updated from achievements</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 5: Health & Safety -->
+                    <div class="form-section step-content" id="step5" style="display: none;">
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <span class="material-symbols-outlined">medical_information</span>
+                                E. Health & Safety
+                            </h2>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group full-width">
+                                <label for="medicalConditions" class="form-label">Medical Conditions (if any)</label>
+                                <textarea id="medicalConditions" name="medicalConditions" class="form-textarea" rows="3"
+                                    placeholder="List any known medical conditions"></textarea>
+                                <span class="error-message" id="medicalConditionsError"></span>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label for="allergies" class="form-label">Allergies</label>
+                                <textarea id="allergies" name="allergies" class="form-textarea" rows="2"
+                                    placeholder="List any known allergies (food, medicine, environmental)"></textarea>
+                                <span class="error-message" id="allergiesError"></span>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label for="emergencyInstructions" class="form-label">Emergency Instructions</label>
+                                <textarea id="emergencyInstructions" name="emergencyInstructions" class="form-textarea"
+                                    rows="3" placeholder="Special instructions in case of emergency"></textarea>
+                                <span class="error-message" id="emergencyInstructionsError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="doctorName" class="form-label">Doctor Name (Optional)</label>
+                                <input type="text" id="doctorName" name="doctorName" class="form-input"
+                                    placeholder="Enter doctor's name">
+                                <span class="error-message" id="doctorNameError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="doctorContact" class="form-label">Doctor Contact (Optional)</label>
+                                <input type="tel" id="doctorContact" name="doctorContact" class="form-input"
+                                    placeholder="+91 XXXXX XXXXX">
+                                <span class="error-message" id="doctorContactError"></span>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label for="physicalLimitations" class="form-label">Physical Limitations</label>
+                                <textarea id="physicalLimitations" name="physicalLimitations" class="form-textarea"
+                                    rows="3"
+                                    placeholder="Important for skill lab activities - list any physical limitations"></textarea>
+                                <span class="error-message" id="physicalLimitationsError"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 6: Emergency Contact -->
+                    <div class="form-section step-content" id="step6" style="display: none;">
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <span class="material-symbols-outlined">emergency</span>
+                                F. Emergency Contact
+                            </h2>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="emergencyName" class="form-label">Contact Name <span
+                                        class="required">*</span></label>
+                                <input type="text" id="emergencyName" name="emergencyName" class="form-input"
+                                    placeholder="Enter emergency contact name" required>
+                                <span class="error-message" id="emergencyNameError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="emergencyRelationship" class="form-label">Relationship <span
+                                        class="required">*</span></label>
+                                <select id="emergencyRelationship" name="emergencyRelationship" class="form-input"
+                                    required>
+                                    <option value="" disabled selected hidden>Select relationship</option>
+                                    <option value="father">Father</option>
+                                    <option value="mother">Mother</option>
+                                    <option value="guardian">Guardian</option>
+                                    <option value="uncle">Uncle</option>
+                                    <option value="aunt">Aunt</option>
+                                    <option value="grandparent">Grandparent</option>
+                                    <option value="sibling">Sibling</option>
+                                    <option value="other">Other</option>
+                                </select>
+                                <span class="error-message" id="emergencyRelationshipError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="emergencyMobile" class="form-label">Mobile Number <span
+                                        class="required">*</span></label>
+                                <input type="tel" id="emergencyMobile" name="emergencyMobile" class="form-input"
+                                    placeholder="+91 XXXXX XXXXX" required>
+                                <span class="error-message" id="emergencyMobileError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="emergencyAltMobile" class="form-label">Alternate Mobile</label>
+                                <input type="tel" id="emergencyAltMobile" name="emergencyAltMobile" class="form-input"
+                                    placeholder="+91 XXXXX XXXXX">
+                                <span class="error-message" id="emergencyAltMobileError"></span>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label for="emergencyAddress" class="form-label">Address (if different from
+                                    student)</label>
+                                <textarea id="emergencyAddress" name="emergencyAddress" class="form-textarea" rows="3"
+                                    placeholder="Enter address if different from student's address"></textarea>
+                                <span class="error-message" id="emergencyAddressError"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 7: Family Details (Optional) -->
+                    <div class="form-section step-content" id="step7" style="display: none;">
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <span class="material-symbols-outlined">family_restroom</span>
+                                G. Family Details (Optional)
+                            </h2>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="sibling1Name" class="form-label">Sibling 1 Name</label>
+                                <input type="text" id="sibling1Name" name="sibling1Name" class="form-input"
+                                    placeholder="Enter sibling name">
+                                <span class="error-message" id="sibling1NameError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="sibling1ClassSchool" class="form-label">Sibling 1 Class / School</label>
+                                <input type="text" id="sibling1ClassSchool" name="sibling1ClassSchool"
+                                    class="form-input" placeholder="e.g., Class 5, ABC School">
+                                <span class="error-message" id="sibling1ClassSchoolError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="sibling1SkillLabId" class="form-label">Sibling 1 Skill Lab ID (if
+                                    enrolled)</label>
+                                <input type="text" id="sibling1SkillLabId" name="sibling1SkillLabId" class="form-input"
+                                    placeholder="Enter Skill Lab ID">
+                                <span class="error-message" id="sibling1SkillLabIdError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="sibling2Name" class="form-label">Sibling 2 Name</label>
+                                <input type="text" id="sibling2Name" name="sibling2Name" class="form-input"
+                                    placeholder="Enter sibling name">
+                                <span class="error-message" id="sibling2NameError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="sibling2ClassSchool" class="form-label">Sibling 2 Class / School</label>
+                                <input type="text" id="sibling2ClassSchool" name="sibling2ClassSchool"
+                                    class="form-input" placeholder="e.g., Class 8, XYZ School">
+                                <span class="error-message" id="sibling2ClassSchoolError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="sibling2SkillLabId" class="form-label">Sibling 2 Skill Lab ID (if
+                                    enrolled)</label>
+                                <input type="text" id="sibling2SkillLabId" name="sibling2SkillLabId" class="form-input"
+                                    placeholder="Enter Skill Lab ID">
+                                <span class="error-message" id="sibling2SkillLabIdError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="sibling3Name" class="form-label">Sibling 3 Name</label>
+                                <input type="text" id="sibling3Name" name="sibling3Name" class="form-input"
+                                    placeholder="Enter sibling name">
+                                <span class="error-message" id="sibling3NameError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="sibling3ClassSchool" class="form-label">Sibling 3 Class / School</label>
+                                <input type="text" id="sibling3ClassSchool" name="sibling3ClassSchool"
+                                    class="form-input" placeholder="e.g., Class 10, PQR School">
+                                <span class="error-message" id="sibling3ClassSchoolError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="sibling3SkillLabId" class="form-label">Sibling 3 Skill Lab ID (if
+                                    enrolled)</label>
+                                <input type="text" id="sibling3SkillLabId" name="sibling3SkillLabId" class="form-input"
+                                    placeholder="Enter Skill Lab ID">
+                                <span class="error-message" id="sibling3SkillLabIdError"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="form-actions">
+                        <button type="button" class="btn-cancel" id="cancelBtn">
+                            <span class="material-symbols-outlined">close</span>
+                            Cancel
+                        </button>
+                        <div class="action-buttons-right">
+                            <button type="button" class="btn-back" id="backBtn" style="display: none;">
+                                <span class="material-symbols-outlined">arrow_back</span>
+                                Back
+                            </button>
+                            <button type="button" class="btn-next" id="nextBtn">
+                                Next
+                                <span class="material-symbols-outlined">arrow_forward</span>
+                            </button>
+                            <button type="submit" class="btn-submit" id="submitBtn" style="display: none;">
+                                <span class="material-symbols-outlined">check_circle</span>
+                                Submit
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Load Sidebar -->
+    <script>
+        fetch('sidebar.html')
+            .then(response => response.text())
+            .then(data => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = data;
+
+                const sidebar = tempDiv.querySelector('aside');
+                const sidebarScript = tempDiv.querySelector('script');
+                const sidebarStyle = tempDiv.querySelector('style');
+
+                if (sidebar) {
+                    document.getElementById('sidebar-container').appendChild(sidebar);
+                }
+
+                if (sidebarStyle) {
+                    document.head.appendChild(sidebarStyle);
+                }
+
+                if (sidebarScript) {
+                    const script = document.createElement('script');
+                    script.textContent = sidebarScript.textContent;
+                    document.body.appendChild(script);
+                }
+
+                console.log('Sidebar loaded and script executed');
+            })
+            .catch(error => console.error('Error loading sidebar:', error));
+    </script>
+
+    <!-- Load Header -->
+    <script>
+        fetch('header.html')
+            .then(response => response.text())
+            .then(data => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = data;
+
+                const header = tempDiv.querySelector('header');
+                const notificationPanel = tempDiv.querySelector('#notificationPanel');
+                const profileDropdown = tempDiv.querySelector('#profileDropdown');
+                const headerStyle = tempDiv.querySelector('style');
+                const headerScript = tempDiv.querySelector('script');
+
+                if (header) {
+                    document.getElementById('header-container').appendChild(header);
+                }
+
+                // Append dropdowns to body for proper z-index positioning
+                if (notificationPanel) {
+                    document.body.appendChild(notificationPanel);
+                }
+
+                if (profileDropdown) {
+                    document.body.appendChild(profileDropdown);
+                }
+
+                if (headerStyle) {
+                    document.head.appendChild(headerStyle);
+                }
+
+                if (headerScript) {
+                    const script = document.createElement('script');
+                    script.textContent = headerScript.textContent;
+                    document.body.appendChild(script);
+                }
+
+                console.log('Header loaded and script executed');
+            })
+            .catch(error => console.error('Error loading header:', error));
+    </script>
+
+    <!-- Page-specific functionality -->
+    <script>
+        // Multi-Step Form Navigation
+        let currentStep = 1;
+        const totalSteps = 7;
+        const formData = {};
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function () {
+            updateStepDisplay();
+            initializeValidation();
+            initializePhotoUpload();
+            initializeFormatting();
+            initializeAgeCalculation();
+            initializeAadharFormatting();
+        });
+
+        // Auto-calculate age from date of birth
+        function initializeAgeCalculation() {
+            const dobInput = document.getElementById('dateOfBirth');
+            const ageInput = document.getElementById('age');
+
+            if (dobInput && ageInput) {
+                dobInput.addEventListener('change', function () {
+                    const dob = new Date(this.value);
+                    const today = new Date();
+
+                    if (!isNaN(dob.getTime()) && dob < today) {
+                        let age = today.getFullYear() - dob.getFullYear();
+                        const monthDiff = today.getMonth() - dob.getMonth();
+                        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+                            age--;
+                        }
+                        ageInput.value = age + ' years';
+                    } else {
+                        ageInput.value = '';
+                    }
+                });
+            }
+        }
+
+        // Aadhar number formatting (XXXX XXXX XXXX)
+        function initializeAadharFormatting() {
+            const aadharInput = document.getElementById('aadharNumber');
+            if (aadharInput) {
+                aadharInput.addEventListener('input', function (e) {
+                    let value = e.target.value.replace(/\D/g, '');
+                    if (value.length > 12) {
+                        value = value.slice(0, 12);
+                    }
+                    // Format as XXXX XXXX XXXX
+                    let formatted = '';
+                    for (let i = 0; i < value.length; i++) {
+                        if (i > 0 && i % 4 === 0) {
+                            formatted += ' ';
+                        }
+                        formatted += value[i];
+                    }
+                    e.target.value = formatted;
+                });
+            }
+        }
+
+        // Navigation Functions
+        function updateStepDisplay() {
+            // Hide all steps
+            for (let i = 1; i <= totalSteps; i++) {
+                const stepContent = document.getElementById(`step${i}`);
+                if (stepContent) {
+                    stepContent.style.display = 'none';
+                }
+            }
+
+            // Show current step
+            const currentStepElement = document.getElementById(`step${currentStep}`);
+            if (currentStepElement) {
+                currentStepElement.style.display = 'block';
+            }
+
+            // Update stepper UI
+            document.querySelectorAll('.step').forEach((step, index) => {
+                step.classList.remove('active', 'completed');
+                if (index + 1 < currentStep) {
+                    step.classList.add('completed');
+                } else if (index + 1 === currentStep) {
+                    step.classList.add('active');
+                }
+            });
+
+            // Update buttons
+            const backBtn = document.getElementById('backBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const submitBtn = document.getElementById('submitBtn');
+
+            backBtn.style.display = currentStep > 1 ? 'inline-flex' : 'none';
+            nextBtn.style.display = currentStep < totalSteps ? 'inline-flex' : 'none';
+            submitBtn.style.display = currentStep === totalSteps ? 'inline-flex' : 'none';
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Next Button Handler
+        document.getElementById('nextBtn').addEventListener('click', function () {
+            if (validateCurrentStep()) {
+                saveCurrentStepData();
+                if (currentStep < totalSteps) {
+                    currentStep++;
+                    updateStepDisplay();
+                }
+            }
+        });
+
+        // Back Button Handler
+        document.getElementById('backBtn').addEventListener('click', function () {
+            if (currentStep > 1) {
+                currentStep--;
+                updateStepDisplay();
+            }
+        });
+
+        // Step Click Handler (allow clicking on completed steps)
+        document.querySelectorAll('.step').forEach((step, index) => {
+            step.addEventListener('click', function () {
+                const stepNumber = index + 1;
+                if (stepNumber < currentStep || stepNumber === currentStep) {
+                    currentStep = stepNumber;
+                    updateStepDisplay();
+                }
+            });
+        });
+
+        // Validation Functions
+        function validateCurrentStep() {
+            const currentStepElement = document.getElementById(`step${currentStep}`);
+            const allInputs = currentStepElement.querySelectorAll('input, select, textarea');
+            let isValid = true;
+
+            // Validate all fields (required and optional)
+            allInputs.forEach(input => {
+                const fieldId = input.id;
+
+                // Skip file inputs and fields without validators
+                if (input.type === 'file' || !validators[fieldId]) {
+                    return;
+                }
+
+                // For required fields
+                if (input.hasAttribute('required')) {
+                    const error = validators[fieldId].validate(input.value);
+                    if (error) {
+                        showError(fieldId, error);
+                        isValid = false;
+                    } else {
+                        clearError(fieldId);
+                    }
+                } else {
+                    // For optional fields - only validate if they have a value
+                    if (input.value && input.value.trim() !== '') {
+                        const error = validators[fieldId].validate(input.value);
+                        if (error) {
+                            showError(fieldId, error);
+                            isValid = false;
+                        } else {
+                            clearError(fieldId);
+                        }
+                    } else {
+                        clearError(fieldId);
+                    }
+                }
+            });
+
+            if (!isValid) {
+                const firstError = currentStepElement.querySelector('.form-input.error, .form-textarea.error, .form-select.error');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstError.focus();
+                }
+            }
+
+            return isValid;
+        }
+
+        function saveCurrentStepData() {
+            const currentStepElement = document.getElementById(`step${currentStep}`);
+            const inputs = currentStepElement.querySelectorAll('input, select, textarea');
+
+            inputs.forEach(input => {
+                if (input.name && input.type !== 'file') {
+                    formData[input.name] = input.value;
+                }
+            });
+        }
+
+        function showError(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            const errorElement = document.getElementById(`${fieldId}Error`);
+
+            if (field) {
+                field.classList.add('error');
+            }
+
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.style.display = 'block';
+            }
+        }
+
+        function clearError(fieldId) {
+            const field = document.getElementById(fieldId);
+            const errorElement = document.getElementById(`${fieldId}Error`);
+
+            if (field) {
+                field.classList.remove('error');
+            }
+
+            if (errorElement) {
+                errorElement.textContent = '';
+                errorElement.style.display = 'none';
+            }
+        }
+
+        // Validators
+        const validators = {
+            firstName: {
+                validate: (value) => {
+                    if (!value.trim()) return 'First name is required';
+                    if (value.trim().length < 2) return 'First name must be at least 2 characters';
+                    if (value.trim().length > 50) return 'First name cannot exceed 50 characters';
+                    if (!/^[a-zA-Z\s]+$/.test(value)) return 'First name can only contain letters';
+                    return '';
+                }
+            },
+            lastName: {
+                validate: (value) => {
+                    if (!value.trim()) return 'Last name is required';
+                    if (value.trim().length < 2) return 'Last name must be at least 2 characters';
+                    if (value.trim().length > 50) return 'Last name cannot exceed 50 characters';
+                    if (!/^[a-zA-Z\s]+$/.test(value)) return 'Last name can only contain letters';
+                    return '';
+                }
+            },
+            dateOfBirth: {
+                validate: (value) => {
+                    if (!value) return 'Date of birth is required';
+                    const dob = new Date(value);
+                    const today = new Date();
+
+                    // Check if date is valid
+                    if (isNaN(dob.getTime())) return 'Please enter a valid date';
+
+                    // Check if date is not in the future
+                    if (dob > today) return 'Date of birth cannot be in the future';
+
+                    // Calculate age
+                    let age = today.getFullYear() - dob.getFullYear();
+                    const monthDiff = today.getMonth() - dob.getMonth();
+                    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+                        age--;
+                    }
+
+                    if (age < 5) return 'Student must be at least 5 years old';
+                    if (age > 25) return 'Student age cannot exceed 25 years';
+                    return '';
+                }
+            },
+            gender: {
+                validate: (value) => {
+                    if (!value || value === '') return 'Gender is required';
+                    return '';
+                }
+            },
+            bloodGroup: {
+                validate: (value) => {
+                    // Optional field - only validate if value is provided
+                    if (value && value !== '' && !['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].includes(value)) {
+                        return 'Please select a valid blood group';
+                    }
+                    return '';
+                }
+            },
+            email: {
+                validate: (value) => {
+                    // Optional field - only validate if value is provided
+                    if (!value || value.trim() === '') return '';
+
+                    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                    if (!emailRegex.test(value)) {
+                        return 'Please enter a valid email address';
+                    }
+
+                    if (value.length > 100) return 'Email cannot exceed 100 characters';
+                    return '';
+                }
+            },
+            phone: {
+                validate: (value) => {
+                    // Optional field - only validate if value is provided
+                    if (!value || value.trim() === '') return '';
+
+                    const cleanPhone = value.replace(/\D/g, '');
+                    if (cleanPhone.length !== 10) {
+                        return 'Phone number must be exactly 10 digits';
+                    }
+                    if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+                        return 'Please enter a valid Indian mobile number';
+                    }
+                    return '';
+                }
+            },
+            admissionDate: {
+                validate: (value) => {
+                    if (!value) return 'Admission date is required';
+
+                    const admissionDate = new Date(value);
+                    const today = new Date();
+
+                    if (isNaN(admissionDate.getTime())) return 'Please enter a valid date';
+
+                    // Admission date should not be more than 1 year in the future
+                    const oneYearFromNow = new Date(today.getFullYear() + 1, today.getMonth(), today.getDate());
+                    if (admissionDate > oneYearFromNow) {
+                        return 'Admission date cannot be more than 1 year in the future';
+                    }
+
+                    return '';
+                }
+            },
+            class: {
+                validate: (value) => {
+                    if (!value || value === '') return 'Class is required';
+                    return '';
+                }
+            },
+            section: {
+                validate: (value) => {
+                    if (!value || value === '') return 'Section is required';
+                    return '';
+                }
+            },
+            rollNumber: {
+                validate: (value) => {
+                    if (!value.trim()) return 'Roll number is required';
+                    if (value.trim().length < 1) return 'Roll number is required';
+                    if (value.trim().length > 20) return 'Roll number cannot exceed 20 characters';
+                    if (!/^[a-zA-Z0-9-]+$/.test(value)) return 'Roll number can only contain letters, numbers, and hyphens';
+                    return '';
+                }
+            },
+            previousSchool: {
+                validate: (value) => {
+                    // Optional field - only validate if value is provided
+                    if (!value || value.trim() === '') return '';
+
+                    if (value.trim().length < 3) return 'School name must be at least 3 characters';
+                    if (value.trim().length > 200) return 'School name cannot exceed 200 characters';
+                    return '';
+                }
+            },
+            fatherName: {
+                validate: (value) => {
+                    if (!value.trim()) return 'Father\'s name is required';
+                    if (value.trim().length < 2) return 'Name must be at least 2 characters';
+                    if (value.trim().length > 100) return 'Name cannot exceed 100 characters';
+                    if (!/^[a-zA-Z\s.]+$/.test(value)) return 'Name can only contain letters, spaces, and periods';
+                    return '';
+                }
+            },
+            fatherOccupation: {
+                validate: (value) => {
+                    // Optional field - only validate if value is provided
+                    if (!value || value.trim() === '') return '';
+
+                    if (value.trim().length < 2) return 'Occupation must be at least 2 characters';
+                    if (value.trim().length > 100) return 'Occupation cannot exceed 100 characters';
+                    return '';
+                }
+            },
+            fatherPhone: {
+                validate: (value) => {
+                    if (!value || value.trim() === '') return 'Father\'s phone is required';
+
+                    const cleanPhone = value.replace(/\D/g, '');
+                    if (cleanPhone.length !== 10) {
+                        return 'Phone number must be exactly 10 digits';
+                    }
+                    if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+                        return 'Please enter a valid Indian mobile number';
+                    }
+                    return '';
+                }
+            },
+            fatherEmail: {
+                validate: (value) => {
+                    // Optional field - only validate if value is provided
+                    if (!value || value.trim() === '') return '';
+
+                    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                    if (!emailRegex.test(value)) {
+                        return 'Please enter a valid email address';
+                    }
+
+                    if (value.length > 100) return 'Email cannot exceed 100 characters';
+                    return '';
+                }
+            },
+            motherName: {
+                validate: (value) => {
+                    if (!value.trim()) return 'Mother\'s name is required';
+                    if (value.trim().length < 2) return 'Name must be at least 2 characters';
+                    if (value.trim().length > 100) return 'Name cannot exceed 100 characters';
+                    if (!/^[a-zA-Z\s.]+$/.test(value)) return 'Name can only contain letters, spaces, and periods';
+                    return '';
+                }
+            },
+            motherOccupation: {
+                validate: (value) => {
+                    // Optional field - only validate if value is provided
+                    if (!value || value.trim() === '') return '';
+
+                    if (value.trim().length < 2) return 'Occupation must be at least 2 characters';
+                    if (value.trim().length > 100) return 'Occupation cannot exceed 100 characters';
+                    return '';
+                }
+            },
+            motherPhone: {
+                validate: (value) => {
+                    if (!value || value.trim() === '') return 'Mother\'s phone is required';
+
+                    const cleanPhone = value.replace(/\D/g, '');
+                    if (cleanPhone.length !== 10) {
+                        return 'Phone number must be exactly 10 digits';
+                    }
+                    if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+                        return 'Please enter a valid Indian mobile number';
+                    }
+                    return '';
+                }
+            },
+            motherEmail: {
+                validate: (value) => {
+                    // Optional field - only validate if value is provided
+                    if (!value || value.trim() === '') return '';
+
+                    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                    if (!emailRegex.test(value)) {
+                        return 'Please enter a valid email address';
+                    }
+
+                    if (value.length > 100) return 'Email cannot exceed 100 characters';
+                    return '';
+                }
+            },
+            guardianName: {
+                validate: (value) => {
+                    // Optional field - only validate if value is provided
+                    if (!value || value.trim() === '') return '';
+
+                    if (value.trim().length < 2) return 'Name must be at least 2 characters';
+                    if (value.trim().length > 100) return 'Name cannot exceed 100 characters';
+                    if (!/^[a-zA-Z\s.]+$/.test(value)) return 'Name can only contain letters, spaces, and periods';
+                    return '';
+                }
+            },
+            guardianRelation: {
+                validate: (value) => {
+                    // Optional field - only validate if value is provided
+                    if (!value || value.trim() === '') return '';
+
+                    if (value.trim().length < 2) return 'Relation must be at least 2 characters';
+                    if (value.trim().length > 50) return 'Relation cannot exceed 50 characters';
+                    if (!/^[a-zA-Z\s]+$/.test(value)) return 'Relation can only contain letters';
+                    return '';
+                }
+            },
+            guardianPhone: {
+                validate: (value) => {
+                    // Optional field - only validate if value is provided
+                    if (!value || value.trim() === '') return '';
+
+                    const cleanPhone = value.replace(/\D/g, '');
+                    if (cleanPhone.length !== 10) {
+                        return 'Phone number must be exactly 10 digits';
+                    }
+                    if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+                        return 'Please enter a valid Indian mobile number';
+                    }
+                    return '';
+                }
+            },
+            emergencyContact: {
+                validate: (value) => {
+                    if (!value || value.trim() === '') return 'Emergency contact is required';
+
+                    const cleanPhone = value.replace(/\D/g, '');
+                    if (cleanPhone.length !== 10) {
+                        return 'Phone number must be exactly 10 digits';
+                    }
+                    if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+                        return 'Please enter a valid Indian mobile number';
+                    }
+                    return '';
+                }
+            },
+            address: {
+                validate: (value) => {
+                    if (!value.trim()) return 'Address is required';
+                    if (value.trim().length < 5) return 'Address must be at least 5 characters';
+                    if (value.trim().length > 200) return 'Address cannot exceed 200 characters';
+                    return '';
+                }
+            },
+            address2: {
+                validate: (value) => {
+                    // Optional field - only validate if value is provided
+                    if (!value || value.trim() === '') return '';
+
+                    if (value.trim().length > 200) return 'Address cannot exceed 200 characters';
+                    return '';
+                }
+            },
+            city: {
+                validate: (value) => {
+                    if (!value.trim()) return 'City is required';
+                    if (value.trim().length < 2) return 'City name must be at least 2 characters';
+                    if (value.trim().length > 100) return 'City name cannot exceed 100 characters';
+                    if (!/^[a-zA-Z\s]+$/.test(value)) return 'City can only contain letters';
+                    return '';
+                }
+            },
+            state: {
+                validate: (value) => {
+                    if (!value.trim()) return 'State is required';
+                    if (value.trim().length < 2) return 'State name must be at least 2 characters';
+                    if (value.trim().length > 100) return 'State name cannot exceed 100 characters';
+                    if (!/^[a-zA-Z\s]+$/.test(value)) return 'State can only contain letters';
+                    return '';
+                }
+            },
+            pinCode: {
+                validate: (value) => {
+                    if (!value.trim()) return 'PIN code is required';
+                    const cleanPin = value.replace(/\D/g, '');
+                    if (!/^\d{6}$/.test(cleanPin)) return 'PIN code must be exactly 6 digits';
+                    if (cleanPin === '000000') return 'Please enter a valid PIN code';
+                    return '';
+                }
+            },
+            country: {
+                validate: (value) => {
+                    if (!value || value === '') return 'Country is required';
+                    return '';
+                }
+            },
+            medicalConditions: {
+                validate: (value) => {
+                    // Optional field - only validate if value is provided
+                    if (!value || value.trim() === '') return '';
+
+                    if (value.trim().length > 1000) return 'Medical conditions cannot exceed 1000 characters';
+                    return '';
+                }
+            },
+            medications: {
+                validate: (value) => {
+                    // Optional field - only validate if value is provided
+                    if (!value || value.trim() === '') return '';
+
+                    if (value.trim().length > 1000) return 'Medications cannot exceed 1000 characters';
+                    return '';
+                }
+            },
+            specialNeeds: {
+                validate: (value) => {
+                    // Optional field - only validate if value is provided
+                    if (!value || value.trim() === '') return '';
+
+                    if (value.trim().length > 1000) return 'Special needs cannot exceed 1000 characters';
+                    return '';
+                }
+            },
+            additionalNotes: {
+                validate: (value) => {
+                    // Optional field - only validate if value is provided
+                    if (!value || value.trim() === '') return '';
+
+                    if (value.trim().length > 2000) return 'Additional notes cannot exceed 2000 characters';
+                    return '';
+                }
+            }
+        };
+
+        // Initialize Validation
+        function initializeValidation() {
+            Object.keys(validators).forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    // Validate on blur
+                    field.addEventListener('blur', function () {
+                        const error = validators[fieldId].validate(this.value);
+                        if (error) {
+                            showError(fieldId, error);
+                        } else {
+                            clearError(fieldId);
+                        }
+                    });
+
+                    // Clear error on input
+                    field.addEventListener('input', function () {
+                        if (this.classList.contains('error')) {
+                            const error = validators[fieldId].validate(this.value);
+                            if (!error) {
+                                clearError(fieldId);
+                            }
+                        }
+                    });
+                }
+            });
+        }
+
+        // Photo Upload Functionality
+        function initializePhotoUpload() {
+            const uploadPhotoBtn = document.getElementById('uploadPhotoBtn');
+            const studentPhoto = document.getElementById('studentPhoto');
+            const photoPreview = document.getElementById('photoPreview');
+
+            if (uploadPhotoBtn && studentPhoto && photoPreview) {
+                uploadPhotoBtn.addEventListener('click', function () {
+                    studentPhoto.click();
+                });
+
+                studentPhoto.addEventListener('change', function (e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        // Validate file type
+                        const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+                        if (!validTypes.includes(file.type)) {
+                            alert('Please upload a valid image file (JPEG, PNG, GIF, or WebP)');
+                            studentPhoto.value = '';
+                            return;
+                        }
+
+                        // Validate file size (2MB = 2 * 1024 * 1024 bytes)
+                        const maxSize = 2 * 1024 * 1024;
+                        if (file.size > maxSize) {
+                            alert('File size should not exceed 2MB. Your file is ' + (file.size / (1024 * 1024)).toFixed(2) + 'MB');
+                            studentPhoto.value = '';
+                            return;
+                        }
+
+                        // Validate minimum file size (10KB to avoid too small images)
+                        const minSize = 10 * 1024;
+                        if (file.size < minSize) {
+                            alert('File size is too small. Please upload a clearer image (minimum 10KB)');
+                            studentPhoto.value = '';
+                            return;
+                        }
+
+                        // Create an image object to validate dimensions
+                        const img = new Image();
+                        const objectUrl = URL.createObjectURL(file);
+
+                        img.onload = function () {
+                            // Validate minimum dimensions
+                            const minWidth = 200;
+                            const minHeight = 200;
+
+                            if (img.width < minWidth || img.height < minHeight) {
+                                alert(`Image dimensions are too small. Minimum size is ${minWidth}x${minHeight} pixels. Your image is ${img.width}x${img.height} pixels.`);
+                                studentPhoto.value = '';
+                                URL.revokeObjectURL(objectUrl);
+                                return;
+                            }
+
+                            // Validate maximum dimensions
+                            const maxWidth = 5000;
+                            const maxHeight = 5000;
+
+                            if (img.width > maxWidth || img.height > maxHeight) {
+                                alert(`Image dimensions are too large. Maximum size is ${maxWidth}x${maxHeight} pixels. Your image is ${img.width}x${img.height} pixels.`);
+                                studentPhoto.value = '';
+                                URL.revokeObjectURL(objectUrl);
+                                return;
+                            }
+
+                            // All validations passed - show preview
+                            const reader = new FileReader();
+                            reader.onload = function (event) {
+                                photoPreview.style.backgroundImage = `url(${event.target.result})`;
+                                photoPreview.style.backgroundSize = 'cover';
+                                photoPreview.style.backgroundPosition = 'center';
+                                photoPreview.innerHTML = '';
+                            };
+                            reader.readAsDataURL(file);
+
+                            URL.revokeObjectURL(objectUrl);
+                        };
+
+                        img.onerror = function () {
+                            alert('Failed to load image. Please try a different file.');
+                            studentPhoto.value = '';
+                            URL.revokeObjectURL(objectUrl);
+                        };
+
+                        img.src = objectUrl;
+                    }
+                });
+            }
+        }
+
+        // Auto-generate Student ID
+        function generateStudentID() {
+            const year = new Date().getFullYear();
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let id = 'STU' + year;
+            for (let i = 0; i < 6; i++) {
+                id += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            return id;
+        }
+
+        // Form Submission
+        document.getElementById('addStudentForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            if (validateCurrentStep()) {
+                saveCurrentStepData();
+
+                // Generate Student ID
+                const studentID = generateStudentID();
+                document.getElementById('studentID').value = studentID;
+                formData.studentID = studentID;
+
+                console.log('Student Data:', formData);
+
+                // Show success message
+                alert(`Student added successfully!\n\nStudent ID: ${studentID}\nName: ${formData.firstName} ${formData.lastName}`);
+
+                // Redirect or reset
+                if (confirm('Do you want to add another student?')) {
+                    resetForm();
+                } else {
+                    // Redirect to student list
+                    window.location.href = 'student-list.html';
+                }
+            }
+        });
+
+        // Reset Form
+        function resetForm() {
+            document.getElementById('addStudentForm').reset();
+
+            // Reset photo preview
+            const photoPreview = document.getElementById('photoPreview');
+            if (photoPreview) {
+                photoPreview.style.backgroundImage = '';
+                photoPreview.innerHTML = '<span class="material-symbols-outlined">add_a_photo</span><span class="photo-preview-text">Upload Photo</span>';
+            }
+
+            // Clear all errors
+            Object.keys(validators).forEach(fieldId => clearError(fieldId));
+
+            // Reset to first step
+            currentStep = 1;
+            updateStepDisplay();
+
+            // Clear form data
+            Object.keys(formData).forEach(key => delete formData[key]);
+        }
+
+        // Cancel Button
+        document.getElementById('cancelBtn').addEventListener('click', function () {
+            if (confirm('Are you sure you want to cancel? All unsaved data will be lost.')) {
+                resetForm();
+                // Or redirect to student list
+                // window.location.href = 'student-list.html';
+            }
+        });
+
+        // Input Formatting
+        function initializeFormatting() {
+            // Phone number formatting
+            const phoneInputs = document.querySelectorAll('input[type="tel"]');
+            phoneInputs.forEach(input => {
+                input.addEventListener('input', function (e) {
+                    let value = e.target.value.replace(/\D/g, '');
+                    if (value.length > 10) {
+                        value = value.slice(0, 10);
+                    }
+                    e.target.value = value;
+                });
+            });
+
+            // PIN code formatting
+            const pinCodeInput = document.getElementById('pinCode');
+            if (pinCodeInput) {
+                pinCodeInput.addEventListener('input', function (e) {
+                    let value = e.target.value.replace(/\D/g, '');
+                    if (value.length > 6) {
+                        value = value.slice(0, 6);
+                    }
+                    e.target.value = value;
+                });
+            }
+        }
+
+        // Keyboard Navigation
+        document.addEventListener('keydown', function (e) {
+            // Alt + Right Arrow - Next
+            if (e.altKey && e.key === 'ArrowRight') {
+                e.preventDefault();
+                if (currentStep < totalSteps) {
+                    document.getElementById('nextBtn').click();
+                }
+            }
+
+            // Alt + Left Arrow - Back
+            if (e.altKey && e.key === 'ArrowLeft') {
+                e.preventDefault();
+                if (currentStep > 1) {
+                    document.getElementById('backBtn').click();
+                }
+            }
+        });
+
+        // Auto Fill Form Functionality
+        function autoFillForm() {
+            // Step 1: Basic Information
+            document.getElementById('firstName').value = 'Arjun';
+            document.getElementById('middleName').value = 'Kumar';
+            document.getElementById('lastName').value = 'Patel';
+            document.getElementById('gender').value = 'male';
+            document.getElementById('dateOfBirth').value = '2010-05-20';
+            document.getElementById('nationality').value = 'Indian';
+            document.getElementById('motherTongue').value = 'Hindi';
+            document.getElementById('bloodGroup').value = 'O+';
+            document.getElementById('aadharNumber').value = '1234 5678 9012';
+
+            // Step 2: Academic Details
+            document.getElementById('schoolName').value = 'greenwood';
+            document.getElementById('schoolBranch').value = 'Main Campus';
+            document.getElementById('class').value = '8';
+            document.getElementById('division').value = 'A';
+            document.getElementById('rollNumber').value = '15';
+            document.getElementById('academicYear').value = '2024-2025';
+            document.getElementById('grNumber').value = 'GR20240815';
+            document.getElementById('previousSchool').value = 'Springfield Primary School';
+            document.getElementById('stream').value = 'na';
+            document.getElementById('schoolBoard').value = 'CBSE';
+
+            // Step 3: Contact Details
+            document.getElementById('studentMobile').value = '7890123456';
+            document.getElementById('schoolEmail').value = 'arjun.patel@greenwood.edu';
+            document.getElementById('personalEmail').value = 'arjun.patel@gmail.com';
+
+            // Step 4: Skill Lab Specific Details
+            document.getElementById('enrollmentDate').value = '2024-06-01';
+            document.getElementById('skillsEnrolled').value = 'Critical Thinking, Problem Solving, Communication';
+            document.getElementById('currentSkillLevel').value = 'intermediate';
+            document.getElementById('assignedTrainer').value = 'trainer1';
+            document.getElementById('batchTiming').value = 'Mon-Wed 10:00 AM - 12:00 PM';
+            document.getElementById('learningStyle').value = 'kinesthetic';
+            document.getElementById('interestsAptitude').value = 'Mathematics, Science, Robotics';
+            document.getElementById('preferredLanguage').value = 'english';
+            document.getElementById('attendanceStatus').value = 'active';
+
+            // Step 5: Health & Safety
+            document.getElementById('medicalConditions').value = 'Mild asthma';
+            document.getElementById('allergies').value = 'Peanuts, Dust';
+            document.getElementById('emergencyInstructions').value = 'Keep inhaler nearby. Contact parents immediately in case of breathing difficulty.';
+            document.getElementById('doctorName').value = 'Dr. Ramesh Gupta';
+            document.getElementById('doctorContact').value = '9012345678';
+            document.getElementById('physicalLimitations').value = 'Cannot participate in intense physical activities';
+
+            // Step 6: Emergency Contact
+            document.getElementById('emergencyName').value = 'Sunita Patel';
+            document.getElementById('emergencyRelationship').value = 'mother';
+            document.getElementById('emergencyMobile').value = '9876543210';
+            document.getElementById('emergencyAltMobile').value = '8765432109';
+            document.getElementById('emergencyAddress').value = '123 Green Avenue, Model Town, Delhi';
+
+            // Step 7: Family Details (Optional)
+            document.getElementById('sibling1Name').value = 'Ananya Patel';
+            document.getElementById('sibling1ClassSchool').value = 'Class 5, Greenwood High School';
+            document.getElementById('sibling1SkillLabId').value = 'SKL20240512';
+            document.getElementById('sibling2Name').value = 'Rohan Patel';
+            document.getElementById('sibling2ClassSchool').value = 'Class 11, Greenwood High School';
+            document.getElementById('sibling2SkillLabId').value = 'SKL20220315';
+
+            // Trigger age calculation
+            const dobInput = document.getElementById('dateOfBirth');
+            const event = new Event('change', { bubbles: true });
+            dobInput.dispatchEvent(event);
+
+            alert('Form auto-filled with dummy data!');
+        }
+
+        // Auto Fill Button Event Listener
+        document.getElementById('autoFillBtn').addEventListener('click', autoFillForm);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluations - IFT Jury</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap"
+        rel="stylesheet">
+
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #5E2A97;
+            --primary-hover: #7B3FB5;
+            --secondary-color: #DEDE50;
+            --background: #F7F7F7;
+            --white: #FFFFFF;
+            --text-dark: #222222;
+            --text-muted: #666666;
+            --border-color: #EEEEEE;
+            --success-color: #22c55e;
+            --warning-color: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--background);
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .content-area {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        /* Empty State */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 60vh;
+            text-align: center;
+            padding: 3rem 1.5rem;
+        }
+
+        .empty-state-icon {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, rgba(94, 42, 151, 0.1), rgba(222, 222, 80, 0.1));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .empty-state-icon .material-symbols-outlined {
+            font-size: 64px;
+            color: var(--primary-color);
+        }
+
+        .empty-state-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+        }
+
+        .empty-state-message {
+            font-size: 1.125rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            max-width: 500px;
+        }
+
+        .btn-primary-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.875rem 2rem;
+            background: var(--primary-color);
+            color: var(--white);
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 0.75rem;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(94, 42, 151, 0.25);
+        }
+
+        .btn-primary-action:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(94, 42, 151, 0.35);
+            color: var(--white);
+        }
+
+        .btn-primary-action .material-symbols-outlined {
+            font-size: 20px;
+        }
+
+        /* Evaluation State */
+        .evaluation-container {
+            display: none;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .evaluation-header {
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            margin-bottom: 1.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: var(--primary-color);
+        }
+
+        .back-link .material-symbols-outlined {
+            font-size: 18px;
+        }
+
+        .idea-title-main {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 0.75rem;
+        }
+
+        .idea-meta {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .meta-item .material-symbols-outlined {
+            font-size: 18px;
+            color: var(--primary-color);
+        }
+
+        .meta-value {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .idea-description {
+            font-size: 1rem;
+            color: var(--text-dark);
+            line-height: 1.6;
+            margin-top: 1rem;
+        }
+
+        /* Evaluation Form */
+        .evaluation-form {
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-section {
+            margin-bottom: 2.5rem;
+        }
+
+        .form-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .criteria-item {
+            margin-bottom: 2rem;
+        }
+
+        .criteria-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .criteria-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+
+        .criteria-name {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .criteria-weight {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            background: var(--background);
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.5rem;
+        }
+
+        .criteria-description {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .score-input-group {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .score-slider {
+            flex: 1;
+            height: 8px;
+            border-radius: 4px;
+            background: var(--border-color);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .score-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(94, 42, 151, 0.3);
+        }
+
+        .score-slider::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 8px rgba(94, 42, 151, 0.3);
+        }
+
+        .score-display {
+            min-width: 80px;
+            padding: 0.5rem 1rem;
+            background: var(--background);
+            border: 2px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-align: center;
+        }
+
+        /* Comments Section */
+        .comments-textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 0.75rem;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.875rem;
+            color: var(--text-dark);
+            resize: vertical;
+            transition: all 0.2s ease;
+        }
+
+        .comments-textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(94, 42, 151, 0.1);
+        }
+
+        .char-counter {
+            text-align: right;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        /* Shortlist Toggle */
+        .shortlist-section {
+            background: rgba(94, 42, 151, 0.05);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            border: 2px solid rgba(94, 42, 151, 0.1);
+        }
+
+        .shortlist-toggle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .shortlist-info h3 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .shortlist-info p {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 32px;
+        }
+
+        .toggle-switch input {
+            display: none;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #ccc;
+            border-radius: 32px;
+            transition: 0.3s;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 24px;
+            width: 24px;
+            left: 4px;
+            bottom: 4px;
+            background: white;
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background: var(--success-color);
+        }
+
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(28px);
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--border-color);
+        }
+
+        .btn-secondary {
+            padding: 0.875rem 2rem;
+            background: var(--white);
+            color: var(--text-dark);
+            font-size: 1rem;
+            font-weight: 600;
+            border: 2px solid var(--border-color);
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary:hover {
+            background: var(--background);
+            border-color: var(--primary-color);
+        }
+
+        .btn-submit {
+            padding: 0.875rem 2rem;
+            background: var(--primary-color);
+            color: var(--white);
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(94, 42, 151, 0.25);
+        }
+
+        .btn-submit:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(94, 42, 151, 0.35);
+        }
+
+        .btn-submit:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Total Score Display */
+        .total-score-card {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+            color: var(--white);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .total-score-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .total-score-value {
+            font-size: 3rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .total-score-max {
+            font-size: 1.25rem;
+            opacity: 0.8;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .content-area {
+                padding: 1rem;
+            }
+
+            .idea-title-main {
+                font-size: 1.5rem;
+            }
+
+            .idea-meta {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn-secondary,
+            .btn-submit {
+                width: 100%;
+            }
+
+            .shortlist-toggle {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar Container -->
+        <div id="sidebar-container"></div>
+
+        <div class="main-content">
+            <!-- Header Container -->
+            <div id="header-container"></div>
+
+            <!-- Main Content Area -->
+            <div class="content-area">
+                <!-- Empty State (Default) -->
+                <div id="emptyState" class="empty-state">
+                    <div class="empty-state-icon">
+                        <span class="material-symbols-outlined">assignment</span>
+                    </div>
+                    <h1 class="empty-state-title">No Idea Selected</h1>
+                    <p class="empty-state-message">
+                        Select an idea from Assigned Ideas to start evaluation.
+                    </p>
+                    <a href="assigned-ideas.html" class="btn-primary-action">
+                        <span class="material-symbols-outlined">arrow_forward</span>
+                        Go to Assigned Ideas
+                    </a>
+                </div>
+
+                <!-- Evaluation State (Hidden by default) -->
+                <div id="evaluationContainer" class="evaluation-container">
+                    <!-- Idea Header -->
+                    <div class="evaluation-header">
+                        <a href="assigned-ideas.html" class="back-link">
+                            <span class="material-symbols-outlined">arrow_back</span>
+                            Back to Assigned Ideas
+                        </a>
+
+                        <h1 class="idea-title-main" id="ideaTitle">Loading...</h1>
+
+                        <div class="idea-meta">
+                            <div class="meta-item">
+                                <span class="material-symbols-outlined">group</span>
+                                <span>Team: <span class="meta-value" id="teamName">-</span></span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="material-symbols-outlined">category</span>
+                                <span>Category: <span class="meta-value" id="category">-</span></span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="material-symbols-outlined">event</span>
+                                <span>Submitted: <span class="meta-value" id="submissionDate">-</span></span>
+                            </div>
+                        </div>
+
+                        <div class="idea-description" id="ideaDescription">
+                            Loading idea description...
+                        </div>
+                    </div>
+
+                    <!-- Evaluation Form -->
+                    <div class="evaluation-form">
+                        <!-- Total Score -->
+                        <div class="total-score-card">
+                            <div class="total-score-label">Total Score</div>
+                            <div class="total-score-value">
+                                <span id="totalScore">0</span><span class="total-score-max">/100</span>
+                            </div>
+                        </div>
+
+                        <!-- Evaluation Criteria -->
+                        <div class="form-section">
+                            <h2 class="section-title">Evaluation Criteria</h2>
+
+                            <!-- Criterion 1 -->
+                            <div class="criteria-item">
+                                <div class="criteria-header">
+                                    <div class="criteria-name">Innovation & Originality</div>
+                                    <div class="criteria-weight">Weight: 25%</div>
+                                </div>
+                                <p class="criteria-description">
+                                    How novel and unique is the idea? Does it offer a fresh perspective or solution?
+                                </p>
+                                <div class="score-input-group">
+                                    <input type="range" min="0" max="25" value="0" class="score-slider" id="score1"
+                                           oninput="updateScore(1, this.value)">
+                                    <div class="score-display" id="scoreDisplay1">0/25</div>
+                                </div>
+                            </div>
+
+                            <!-- Criterion 2 -->
+                            <div class="criteria-item">
+                                <div class="criteria-header">
+                                    <div class="criteria-name">Feasibility & Implementation</div>
+                                    <div class="criteria-weight">Weight: 25%</div>
+                                </div>
+                                <p class="criteria-description">
+                                    Is the idea practical and realistic? Can it be implemented with available resources?
+                                </p>
+                                <div class="score-input-group">
+                                    <input type="range" min="0" max="25" value="0" class="score-slider" id="score2"
+                                           oninput="updateScore(2, this.value)">
+                                    <div class="score-display" id="scoreDisplay2">0/25</div>
+                                </div>
+                            </div>
+
+                            <!-- Criterion 3 -->
+                            <div class="criteria-item">
+                                <div class="criteria-header">
+                                    <div class="criteria-name">Impact & Scalability</div>
+                                    <div class="criteria-weight">Weight: 25%</div>
+                                </div>
+                                <p class="criteria-description">
+                                    What is the potential impact? Can this idea be scaled to reach more people?
+                                </p>
+                                <div class="score-input-group">
+                                    <input type="range" min="0" max="25" value="0" class="score-slider" id="score3"
+                                           oninput="updateScore(3, this.value)">
+                                    <div class="score-display" id="scoreDisplay3">0/25</div>
+                                </div>
+                            </div>
+
+                            <!-- Criterion 4 -->
+                            <div class="criteria-item">
+                                <div class="criteria-header">
+                                    <div class="criteria-name">Presentation & Clarity</div>
+                                    <div class="criteria-weight">Weight: 25%</div>
+                                </div>
+                                <p class="criteria-description">
+                                    How well is the idea communicated? Is the proposal clear and well-structured?
+                                </p>
+                                <div class="score-input-group">
+                                    <input type="range" min="0" max="25" value="0" class="score-slider" id="score4"
+                                           oninput="updateScore(4, this.value)">
+                                    <div class="score-display" id="scoreDisplay4">0/25</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Comments Section -->
+                        <div class="form-section">
+                            <h2 class="section-title">Evaluation Comments</h2>
+                            <textarea class="comments-textarea" id="comments"
+                                      placeholder="Provide detailed feedback about this idea. What are its strengths and areas for improvement?"
+                                      maxlength="1000" oninput="updateCharCount()"></textarea>
+                            <div class="char-counter">
+                                <span id="charCount">0</span>/1000 characters
+                            </div>
+                        </div>
+
+                        <!-- Shortlist Section -->
+                        <div class="form-section">
+                            <h2 class="section-title">Shortlist Decision</h2>
+                            <div class="shortlist-section">
+                                <div class="shortlist-toggle">
+                                    <div class="shortlist-info">
+                                        <h3>Recommend for Shortlist</h3>
+                                        <p>Toggle to recommend this idea for the next round</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="shortlistToggle">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="action-buttons">
+                            <button type="button" class="btn-secondary" onclick="saveDraft()">
+                                Save Draft
+                            </button>
+                            <button type="button" class="btn-submit" onclick="submitEvaluation()">
+                                Submit Evaluation
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Load Sidebar and Header -->
+    <script>
+        // Load Sidebar
+        fetch('sidebar.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('sidebar-container').innerHTML = data;
+
+                // Set active sidebar menu item
+                setTimeout(() => {
+                    const currentPage = 'evaluations.html';
+                    const navItems = document.querySelectorAll('.nav-item');
+
+                    navItems.forEach(item => {
+                        const href = item.getAttribute('href');
+                        item.classList.remove('nav-item-active');
+
+                        const icon = item.querySelector('.material-symbols-outlined');
+                        if (icon) {
+                            icon.classList.remove('filled');
+                            icon.style.fontVariationSettings = "'FILL' 0";
+                        }
+
+                        if (href === currentPage) {
+                            item.classList.add('nav-item-active');
+                            if (icon) {
+                                icon.classList.add('filled');
+                                icon.style.fontVariationSettings = "'FILL' 1";
+                            }
+                        }
+                    });
+                }, 200);
+            })
+            .catch(error => console.error('Error loading sidebar:', error));
+
+        // Load Header
+        fetch('header.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('header-container').innerHTML = data;
+            })
+            .catch(error => console.error('Error loading header:', error));
+    </script>
+
+    <!-- Evaluation Logic -->
+    <script>
+        // Check if idea_id is present in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const ideaId = urlParams.get('idea_id');
+
+        // Mock data for demonstration
+        const mockIdeaData = {
+            'IFT-204': {
+                title: 'Solar-Powered Water Purifier',
+                team: 'Team AquaTech',
+                category: 'Sustainability & Environment',
+                date: 'Oct 24, 2023',
+                description: 'An innovative solar-powered water purification system designed for rural communities without access to clean drinking water. The system uses UV sterilization powered by solar panels, making it completely off-grid and sustainable.'
+            },
+            'IFT-198': {
+                title: 'AI Waste Sorter',
+                team: 'Green Mindset',
+                category: 'Tech Innovation',
+                date: 'Oct 22, 2023',
+                description: 'An AI-powered waste sorting system that automatically categorizes recyclables, compostables, and trash using computer vision and machine learning. This reduces contamination in recycling streams and increases efficiency.'
+            },
+            'IFT-211': {
+                title: 'Smart Irrigation System',
+                team: 'AgriVate',
+                category: 'AgriTech',
+                date: 'Oct 20, 2023',
+                description: 'An IoT-based smart irrigation system that optimizes water usage in agriculture by monitoring soil moisture, weather conditions, and crop requirements in real-time, reducing water waste by up to 40%.'
+            }
+        };
+
+        // Initialize page based on URL parameters
+        if (ideaId && mockIdeaData[ideaId]) {
+            // Show evaluation state
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('evaluationContainer').style.display = 'block';
+
+            // Populate idea data
+            const idea = mockIdeaData[ideaId];
+            document.getElementById('ideaTitle').textContent = idea.title;
+            document.getElementById('teamName').textContent = idea.team;
+            document.getElementById('category').textContent = idea.category;
+            document.getElementById('submissionDate').textContent = idea.date;
+            document.getElementById('ideaDescription').textContent = idea.description;
+        } else {
+            // Show empty state (default)
+            document.getElementById('emptyState').style.display = 'flex';
+            document.getElementById('evaluationContainer').style.display = 'none';
+        }
+
+        // Score update function
+        function updateScore(criteriaNum, value) {
+            const maxScore = 25;
+            document.getElementById(`scoreDisplay${criteriaNum}`).textContent = `${value}/${maxScore}`;
+
+            // Calculate total score
+            let total = 0;
+            for (let i = 1; i <= 4; i++) {
+                total += parseInt(document.getElementById(`score${i}`).value);
+            }
+            document.getElementById('totalScore').textContent = total;
+        }
+
+        // Character count update
+        function updateCharCount() {
+            const comments = document.getElementById('comments').value;
+            document.getElementById('charCount').textContent = comments.length;
+        }
+
+        // Save draft function
+        function saveDraft() {
+            const evaluationData = {
+                ideaId: ideaId,
+                scores: {
+                    innovation: document.getElementById('score1').value,
+                    feasibility: document.getElementById('score2').value,
+                    impact: document.getElementById('score3').value,
+                    presentation: document.getElementById('score4').value
+                },
+                comments: document.getElementById('comments').value,
+                shortlist: document.getElementById('shortlistToggle').checked
+            };
+
+            // Save to localStorage
+            localStorage.setItem(`evaluation_draft_${ideaId}`, JSON.stringify(evaluationData));
+
+            // Show success message
+            showToast('Draft saved successfully', 'success');
+        }
+
+        // Submit evaluation function
+        function submitEvaluation() {
+            const evaluationData = {
+                ideaId: ideaId,
+                scores: {
+                    innovation: document.getElementById('score1').value,
+                    feasibility: document.getElementById('score2').value,
+                    impact: document.getElementById('score3').value,
+                    presentation: document.getElementById('score4').value
+                },
+                comments: document.getElementById('comments').value,
+                shortlist: document.getElementById('shortlistToggle').checked,
+                totalScore: document.getElementById('totalScore').textContent
+            };
+
+            // Validate
+            if (evaluationData.totalScore === '0') {
+                showToast('Please provide scores before submitting', 'warning');
+                return;
+            }
+
+            if (!evaluationData.comments || evaluationData.comments.trim().length < 20) {
+                showToast('Please provide detailed comments (minimum 20 characters)', 'warning');
+                return;
+            }
+
+            // In a real app, this would send data to the server
+            console.log('Submitting evaluation:', evaluationData);
+
+            // Remove draft from localStorage
+            localStorage.removeItem(`evaluation_draft_${ideaId}`);
+
+            // Show success and redirect
+            showToast('Evaluation submitted successfully', 'success');
+
+            setTimeout(() => {
+                window.location.href = 'assigned-ideas.html';
+            }, 1500);
+        }
+
+        // Toast notification function
+        function showToast(message, type = 'info') {
+            const colors = {
+                success: '#22c55e',
+                error: '#ef4444',
+                info: '#5E2A97',
+                warning: '#f59e0b'
+            };
+
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 24px;
+                right: 24px;
+                background: ${colors[type]};
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: 0.75rem;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+                z-index: 99999;
+                font-size: 0.875rem;
+                font-weight: 500;
+                font-family: 'Poppins', sans-serif;
+                animation: slideIn 0.3s ease;
+            `;
+
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Add CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(400px); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(400px); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Load draft if exists
+        if (ideaId) {
+            const draft = localStorage.getItem(`evaluation_draft_${ideaId}`);
+            if (draft) {
+                const data = JSON.parse(draft);
+                document.getElementById('score1').value = data.scores.innovation;
+                document.getElementById('score2').value = data.scores.feasibility;
+                document.getElementById('score3').value = data.scores.impact;
+                document.getElementById('score4').value = data.scores.presentation;
+                document.getElementById('comments').value = data.comments;
+                document.getElementById('shortlistToggle').checked = data.shortlist;
+
+                // Update displays
+                updateScore(1, data.scores.innovation);
+                updateScore(2, data.scores.feasibility);
+                updateScore(3, data.scores.impact);
+                updateScore(4, data.scores.presentation);
+                updateCharCount();
+
+                showToast('Draft loaded', 'info');
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,1620 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>My Profile - IFT Student Portal</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap"
+        rel="stylesheet" />
+
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+
+    <style>
+        :root {
+            --primary: #5E2A97;
+            --secondary: #DEDE50;
+            --primary-light: #E8D4F0;
+            --background-light: #F7F7F7;
+            --surface-light: #FFFFFF;
+            --border-light: #EEEEEE;
+            --text-dark: #222222;
+            --text-muted: #666666;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Layout */
+        .main-container {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+        }
+
+        /* Sidebar Container */
+        #sidebar-container {
+            flex-shrink: 0;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        /* Header Container */
+        #header-container {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .content-wrapper {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Page Header */
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+            line-height: 1.2;
+        }
+
+        .page-subtitle {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        /* Profile Header Card */
+        .profile-header-card {
+            background: linear-gradient(135deg, var(--primary) 0%, #7B3FB5 100%);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-header-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 400px;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+
+        .profile-header-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .profile-avatar-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .profile-avatar-large {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid white;
+            object-fit: cover;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .avatar-edit-overlay {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 36px;
+            height: 36px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 3px solid white;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .avatar-edit-overlay:hover {
+            background: #7B3FB5;
+            transform: scale(1.1);
+        }
+
+        .avatar-edit-overlay .material-symbols-outlined {
+            font-size: 18px;
+            color: white;
+        }
+
+        #avatarFileInput {
+            display: none;
+        }
+
+        .profile-header-info {
+            flex: 1;
+            color: white;
+        }
+
+        .profile-name {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-meta {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .profile-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .profile-meta-item .material-symbols-outlined {
+            font-size: 18px;
+        }
+
+        .profile-stats {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .profile-stat {
+            text-align: center;
+        }
+
+        .profile-stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: block;
+        }
+
+        .profile-stat-label {
+            font-size: 0.75rem;
+            opacity: 0.9;
+            display: block;
+        }
+
+        .btn-edit-profile {
+            padding: 0.75rem 1.5rem;
+            background: white;
+            color: var(--primary);
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-edit-profile:hover {
+            background: var(--secondary);
+            color: var(--text-dark);
+            transform: translateY(-2px);
+        }
+
+        /* Cards */
+        .profile-card {
+            background: var(--surface-light);
+            border: 1px solid var(--border-light);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-title .material-symbols-outlined {
+            color: var(--primary);
+        }
+
+        .btn-edit {
+            padding: 0.5rem 1rem;
+            background: none;
+            border: 1px solid var(--border-light);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-edit:hover {
+            background: var(--background-light);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Info Grid */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .info-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .info-value {
+            font-size: 0.9375rem;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        /* Achievement Badge */
+        .achievement-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .achievement-badge {
+            background: var(--background-light);
+            border: 1px solid var(--border-light);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .achievement-badge:hover {
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .achievement-icon {
+            width: 3rem;
+            height: 3rem;
+            background: rgba(94, 42, 151, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.75rem;
+            color: var(--primary);
+        }
+
+        .achievement-icon .material-symbols-outlined {
+            font-size: 28px;
+        }
+
+        .achievement-name {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .achievement-date {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Activity Timeline */
+        .activity-timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .activity-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--background-light);
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .activity-item:hover {
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .activity-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            background: rgba(94, 42, 151, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            flex-shrink: 0;
+        }
+
+        .activity-icon .material-symbols-outlined {
+            font-size: 20px;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-description {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Save Button */
+        .btn-save {
+            padding: 0.75rem 2rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(94, 42, 151, 0.3);
+        }
+
+        .btn-save:hover {
+            background: #7B3FB5;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(94, 42, 151, 0.4);
+        }
+
+        .btn-cancel {
+            padding: 0.75rem 2rem;
+            background: white;
+            color: var(--text-dark);
+            border: 1px solid var(--border-light);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-cancel:hover {
+            background: var(--background-light);
+            border-color: var(--text-muted);
+        }
+
+        /* Edit Mode Styles */
+        .edit-mode .info-grid {
+            gap: 1rem;
+        }
+
+        .edit-mode .info-item input,
+        .edit-mode .info-item select,
+        .edit-mode .info-item textarea {
+            width: 100%;
+            padding: 0.625rem 0.875rem;
+            border: 1px solid var(--border-light);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-dark);
+            background: white;
+            transition: all 0.2s ease;
+        }
+
+        .edit-mode .info-item input:focus,
+        .edit-mode .info-item select:focus,
+        .edit-mode .info-item textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(94, 42, 151, 0.1);
+        }
+
+        .edit-mode .info-item input.error,
+        .edit-mode .info-item select.error,
+        .edit-mode .info-item textarea.error {
+            border-color: #ef4444;
+        }
+
+        .edit-mode .info-item input.error:focus,
+        .edit-mode .info-item select.error:focus,
+        .edit-mode .info-item textarea.error:focus {
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        }
+
+        .error-message {
+            font-size: 0.75rem;
+            color: #ef4444;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .edit-actions {
+            display: none;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-light);
+        }
+
+        .edit-mode .edit-actions {
+            display: flex;
+        }
+
+        .edit-mode .info-value {
+            display: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .content-wrapper {
+                padding: 1rem;
+            }
+
+            .profile-header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .profile-meta,
+            .profile-stats {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .page-title {
+                font-size: 1.5rem;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-container">
+        <!-- Sidebar Container -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header Container -->
+            <div id="header-container"></div>
+
+            <!-- Page Content -->
+            <div class="content-wrapper">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <h1 class="page-title">My Profile</h1>
+                    <p class="page-subtitle">Manage your personal information and track your progress</p>
+                </div>
+
+                <!-- Profile Header Card -->
+                <div class="profile-header-card">
+                    <div class="profile-header-content">
+                        <div class="profile-avatar-wrapper">
+                            <img class="profile-avatar-large" id="profileAvatar"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAY6iaiuM97ukhXnkazQO4ZEzVdkIlgOyUQ0xIW_ZYSRjhORA4PvjrpGUSehGXjXjaRFLQ227P1dyOoIB5EmUt1fSgTZgJ9qdSUGdyS3RfS3dKbzonPwrp9ENytz14BwcvT_ooy5rrq8RdJUUJAGSM40jDW0kzhk0BmETKlnnf4iA8CZtLcqtXs89sn0ZToW5seXzTbLU3esfQXCgMSOr0Oe-sq-g6DuIYwgAGqg2xOV4hjJGirhWM8L7hk34VKsuti0EQYb5IehuM"
+                                alt="Profile Picture">
+                            <div class="avatar-edit-overlay" id="avatarEditBtn" title="Change profile picture">
+                                <span class="material-symbols-outlined">photo_camera</span>
+                            </div>
+                            <input type="file" id="avatarFileInput" accept="image/*">
+                        </div>
+                        <div class="profile-header-info">
+                            <h2 class="profile-name">Rohan Sharma</h2>
+                            <div class="profile-meta">
+                                <div class="profile-meta-item">
+                                    <span class="material-symbols-outlined">school</span>
+                                    <span>Grade 11 • Science Stream</span>
+                                </div>
+                                <div class="profile-meta-item">
+                                    <span class="material-symbols-outlined">location_on</span>
+                                    <span>Mumbai, Maharashtra</span>
+                                </div>
+                            </div>
+                            <div class="profile-stats">
+                                <div class="profile-stat">
+                                    <span class="profile-stat-value">1</span>
+                                    <span class="profile-stat-label">Ideas Submitted</span>
+                                </div>
+                                <div class="profile-stat">
+                                    <span class="profile-stat-value">3</span>
+                                    <span class="profile-stat-label">Team Members</span>
+                                </div>
+                                <div class="profile-stat">
+                                    <span class="profile-stat-value">2</span>
+                                    <span class="profile-stat-label">Achievements</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Two Column Layout -->
+                <div class="row">
+                    <!-- Left Column -->
+                    <div class="col-12 col-lg-8">
+                        <!-- Personal Information -->
+                        <div class="profile-card">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <span class="material-symbols-outlined">person</span>
+                                    Personal Information
+                                </h3>
+                                <button class="btn-edit">Edit</button>
+                            </div>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <span class="info-label">Full Name</span>
+                                    <span class="info-value">Rohan Sharma</span>
+                                    <input type="text" class="form-control" value="Rohan Sharma" data-field="fullName" required style="display: none;">
+                                    <span class="error-message" data-error="fullName"></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Email Address</span>
+                                    <span class="info-value">rohan.sharma@student.ift.org</span>
+                                    <input type="email" class="form-control" value="rohan.sharma@student.ift.org" data-field="email" required style="display: none;">
+                                    <span class="error-message" data-error="email"></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Phone Number</span>
+                                    <span class="info-value">+91 98765 43210</span>
+                                    <input type="tel" class="form-control" value="+91 98765 43210" data-field="phone" required style="display: none;">
+                                    <span class="error-message" data-error="phone"></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Date of Birth</span>
+                                    <span class="info-value">March 15, 2007</span>
+                                    <input type="date" class="form-control" value="2007-03-15" data-field="dob" required style="display: none;">
+                                    <span class="error-message" data-error="dob"></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Gender</span>
+                                    <span class="info-value">Male</span>
+                                    <select class="form-control" data-field="gender" required style="display: none;">
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                        <option value="Other">Other</option>
+                                        <option value="Prefer not to say">Prefer not to say</option>
+                                    </select>
+                                    <span class="error-message" data-error="gender"></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Student ID</span>
+                                    <span class="info-value">IFT-2024-STU-00145</span>
+                                </div>
+                            </div>
+                            <div class="edit-actions">
+                                <button class="btn-save" data-section="personal">Save Changes</button>
+                                <button class="btn-cancel" data-section="personal">Cancel</button>
+                            </div>
+                        </div>
+
+                        <!-- Academic Information -->
+                        <div class="profile-card">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <span class="material-symbols-outlined">school</span>
+                                    Academic Information
+                                </h3>
+                                <button class="btn-edit">Edit</button>
+                            </div>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <span class="info-label">School Name</span>
+                                    <span class="info-value">Delhi Public School, Mumbai</span>
+                                    <input type="text" class="form-control" value="Delhi Public School, Mumbai" data-field="schoolName" required style="display: none;">
+                                    <span class="error-message" data-error="schoolName"></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Current Grade</span>
+                                    <span class="info-value">Grade 11</span>
+                                    <select class="form-control" data-field="grade" required style="display: none;">
+                                        <option value="Grade 8">Grade 8</option>
+                                        <option value="Grade 9">Grade 9</option>
+                                        <option value="Grade 10">Grade 10</option>
+                                        <option value="Grade 11" selected>Grade 11</option>
+                                        <option value="Grade 12">Grade 12</option>
+                                    </select>
+                                    <span class="error-message" data-error="grade"></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Stream</span>
+                                    <span class="info-value">Science (PCM)</span>
+                                    <select class="form-control" data-field="stream" required style="display: none;">
+                                        <option value="Science (PCM)" selected>Science (PCM)</option>
+                                        <option value="Science (PCB)">Science (PCB)</option>
+                                        <option value="Commerce">Commerce</option>
+                                        <option value="Arts/Humanities">Arts/Humanities</option>
+                                        <option value="Not Applicable">Not Applicable</option>
+                                    </select>
+                                    <span class="error-message" data-error="stream"></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Academic Year</span>
+                                    <span class="info-value">2024-2025</span>
+                                    <input type="text" class="form-control" value="2024-2025" data-field="academicYear" required style="display: none;">
+                                    <span class="error-message" data-error="academicYear"></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Areas of Interest</span>
+                                    <span class="info-value">Technology, Innovation, Environment</span>
+                                    <input type="text" class="form-control" value="Technology, Innovation, Environment" data-field="interests" style="display: none;">
+                                    <span class="error-message" data-error="interests"></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Previous Competitions</span>
+                                    <span class="info-value">National Science Olympiad, Smart India Hackathon</span>
+                                    <input type="text" class="form-control" value="National Science Olympiad, Smart India Hackathon" data-field="competitions" style="display: none;">
+                                    <span class="error-message" data-error="competitions"></span>
+                                </div>
+                            </div>
+                            <div class="edit-actions">
+                                <button class="btn-save" data-section="academic">Save Changes</button>
+                                <button class="btn-cancel" data-section="academic">Cancel</button>
+                            </div>
+                        </div>
+
+                        <!-- Recent Activity -->
+                        <div class="profile-card">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <span class="material-symbols-outlined">history</span>
+                                    Recent Activity
+                                </h3>
+                            </div>
+                            <div class="activity-timeline">
+                                <div class="activity-item">
+                                    <div class="activity-icon">
+                                        <span class="material-symbols-outlined">upload</span>
+                                    </div>
+                                    <div class="activity-content">
+                                        <div class="activity-title">Submitted idea "Solar-Powered Water Purification"
+                                        </div>
+                                        <div class="activity-description">Your team submitted a new project idea for
+                                            evaluation</div>
+                                        <div class="activity-time">2 days ago</div>
+                                    </div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-icon">
+                                        <span class="material-symbols-outlined">group_add</span>
+                                    </div>
+                                    <div class="activity-content">
+                                        <div class="activity-title">Added new team member</div>
+                                        <div class="activity-description">Priya Singh joined your team as a developer
+                                        </div>
+                                        <div class="activity-time">5 days ago</div>
+                                    </div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-icon">
+                                        <span class="material-symbols-outlined">edit</span>
+                                    </div>
+                                    <div class="activity-content">
+                                        <div class="activity-title">Updated project documentation</div>
+                                        <div class="activity-description">Modified the pitch deck and added market
+                                            research data</div>
+                                        <div class="activity-time">1 week ago</div>
+                                    </div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-icon">
+                                        <span class="material-symbols-outlined">emoji_events</span>
+                                    </div>
+                                    <div class="activity-content">
+                                        <div class="activity-title">Earned achievement</div>
+                                        <div class="activity-description">Received "Team Builder" badge for forming a
+                                            complete team</div>
+                                        <div class="activity-time">2 weeks ago</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="col-12 col-lg-4">
+                        <!-- Achievements & Badges -->
+                        <div class="profile-card">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <span class="material-symbols-outlined">emoji_events</span>
+                                    Achievements
+                                </h3>
+                            </div>
+                            <div class="achievement-grid">
+                                <div class="achievement-badge">
+                                    <div class="achievement-icon">
+                                        <span class="material-symbols-outlined">rocket_launch</span>
+                                    </div>
+                                    <div class="achievement-name">Quick Starter</div>
+                                    <div class="achievement-date">Jan 2024</div>
+                                </div>
+                                <div class="achievement-badge">
+                                    <div class="achievement-icon">
+                                        <span class="material-symbols-outlined">group</span>
+                                    </div>
+                                    <div class="achievement-name">Team Builder</div>
+                                    <div class="achievement-date">Jan 2024</div>
+                                </div>
+                                <div class="achievement-badge">
+                                    <div class="achievement-icon">
+                                        <span class="material-symbols-outlined">lightbulb</span>
+                                    </div>
+                                    <div class="achievement-name">Innovator</div>
+                                    <div class="achievement-date">Feb 2024</div>
+                                </div>
+                                <div class="achievement-badge">
+                                    <div class="achievement-icon">
+                                        <span class="material-symbols-outlined">workspace_premium</span>
+                                    </div>
+                                    <div class="achievement-name">First Pitch</div>
+                                    <div class="achievement-date">Feb 2024</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contact Information -->
+                        <div class="profile-card">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <span class="material-symbols-outlined">contact_mail</span>
+                                    Contact Information
+                                </h3>
+                                <button class="btn-edit">Edit</button>
+                            </div>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <span class="info-label">Address</span>
+                                    <span class="info-value">123, Green Park Society, Andheri West, Mumbai - 400058
+                                    </span>
+                                    <textarea class="form-control" data-field="address" required style="display: none; resize: vertical; min-height: 60px;">123, Green Park Society, Andheri West, Mumbai - 400058</textarea>
+                                    <span class="error-message" data-error="address"></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">City</span>
+                                    <span class="info-value">Mumbai</span>
+                                    <input type="text" class="form-control" value="Mumbai" data-field="city" required style="display: none;">
+                                    <span class="error-message" data-error="city"></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">State</span>
+                                    <span class="info-value">Maharashtra</span>
+                                    <input type="text" class="form-control" value="Maharashtra" data-field="state" required style="display: none;">
+                                    <span class="error-message" data-error="state"></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">PIN Code</span>
+                                    <span class="info-value">400058</span>
+                                    <input type="text" class="form-control" value="400058" data-field="pincode" required pattern="[0-9]{6}" style="display: none;">
+                                    <span class="error-message" data-error="pincode"></span>
+                                </div>
+                            </div>
+                            <div class="edit-actions">
+                                <button class="btn-save" data-section="contact">Save Changes</button>
+                                <button class="btn-cancel" data-section="contact">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Load Sidebar -->
+    <script>
+        fetch('sidebar.html')
+            .then(response => response.text())
+            .then(data => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = data;
+
+                const sidebar = tempDiv.querySelector('aside');
+                const sidebarScript = tempDiv.querySelector('script');
+                const sidebarStyle = tempDiv.querySelector('style');
+
+                if (sidebar) {
+                    document.getElementById('sidebar-container').appendChild(sidebar);
+                }
+
+                if (sidebarStyle) {
+                    document.head.appendChild(sidebarStyle);
+                }
+
+                if (sidebarScript) {
+                    const script = document.createElement('script');
+                    script.textContent = sidebarScript.textContent;
+                    document.body.appendChild(script);
+                }
+
+                // Set active sidebar menu item after sidebar is loaded
+                setTimeout(() => {
+                    const currentPage = window.location.pathname.split('/').pop() || 'profile.html';
+                    const navItems = document.querySelectorAll('.nav-item');
+
+                    navItems.forEach(item => {
+                        const href = item.getAttribute('href');
+
+                        // Remove active class from all items first
+                        item.classList.remove('nav-item-active');
+
+                        // Find the icon and update fill state
+                        const icon = item.querySelector('.material-symbols-outlined');
+                        if (icon) {
+                            icon.classList.remove('filled');
+                            icon.style.fontVariationSettings = "'FILL' 0";
+                        }
+
+                        // Add active class to matching item (checking for My Profile link)
+                        if (href === currentPage || (currentPage === 'profile.html' && href === '#' && item.querySelector('.nav-text')?.textContent.trim() === 'My Profile')) {
+                            item.classList.add('nav-item-active');
+                            if (icon) {
+                                icon.classList.add('filled');
+                                icon.style.fontVariationSettings = "'FILL' 1";
+                            }
+                        }
+                    });
+
+                    console.log('Sidebar active menu item set for:', currentPage);
+                }, 200);
+            })
+            .catch(error => console.error('Error loading sidebar:', error));
+    </script>
+
+    <!-- Load Header -->
+    <script>
+        fetch('header.html')
+            .then(response => response.text())
+            .then(data => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = data;
+
+                // Extract and append all elements
+                const elements = tempDiv.childNodes;
+                elements.forEach(node => {
+                    if (node.nodeType === 1 || node.nodeType === 3) { // Element or Text node
+                        document.getElementById('header-container').appendChild(node.cloneNode(true));
+                    }
+                });
+
+                // Find and execute the script
+                const script = tempDiv.querySelector('script');
+                if (script) {
+                    const newScript = document.createElement('script');
+                    newScript.textContent = script.textContent;
+                    document.body.appendChild(newScript);
+                }
+            })
+            .catch(error => console.error('Error loading header:', error));
+    </script>
+
+    <!-- Profile Edit Functionality -->
+    <script>
+        (function() {
+            // Validation functions
+            const validators = {
+                fullName: (value) => {
+                    if (!value || value.trim() === '') {
+                        return 'Full name is required';
+                    }
+                    if (!/^[a-zA-Z\s]+$/.test(value)) {
+                        return 'Full name should contain only letters';
+                    }
+                    return null;
+                },
+                email: (value) => {
+                    if (!value || value.trim() === '') {
+                        return 'Email is required';
+                    }
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailRegex.test(value)) {
+                        return 'Please enter a valid email address';
+                    }
+                    return null;
+                },
+                phone: (value) => {
+                    if (!value || value.trim() === '') {
+                        return 'Phone number is required';
+                    }
+                    const phoneRegex = /^(\+91[\s]?)?[6-9]\d{9}$|^(\+91[\s]?)?[6-9]\d{4}[\s]?\d{5}$/;
+                    if (!phoneRegex.test(value.replace(/\s/g, ''))) {
+                        return 'Please enter a valid phone number';
+                    }
+                    return null;
+                },
+                dob: (value) => {
+                    if (!value || value.trim() === '') {
+                        return 'Date of birth is required';
+                    }
+                    const date = new Date(value);
+                    const today = new Date();
+                    if (date > today) {
+                        return 'Date of birth cannot be in the future';
+                    }
+                    return null;
+                },
+                gender: (value) => {
+                    if (!value || value.trim() === '') {
+                        return 'Gender is required';
+                    }
+                    return null;
+                },
+                schoolName: (value) => {
+                    if (!value || value.trim() === '') {
+                        return 'School name is required';
+                    }
+                    return null;
+                },
+                grade: (value) => {
+                    if (!value || value.trim() === '') {
+                        return 'Grade is required';
+                    }
+                    return null;
+                },
+                stream: (value) => {
+                    if (!value || value.trim() === '') {
+                        return 'Stream is required';
+                    }
+                    return null;
+                },
+                academicYear: (value) => {
+                    if (!value || value.trim() === '') {
+                        return 'Academic year is required';
+                    }
+                    const yearRegex = /^\d{4}-\d{4}$/;
+                    if (!yearRegex.test(value)) {
+                        return 'Please enter valid format (YYYY-YYYY)';
+                    }
+                    return null;
+                },
+                address: (value) => {
+                    if (!value || value.trim() === '') {
+                        return 'Address is required';
+                    }
+                    return null;
+                },
+                city: (value) => {
+                    if (!value || value.trim() === '') {
+                        return 'City is required';
+                    }
+                    if (!/^[a-zA-Z\s]+$/.test(value)) {
+                        return 'City should contain only letters';
+                    }
+                    return null;
+                },
+                state: (value) => {
+                    if (!value || value.trim() === '') {
+                        return 'State is required';
+                    }
+                    if (!/^[a-zA-Z\s]+$/.test(value)) {
+                        return 'State should contain only letters';
+                    }
+                    return null;
+                },
+                pincode: (value) => {
+                    if (!value || value.trim() === '') {
+                        return 'PIN code is required';
+                    }
+                    if (!/^\d{6}$/.test(value)) {
+                        return 'PIN code must be 6 digits';
+                    }
+                    return null;
+                }
+            };
+
+            // Helper function to format date for display
+            function formatDate(dateString) {
+                const date = new Date(dateString);
+                const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                return date.toLocaleDateString('en-US', options);
+            }
+
+            // Store original values for cancel functionality
+            let originalValues = {};
+
+            // Get all edit buttons
+            const editButtons = document.querySelectorAll('.btn-edit');
+
+            editButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const card = this.closest('.profile-card');
+                    const isEditMode = card.classList.contains('edit-mode');
+
+                    if (isEditMode) {
+                        // Exit edit mode without saving
+                        exitEditMode(card);
+                    } else {
+                        // Enter edit mode
+                        enterEditMode(card);
+                    }
+                });
+            });
+
+            function enterEditMode(card) {
+                // Store original values
+                originalValues = {};
+                const inputs = card.querySelectorAll('input[data-field], select[data-field], textarea[data-field]');
+                inputs.forEach(input => {
+                    const field = input.getAttribute('data-field');
+                    originalValues[field] = input.value;
+                });
+
+                // Add edit-mode class
+                card.classList.add('edit-mode');
+
+                // Show input fields and hide value spans
+                inputs.forEach(input => {
+                    input.style.display = 'block';
+                    const infoItem = input.closest('.info-item');
+                    const valueSpan = infoItem.querySelector('.info-value');
+                    if (valueSpan) {
+                        valueSpan.style.display = 'none';
+                    }
+                });
+
+                // Change button text
+                const editBtn = card.querySelector('.btn-edit');
+                if (editBtn) {
+                    editBtn.textContent = 'Cancel';
+                    editBtn.style.background = 'var(--background-light)';
+                }
+            }
+
+            function exitEditMode(card, saveChanges = false) {
+                const inputs = card.querySelectorAll('input[data-field], select[data-field], textarea[data-field]');
+
+                if (!saveChanges) {
+                    // Restore original values
+                    inputs.forEach(input => {
+                        const field = input.getAttribute('data-field');
+                        if (originalValues[field] !== undefined) {
+                            input.value = originalValues[field];
+                        }
+                    });
+                }
+
+                // Remove edit-mode class
+                card.classList.remove('edit-mode');
+
+                // Hide input fields and show value spans
+                inputs.forEach(input => {
+                    input.style.display = 'none';
+                    input.classList.remove('error');
+                    const infoItem = input.closest('.info-item');
+                    const valueSpan = infoItem.querySelector('.info-value');
+                    if (valueSpan) {
+                        valueSpan.style.display = 'block';
+                    }
+                    // Hide error messages
+                    const errorSpan = infoItem.querySelector('.error-message');
+                    if (errorSpan) {
+                        errorSpan.classList.remove('show');
+                        errorSpan.textContent = '';
+                    }
+                });
+
+                // Reset button text
+                const editBtn = card.querySelector('.btn-edit');
+                if (editBtn) {
+                    editBtn.textContent = 'Edit';
+                    editBtn.style.background = 'none';
+                }
+
+                // Clear original values
+                originalValues = {};
+            }
+
+            // Save button handlers
+            const saveButtons = document.querySelectorAll('.btn-save');
+            saveButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const section = this.getAttribute('data-section');
+                    const card = this.closest('.profile-card');
+
+                    // Validate all fields
+                    let isValid = true;
+                    const inputs = card.querySelectorAll('input[data-field], select[data-field], textarea[data-field]');
+
+                    inputs.forEach(input => {
+                        const field = input.getAttribute('data-field');
+                        const value = input.value;
+                        const infoItem = input.closest('.info-item');
+                        const errorSpan = infoItem.querySelector('.error-message');
+
+                        // Clear previous errors
+                        input.classList.remove('error');
+                        errorSpan.classList.remove('show');
+                        errorSpan.textContent = '';
+
+                        // Validate if validator exists
+                        if (validators[field]) {
+                            const errorMessage = validators[field](value);
+                            if (errorMessage) {
+                                isValid = false;
+                                input.classList.add('error');
+                                errorSpan.textContent = errorMessage;
+                                errorSpan.classList.add('show');
+                            }
+                        }
+                    });
+
+                    if (isValid) {
+                        // Update displayed values
+                        inputs.forEach(input => {
+                            const field = input.getAttribute('data-field');
+                            const value = input.value;
+                            const infoItem = input.closest('.info-item');
+                            const valueSpan = infoItem.querySelector('.info-value');
+
+                            if (valueSpan) {
+                                // Format date fields
+                                if (field === 'dob') {
+                                    valueSpan.textContent = formatDate(value);
+                                } else {
+                                    valueSpan.textContent = value;
+                                }
+                            }
+                        });
+
+                        // Exit edit mode
+                        exitEditMode(card, true);
+
+                        // Show success message
+                        showSuccessMessage(card);
+
+                        // Here you would typically send data to server
+                        console.log(`${section} section saved successfully`);
+                    } else {
+                        // Scroll to first error
+                        const firstError = card.querySelector('.error');
+                        if (firstError) {
+                            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            firstError.focus();
+                        }
+                    }
+                });
+            });
+
+            // Cancel button handlers
+            const cancelButtons = document.querySelectorAll('.btn-cancel');
+            cancelButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const card = this.closest('.profile-card');
+                    exitEditMode(card, false);
+                });
+            });
+
+            // Success message function
+            function showSuccessMessage(card) {
+                const successMsg = document.createElement('div');
+                successMsg.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: #10b981;
+                    color: white;
+                    padding: 1rem 1.5rem;
+                    border-radius: 0.5rem;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                    z-index: 1000;
+                    font-weight: 600;
+                    animation: slideIn 0.3s ease-out;
+                `;
+                successMsg.textContent = 'Changes saved successfully!';
+
+                document.body.appendChild(successMsg);
+
+                setTimeout(() => {
+                    successMsg.style.animation = 'slideOut 0.3s ease-out';
+                    setTimeout(() => {
+                        document.body.removeChild(successMsg);
+                    }, 300);
+                }, 3000);
+            }
+
+            // Add animation styles
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from {
+                        transform: translateX(400px);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                }
+                @keyframes slideOut {
+                    from {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                    to {
+                        transform: translateX(400px);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        })();
+    </script>
+
+    <!-- Avatar Edit Functionality -->
+    <script>
+        (function() {
+            const avatarEditBtn = document.getElementById('avatarEditBtn');
+            const avatarFileInput = document.getElementById('avatarFileInput');
+            const profileAvatar = document.getElementById('profileAvatar');
+
+            // Trigger file input when clicking the edit overlay
+            avatarEditBtn.addEventListener('click', function() {
+                avatarFileInput.click();
+            });
+
+            // Handle file selection
+            avatarFileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+
+                if (!file) {
+                    return;
+                }
+
+                // Validate file type
+                const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+                if (!validTypes.includes(file.type)) {
+                    showErrorMessage('Please select a valid image file (JPEG, PNG, GIF, or WebP)');
+                    avatarFileInput.value = '';
+                    return;
+                }
+
+                // Validate file size (max 5MB)
+                const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+                if (file.size > maxSize) {
+                    showErrorMessage('Image size must be less than 5MB');
+                    avatarFileInput.value = '';
+                    return;
+                }
+
+                // Preview the selected image
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    // Show confirmation dialog
+                    showAvatarPreview(event.target.result, file);
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // Show avatar preview with confirmation
+            function showAvatarPreview(imageUrl, file) {
+                // Create modal for preview
+                const modal = document.createElement('div');
+                modal.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.7);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 10000;
+                    animation: fadeIn 0.2s ease-out;
+                `;
+
+                modal.innerHTML = `
+                    <div style="
+                        background: white;
+                        border-radius: 1rem;
+                        padding: 2rem;
+                        max-width: 400px;
+                        width: 90%;
+                        text-align: center;
+                        animation: slideUp 0.3s ease-out;
+                    ">
+                        <h3 style="
+                            font-size: 1.25rem;
+                            font-weight: 700;
+                            color: var(--text-dark);
+                            margin-bottom: 1.5rem;
+                        ">Change Profile Picture</h3>
+
+                        <div style="
+                            width: 150px;
+                            height: 150px;
+                            margin: 0 auto 1.5rem;
+                            border-radius: 50%;
+                            overflow: hidden;
+                            border: 4px solid var(--primary);
+                            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                        ">
+                            <img src="${imageUrl}" alt="Preview" style="
+                                width: 100%;
+                                height: 100%;
+                                object-fit: cover;
+                            ">
+                        </div>
+
+                        <p style="
+                            font-size: 0.875rem;
+                            color: var(--text-muted);
+                            margin-bottom: 1.5rem;
+                        ">Do you want to use this image as your profile picture?</p>
+
+                        <div style="
+                            display: flex;
+                            gap: 0.75rem;
+                            justify-content: center;
+                        ">
+                            <button id="confirmAvatarBtn" style="
+                                padding: 0.75rem 1.5rem;
+                                background: var(--primary);
+                                color: white;
+                                border: none;
+                                border-radius: 0.5rem;
+                                font-size: 0.875rem;
+                                font-weight: 700;
+                                cursor: pointer;
+                                transition: all 0.2s ease;
+                                box-shadow: 0 4px 12px rgba(94, 42, 151, 0.3);
+                            ">Confirm</button>
+                            <button id="cancelAvatarBtn" style="
+                                padding: 0.75rem 1.5rem;
+                                background: white;
+                                color: var(--text-dark);
+                                border: 1px solid var(--border-light);
+                                border-radius: 0.5rem;
+                                font-size: 0.875rem;
+                                font-weight: 600;
+                                cursor: pointer;
+                                transition: all 0.2s ease;
+                            ">Cancel</button>
+                        </div>
+                    </div>
+                `;
+
+                document.body.appendChild(modal);
+
+                // Add hover effects
+                const confirmBtn = modal.querySelector('#confirmAvatarBtn');
+                const cancelBtn = modal.querySelector('#cancelAvatarBtn');
+
+                confirmBtn.addEventListener('mouseenter', function() {
+                    this.style.background = '#7B3FB5';
+                    this.style.transform = 'translateY(-2px)';
+                });
+                confirmBtn.addEventListener('mouseleave', function() {
+                    this.style.background = 'var(--primary)';
+                    this.style.transform = 'translateY(0)';
+                });
+
+                cancelBtn.addEventListener('mouseenter', function() {
+                    this.style.background = 'var(--background-light)';
+                });
+                cancelBtn.addEventListener('mouseleave', function() {
+                    this.style.background = 'white';
+                });
+
+                // Confirm button - update avatar
+                confirmBtn.addEventListener('click', function() {
+                    profileAvatar.src = imageUrl;
+                    document.body.removeChild(modal);
+                    showSuccessMessage('Profile picture updated successfully!');
+                    avatarFileInput.value = '';
+
+                    // Here you would typically upload the file to server
+                    console.log('Avatar file ready for upload:', file.name, file.size);
+                });
+
+                // Cancel button - close modal
+                cancelBtn.addEventListener('click', function() {
+                    document.body.removeChild(modal);
+                    avatarFileInput.value = '';
+                });
+
+                // Close on background click
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        document.body.removeChild(modal);
+                        avatarFileInput.value = '';
+                    }
+                });
+            }
+
+            // Error message function
+            function showErrorMessage(message) {
+                const errorMsg = document.createElement('div');
+                errorMsg.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: #ef4444;
+                    color: white;
+                    padding: 1rem 1.5rem;
+                    border-radius: 0.5rem;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                    z-index: 1000;
+                    font-weight: 600;
+                    animation: slideIn 0.3s ease-out;
+                `;
+                errorMsg.textContent = message;
+
+                document.body.appendChild(errorMsg);
+
+                setTimeout(() => {
+                    errorMsg.style.animation = 'slideOut 0.3s ease-out';
+                    setTimeout(() => {
+                        document.body.removeChild(errorMsg);
+                    }, 300);
+                }, 4000);
+            }
+
+            // Success message function
+            function showSuccessMessage(message) {
+                const successMsg = document.createElement('div');
+                successMsg.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: #10b981;
+                    color: white;
+                    padding: 1rem 1.5rem;
+                    border-radius: 0.5rem;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                    z-index: 1000;
+                    font-weight: 600;
+                    animation: slideIn 0.3s ease-out;
+                `;
+                successMsg.textContent = message;
+
+                document.body.appendChild(successMsg);
+
+                setTimeout(() => {
+                    successMsg.style.animation = 'slideOut 0.3s ease-out';
+                    setTimeout(() => {
+                        document.body.removeChild(successMsg);
+                    }, 300);
+                }, 3000);
+            }
+
+            // Add animation styles for modal
+            const modalStyle = document.createElement('style');
+            modalStyle.textContent = `
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                @keyframes slideUp {
+                    from {
+                        transform: translateY(30px);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateY(0);
+                        opacity: 1;
+                    }
+                }
+            `;
+            document.head.appendChild(modalStyle);
+        })();
+    </script>
+</body>
+
+</html>

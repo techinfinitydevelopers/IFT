@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Idea - IFT</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap"
+        rel="stylesheet">
+
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #5E2A97;
+            --primary-hover: #7B3FB5;
+            --secondary-color: #DEDE50;
+            --background: #F7F7F7;
+            --white: #FFFFFF;
+            --text-dark: #222222;
+            --text-muted: #666666;
+            --border-color: #EEEEEE;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--background);
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .content-area {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb-nav {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .breadcrumb-nav a {
+            color: #999999;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .breadcrumb-nav a:hover {
+            color: var(--primary-color);
+        }
+
+        .breadcrumb-nav .material-symbols-outlined {
+            font-size: 16px;
+            color: #CCCCCC;
+        }
+
+        .breadcrumb-nav .current {
+            color: var(--text-dark);
+        }
+
+        /* Page Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+            gap: 1rem;
+        }
+
+        .page-title-section h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-title-section p {
+            font-size: 0.9375rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background: #FFF7ED;
+            color: #9A3412;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border-radius: 50px;
+            border: 1px solid #FED7AA;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Idea Card */
+        .idea-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        .idea-section {
+            margin-bottom: 2rem;
+        }
+
+        .idea-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-label {
+            font-size: 0.625rem;
+            font-weight: 700;
+            color: #999999;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.75rem;
+        }
+
+        .section-content {
+            background: #F9FAFB;
+            padding: 1.25rem;
+            border-radius: 12px;
+            border: 1px solid #F3F4F6;
+        }
+
+        .section-content.title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .section-content.description {
+            font-size: 0.9375rem;
+            line-height: 1.7;
+            color: var(--text-muted);
+        }
+
+        .section-content.info {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .two-column-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+        }
+
+        /* Card Footer */
+        .card-footer-section {
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .last-updated {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .last-updated .material-symbols-outlined {
+            font-size: 18px;
+        }
+
+        .action-buttons {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .btn-edit {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: 2px solid var(--primary-color);
+            background: var(--white);
+            color: var(--primary-color);
+            font-weight: 700;
+            font-size: 0.875rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-edit:hover {
+            background: rgba(94, 42, 151, 0.05);
+        }
+
+        .btn-edit .material-symbols-outlined {
+            font-size: 20px;
+        }
+
+        .btn-publish {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+            color: var(--white);
+            font-weight: 700;
+            font-size: 0.875rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(94, 42, 151, 0.25);
+            transition: all 0.2s ease;
+        }
+
+        .btn-publish:hover {
+            box-shadow: 0 6px 16px rgba(94, 42, 151, 0.35);
+            transform: translateY(-2px);
+        }
+
+        .btn-publish .material-symbols-outlined {
+            font-size: 20px;
+        }
+
+        /* Info Cards */
+        .info-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        .info-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .info-card.tip {
+            background: #EFF6FF;
+            border-color: #DBEAFE;
+        }
+
+        .info-card.requirement {
+            background: #FAF5FF;
+            border-color: #F3E8FF;
+        }
+
+        .info-card.deadline {
+            background: #FEF2F2;
+            border-color: #FECACA;
+        }
+
+        .info-card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .info-card.tip .info-card-icon {
+            background: #DBEAFE;
+            color: #1D4ED8;
+        }
+
+        .info-card.requirement .info-card-icon {
+            background: #F3E8FF;
+            color: #7C3AED;
+        }
+
+        .info-card.deadline .info-card-icon {
+            background: #FECACA;
+            color: #DC2626;
+        }
+
+        .info-card-icon .material-symbols-outlined {
+            font-size: 24px;
+            font-variation-settings: 'FILL' 1;
+        }
+
+        .info-card h3 {
+            font-size: 0.875rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-dark);
+            margin: 0;
+            letter-spacing: 0.05em;
+        }
+
+        .info-card p {
+            font-size: 0.875rem;
+            line-height: 1.6;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* Custom Modal Styles */
+        .modal-content {
+            border-radius: 16px;
+            border: none;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .modal-header {
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem;
+        }
+
+        .modal-header .modal-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .modal-header .modal-title .material-symbols-outlined {
+            font-size: 28px;
+        }
+
+        .modal-header.confirm-header .modal-title {
+            color: var(--primary-color);
+        }
+
+        .modal-header.success-header .modal-title {
+            color: #059669;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-body p {
+            font-size: 0.9375rem;
+            line-height: 1.7;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .modal-body ul {
+            list-style: none;
+            padding: 0;
+            margin: 1rem 0;
+        }
+
+        .modal-body ul li {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .modal-body ul li:before {
+            content: "•";
+            position: absolute;
+            left: 0.5rem;
+            color: var(--primary-color);
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .modal-footer {
+            border-top: 1px solid var(--border-color);
+            padding: 1.25rem 1.5rem;
+        }
+
+        .modal-footer .btn {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 0.875rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .modal-footer .btn-secondary {
+            background: var(--white);
+            border: 2px solid var(--border-color);
+            color: var(--text-muted);
+        }
+
+        .modal-footer .btn-secondary:hover {
+            background: #F9FAFB;
+            border-color: #CCCCCC;
+        }
+
+        .modal-footer .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+            border: none;
+            box-shadow: 0 4px 12px rgba(94, 42, 151, 0.25);
+        }
+
+        .modal-footer .btn-primary:hover {
+            box-shadow: 0 6px 16px rgba(94, 42, 151, 0.35);
+        }
+
+        .modal-footer .btn-success {
+            background: linear-gradient(135deg, #059669 0%, #10B981 100%);
+            border: none;
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
+        }
+
+        .modal-footer .btn-success:hover {
+            box-shadow: 0 6px 16px rgba(5, 150, 105, 0.35);
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .two-column-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .info-cards-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .content-area {
+                padding: 1.5rem;
+            }
+
+            .page-header {
+                flex-direction: column;
+            }
+
+            .page-title-section h1 {
+                font-size: 1.5rem;
+            }
+
+            .idea-card {
+                padding: 1.5rem;
+            }
+
+            .card-footer-section {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .action-buttons {
+                width: 100%;
+                flex-direction: column;
+            }
+
+            .btn-edit,
+            .btn-publish {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar Container -->
+        <div id="sidebar-container"></div>
+
+        <div class="main-content">
+            <!-- Header Container -->
+            <div id="header-container"></div>
+
+            <!-- Main Content Area -->
+            <div class="content-area">
+                <div class="container-fluid" style="max-width: 1200px;">
+                    <!-- Breadcrumb Navigation -->
+                    <nav class="breadcrumb-nav">
+                        <a href="dashboard.html">Dashboard</a>
+                        <span class="material-symbols-outlined">chevron_right</span>
+                        <a href="my-idea.html">My Idea</a>
+                    </nav>
+
+                    <!-- Page Header -->
+                    <div class="page-header">
+                        <div class="page-title-section">
+                            <h1>Eco-Pulse Charger</h1>
+                            <p>Innovation for sustainable personal energy.</p>
+                        </div>
+                        <div>
+                            <span class="status-badge">Draft</span>
+                        </div>
+                    </div>
+
+                    <!-- Main Idea Card -->
+                    <div class="idea-card">
+                        <!-- Project Title -->
+                        <div class="idea-section">
+                            <div class="section-label">Project Title</div>
+                            <div class="section-content title">
+                                Eco-Pulse Charger: Kinetic Harvesting Solutions
+                            </div>
+                        </div>
+
+                        <!-- Idea Description -->
+                        <div class="idea-section">
+                            <div class="section-label">Idea Description</div>
+                            <div class="section-content description">
+                                Eco-Pulse is a revolutionary wearable device that converts body movement into
+                                electrical energy to charge mobile devices. Designed for the active urban dweller,
+                                it aims to reduce dependency on the power grid while encouraging physical activity
+                                through a gamified mobile app integrated with the hardware.
+                            </div>
+                        </div>
+
+                        <!-- Two Column Info -->
+                        <div class="two-column-grid">
+                            <div class="idea-section">
+                                <div class="section-label">Target Audience</div>
+                                <div class="section-content info">
+                                    Urban commuters, outdoor enthusiasts, and eco-conscious students.
+                                </div>
+                            </div>
+                            <div class="idea-section">
+                                <div class="section-label">Primary Category</div>
+                                <div class="section-content info">
+                                    Sustainable Energy / Tech
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card Footer -->
+                        <div class="card-footer-section">
+                            <div class="last-updated">
+                                <span class="material-symbols-outlined">history</span>
+                                <span>Draft last updated 2 hours ago</span>
+                            </div>
+                            <div class="action-buttons">
+                                <button class="btn-edit">
+                                    <span class="material-symbols-outlined">edit_square</span>
+                                    Edit Idea
+                                </button>
+                                <button class="btn-publish">
+                                    <span class="material-symbols-outlined">rocket_launch</span>
+                                    Publish Idea
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Auto-Submission Notice -->
+                    <div style="background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%); border: 2px solid #FCA5A5; border-radius: 16px; padding: 1.5rem; margin-bottom: 2rem; display: flex; align-items: start; gap: 1rem;">
+                        <div style="width: 48px; height: 48px; border-radius: 50%; background: #FCA5A5; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <span class="material-symbols-outlined" style="color: #991B1B; font-size: 28px; font-variation-settings: 'FILL' 1;">schedule</span>
+                        </div>
+                        <div style="flex: 1;">
+                            <h3 style="font-size: 1rem; font-weight: 700; color: #991B1B; margin: 0 0 0.5rem 0;">
+                                Auto-Submission Notice
+                            </h3>
+                            <p style="font-size: 0.9375rem; line-height: 1.6; color: #7F1D1D; margin: 0;">
+                                Your idea will be <strong>automatically submitted</strong> after the deadline passes if you haven't published it manually. Make sure to review and complete all sections before the deadline.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Info Cards -->
+                    <div class="info-cards-grid">
+                        <div class="info-card tip">
+                            <div class="info-card-icon">
+                                <span class="material-symbols-outlined">lightbulb</span>
+                            </div>
+                            <div>
+                                <h3>Mentor Tip</h3>
+                                <p>Focus on the scalability of your prototype. Judges love to see how it works for
+                                    millions!</p>
+                            </div>
+                        </div>
+
+                        <div class="info-card requirement">
+                            <div class="info-card-icon">
+                                <span class="material-symbols-outlined">verified_user</span>
+                            </div>
+                            <div>
+                                <h3>Requirement</h3>
+                                <p>Make sure to attach a 60-second video pitch before you hit publish.</p>
+                            </div>
+                        </div>
+
+                        <div class="info-card deadline">
+                            <div class="info-card-icon">
+                                <span class="material-symbols-outlined">alarm</span>
+                            </div>
+                            <div>
+                                <h3>Deadline</h3>
+                                <p>Submission phase ends in 4 days. Complete all sections soon.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Publish Confirmation Modal -->
+    <div class="modal fade" id="publishConfirmModal" tabindex="-1" aria-labelledby="publishConfirmModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header confirm-header">
+                    <h5 class="modal-title" id="publishConfirmModalLabel">
+                        <span class="material-symbols-outlined">rocket_launch</span>
+                        Publish Your Idea?
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Once published, your idea will be submitted for review by the jury. Please make sure you have:</p>
+                    <ul>
+                        <li>Completed all required sections</li>
+                        <li>Attached a 60-second video pitch</li>
+                        <li>Reviewed your submission for accuracy</li>
+                    </ul>
+                    <p style="margin-bottom: 0;"><strong>Are you ready to publish?</strong></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <span class="material-symbols-outlined">close</span>
+                        Cancel
+                    </button>
+                    <button type="button" class="btn btn-primary" id="confirmPublishBtn">
+                        <span class="material-symbols-outlined">check_circle</span>
+                        Yes, Publish
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header success-header">
+                    <h5 class="modal-title" id="successModalLabel">
+                        <span class="material-symbols-outlined">check_circle</span>
+                        Successfully Published!
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Your idea has been published and submitted for review.</p>
+                    <p style="margin-bottom: 0;">You will receive notifications about the evaluation status. Good luck!</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" data-bs-dismiss="modal">
+                        <span class="material-symbols-outlined">done</span>
+                        Got it
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Submission Modal -->
+    <div class="modal fade" id="viewSubmissionModal" tabindex="-1" aria-labelledby="viewSubmissionModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header" style="background: linear-gradient(135deg, #F3E8FF 0%, #FAF5FF 100%);">
+                    <h5 class="modal-title" id="viewSubmissionModalLabel">
+                        <span class="material-symbols-outlined" style="color: var(--primary-color);">visibility</span>
+                        View Submission
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="padding: 2rem;">
+                    <!-- Submission Header -->
+                    <div style="margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid var(--border-color);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                            <h3 style="font-size: 1.5rem; font-weight: 700; color: var(--text-dark); margin: 0;">
+                                Eco-Pulse Charger
+                            </h3>
+                            <span class="status-badge" style="background: #D1FAE5; color: #065F46; border-color: #6EE7B7;">
+                                Published
+                            </span>
+                        </div>
+                        <p style="font-size: 0.875rem; color: var(--text-muted); margin: 0;">
+                            Innovation for sustainable personal energy
+                        </p>
+                        <div style="display: flex; gap: 1rem; margin-top: 1rem; font-size: 0.8125rem; color: var(--text-muted);">
+                            <div style="display: flex; align-items: center; gap: 0.25rem;">
+                                <span class="material-symbols-outlined" style="font-size: 16px;">calendar_today</span>
+                                <span>Published: <strong>Feb 5, 2026</strong></span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.25rem;">
+                                <span class="material-symbols-outlined" style="font-size: 16px;">person</span>
+                                <span>Rohan Sharma</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Project Title Section -->
+                    <div style="margin-bottom: 2rem;">
+                        <div class="section-label">Project Title</div>
+                        <div style="background: #F9FAFB; padding: 1rem; border-radius: 10px; border: 1px solid #F3F4F6;">
+                            <p style="font-size: 1rem; font-weight: 600; color: var(--text-dark); margin: 0;">
+                                Eco-Pulse Charger: Kinetic Harvesting Solutions
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Idea Description Section -->
+                    <div style="margin-bottom: 2rem;">
+                        <div class="section-label">Idea Description</div>
+                        <div style="background: #F9FAFB; padding: 1rem; border-radius: 10px; border: 1px solid #F3F4F6;">
+                            <p style="font-size: 0.875rem; line-height: 1.7; color: var(--text-muted); margin: 0;">
+                                Eco-Pulse is a revolutionary wearable device that converts body movement into
+                                electrical energy to charge mobile devices. Designed for the active urban dweller,
+                                it aims to reduce dependency on the power grid while encouraging physical activity
+                                through a gamified mobile app integrated with the hardware.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Two Column Info -->
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
+                        <div>
+                            <div class="section-label">Target Audience</div>
+                            <div style="background: #F9FAFB; padding: 1rem; border-radius: 10px; border: 1px solid #F3F4F6;">
+                                <p style="font-size: 0.8125rem; color: var(--text-muted); margin: 0;">
+                                    Urban commuters, outdoor enthusiasts, and eco-conscious students.
+                                </p>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="section-label">Primary Category</div>
+                            <div style="background: #F9FAFB; padding: 1rem; border-radius: 10px; border: 1px solid #F3F4F6;">
+                                <p style="font-size: 0.8125rem; color: var(--text-muted); margin: 0;">
+                                    Sustainable Energy / Tech
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submission Status -->
+                    <div style="background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%); padding: 1.5rem; border-radius: 12px; border: 1px solid #BFDBFE;">
+                        <div style="display: flex; align-items: start; gap: 1rem;">
+                            <div style="width: 40px; height: 40px; border-radius: 50%; background: #DBEAFE; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <span class="material-symbols-outlined" style="color: #1D4ED8; font-size: 24px; font-variation-settings: 'FILL' 1;">info</span>
+                            </div>
+                            <div>
+                                <h4 style="font-size: 0.875rem; font-weight: 700; color: var(--text-dark); margin: 0 0 0.5rem 0;">
+                                    Submission Status
+                                </h4>
+                                <p style="font-size: 0.8125rem; color: var(--text-muted); margin: 0; line-height: 1.6;">
+                                    Your idea has been successfully submitted and is currently under review by our jury panel.
+                                    You will receive email notifications regarding evaluation progress and feedback.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <span class="material-symbols-outlined">close</span>
+                        Close
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="window.location.href='dashboard.html'">
+                        <span class="material-symbols-outlined">dashboard</span>
+                        Go to Dashboard
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Load Sidebar and Header -->
+    <script>
+        // Load Sidebar
+        fetch('sidebar.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('sidebar-container').innerHTML = data;
+
+                // Set active sidebar menu item after sidebar is loaded
+                setTimeout(() => {
+                    const currentPage = window.location.pathname.split('/').pop() || 'my-idea.html';
+                    const navItems = document.querySelectorAll('.nav-item');
+
+                    navItems.forEach(item => {
+                        const href = item.getAttribute('href');
+
+                        // Remove active class from all items first
+                        item.classList.remove('nav-item-active');
+
+                        // Find the icon and update fill state
+                        const icon = item.querySelector('.material-symbols-outlined');
+                        if (icon) {
+                            icon.classList.remove('filled');
+                            icon.style.fontVariationSettings = "'FILL' 0";
+                        }
+
+                        // Add active class to matching item
+                        if (href === currentPage || href === 'my-idea.html' && currentPage === 'my-idea.html') {
+                            item.classList.add('nav-item-active');
+                            if (icon) {
+                                icon.classList.add('filled');
+                                icon.style.fontVariationSettings = "'FILL' 1";
+                            }
+                        }
+                    });
+
+                    console.log('Sidebar active menu item set for:', currentPage);
+                }, 200);
+            })
+            .catch(error => console.error('Error loading sidebar:', error));
+
+        // Load Header
+        fetch('header.html')
+            .then(response => response.text())
+            .then(data => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = data;
+
+                // Extract and append all elements
+                const elements = tempDiv.childNodes;
+                elements.forEach(node => {
+                    if (node.nodeType === 1 || node.nodeType === 3) { // Element or Text node
+                        document.getElementById('header-container').appendChild(node.cloneNode(true));
+                    }
+                });
+
+                // Find and execute the script
+                const script = tempDiv.querySelector('script');
+                if (script) {
+                    const newScript = document.createElement('script');
+                    newScript.textContent = script.textContent;
+                    document.body.appendChild(newScript);
+                }
+            })
+            .catch(error => console.error('Error loading header:', error));
+
+        // Button Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Edit Idea Button
+            const editBtn = document.querySelector('.btn-edit');
+            if (editBtn) {
+                editBtn.addEventListener('click', function() {
+                    // Redirect to idea submission/edit page
+                    window.location.href = 'idea-submissions.html';
+                });
+            }
+
+            // Publish Idea Button
+            const publishBtn = document.querySelector('.btn-publish');
+            const publishConfirmModal = new bootstrap.Modal(document.getElementById('publishConfirmModal'));
+            const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+            const viewSubmissionModal = new bootstrap.Modal(document.getElementById('viewSubmissionModal'));
+            const confirmPublishBtn = document.getElementById('confirmPublishBtn');
+
+            let isPublished = false; // Track if idea is published
+
+            if (publishBtn) {
+                publishBtn.addEventListener('click', function() {
+                    if (isPublished) {
+                        // If already published, show submission details
+                        viewSubmissionModal.show();
+                    } else {
+                        // If not published, show confirmation modal
+                        publishConfirmModal.show();
+                    }
+                });
+            }
+
+            if (confirmPublishBtn) {
+                confirmPublishBtn.addEventListener('click', function() {
+                    // Hide confirmation modal
+                    publishConfirmModal.hide();
+
+                    // Show loading state
+                    publishBtn.disabled = true;
+                    publishBtn.innerHTML = '<span class="material-symbols-outlined">hourglass_empty</span> Publishing...';
+
+                    // Simulate API call (replace with actual API endpoint)
+                    setTimeout(() => {
+                        // Update status badge
+                        const statusBadge = document.querySelector('.status-badge');
+                        if (statusBadge) {
+                            statusBadge.textContent = 'Published';
+                            statusBadge.style.background = '#D1FAE5';
+                            statusBadge.style.color = '#065F46';
+                            statusBadge.style.borderColor = '#6EE7B7';
+                        }
+
+                        // Update last updated text
+                        const lastUpdated = document.querySelector('.last-updated span:last-child');
+                        if (lastUpdated) {
+                            lastUpdated.textContent = 'Published just now';
+                        }
+
+                        // Change button to "View Submission"
+                        publishBtn.innerHTML = '<span class="material-symbols-outlined">visibility</span> View Submission';
+                        publishBtn.disabled = false;
+                        isPublished = true; // Mark as published
+
+                        // Show success modal
+                        successModal.show();
+
+                        // Optional: Redirect to dashboard after modal is closed
+                        // document.getElementById('successModal').addEventListener('hidden.bs.modal', function () {
+                        //     window.location.href = 'dashboard.html';
+                        // });
+                    }, 1500);
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

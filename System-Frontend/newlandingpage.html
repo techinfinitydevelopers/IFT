@@ -1,0 +1,2673 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>India's Future Tycoon - National Entrepreneurship Platform</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet" />
+
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+
+    <!-- GSAP Animation Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #5E2A97;
+            --secondary-color: #DEDE50;
+            --background-dark: #0A0A0A;
+            --background-darker: #050505;
+            --text-light: #FFFFFF;
+            --text-muted: #94a3b8;
+            --border-color: rgba(94, 42, 151, 0.2);
+            --glow-color: rgba(94, 42, 151, 0.6);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: var(--background-dark);
+            color: var(--text-light);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--background-darker);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--primary-color), #9333ea);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #7B3FB5, #a855f7);
+        }
+
+        /* Background Effects */
+        .grid-background {
+            position: fixed;
+            inset: 0;
+            background-image:
+                radial-gradient(circle at 20% 50%, rgba(94, 42, 151, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(147, 51, 234, 0.1) 0%, transparent 50%),
+                radial-gradient(circle, rgba(94, 42, 151, 0.05) 1px, transparent 1px);
+            background-size: cover, cover, 40px 40px;
+            opacity: 0.4;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .header.scrolled {
+            padding: 0.75rem 0;
+            background: rgba(10, 10, 10, 0.95);
+            box-shadow: 0 10px 40px rgba(94, 42, 151, 0.2);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-img {
+            width: 250px;
+            height: 50px;
+            background-size: contain;
+            background-position: left center;
+            background-repeat: no-repeat;
+            flex-shrink: 0;
+            transition: transform 0.3s ease;
+        }
+
+        .logo-img:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2.5rem;
+        }
+
+        .nav-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--text-light);
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .btn-register {
+            background: linear-gradient(135deg, var(--primary-color), #7B3FB5);
+            border: none;
+            color: white;
+            padding: 0.625rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.8125rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            box-shadow: 0 0 20px rgba(94, 42, 151, 0.4);
+        }
+
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px var(--glow-color);
+        }
+
+        /* Hero Section with Video Background */
+        .hero-section {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding-top: 100px;
+            padding-bottom: 100px;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .hero-video-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -2;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(10, 10, 10, 0.92) 0%, rgba(94, 42, 151, 0.15) 100%);
+            z-index: -1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .badge-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
+            background: rgba(94, 42, 151, 0.25);
+            border: 1px solid rgba(94, 42, 151, 0.5);
+            border-radius: 50px;
+            font-size: 0.6875rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--secondary-color);
+            margin-bottom: 1.5rem;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--secondary-color);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+                box-shadow: 0 0 10px var(--secondary-color);
+            }
+            50% {
+                opacity: 0.7;
+                transform: scale(1.3);
+                box-shadow: 0 0 20px var(--secondary-color);
+            }
+        }
+
+        .hero-title {
+            font-size: clamp(2.25rem, 7vw, 4.5rem);
+            font-weight: 900;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            margin-bottom: 1.25rem;
+            background: linear-gradient(135deg, #ffffff 0%, #c4b5fd 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-title .highlight {
+            color: var(--primary-color);
+            font-style: italic;
+            background: linear-gradient(135deg, var(--primary-color), #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-description {
+            font-size: 1rem;
+            color: var(--text-muted);
+            line-height: 1.7;
+            max-width: 650px;
+            margin-bottom: 2rem;
+        }
+
+        .hero-cta-group {
+            display: flex;
+            gap: 1.25rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary-hero {
+            background: linear-gradient(135deg, var(--primary-color), #9333ea);
+            color: white;
+            padding: 1rem 2.5rem;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            border: none;
+            box-shadow: 0 10px 40px rgba(94, 42, 151, 0.5);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-primary-hero:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary-hero:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 50px var(--glow-color);
+        }
+
+        .btn-secondary-hero {
+            background: transparent;
+            color: var(--text-light);
+            padding: 1rem 2.5rem;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-secondary-hero:hover {
+            border-color: var(--primary-color);
+            background: rgba(94, 42, 151, 0.1);
+            color: var(--text-light);
+            transform: translateY(-3px);
+        }
+
+        /* Number Ticker Section */
+        .number-ticker-section {
+            position: relative;
+            padding: 100px 0;
+            background: linear-gradient(180deg, var(--background-dark) 0%, rgba(94, 42, 151, 0.05) 50%, var(--background-dark) 100%);
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 1;
+        }
+
+        .ticker-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 3rem;
+        }
+
+        .ticker-item {
+            text-align: center;
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .ticker-number {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary-color), #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .ticker-label {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 600;
+        }
+
+        /* About IFT Section */
+        .about-ift-section {
+            position: relative;
+            padding: 100px 0;
+            z-index: 1;
+        }
+
+        .about-content {
+            max-width: 600px;
+        }
+
+        .section-subtitle {
+            font-size: 0.8125rem;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 900;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            margin-bottom: 1.25rem;
+        }
+
+        .section-description {
+            font-size: 0.9375rem;
+            color: var(--text-muted);
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-description strong {
+            color: var(--text-light);
+            font-weight: 700;
+        }
+
+        .promo-video-container {
+            position: relative;
+            width: 100%;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border-color);
+        }
+
+        .promo-video-container iframe {
+            width: 100%;
+            height: 100%;
+            min-height: 400px;
+            display: block;
+        }
+
+        /* IFT Experience Section */
+        .ift-experience-section {
+            position: relative;
+            padding: 100px 0;
+            /* background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); */
+            z-index: 1;
+        }
+
+        .experience-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 2.5rem;
+        }
+
+        .experience-card {
+            background: #ffffff;
+            backdrop-filter: blur(12px);
+            border: 1px solid #e5e7eb;
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .experience-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(94, 42, 151, 0.1), transparent);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .experience-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(94, 42, 151, 0.6);
+            box-shadow: 0 20px 60px rgba(94, 42, 151, 0.3),
+                        inset 0 0 40px rgba(94, 42, 151, 0.1);
+        }
+
+        .experience-card:hover::before {
+            opacity: 1;
+        }
+
+        .experience-icon {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--primary-color), #9333ea);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.25rem;
+            box-shadow: 0 10px 30px rgba(94, 42, 151, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .experience-card:hover .experience-icon {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 15px 40px var(--glow-color);
+        }
+
+        .experience-icon .material-symbols-outlined {
+            font-size: 28px;
+            color: white;
+        }
+
+        .experience-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: #1f2937;
+            letter-spacing: -0.01em;
+        }
+
+        .experience-description {
+            font-size: 0.9375rem;
+            color: #6b7280;
+            line-height: 1.6;
+        }
+
+        /* IFT Journey Section - Modern Timeline */
+        .ift-journey-section {
+            position: relative;
+            padding: 100px 0;
+            /* background: linear-gradient(135deg, rgba(94, 42, 151, 0.95) 0%, rgba(30, 13, 51, 0.98) 100%); */
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .ift-journey-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 30%, rgba(168, 85, 247, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 70%, rgba(94, 42, 151, 0.15) 0%, transparent 50%);
+            z-index: 0;
+        }
+
+        .journey-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .journey-timeline {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .journey-timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg, transparent, rgba(222, 222, 80, 0.6), rgba(168, 85, 247, 0.8), transparent);
+            transform: translateX(-50%);
+            box-shadow: 0 0 20px rgba(222, 222, 80, 0.3);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 60px;
+            display: flex;
+            align-items: center;
+        }
+
+        .timeline-item:nth-child(even) {
+            flex-direction: row-reverse;
+        }
+
+        .timeline-content {
+            flex: 1;
+            max-width: 500px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(222, 222, 80, 0.2);
+            border-radius: 16px;
+            padding: 2rem;
+            position: relative;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .timeline-item:nth-child(odd) .timeline-content {
+            margin-right: auto;
+            margin-left: 0;
+        }
+
+        .timeline-item:nth-child(even) .timeline-content {
+            margin-left: auto;
+            margin-right: 0;
+        }
+
+        .timeline-content:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(222, 222, 80, 0.5);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(222, 222, 80, 0.3), 0 5px 20px rgba(94, 42, 151, 0.4);
+        }
+
+        .timeline-number {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--primary-color), #a855f7);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: white;
+            border: 4px solid rgba(30, 13, 51, 0.9);
+            box-shadow: 0 0 30px rgba(222, 222, 80, 0.6), 0 0 50px rgba(94, 42, 151, 0.4);
+            z-index: 2;
+        }
+
+        .timeline-step-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 0.75rem;
+        }
+
+        .timeline-step-description {
+            font-size: 0.9375rem;
+            color: #9ca3af;
+            line-height: 1.6;
+        }
+
+        /* Hall of Fame Section */
+        .hall-of-fame-section {
+            position: relative;
+            padding: 100px 0;
+            z-index: 1;
+        }
+
+        .hall-badge {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: var(--background-dark);
+            font-weight: 800;
+            font-size: 0.8125rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            border-radius: 50px;
+            margin-bottom: 1.5rem;
+        }
+
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-top: 2.5rem;
+        }
+
+        .video-card {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            background: rgba(15, 15, 15, 0.6);
+            border: 1px solid var(--border-color);
+            transition: all 0.4s ease;
+            cursor: pointer;
+        }
+
+        .video-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(94, 42, 151, 0.6);
+            box-shadow: 0 20px 60px rgba(94, 42, 151, 0.4);
+        }
+
+        .video-thumbnail {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%;
+            background: linear-gradient(135deg, rgba(94, 42, 151, 0.3), rgba(147, 51, 234, 0.3));
+            overflow: hidden;
+        }
+
+        .video-thumbnail img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .video-play-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70px;
+            height: 70px;
+            background: rgba(94, 42, 151, 0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .video-card:hover .video-play-overlay {
+            background: var(--primary-color);
+            transform: translate(-50%, -50%) scale(1.1);
+            box-shadow: 0 0 30px var(--glow-color);
+        }
+
+        .video-play-overlay .material-symbols-outlined {
+            font-size: 36px;
+            color: white;
+        }
+
+        .video-info {
+            padding: 1.25rem;
+        }
+
+        .video-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .video-subtitle {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+        }
+
+        /* IFT for Schools Section */
+        .ift-schools-section {
+            position: relative;
+            padding: 100px 0;
+            background: rgba(94, 42, 151, 0.03);
+            z-index: 1;
+        }
+
+        .school-benefits {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-top: 2.5rem;
+        }
+
+        .school-benefit-block {
+            background: rgba(15, 15, 15, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2.5rem;
+            transition: all 0.4s ease;
+        }
+
+        .school-benefit-block:hover {
+            border-color: rgba(94, 42, 151, 0.6);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 60px rgba(94, 42, 151, 0.3);
+        }
+
+        .benefit-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary-color), #9333ea);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.25rem;
+            box-shadow: 0 10px 30px rgba(94, 42, 151, 0.4);
+        }
+
+        .benefit-icon .material-symbols-outlined {
+            font-size: 32px;
+            color: white;
+        }
+
+        .benefit-title {
+            font-size: 1.375rem;
+            font-weight: 800;
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+        }
+
+        .benefit-list {
+            list-style: none;
+            padding: 0;
+            margin: 1.25rem 0;
+        }
+
+        .benefit-list li {
+            padding: 0.625rem 0;
+            border-bottom: 1px solid rgba(94, 42, 151, 0.1);
+            color: var(--text-muted);
+            display: flex;
+            align-items: start;
+            gap: 0.625rem;
+            font-size: 0.875rem;
+        }
+
+        .benefit-list li::before {
+            content: '✓';
+            color: var(--primary-color);
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .btn-partner {
+            margin-top: 1.5rem;
+            background: linear-gradient(135deg, var(--primary-color), #9333ea);
+            color: white;
+            padding: 0.875rem 2rem;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            border: none;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: 0 10px 30px rgba(94, 42, 151, 0.4);
+        }
+
+        .btn-partner:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px var(--glow-color);
+        }
+
+        /* Mentor Network Section */
+        .mentor-network-section {
+            position: relative;
+            padding: 100px 0;
+            z-index: 1;
+        }
+
+        .mentor-filters {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin: 2.5rem 0;
+        }
+
+        .filter-btn {
+            padding: 0.625rem 1.5rem;
+            background: rgba(94, 42, 151, 0.1);
+            border: 1px solid rgba(94, 42, 151, 0.3);
+            border-radius: 50px;
+            color: var(--text-light);
+            font-weight: 600;
+            font-size: 0.8125rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            box-shadow: 0 5px 20px rgba(94, 42, 151, 0.5);
+        }
+
+        .mentor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 2rem;
+        }
+
+        .mentor-card {
+            background: rgba(15, 15, 15, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.75rem;
+            text-align: center;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mentor-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(94, 42, 151, 0.6);
+            box-shadow: 0 20px 60px rgba(94, 42, 151, 0.3);
+        }
+
+        .mentor-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: 0 auto 1.25rem;
+            border: 3px solid var(--primary-color);
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(94, 42, 151, 0.5);
+        }
+
+        .mentor-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .mentor-name {
+            font-size: 1.125rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .mentor-domain {
+            font-size: 0.8125rem;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 600;
+            margin-bottom: 0.875rem;
+        }
+
+        .mentor-bio {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* Jury Speaks Section */
+        .jury-speaks-section {
+            position: relative;
+            padding: 100px 0;
+            background: linear-gradient(180deg, var(--background-dark) 0%, rgba(94, 42, 151, 0.05) 50%, var(--background-dark) 100%);
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .testimonial-carousel {
+            display: flex;
+            gap: 2rem;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            padding: 2rem 0;
+            margin-top: 2.5rem;
+            scrollbar-width: none;
+        }
+
+        .testimonial-carousel::-webkit-scrollbar {
+            display: none;
+        }
+
+        .testimonial-card {
+            flex: 0 0 400px;
+            scroll-snap-align: center;
+            background: rgba(15, 15, 15, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quote-icon {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            font-size: 100px;
+            color: rgba(94, 42, 151, 0.1);
+            font-family: Georgia, serif;
+            line-height: 1;
+        }
+
+        .testimonial-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .testimonial-image {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: 3px solid var(--primary-color);
+            margin-bottom: 1.25rem;
+            overflow: hidden;
+        }
+
+        .testimonial-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .testimonial-text {
+            font-size: 0.9375rem;
+            line-height: 1.7;
+            font-style: italic;
+            color: var(--text-muted);
+            margin-bottom: 1.25rem;
+        }
+
+        .testimonial-author {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .testimonial-designation {
+            font-size: 0.8125rem;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+
+        /* Partners Section */
+        .partners-section {
+            position: relative;
+            padding: 100px 0;
+            z-index: 1;
+        }
+
+        .partner-carousel {
+            display: flex;
+            gap: 3rem;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 2.5rem 0;
+            padding: 2rem 0;
+        }
+
+        .partner-logo {
+            width: 140px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(15, 15, 15, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.25rem;
+            transition: all 0.3s ease;
+            filter: grayscale(100%);
+            opacity: 0.6;
+        }
+
+        .partner-logo:hover {
+            filter: grayscale(0%);
+            opacity: 1;
+            border-color: rgba(94, 42, 151, 0.5);
+            transform: scale(1.1);
+        }
+
+        .partner-logo img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .partner-highlight {
+            background: rgba(94, 42, 151, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin-top: 2.5rem;
+        }
+
+        .partner-highlight-text {
+            font-size: 1rem;
+            color: var(--text-muted);
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+
+        /* About ENpower Section */
+        .about-enpower-section {
+            position: relative;
+            padding: 100px 0;
+            background: rgba(94, 42, 151, 0.03);
+            z-index: 1;
+        }
+
+        .enpower-graphic {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .enpower-graphic img {
+            width: 100%;
+            height: auto;
+            filter: drop-shadow(0 20px 60px rgba(94, 42, 151, 0.5));
+        }
+
+        /* Contact Section */
+        .contact-section {
+            position: relative;
+            padding: 100px 0;
+            z-index: 1;
+        }
+
+        .contact-tabs {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .contact-tab {
+            padding: 0.875rem 2rem;
+            background: rgba(94, 42, 151, 0.1);
+            border: 1px solid rgba(94, 42, 151, 0.3);
+            border-radius: 12px;
+            color: var(--text-light);
+            font-weight: 700;
+            font-size: 0.9375rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .contact-tab:hover, .contact-tab.active {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            box-shadow: 0 10px 30px rgba(94, 42, 151, 0.5);
+        }
+
+        .contact-form-container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: rgba(15, 15, 15, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.8125rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.625rem;
+            color: var(--text-muted);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.875rem 1.25rem;
+            background: rgba(94, 42, 151, 0.05);
+            border: 1px solid rgba(94, 42, 151, 0.3);
+            border-radius: 12px;
+            color: var(--text-light);
+            font-size: 0.9375rem;
+            font-family: 'Space Grotesk', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background: rgba(94, 42, 151, 0.1);
+            box-shadow: 0 0 20px rgba(94, 42, 151, 0.3);
+        }
+
+        textarea.form-control {
+            min-height: 130px;
+            resize: vertical;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 1.125rem;
+            background: linear-gradient(135deg, var(--primary-color), #9333ea);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 0.9375rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(94, 42, 151, 0.4);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px var(--glow-color);
+        }
+
+        .success-message {
+            display: none;
+            padding: 1.25rem;
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 12px;
+            color: #22c55e;
+            text-align: center;
+            font-weight: 600;
+            margin-top: 1.25rem;
+        }
+
+        /* FAQ Section */
+        .faq-section {
+            position: relative;
+            padding: 100px 0;
+            background: rgba(94, 42, 151, 0.03);
+            z-index: 1;
+        }
+
+        .faq-container {
+            max-width: 900px;
+            margin: 2.5rem auto 0;
+        }
+
+        .faq-item {
+            background: rgba(15, 15, 15, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .faq-item.active {
+            border-color: rgba(94, 42, 151, 0.6);
+        }
+
+        .faq-question {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 1.75rem;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .faq-question:hover {
+            background: rgba(94, 42, 151, 0.05);
+        }
+
+        .faq-icon {
+            font-size: 22px;
+            color: var(--primary-color);
+            transition: transform 0.3s ease;
+        }
+
+        .faq-item.active .faq-icon {
+            transform: rotate(45deg);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.4s ease;
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 500px;
+            padding: 0 1.75rem 1.5rem;
+        }
+
+        .faq-answer p {
+            color: var(--text-muted);
+            line-height: 1.7;
+            font-size: 0.9375rem;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            position: relative;
+            padding: 120px 0;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(94, 42, 151, 0.15), rgba(147, 51, 234, 0.1));
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .cta-title {
+            font-size: clamp(2.25rem, 6vw, 4rem);
+            font-weight: 900;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            margin-bottom: 1.25rem;
+            background: linear-gradient(135deg, #ffffff 0%, #c4b5fd 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .cta-description {
+            font-size: 1.125rem;
+            color: var(--text-muted);
+            max-width: 800px;
+            margin: 0 auto 2.5rem;
+            line-height: 1.7;
+        }
+
+        /* Footer */
+        .footer {
+            position: relative;
+            padding: 3.5rem 0 2rem;
+            border-top: 1px solid var(--border-color);
+            background: var(--background-darker);
+            z-index: 1;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .footer-logo-text {
+            font-size: 0.9375rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .footer-social {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .footer-social a {
+            color: var(--text-muted);
+            transition: all 0.3s ease;
+        }
+
+        .footer-social a:hover {
+            color: var(--primary-color);
+            transform: translateY(-3px);
+        }
+
+        /* Mobile Menu */
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .mobile-menu-toggle .material-symbols-outlined {
+            font-size: 30px;
+        }
+
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            top: 80px;
+            left: 0;
+            right: 0;
+            background: rgba(10, 10, 10, 0.98);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem;
+            z-index: 999;
+            max-height: calc(100vh - 80px);
+            overflow-y: auto;
+        }
+
+        .mobile-nav.active {
+            display: block;
+        }
+
+        .mobile-nav a {
+            display: block;
+            padding: 1.125rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid rgba(94, 42, 151, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .mobile-nav a:hover {
+            color: var(--text-light);
+            background: rgba(94, 42, 151, 0.1);
+        }
+
+        .mobile-nav a:last-child {
+            border-bottom: none;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .nav-links {
+                display: none !important;
+            }
+
+            .mobile-menu-toggle {
+                display: block;
+            }
+
+            .hero-title {
+                font-size: clamp(2rem, 9vw, 3.5rem);
+            }
+
+            .section-title {
+                font-size: clamp(1.75rem, 7vw, 2.5rem);
+            }
+
+            .journey-steps {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .journey-step {
+                flex: 0 0 180px;
+            }
+
+            .testimonial-card {
+                flex: 0 0 320px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                padding: 0 1rem;
+            }
+
+            .logo-img {
+                width: 180px;
+                height: 40px;
+            }
+
+            .hero-section {
+                padding: 70px 1rem 50px;
+            }
+
+            .hero-description {
+                font-size: 0.9375rem;
+            }
+
+            .hero-cta-group {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .btn-primary-hero, .btn-secondary-hero {
+                width: 100%;
+                text-align: center;
+            }
+
+            .number-ticker-section,
+            .about-ift-section,
+            .ift-experience-section,
+            .ift-journey-section,
+            .hall-of-fame-section,
+            .ift-schools-section,
+            .mentor-network-section,
+            .jury-speaks-section,
+            .partners-section,
+            .about-enpower-section,
+            .contact-section,
+            .faq-section {
+                padding: 70px 0;
+            }
+
+            .ticker-number {
+                font-size: clamp(2rem, 9vw, 3rem);
+            }
+
+            .experience-grid,
+            .school-benefits,
+            .video-grid,
+            .mentor-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .journey-rocket {
+                font-size: 30px;
+            }
+
+            .contact-tabs {
+                flex-direction: column;
+                gap: 0.625rem;
+            }
+
+            .contact-tab {
+                width: 100%;
+            }
+
+            .contact-form-container {
+                padding: 2rem 1.5rem;
+            }
+
+            .testimonial-card {
+                flex: 0 0 280px;
+                padding: 2rem;
+            }
+
+            .quote-icon {
+                font-size: 70px;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .badge-status {
+                font-size: 0.625rem;
+                padding: 0.45rem 0.875rem;
+            }
+
+            .ticker-container {
+                gap: 2rem;
+            }
+
+            .ticker-item {
+                min-width: 100%;
+            }
+
+            .mentor-filters {
+                gap: 0.5rem;
+            }
+
+            .filter-btn {
+                padding: 0.5rem 1.125rem;
+                font-size: 0.75rem;
+            }
+
+            .faq-question {
+                padding: 1.125rem 1.25rem;
+                font-size: 0.9375rem;
+            }
+
+            .faq-item.active .faq-answer {
+                padding: 0 1.25rem 1.125rem;
+            }
+        }
+
+        /* Utility Classes */
+        .text-center {
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Background Grid -->
+    <div class="grid-background"></div>
+
+    <!-- Header -->
+    <header class="header" id="header">
+        <div class="header-content d-flex justify-content-between align-items-center">
+            <div class="logo-section">
+                <div class="logo-img" style='background-image: url("assets/IFT_logo.png");'></div>
+            </div>
+            <nav class="nav-links d-none d-lg-flex">
+                <a href="#about" class="nav-link">About</a>
+                <a href="#experience" class="nav-link">Experience</a>
+                <a href="#journey" class="nav-link">Journey</a>
+                <a href="#hall-of-fame" class="nav-link">Hall of Fame</a>
+                <a href="#mentors" class="nav-link">Mentors</a>
+                <a href="#contact" class="nav-link">Contact</a>
+                <a href="auth/sign-up.html" class="btn-register">I'm a Student</a>
+            </nav>
+            <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Mobile Navigation -->
+    <div class="mobile-nav" id="mobileNav">
+        <a href="#about">About</a>
+        <a href="#experience">Experience</a>
+        <a href="#journey">Journey</a>
+        <a href="#hall-of-fame">Hall of Fame</a>
+        <a href="#mentors">Mentors</a>
+        <a href="#contact">Contact</a>
+        <a href="auth/sign-up.html">I'm a Student</a>
+    </div>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section with Video Background -->
+        <section class="hero-section">
+            <video class="hero-video-bg" autoplay muted loop playsinline preload="auto">
+                <source src="assets/IFT%20FINAL%20PROMO%20SEASON%204.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            <div class="hero-overlay"></div>
+            <div class="container hero-content">
+                <div class="row align-items-center">
+                    <div class="col-lg-8">
+                        <div class="badge-status fade-in">
+                            <span class="pulse-dot"></span>
+                            India's First-Ever National Platform
+                        </div>
+                        <h1 class="hero-title fade-in">
+                            ENTREPRENEURSHIP<br />
+                            SEARCH & <span class="highlight">MENTORSHIP</span><br />
+                            PLATFORM
+                        </h1>
+                        <p class="hero-description fade-in">
+                            For Young Innovators (13–18). Transform your ideas into action with India's premier entrepreneurship platform. Get expert mentorship, founder bootcamp experience, and national recognition.
+                        </p>
+                        <div class="hero-cta-group fade-in">
+                            <a href="auth/sign-up.html" class="btn-primary-hero">
+                                I'm a Student
+                            </a>
+                            <a href="#schools" class="btn-secondary-hero">
+                                I'm a School
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Number Ticker Section -->
+        <section class="number-ticker-section">
+            <div class="container">
+                <div class="ticker-container">
+                    <div class="ticker-item fade-in">
+                        <div class="ticker-number" data-target="5000">0</div>
+                        <div class="ticker-label">Ideas</div>
+                    </div>
+                    <div class="ticker-item fade-in">
+                        <div class="ticker-number" data-target="600">0</div>
+                        <div class="ticker-label">Schools</div>
+                    </div>
+                    <div class="ticker-item fade-in">
+                        <div class="ticker-number" data-target="250">0</div>
+                        <div class="ticker-label">Cities</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About IFT Section -->
+        <section class="about-ift-section" id="about">
+            <div class="container">
+                <div class="row align-items-center g-5">
+                    <div class="col-lg-6 fade-in">
+                        <div class="section-subtitle">About IFT</div>
+                        <h2 class="section-title">
+                            India's Future <span class="highlight">Tycoons</span>
+                        </h2>
+                        <p class="section-description">
+                            Children are a powerhouse of ideas and innovation but they lack a platform to express freely, solve real-world problems, and build the confidence to innovate.
+                        </p>
+                        <p class="section-description">
+                            <strong>ENpower's India's Future Tycoons (IFT)</strong> bridges this gap as India's first national entrepreneurship search and mentorship platform for young innovators (13–18). We enable young minds with the skills, mindset, and courage to create real-world impact.
+                        </p>
+                        <p class="section-description">
+                            Children experience a journey where they learn how to identify real-world problems, build solutions, and develop entrepreneurial thinking through expert-led mentorship, founder bootcamps, and a national pitch stage.
+                        </p>
+                        <p class="section-description">
+                            IFT is a <strong>launchpad for confidence, creativity, and purpose</strong>, helping students transform ideas into action while gaining visibility, recognition, and access to funding and global opportunities.
+                        </p>
+                    </div>
+                    <div class="col-lg-6 fade-in">
+                        <div class="promo-video-container">
+                            <iframe
+                                src="https://www.youtube.com/embed/i3kHrKy34yM"
+                                title="IFT Promo Video"
+                                frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowfullscreen>
+                            </iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- IFT Experience Section -->
+        <section class="ift-experience-section" id="experience">
+            <div class="container">
+                <div class="text-center fade-in">
+                    <div class="section-subtitle">What You'll Gain</div>
+                    <h2 class="section-title">
+                        The IFT <span class="highlight">Experience</span>
+                    </h2>
+                </div>
+                <div class="experience-grid">
+                    <div class="experience-card fade-in">
+                        <div class="experience-icon">
+                            <span class="material-symbols-outlined">lightbulb</span>
+                        </div>
+                        <h3 class="experience-title">Innovate & Solve Real Problems</h3>
+                        <p class="experience-description">
+                            Learn to identify real-world challenges and create innovative solutions with a problem-first approach.
+                        </p>
+                    </div>
+                    <div class="experience-card fade-in">
+                        <div class="experience-icon">
+                            <span class="material-symbols-outlined">groups</span>
+                        </div>
+                        <h3 class="experience-title">Industry-Led Mentorship</h3>
+                        <p class="experience-description">
+                            Get personalized guidance from industry leaders, successful entrepreneurs, and domain experts.
+                        </p>
+                    </div>
+                    <div class="experience-card fade-in">
+                        <div class="experience-icon">
+                            <span class="material-symbols-outlined">rocket_launch</span>
+                        </div>
+                        <h3 class="experience-title">Founders Bootcamp Experience</h3>
+                        <p class="experience-description">
+                            3-day residential bootcamp with real startup tools: BMC, MVP, GTM, and pitch training.
+                        </p>
+                    </div>
+                    <div class="experience-card fade-in">
+                        <div class="experience-icon">
+                            <span class="material-symbols-outlined">podium</span>
+                        </div>
+                        <h3 class="experience-title">National Pitch Platform</h3>
+                        <p class="experience-description">
+                            Present your ideas on a national stage at the Grand National Showcase with live pitching.
+                        </p>
+                    </div>
+                    <div class="experience-card fade-in">
+                        <div class="experience-icon">
+                            <span class="material-symbols-outlined">diversity_3</span>
+                        </div>
+                        <h3 class="experience-title">Jury of Entrepreneurs & Leaders</h3>
+                        <p class="experience-description">
+                            Get feedback and evaluation from successful entrepreneurs, VCs, and industry leaders.
+                        </p>
+                    </div>
+                    <div class="experience-card fade-in">
+                        <div class="experience-icon">
+                            <span class="material-symbols-outlined">emoji_events</span>
+                        </div>
+                        <h3 class="experience-title">Seed Funding, Awards & Recognition</h3>
+                        <p class="experience-description">
+                            Win cash prizes, seed funding opportunities, national awards, and global exposure.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- IFT Journey Section - Modern Timeline -->
+        <section class="ift-journey-section" id="journey">
+            <div class="container">
+                <div class="journey-header fade-in">
+                    <div class="section-subtitle" style="color: #9ca3af;">Your Path to Success</div>
+                    <h2 class="section-title" style="color: white;">
+                        The IFT <span class="highlight">Journey</span>
+                    </h2>
+                </div>
+                <div class="journey-timeline">
+                    <div class="timeline-item fade-in">
+                        <div class="timeline-number">1</div>
+                        <div class="timeline-content">
+                            <h4 class="timeline-step-title">Registration</h4>
+                            <p class="timeline-step-description">
+                                School-led registrations to begin your IFT journey with a vision to solve real-world problems
+                            </p>
+                        </div>
+                    </div>
+                    <div class="timeline-item fade-in">
+                        <div class="timeline-number">2</div>
+                        <div class="timeline-content">
+                            <h4 class="timeline-step-title">Idea Submission</h4>
+                            <p class="timeline-step-description">
+                                Submit your innovative business idea with a problem-first approach and detailed solution
+                            </p>
+                        </div>
+                    </div>
+                    <div class="timeline-item fade-in">
+                        <div class="timeline-number">3</div>
+                        <div class="timeline-content">
+                            <h4 class="timeline-step-title">Top 400 Ideas Showcase</h4>
+                            <p class="timeline-step-description">
+                                Zonal-level mentoring and showcases for selected teams to refine their ideas
+                            </p>
+                        </div>
+                    </div>
+                    <div class="timeline-item fade-in">
+                        <div class="timeline-number">4</div>
+                        <div class="timeline-content">
+                            <h4 class="timeline-step-title">Top 100 Ideas Showcase</h4>
+                            <p class="timeline-step-description">
+                                National-level mentoring and showcases for elite teams with industry experts
+                            </p>
+                        </div>
+                    </div>
+                    <div class="timeline-item fade-in">
+                        <div class="timeline-number">5</div>
+                        <div class="timeline-content">
+                            <h4 class="timeline-step-title">IFT Hall of Fame</h4>
+                            <p class="timeline-step-description">
+                                Top 24 ideas nationally recognized and inducted into the prestigious Hall of Fame
+                            </p>
+                        </div>
+                    </div>
+                    <div class="timeline-item fade-in">
+                        <div class="timeline-number">6</div>
+                        <div class="timeline-content">
+                            <h4 class="timeline-step-title">Residential Bootcamp</h4>
+                            <p class="timeline-step-description">
+                                3-day intensive training covering BMC, MVP development, GTM strategy, and pitch perfection
+                            </p>
+                        </div>
+                    </div>
+                    <div class="timeline-item fade-in">
+                        <div class="timeline-number">7</div>
+                        <div class="timeline-content">
+                            <h4 class="timeline-step-title">Grand National Showcase</h4>
+                            <p class="timeline-step-description">
+                                Live pitch to investors, VCs, and industry jury for seed funding opportunities
+                            </p>
+                        </div>
+                    </div>
+                    <div class="timeline-item fade-in">
+                        <div class="timeline-number">8</div>
+                        <div class="timeline-content">
+                            <h4 class="timeline-step-title">National Recognition</h4>
+                            <p class="timeline-step-description">
+                                Awards, cash prizes, media exposure, and global entrepreneurship opportunities
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Hall of Fame Section -->
+        <section class="hall-of-fame-section" id="hall-of-fame">
+            <div class="container">
+                <div class="text-center fade-in">
+                    <span class="hall-badge">Success Stories</span>
+                    <h2 class="section-title">
+                        IFT Hall of <span class="highlight">Fame</span>
+                    </h2>
+                    <p class="section-description" style="max-width: 800px; margin: 0 auto;">
+                        Watch the inspiring journeys of our participants who are creating real-world impact
+                    </p>
+                </div>
+                <div class="video-grid">
+                    <div class="video-card fade-in">
+                        <div class="video-thumbnail">
+                            <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&h=450&fit=crop" alt="Success Story 1">
+                            <div class="video-play-overlay">
+                                <span class="material-symbols-outlined">play_arrow</span>
+                            </div>
+                        </div>
+                        <div class="video-info">
+                            <h4 class="video-title">Student Innovation Story</h4>
+                            <p class="video-subtitle">IFT Hall of Fame - Season 3</p>
+                        </div>
+                    </div>
+                    <div class="video-card fade-in">
+                        <div class="video-thumbnail">
+                            <img src="https://images.unsplash.com/photo-1573164713988-8665fc963095?w=800&h=450&fit=crop" alt="Success Story 2">
+                            <div class="video-play-overlay">
+                                <span class="material-symbols-outlined">play_arrow</span>
+                            </div>
+                        </div>
+                        <div class="video-info">
+                            <h4 class="video-title">Entrepreneurial Journey</h4>
+                            <p class="video-subtitle">IFT Hall of Fame - Season 3</p>
+                        </div>
+                    </div>
+                    <div class="video-card fade-in">
+                        <div class="video-thumbnail">
+                            <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=450&fit=crop" alt="Success Story 3">
+                            <div class="video-play-overlay">
+                                <span class="material-symbols-outlined">play_arrow</span>
+                            </div>
+                        </div>
+                        <div class="video-info">
+                            <h4 class="video-title">Problem Solver Story</h4>
+                            <p class="video-subtitle">IFT Hall of Fame - Season 3</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- IFT for Schools Section -->
+        <section class="ift-schools-section" id="schools">
+            <div class="container">
+                <div class="text-center fade-in">
+                    <div class="section-subtitle">Partner With Us</div>
+                    <h2 class="section-title">
+                        IFT for <span class="highlight">Schools</span>
+                    </h2>
+                </div>
+                <div class="school-benefits">
+                    <div class="school-benefit-block fade-in">
+                        <div class="benefit-icon">
+                            <span class="material-symbols-outlined">verified</span>
+                        </div>
+                        <h3 class="benefit-title">NEP 2020 Goals Come Alive!</h3>
+                        <p class="section-description">
+                            Align with National Education Policy's focus on experiential learning and skill development
+                        </p>
+                        <ul class="benefit-list">
+                            <li>Innovation & Experiential Learning</li>
+                            <li>Vocational Exposure</li>
+                            <li>21st Century Skills Development</li>
+                        </ul>
+                        <a href="#contact" class="btn-partner">Bring IFT to Your School</a>
+                    </div>
+                    <div class="school-benefit-block fade-in">
+                        <div class="benefit-icon">
+                            <span class="material-symbols-outlined">military_tech</span>
+                        </div>
+                        <h3 class="benefit-title">Future Skill Leader</h3>
+                        <p class="section-description">
+                            Position your school as a leader in preparing students for the innovation economy
+                        </p>
+                        <ul class="benefit-list">
+                            <li>21st Century Skill Building</li>
+                            <li>Entrepreneurial Mindset Development</li>
+                            <li>Tech & Design Thinking Skills</li>
+                        </ul>
+                        <a href="#contact" class="btn-partner">Bring IFT to Your School</a>
+                    </div>
+                    <div class="school-benefit-block fade-in">
+                        <div class="benefit-icon">
+                            <span class="material-symbols-outlined">star</span>
+                        </div>
+                        <h3 class="benefit-title">National Recognition</h3>
+                        <p class="section-description">
+                            Gain national visibility and prestige through student achievements
+                        </p>
+                        <ul class="benefit-list">
+                            <li>Awards, Recognition & Seed Funding</li>
+                            <li>Opportunities with NFTE, UNGCNI</li>
+                            <li>Inspire MANAK & National Platforms</li>
+                        </ul>
+                        <a href="#contact" class="btn-partner">Bring IFT to Your School</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Mentor Network Section -->
+        <section class="mentor-network-section" id="mentors">
+            <div class="container">
+                <div class="text-center fade-in">
+                    <div class="section-subtitle">Learn From The Best</div>
+                    <h2 class="section-title">
+                        Our Mentor <span class="highlight">Network</span>
+                    </h2>
+                </div>
+                <div class="mentor-filters">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="industry">Industry</button>
+                    <button class="filter-btn" data-filter="domain">Domain</button>
+                    <button class="filter-btn" data-filter="experience">Experience</button>
+                </div>
+                <div class="mentor-grid">
+                    <div class="mentor-card fade-in" data-category="industry">
+                        <div class="mentor-image">
+                            <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=300&h=300&fit=crop" alt="Mentor">
+                        </div>
+                        <h4 class="mentor-name">Industry Expert</h4>
+                        <p class="mentor-domain">Technology</p>
+                        <p class="mentor-bio">15+ years of experience in tech innovation and startups</p>
+                    </div>
+                    <div class="mentor-card fade-in" data-category="domain">
+                        <div class="mentor-image">
+                            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&h=300&fit=crop" alt="Mentor">
+                        </div>
+                        <h4 class="mentor-name">Domain Specialist</h4>
+                        <p class="mentor-domain">Finance</p>
+                        <p class="mentor-bio">Venture Capital Partner with extensive startup funding experience</p>
+                    </div>
+                    <div class="mentor-card fade-in" data-category="experience">
+                        <div class="mentor-image">
+                            <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=300&h=300&fit=crop" alt="Mentor">
+                        </div>
+                        <h4 class="mentor-name">Serial Entrepreneur</h4>
+                        <p class="mentor-domain">Startup</p>
+                        <p class="mentor-bio">Founded multiple successful ventures with proven track record</p>
+                    </div>
+                    <div class="mentor-card fade-in" data-category="industry">
+                        <div class="mentor-image">
+                            <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=300&h=300&fit=crop" alt="Mentor">
+                        </div>
+                        <h4 class="mentor-name">Design Leader</h4>
+                        <p class="mentor-domain">Design</p>
+                        <p class="mentor-bio">Head of Design at leading tech company, UX/UI expert</p>
+                    </div>
+                    <div class="mentor-card fade-in" data-category="domain">
+                        <div class="mentor-image">
+                            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop" alt="Mentor">
+                        </div>
+                        <h4 class="mentor-name">Education Expert</h4>
+                        <p class="mentor-domain">Education</p>
+                        <p class="mentor-bio">Professor of Innovation, EdTech Advisor and Researcher</p>
+                    </div>
+                    <div class="mentor-card fade-in" data-category="experience">
+                        <div class="mentor-image">
+                            <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=300&fit=crop" alt="Mentor">
+                        </div>
+                        <h4 class="mentor-name">Product Leader</h4>
+                        <p class="mentor-domain">Product</p>
+                        <p class="mentor-bio">Product Lead with expertise in scaling global tech products</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Jury Speaks Section -->
+        <section class="jury-speaks-section" id="jury">
+            <div class="container">
+                <div class="text-center fade-in">
+                    <div class="section-subtitle">Words of Wisdom</div>
+                    <h2 class="section-title">
+                        Jury <span class="highlight">Speaks</span>
+                    </h2>
+                </div>
+                <div class="testimonial-carousel">
+                    <div class="testimonial-card fade-in">
+                        <div class="quote-icon">"</div>
+                        <div class="testimonial-content">
+                            <div class="testimonial-image">
+                                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop" alt="Jury">
+                            </div>
+                            <p class="testimonial-text">
+                                "IFT provides students an unparalleled platform to transform their ideas into viable ventures. The quality of mentorship and structured approach is truly remarkable."
+                            </p>
+                            <h4 class="testimonial-author">Industry Leader</h4>
+                            <p class="testimonial-designation">Venture Capital Partner</p>
+                        </div>
+                    </div>
+                    <div class="testimonial-card fade-in">
+                        <div class="quote-icon">"</div>
+                        <div class="testimonial-content">
+                            <div class="testimonial-image">
+                                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop" alt="Jury">
+                            </div>
+                            <p class="testimonial-text">
+                                "The entrepreneurial mindset these young innovators develop through IFT is incredible. It's more than a competition—it's a transformative journey."
+                            </p>
+                            <h4 class="testimonial-author">Entrepreneur</h4>
+                            <p class="testimonial-designation">Founder & CEO</p>
+                        </div>
+                    </div>
+                    <div class="testimonial-card fade-in">
+                        <div class="quote-icon">"</div>
+                        <div class="testimonial-content">
+                            <div class="testimonial-image">
+                                <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&h=200&fit=crop" alt="Jury">
+                            </div>
+                            <p class="testimonial-text">
+                                "IFT is creating the next generation of problem solvers and changemakers. The structured bootcamp and national platform provide real-world exposure."
+                            </p>
+                            <h4 class="testimonial-author">Angel Investor</h4>
+                            <p class="testimonial-designation">Startup Ecosystem Leader</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Partners Section -->
+        <section class="partners-section" id="partners">
+            <div class="container">
+                <div class="text-center fade-in">
+                    <div class="section-subtitle">Trusted By Leaders</div>
+                    <h2 class="section-title">
+                        Partners & <span class="highlight">Engagements</span>
+                    </h2>
+                </div>
+                <div class="partner-carousel">
+                    <div class="partner-logo fade-in">
+                        <img src="https://via.placeholder.com/140x70/5E2A97/FFFFFF?text=Partner" alt="Partner">
+                    </div>
+                    <div class="partner-logo fade-in">
+                        <img src="https://via.placeholder.com/140x70/5E2A97/FFFFFF?text=Partner" alt="Partner">
+                    </div>
+                    <div class="partner-logo fade-in">
+                        <img src="https://via.placeholder.com/140x70/5E2A97/FFFFFF?text=Partner" alt="Partner">
+                    </div>
+                    <div class="partner-logo fade-in">
+                        <img src="https://via.placeholder.com/140x70/5E2A97/FFFFFF?text=Partner" alt="Partner">
+                    </div>
+                </div>
+                <div class="partner-highlight fade-in">
+                    <p class="partner-highlight-text">
+                        <strong>Collaborating with India's leading organizations to create opportunities for young innovators through NFTE, UNGCNI, Inspire MANAK, and other prestigious platforms.</strong>
+                    </p>
+                    <a href="#contact" class="btn-partner">Partner With IFT</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- About ENpower Section -->
+        <section class="about-enpower-section" id="enpower">
+            <div class="container">
+                <div class="row align-items-center g-5">
+                    <div class="col-lg-6 fade-in">
+                        <div class="section-subtitle">Powered By</div>
+                        <h2 class="section-title">
+                            About <span class="highlight">ENpower</span>
+                        </h2>
+                        <p class="section-description">
+                            <strong>ENpower</strong> is a future-skills ecosystem enabling young minds to build the skills, mindset, and confidence required to create meaningful real-world impact.
+                        </p>
+                        <p class="section-description">
+                            IFT, an initiative by ENpower, provides a national platform for students to showcase their innovation and entrepreneurial potential through structured mentorship, bootcamps, and national recognition.
+                        </p>
+                    </div>
+                    <div class="col-lg-6 fade-in">
+                        <div class="enpower-graphic">
+                            <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&h=800&fit=crop" alt="ENpower">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section class="contact-section" id="contact">
+            <div class="container">
+                <div class="text-center fade-in">
+                    <div class="section-subtitle">Get In Touch</div>
+                    <h2 class="section-title">
+                        Contact <span class="highlight">Us</span>
+                    </h2>
+                    <p class="section-description" style="max-width: 800px; margin: 0 auto;">
+                        Bring IFT to your school or become a sponsor. Email us at <strong>contact@enlearning.in</strong>
+                    </p>
+                </div>
+                <div class="contact-tabs">
+                    <button class="contact-tab active" data-tab="school">Bring IFT to My School</button>
+                    <button class="contact-tab" data-tab="sponsor">I Want to Sponsor IFT</button>
+                </div>
+                <div class="contact-form-container fade-in" id="contactFormContainer">
+                    <form id="contactForm">
+                        <div class="form-group">
+                            <label class="form-label">Name</label>
+                            <input type="text" class="form-control" required>
+                        </div>
+                        <div class="form-group" id="roleGroup">
+                            <label class="form-label">I am a</label>
+                            <select class="form-control" required>
+                                <option value="">Select Role</option>
+                                <option value="teacher">Teacher</option>
+                                <option value="principal">Principal</option>
+                                <option value="school-leader">School Leader</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="designationGroup" style="display: none;">
+                            <label class="form-label">Designation</label>
+                            <input type="text" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email ID</label>
+                            <input type="email" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Contact Number</label>
+                            <input type="tel" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn-submit">Submit</button>
+                        <div class="success-message" id="successMessage">
+                            ✓ Thank you for reaching out! We'll get back to you shortly.
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ Section -->
+        <section class="faq-section" id="faq">
+            <div class="container">
+                <div class="text-center fade-in">
+                    <div class="section-subtitle">Questions?</div>
+                    <h2 class="section-title">
+                        Frequently Asked <span class="highlight">Questions</span>
+                    </h2>
+                </div>
+                <div class="faq-container">
+                    <div class="faq-item fade-in">
+                        <div class="faq-question">
+                            <span>What is India's Future Tycoons (IFT)?</span>
+                            <span class="material-symbols-outlined faq-icon">add</span>
+                        </div>
+                        <div class="faq-answer">
+                            <p>IFT is India's first-ever entrepreneurship search & mentorship platform for young adults (students). It allows students to showcase ideas, get expert mentorship, and refine ventures that solve real-world problems.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item fade-in">
+                        <div class="faq-question">
+                            <span>How to bring IFT to our school?</span>
+                            <span class="material-symbols-outlined faq-icon">add</span>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Schools can fill in the form on this page and our team will get in touch with your team to discuss partnership opportunities and implementation.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item fade-in">
+                        <div class="faq-question">
+                            <span>Who can participate in IFT?</span>
+                            <span class="material-symbols-outlined faq-icon">add</span>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Students aged 13–18 years from any school in India can register and submit their ideas, either individually or as teams.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item fade-in">
+                        <div class="faq-question">
+                            <span>What are the fees to participate in IFT?</span>
+                            <span class="material-symbols-outlined faq-icon">add</span>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Participation in IFT is completely FREE for students.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item fade-in">
+                        <div class="faq-question">
+                            <span>What is the structure of the program?</span>
+                            <span class="material-symbols-outlined faq-icon">add</span>
+                        </div>
+                        <div class="faq-answer">
+                            <p>IFT is carried out in multiple levels: Idea submission & shortlisting, Interactive learning sessions, Mentorship and refinement of ideas, Residential boot camps, and Final pitch showcase to judges.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item fade-in">
+                        <div class="faq-question">
+                            <span>What happens at the bootcamp and finale?</span>
+                            <span class="material-symbols-outlined faq-icon">add</span>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Top ideas of the year are invited to a 3-day residential bootcamp where students get 1-on-1 mentorship from industry experts & entrepreneurs, prepare for the grand finale pitch, and compete for prizes, recognition, and investor attention.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item fade-in">
+                        <div class="faq-question">
+                            <span>What can participants win?</span>
+                            <span class="material-symbols-outlined faq-icon">add</span>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Participants can win cash prizes & awards, mentorship and networking opportunities with expert judges, possibilities of seed funding for their venture ideas, and exposure on national & international platforms such as NFTE and UNGCNI events.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item fade-in">
+                        <div class="faq-question">
+                            <span>Is it just a competition?</span>
+                            <span class="material-symbols-outlined faq-icon">add</span>
+                        </div>
+                        <div class="faq-answer">
+                            <p>No, it's more than a contest. IFT is an experiential learning journey that builds an entrepreneurial mindset and real-world problem-solving skills, not just idea pitching.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item fade-in">
+                        <div class="faq-question">
+                            <span>How does IFT benefit students beyond prizes?</span>
+                            <span class="material-symbols-outlined faq-icon">add</span>
+                        </div>
+                        <div class="faq-answer">
+                            <p>IFT helps participants in building life skills like creativity, critical thinking, collaboration, and leadership, and learn to convert problems into solutions.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="cta-section">
+            <div class="container">
+                <div class="fade-in">
+                    <h2 class="cta-title">
+                        Start Your IFT <span class="highlight">Journey</span> Today
+                    </h2>
+                    <p class="cta-description">
+                        Transform your ideas into action. Join India's premier entrepreneurship platform for young innovators.
+                    </p>
+                    <div class="hero-cta-group" style="justify-content: center;">
+                        <a href="auth/sign-up.html" class="btn-primary-hero">
+                            I'm a Student
+                        </a>
+                        <a href="#contact" class="btn-secondary-hero">
+                            I'm a School
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-logo-text">India's Future Tycoon © 2026</div>
+                    <div class="footer-social">
+                        <a href="mailto:contact@enlearning.in"><span class="material-symbols-outlined">email</span></a>
+                        <a href="#"><span class="material-symbols-outlined">contact_support</span></a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </main>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Custom JavaScript -->
+    <script>
+        // GSAP Registration
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Header Scroll Effect
+        const header = document.getElementById('header');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        // Mobile Menu Toggle
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const mobileNav = document.getElementById('mobileNav');
+
+        if (mobileMenuToggle && mobileNav) {
+            mobileMenuToggle.addEventListener('click', function() {
+                mobileNav.classList.toggle('active');
+                const icon = this.querySelector('.material-symbols-outlined');
+                icon.textContent = mobileNav.classList.contains('active') ? 'close' : 'menu';
+            });
+
+            const mobileNavLinks = mobileNav.querySelectorAll('a');
+            mobileNavLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    mobileNav.classList.remove('active');
+                    const icon = mobileMenuToggle.querySelector('.material-symbols-outlined');
+                    icon.textContent = 'menu';
+                });
+            });
+        }
+
+        // Smooth Scroll for Anchor Links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+                if (href !== '#' && document.querySelector(href)) {
+                    e.preventDefault();
+                    const target = document.querySelector(href);
+                    const headerHeight = 80;
+                    const targetPosition = target.offsetTop - headerHeight;
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Fade-in Animation on Scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Number Ticker Animation
+        const animateNumber = (element, target) => {
+            const duration = 2000;
+            const increment = target / (duration / 16);
+            let current = 0;
+
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    element.textContent = target + '+';
+                    clearInterval(timer);
+                } else {
+                    element.textContent = Math.floor(current) + '+';
+                }
+            }, 16);
+        };
+
+        const tickerObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const number = entry.target.querySelector('.ticker-number');
+                    const target = parseInt(number.getAttribute('data-target'));
+                    animateNumber(number, target);
+                    tickerObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        document.querySelectorAll('.ticker-item').forEach(item => {
+            tickerObserver.observe(item);
+        });
+
+        // Journey Section - Parallax Scroll with Rocket
+        const journeySteps = document.querySelectorAll('.journey-step');
+        const journeyRocket = document.getElementById('journeyRocket');
+        const journeyProgressLine = document.getElementById('journeyProgressLine');
+
+        window.addEventListener('scroll', () => {
+            const journeySection = document.querySelector('.ift-journey-section');
+            if (!journeySection) return;
+
+            const sectionTop = journeySection.offsetTop;
+            const sectionHeight = journeySection.offsetHeight;
+            const scrollPosition = window.scrollY;
+            const windowHeight = window.innerHeight;
+
+            const sectionScrollProgress = (scrollPosition + windowHeight - sectionTop) / sectionHeight;
+            const clampedProgress = Math.max(0, Math.min(1, sectionScrollProgress));
+
+            const progressPercent = clampedProgress * 100;
+            if (journeyProgressLine) {
+                journeyProgressLine.style.width = progressPercent + '%';
+            }
+            if (journeyRocket) {
+                journeyRocket.style.left = progressPercent + '%';
+            }
+
+            const totalSteps = journeySteps.length;
+            const activeStepIndex = Math.floor(clampedProgress * totalSteps);
+
+            journeySteps.forEach((step, index) => {
+                if (index <= activeStepIndex) {
+                    step.classList.add('active');
+                } else {
+                    step.classList.remove('active');
+                }
+            });
+        });
+
+        // Mentor Filter System
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const mentorCards = document.querySelectorAll('.mentor-card');
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                const filter = btn.getAttribute('data-filter');
+
+                mentorCards.forEach(card => {
+                    if (filter === 'all' || card.getAttribute('data-category') === filter) {
+                        card.style.display = 'block';
+                        setTimeout(() => {
+                            card.style.opacity = '1';
+                            card.style.transform = 'translateY(0)';
+                        }, 10);
+                    } else {
+                        card.style.opacity = '0';
+                        card.style.transform = 'translateY(20px)';
+                        setTimeout(() => {
+                            card.style.display = 'none';
+                        }, 300);
+                    }
+                });
+            });
+        });
+
+        // Contact Form Tabs
+        const contactTabs = document.querySelectorAll('.contact-tab');
+        const roleGroup = document.getElementById('roleGroup');
+        const designationGroup = document.getElementById('designationGroup');
+
+        contactTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                contactTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                const formType = tab.getAttribute('data-tab');
+
+                if (formType === 'school') {
+                    roleGroup.style.display = 'block';
+                    designationGroup.style.display = 'none';
+                } else {
+                    roleGroup.style.display = 'none';
+                    designationGroup.style.display = 'block';
+                }
+            });
+        });
+
+        // Contact Form Submission
+        const contactForm = document.getElementById('contactForm');
+        const successMessage = document.getElementById('successMessage');
+
+        contactForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            successMessage.style.display = 'block';
+            contactForm.reset();
+
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 5000);
+        });
+
+        // FAQ Accordion
+        const faqItems = document.querySelectorAll('.faq-item');
+
+        faqItems.forEach(item => {
+            const question = item.querySelector('.faq-question');
+
+            question.addEventListener('click', () => {
+                const isActive = item.classList.contains('active');
+
+                faqItems.forEach(otherItem => {
+                    otherItem.classList.remove('active');
+                });
+
+                if (!isActive) {
+                    item.classList.add('active');
+                }
+            });
+        });
+
+        // Testimonial Auto-Scroll
+        const testimonialCarousel = document.querySelector('.testimonial-carousel');
+        if (testimonialCarousel) {
+            let scrollAmount = 0;
+            const scrollStep = 1;
+            const scrollDelay = 30;
+
+            const autoScroll = () => {
+                if (scrollAmount >= testimonialCarousel.scrollWidth - testimonialCarousel.clientWidth) {
+                    scrollAmount = 0;
+                } else {
+                    scrollAmount += scrollStep;
+                }
+                testimonialCarousel.scrollLeft = scrollAmount;
+            };
+
+            let scrollInterval = setInterval(autoScroll, scrollDelay);
+
+            testimonialCarousel.addEventListener('mouseenter', () => {
+                clearInterval(scrollInterval);
+            });
+
+            testimonialCarousel.addEventListener('mouseleave', () => {
+                scrollInterval = setInterval(autoScroll, scrollDelay);
+            });
+        }
+
+        // GSAP Animations for Hero Section
+        gsap.from('.hero-section .fade-in', {
+            opacity: 0,
+            y: 50,
+            duration: 1,
+            stagger: 0.2,
+            ease: 'power3.out',
+            delay: 0.3
+        });
+
+        // GSAP Scroll Animations
+        gsap.utils.toArray('.experience-card').forEach((card, index) => {
+            gsap.from(card, {
+                scrollTrigger: {
+                    trigger: card,
+                    start: 'top 85%',
+                    toggleActions: 'play none none none'
+                },
+                opacity: 0,
+                y: 50,
+                duration: 0.8,
+                delay: index * 0.1,
+                ease: 'power3.out'
+            });
+        });
+
+        console.log('🚀 IFT Landing Page - Loaded with Official Content');
+    </script>
+</body>
+
+</html>

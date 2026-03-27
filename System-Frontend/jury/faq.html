@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>IFT Jury FAQ</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+    <!-- Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary: #5E2A97;
+            --secondary: #DEDE50;
+            --primary-light: #E8D4F0;
+            --background-light: #F7F7F7;
+            --surface-light: #FFFFFF;
+            --border-light: #EEEEEE;
+            --text-dark: #222222;
+            --text-muted: #666666;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            overflow: hidden;
+        }
+
+        .main-container {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow-y: auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        .content-wrapper {
+            flex: 1;
+            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Page Header */
+        .page-header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .page-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 50px;
+            background-color: rgba(94, 42, 151, 0.1);
+            color: var(--primary);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 16px;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 16px;
+            letter-spacing: -0.025em;
+        }
+
+        .page-description {
+            font-size: 1rem;
+            color: var(--text-muted);
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* FAQ Section */
+        .faq-section {
+            margin-bottom: 32px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .section-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .section-icon-blue {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+
+        .section-icon-orange {
+            background-color: rgba(249, 115, 22, 0.1);
+            color: #f97316;
+        }
+
+        .section-icon-green {
+            background-color: rgba(34, 197, 94, 0.1);
+            color: #22c65e;
+        }
+
+        .section-icon-pink {
+            background-color: rgba(236, 72, 153, 0.1);
+            color: #ec4899;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin: 0;
+        }
+
+        /* FAQ Card */
+        .faq-card {
+            background-color: var(--surface-light);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border-light);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .faq-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .faq-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .faq-question {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin: 0;
+            transition: color 0.2s ease;
+        }
+
+        .faq-card:hover .faq-question {
+            color: var(--primary);
+        }
+
+        .faq-icon {
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .faq-card:hover .faq-icon {
+            color: var(--primary);
+        }
+
+        .faq-card.active .faq-icon {
+            transform: rotate(180deg);
+            color: var(--primary);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, margin-top 0.3s ease;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .faq-card.active .faq-answer {
+            max-height: 500px;
+            margin-top: 16px;
+        }
+
+        /* Support Section */
+        .support-section {
+            margin-top: 64px;
+            background: linear-gradient(135deg, rgba(94, 42, 151, 0.05) 0%, rgba(222, 222, 80, 0.05) 100%);
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            border: 1px solid rgba(94, 42, 151, 0.1);
+        }
+
+        .support-icon-circle {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+        }
+
+        .support-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 12px;
+        }
+
+        .support-description {
+            font-size: 1rem;
+            color: var(--text-muted);
+            margin-bottom: 32px;
+        }
+
+        .btn-primary-custom {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background-color: var(--primary);
+            color: white;
+            font-weight: 600;
+            padding: 12px 32px;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(94, 42, 151, 0.3);
+            text-decoration: none;
+        }
+
+        .btn-primary-custom:hover {
+            background-color: #7B3FB5;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(94, 42, 151, 0.4);
+            color: white;
+        }
+
+        .btn-secondary-custom {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background-color: white;
+            color: var(--primary);
+            font-weight: 600;
+            padding: 12px 32px;
+            border-radius: 50px;
+            border: 2px solid var(--primary);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-secondary-custom:hover {
+            background-color: rgba(94, 42, 151, 0.05);
+            color: var(--primary);
+        }
+
+        @media (max-width: 768px) {
+            .content-wrapper {
+                padding: 24px;
+            }
+
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .support-section {
+                padding: 32px 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-container">
+        <!-- Include Sidebar -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Include Header -->
+            <div id="header-container"></div>
+
+            <div class="content-wrapper">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <span class="page-badge">Jury Support Center</span>
+                    <h1 class="page-title">Frequently Asked Questions</h1>
+                    <p class="page-description">
+                        Find everything you need to know about your role as a jury member in the India Future Tycoon innovation competition evaluation process.
+                    </p>
+                </div>
+
+                <!-- FAQ Grid -->
+                <div class="row g-4">
+                    <!-- Role & Responsibilities Section -->
+                    <div class="col-12 col-md-6">
+                        <div class="faq-section">
+                            <div class="section-header">
+                                <div class="section-icon section-icon-blue">
+                                    <span class="material-symbols-outlined">badge</span>
+                                </div>
+                                <h2 class="section-title">Role & Responsibilities</h2>
+                            </div>
+
+                            <div class="faq-card">
+                                <div class="faq-card-header">
+                                    <h3 class="faq-question">What is my role as a Jury member in IFT?</h3>
+                                    <span class="material-symbols-outlined faq-icon">expand_more</span>
+                                </div>
+                                <div class="faq-answer">
+                                    As a Jury member, you play a critical role in evaluating student innovations. Your responsibilities include reviewing assigned ideas, scoring them based on established criteria, providing constructive feedback, and helping identify the most promising innovations that will advance to the next round. Your expertise ensures fair and comprehensive evaluation of student submissions.
+                                </div>
+                            </div>
+
+                            <div class="faq-card">
+                                <div class="faq-card-header">
+                                    <h3 class="faq-question">How are ideas assigned to me for evaluation?</h3>
+                                    <span class="material-symbols-outlined faq-icon">expand_more</span>
+                                </div>
+                                <div class="faq-answer">
+                                    Ideas are automatically assigned to jury members through our intelligent allocation system. The system considers factors such as your expertise domain, workload balance, and availability. You will receive notifications via email and your jury dashboard when new ideas are assigned. Each jury member typically receives 15-25 submissions per round to ensure thorough evaluation.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Evaluation Process Section -->
+                    <div class="col-12 col-md-6">
+                        <div class="faq-section">
+                            <div class="section-header">
+                                <div class="section-icon section-icon-orange">
+                                    <span class="material-symbols-outlined">rule</span>
+                                </div>
+                                <h2 class="section-title">Evaluation Process</h2>
+                            </div>
+
+                            <div class="faq-card">
+                                <div class="faq-card-header">
+                                    <h3 class="faq-question">What evaluation criteria should I use while scoring ideas?</h3>
+                                    <span class="material-symbols-outlined faq-icon">expand_more</span>
+                                </div>
+                                <div class="faq-answer">
+                                    Evaluate each idea based on five key criteria: <strong>Innovation & Originality</strong> (uniqueness and creativity), <strong>Feasibility</strong> (practicality and resource requirements), <strong>Impact & Scalability</strong> (potential reach and social/economic benefit), <strong>Presentation Quality</strong> (clarity and professionalism), and <strong>Team Capability</strong> (skills and execution ability). Detailed rubrics with scoring guidelines are available in your evaluation dashboard.
+                                </div>
+                            </div>
+
+                            <div class="faq-card">
+                                <div class="faq-card-header">
+                                    <h3 class="faq-question">What is weighted scoring and how does it affect evaluations?</h3>
+                                    <span class="material-symbols-outlined faq-icon">expand_more</span>
+                                </div>
+                                <div class="faq-answer">
+                                    Weighted scoring means different evaluation criteria carry different importance in the final score. For example, Innovation & Originality might carry 30% weight, while Presentation Quality carries 15%. The system automatically calculates the weighted final score based on your individual criterion scores. This ensures that the most critical aspects of an innovation are given appropriate emphasis in the overall evaluation.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submission Management Section -->
+                    <div class="col-12 col-md-6">
+                        <div class="faq-section">
+                            <div class="section-header">
+                                <div class="section-icon section-icon-green">
+                                    <span class="material-symbols-outlined">edit_note</span>
+                                </div>
+                                <h2 class="section-title">Submission Management</h2>
+                            </div>
+
+                            <div class="faq-card">
+                                <div class="faq-card-header">
+                                    <h3 class="faq-question">Can I edit or update my evaluation after submission?</h3>
+                                    <span class="material-symbols-outlined faq-icon">expand_more</span>
+                                </div>
+                                <div class="faq-answer">
+                                    Yes, you can edit your evaluation before the round deadline. Navigate to "My Evaluations" in your dashboard, find the specific evaluation, and click "Edit". However, once the evaluation round closes, all scores are locked and cannot be modified to maintain integrity and fairness. Make sure to review your scores carefully before the deadline.
+                                </div>
+                            </div>
+
+                            <div class="faq-card">
+                                <div class="faq-card-header">
+                                    <h3 class="faq-question">Where can I view my past evaluations and assigned ideas?</h3>
+                                    <span class="material-symbols-outlined faq-icon">expand_more</span>
+                                </div>
+                                <div class="faq-answer">
+                                    All your evaluations and assigned ideas are accessible through your jury dashboard. Click on "My Evaluations" to view completed evaluations, or "Assigned Ideas" to see pending submissions. You can filter by round, status (pending/completed), and date. Each evaluation includes your scores, comments, and the idea details for future reference.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Shortlisting & Results Section -->
+                    <div class="col-12 col-md-6">
+                        <div class="faq-section">
+                            <div class="section-header">
+                                <div class="section-icon section-icon-pink">
+                                    <span class="material-symbols-outlined">verified</span>
+                                </div>
+                                <h2 class="section-title">Shortlisting & Results</h2>
+                            </div>
+
+                            <div class="faq-card">
+                                <div class="faq-card-header">
+                                    <h3 class="faq-question">How does the shortlisting process work across rounds?</h3>
+                                    <span class="material-symbols-outlined faq-icon">expand_more</span>
+                                </div>
+                                <div class="faq-answer">
+                                    The shortlisting process uses aggregated scores from all jury members who evaluated each idea. After the evaluation deadline, the system calculates average weighted scores for all submissions. Ideas are ranked, and the top performers (typically top 30-40% based on the round) advance to the next stage. The final shortlist is reviewed by the organizing committee before teams are notified. You can view shortlisting results in the "Round Results" section of your dashboard.
+                                </div>
+                            </div>
+
+                            <div class="faq-card">
+                                <div class="faq-card-header">
+                                    <h3 class="faq-question">How long does each evaluation round last?</h3>
+                                    <span class="material-symbols-outlined faq-icon">expand_more</span>
+                                </div>
+                                <div class="faq-answer">
+                                    Each evaluation round typically lasts 10-14 days from the date ideas are assigned. You'll receive clear deadlines via email and dashboard notifications. We recommend spreading your evaluations throughout the period rather than completing them all at the last moment to ensure thoughtful and quality assessments.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Still have questions? -->
+                <div class="support-section">
+                    <div class="support-icon-circle">
+                        <span class="material-symbols-outlined" style="font-size: 32px;">chat_bubble</span>
+                    </div>
+                    <h3 class="support-title">Still have questions?</h3>
+                    <p class="support-description">We're here to support your evaluation journey! Reach out to our jury support team for assistance.</p>
+                    <div class="d-flex flex-wrap align-items-center justify-content-center gap-3">
+                        <a href="mailto:shravani.techinfity@gmail.com" class="btn-primary-custom">
+                            <span class="material-symbols-outlined">mail</span>
+                            Contact Support
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Load External Components -->
+    <script>
+        // Load sidebar
+        fetch('sidebar.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('sidebar-container').innerHTML = data;
+
+                // Set active sidebar menu item after sidebar is loaded
+                setTimeout(() => {
+                    const currentPage = window.location.pathname.split('/').pop() || 'faq.html';
+                    const navItems = document.querySelectorAll('.nav-item');
+
+                    navItems.forEach(item => {
+                        const href = item.getAttribute('href');
+
+                        // Remove active class from all items first
+                        item.classList.remove('nav-item-active');
+
+                        // Find the icon and update fill state
+                        const icon = item.querySelector('.material-symbols-outlined');
+                        if (icon) {
+                            icon.classList.remove('filled');
+                            icon.style.fontVariationSettings = "'FILL' 0";
+                        }
+
+                        // Add active class to matching item
+                        if (href === currentPage) {
+                            item.classList.add('nav-item-active');
+                            if (icon) {
+                                icon.classList.add('filled');
+                                icon.style.fontVariationSettings = "'FILL' 1";
+                            }
+                        }
+                    });
+                }, 200);
+            })
+            .catch(error => console.error('Error loading sidebar:', error));
+
+        // Load header
+        fetch('header.html')
+            .then(response => response.text())
+            .then(data => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = data;
+
+                // Extract and append all elements
+                const elements = tempDiv.childNodes;
+                elements.forEach(node => {
+                    if (node.nodeType === 1 || node.nodeType === 3) { // Element or Text node
+                        document.getElementById('header-container').appendChild(node.cloneNode(true));
+                    }
+                });
+
+                // Find and execute the script
+                const script = tempDiv.querySelector('script');
+                if (script) {
+                    const newScript = document.createElement('script');
+                    newScript.textContent = script.textContent;
+                    document.body.appendChild(newScript);
+                }
+            })
+            .catch(error => console.error('Error loading header:', error));
+    </script>
+
+    <!-- FAQ Functionality -->
+    <script>
+        // FAQ accordion functionality
+        (function () {
+            function initFAQ() {
+                const faqCards = document.querySelectorAll('.faq-card');
+
+                faqCards.forEach(card => {
+                    card.addEventListener('click', function () {
+                        // Toggle active class on clicked card
+                        const isActive = this.classList.contains('active');
+
+                        // Close all other cards in the same section (optional)
+                        // const sectionCards = this.closest('.faq-section').querySelectorAll('.faq-card');
+                        // sectionCards.forEach(c => c.classList.remove('active'));
+
+                        // Toggle current card
+                        if (isActive) {
+                            this.classList.remove('active');
+                        } else {
+                            this.classList.add('active');
+                        }
+                    });
+                });
+
+                // Add animation on scroll
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach((entry, index) => {
+                        if (entry.isIntersecting) {
+                            setTimeout(() => {
+                                entry.target.style.opacity = '1';
+                                entry.target.style.transform = 'translateY(0)';
+                            }, index * 50);
+                        }
+                    });
+                }, {
+                    threshold: 0.1
+                });
+
+                faqCards.forEach(card => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(20px)';
+                    card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                    observer.observe(card);
+                });
+            }
+
+            // Initialize when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initFAQ);
+            } else {
+                // DOM already loaded, wait for external components
+                setTimeout(initFAQ, 500);
+            }
+        })();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Jury Dashboard Overview</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+    <style>
+        :root {
+            --primary-color: #5E2A97;
+            --secondary-color: #DEDE50;
+            --background-light: #F7F7F7;
+            --text-dark: #222222;
+            --text-muted: #666666;
+            --border-color: #EEEEEE;
+            --white: #FFFFFF;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--background-light);
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Layout */
+        .dashboard-container {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            background: var(--background-light);
+        }
+
+        .content-wrapper {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 2rem;
+            width: 100%;
+        }
+
+        /* Sidebar Container */
+        #sidebar-container {
+            flex-shrink: 0;
+        }
+
+        /* Header Container */
+        #header-container {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        /* Stats Cards */
+        .stat-card {
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            min-height: 140px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .stat-card .stat-label {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+        }
+
+        .stat-card .stat-value {
+            color: var(--text-dark);
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .stat-card .stat-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .stat-icon.primary {
+            background: rgba(13, 89, 242, 0.1);
+            color: var(--primary-color);
+        }
+
+        .stat-icon.secondary {
+            background: rgba(249, 115, 22, 0.1);
+            color: var(--secondary-color);
+        }
+
+        .stat-icon.success {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+        }
+
+        .stat-card.pending-card {
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* .stat-card.pending-card::before {
+            content: '';
+            position: absolute;
+            right: -2rem;
+            top: -2rem;
+            width: 8rem;
+            height: 8rem;
+            background: rgba(249, 115, 22, 0.1);
+            border-radius: 50%;
+        } */
+
+        .stat-card.pending-card .stat-value {
+            color: var(--secondary-color);
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-card.pending-card .stat-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        /* Progress Card */
+        .progress-card {
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .progress-card h3 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .progress-card .progress-subtitle {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .progress-card .progress-percentage {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .progress-bar-custom {
+            height: 0.75rem;
+            background: #e7ebf4;
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--primary-color);
+            border-radius: 1rem;
+            transition: width 0.5s ease-out;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.75rem;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        /* Table Card */
+        .table-card {
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .table-card-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-card-header h3 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin: 0;
+        }
+
+        .view-all-btn {
+            color: var(--primary-color);
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-decoration: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .view-all-btn:hover {
+            text-decoration: underline;
+        }
+
+        .custom-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .custom-table thead {
+            background: #f8fafc;
+        }
+
+        .custom-table th {
+            padding: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            text-align: left;
+        }
+
+        .custom-table th:last-child {
+            text-align: right;
+        }
+
+        .custom-table tbody tr {
+            border-bottom: 1px solid var(--border-color);
+            transition: background 0.2s ease;
+        }
+
+        .custom-table tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .custom-table td {
+            padding: 1rem;
+            font-size: 0.875rem;
+        }
+
+        .custom-table td:last-child {
+            text-align: right;
+        }
+
+        .idea-title {
+            font-weight: 500;
+            color: var(--text-dark);
+            margin: 0 0 0.25rem 0;
+        }
+
+        .idea-id {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .team-name {
+            color: var(--text-dark);
+        }
+
+        .category-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .category-badge.sustainability {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .category-badge.education {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .category-badge.agriculture {
+            background: #fef3c7;
+            color: #854d0e;
+        }
+
+        .btn-evaluate {
+            padding: 0.5rem 1rem;
+            background: var(--primary-color);
+            color: #fff;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(13, 89, 242, 0.2);
+        }
+
+        .btn-evaluate:hover {
+            background: #8253b4;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(147, 13, 242, 0.3);
+        }
+
+        .btn-resume {
+            padding: 0.5rem 1rem;
+            background: var(--white);
+            color: var(--text-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-resume:hover {
+            background: var(--background-light);
+        }
+
+        /* Guidelines Card */
+        .guidelines-card {
+            background: linear-gradient(135deg, #5E2A97 0%, #7B3FB5 100%),
+                url("https://lh3.googleusercontent.com/aida-public/AB6AXuBP2VDkaFMMoFo4GoDatDjkABFWkIJHRZa08cojDOyZLcRaTOT1ebXcpCtZ02CfVNcEH_W1U4r3U6mo9SokVsdgSjY05DXjud4Y-6hC0en_S4He6cq3RnrJJwFpwq91vM0IwzRIL3HXcysA6ud99jHJQVoXKNOEj25d18cv0clmd-6SK7CKg-E6-GpdiYTK_kddFxo8BczNi9JwQkdFPksBSClVFl5raOj-f6DQ6FitHHPNShP4fitqYOhl0UF2urUBz5b2aIWq7vY");
+            background-size: cover;
+            background-position: center;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(94, 42, 151, 0.3);
+        }
+
+        .guidelines-icon {
+            width: 3rem;
+            height: 3rem;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+        }
+
+        .guidelines-content h3 {
+            color: #fff;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .guidelines-content p {
+            color: #E8D4F0;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        .guidelines-content ul {
+            color: var(--white);
+            font-size: 0.875rem;
+            margin-bottom: 1.5rem;
+            padding-left: 1.25rem;
+        }
+
+        .guidelines-content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .btn-download {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: var(--white);
+            color: var(--primary-color);
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-download:hover {
+            background: var(--secondary-color);
+            color: var(--text-dark);
+            transform: translateY(-2px);
+        }
+
+        /* Help Card */
+        .help-card {
+            background: #FFFEF0;
+            border: 1px solid rgba(222, 222, 80, 0.3);
+            border-radius: 1rem;
+            padding: 1.5rem;
+        }
+
+        .help-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #B8B830;
+            margin-bottom: 0.75rem;
+        }
+
+        .help-header span.material-symbols-outlined {
+            font-size: 24px;
+        }
+
+        .help-header .help-title {
+            font-weight: 700;
+            font-size: 0.875rem;
+        }
+
+        .help-card p {
+            color: var(--text-dark);
+            font-size: 0.875rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .help-link {
+            color: var(--primary-color);
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .help-link:hover {
+            text-decoration: underline;
+            color: #7B3FB5;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .content-wrapper {
+                padding: 1rem;
+            }
+
+            .stat-card .stat-value {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar Container -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header Container -->
+            <div id="header-container"></div>
+
+            <!-- Dashboard Content -->
+            <div class="content-wrapper">
+                <!-- Stats Cards -->
+                <div class="row g-4 mb-4">
+                    <div class="col-12 col-md-4">
+                        <div class="stat-card">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <p class="stat-label">Total Assigned</p>
+                                    <p class="stat-value">50</p>
+                                </div>
+                                <div class="stat-icon primary">
+                                    <span class="material-symbols-outlined">lightbulb</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="stat-card pending-card">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <p class="stat-label">Pending</p>
+                                    <p class="stat-value">12</p>
+                                    <p class="stat-subtitle">Due within 3 days</p>
+                                </div>
+                                <div class="stat-icon secondary">
+                                    <span class="material-symbols-outlined">pending_actions</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="stat-card">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <p class="stat-label">Completed</p>
+                                    <p class="stat-value">38</p>
+                                </div>
+                                <div class="stat-icon success">
+                                    <span class="material-symbols-outlined">check_circle</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Grid Layout -->
+                <div class="row g-4">
+                    <!-- Left Column (Progress & Table) -->
+                    <div class="col-12 col-lg-8">
+                        <!-- Progress Bar Section -->
+                        <div class="progress-card mb-4">
+                            <div class="d-flex justify-content-between align-items-end mb-3">
+                                <div>
+                                    <h3>Overall Progress</h3>
+                                    <p class="progress-subtitle">Keep up the momentum! You're almost there.</p>
+                                </div>
+                                <p class="progress-percentage">76%</p>
+                            </div>
+                            <div class="progress-bar-custom">
+                                <div class="progress-bar-fill" style="width: 76%"></div>
+                            </div>
+                            <div class="progress-info">
+                                <span>38 Completed</span>
+                                <span>50 Total</span>
+                            </div>
+                        </div>
+
+                        <!-- Pending Evaluations Table -->
+                        <div class="table-card">
+                            <div class="table-card-header">
+                                <h3>Pending Evaluations</h3>
+                                <button class="view-all-btn">View All</button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="custom-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Idea Title</th>
+                                            <th>Team</th>
+                                            <th>Category</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <p class="idea-title">Eco-Smart Packaging</p>
+                                                <p class="idea-id">ID: #IFT-2023-045</p>
+                                            </td>
+                                            <td class="team-name">GreenGen Warriors</td>
+                                            <td>
+                                                <span class="category-badge sustainability">Sustainability</span>
+                                            </td>
+                                            <td>
+                                                <a href="idea-evaluation.html" class="btn-evaluate" style="text-decoration: none; display: inline-block;">Evaluate</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <p class="idea-title">AI-Based Rural Tutor</p>
+                                                <p class="idea-id">ID: #IFT-2023-112</p>
+                                            </td>
+                                            <td class="team-name">EduTech Pioneers</td>
+                                            <td>
+                                                <span class="category-badge education">Education</span>
+                                            </td>
+                                            <td>
+                                                <a href="idea-evaluation.html" class="btn-evaluate" style="text-decoration: none; display: inline-block;">Evaluate</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <p class="idea-title">Solar Irrigation Pump</p>
+                                                <p class="idea-id">ID: #IFT-2023-089</p>
+                                            </td>
+                                            <td class="team-name">AgriGrowth Solutions</td>
+                                            <td>
+                                                <span class="category-badge agriculture">Agriculture</span>
+                                            </td>
+                                            <td>
+                                                <a href="idea-evaluation.html" class="btn-evaluate" style="text-decoration: none; display: inline-block;">Evaluate</a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column (Guidelines & Help) -->
+                    <div class="col-12 col-lg-4">
+                        <!-- Guidelines Card -->
+                        <div class="guidelines-card mb-4">
+                            <div class="guidelines-icon">
+                                <span class="material-symbols-outlined">menu_book</span>
+                            </div>
+                            <div class="guidelines-content">
+                                <h3>Evaluation Guidelines</h3>
+                                <p>Remember to focus on these key pillars during your scoring process:</p>
+                                <ul>
+                                    <li>Innovation & Originality</li>
+                                    <li>Scalability Potential</li>
+                                    <li>Social Impact Factor</li>
+                                    <li>Financial Feasibility</li>
+                                </ul>
+                                <button class="btn-download">
+                                    <span class="material-symbols-outlined">download</span>
+                                    <span>Download PDF Guide</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Help Card -->
+                        <div class="help-card">
+                            <div class="help-header">
+                                <span class="material-symbols-outlined">support_agent</span>
+                                <span class="help-title">Need Help?</span>
+                            </div>
+                            <p>Contact the jury support team if you have conflicts of interest with any assigned team.</p>
+                            <a href="#" class="help-link">Contact Support →</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Load Sidebar -->
+    <script>
+        fetch('sidebar.html')
+            .then(response => response.text())
+            .then(data => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = data;
+
+                const sidebar = tempDiv.querySelector('aside');
+                const sidebarScript = tempDiv.querySelector('script');
+                const sidebarStyle = tempDiv.querySelector('style');
+
+                if (sidebar) {
+                    document.getElementById('sidebar-container').appendChild(sidebar);
+                }
+
+                if (sidebarStyle) {
+                    document.head.appendChild(sidebarStyle);
+                }
+
+                if (sidebarScript) {
+                    const script = document.createElement('script');
+                    script.textContent = sidebarScript.textContent;
+                    document.body.appendChild(script);
+                }
+
+                // Manually trigger active menu highlighting after sidebar is loaded
+                setTimeout(() => {
+                    const currentPage = window.location.pathname.split('/').pop() || 'dashboard.html';
+                    const navItems = document.querySelectorAll('.nav-item');
+
+                    console.log('Setting active menu for page:', currentPage);
+
+                    navItems.forEach(item => {
+                        const href = item.getAttribute('href');
+
+                        // Remove active class from all items first
+                        item.classList.remove('nav-item-active');
+
+                        // Find the icon and update fill state
+                        const icon = item.querySelector('.material-symbols-outlined');
+                        if (icon) {
+                            icon.classList.remove('filled');
+                            icon.style.fontVariationSettings = "'FILL' 0";
+                        }
+
+                        // Add active class to matching item
+                        if (href === currentPage ||
+                            (currentPage === '' && href === 'dashboard.html') ||
+                            (currentPage === 'index.html' && href === 'dashboard.html')) {
+                            item.classList.add('nav-item-active');
+                            console.log('Active menu set to:', href);
+                            if (icon) {
+                                icon.classList.add('filled');
+                                icon.style.fontVariationSettings = "'FILL' 1";
+                            }
+                        }
+                    });
+                }, 200);
+            })
+            .catch(error => console.error('Error loading sidebar:', error));
+    </script>
+
+    <!-- Load Header -->
+    <script>
+        fetch('header.html')
+            .then(response => response.text())
+            .then(data => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = data;
+
+                const header = tempDiv.querySelector('header');
+                const notificationPanel = tempDiv.querySelector('#notificationPanel');
+                const helpModal = tempDiv.querySelector('#helpModal');
+                const profileDropdown = tempDiv.querySelector('#profileDropdown');
+                const headerStyle = tempDiv.querySelector('style');
+
+                if (header) {
+                    document.getElementById('header-container').appendChild(header);
+                }
+
+                // Append dropdowns to body for proper z-index positioning
+                if (notificationPanel) {
+                    document.body.appendChild(notificationPanel);
+                }
+
+                if (helpModal) {
+                    document.body.appendChild(helpModal);
+                }
+
+                if (profileDropdown) {
+                    document.body.appendChild(profileDropdown);
+                }
+
+                if (headerStyle) {
+                    document.head.appendChild(headerStyle);
+                }
+
+                // Initialize header functionality directly here
+                setTimeout(() => {
+                    console.log('Initializing header functionality...');
+
+                    const notificationBtn = document.getElementById('notificationBtn');
+                    const notificationPanelEl = document.getElementById('notificationPanel');
+                    const closeNotificationPanel = document.getElementById('closeNotificationPanel');
+                    const helpBtn = document.getElementById('helpBtn');
+                    const helpModalEl = document.getElementById('helpModal');
+                    const closeHelpModal = document.getElementById('closeHelpModal');
+                    const profileDropdownEl = document.getElementById('profileDropdown');
+                    const profileAvatarBtn = document.getElementById('profileAvatarBtn');
+                    const logoutLink = document.getElementById('logoutLink');
+                    const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
+                    const sidebar = document.getElementById('juryAppSidebar');
+
+                    console.log('Elements found:', {
+                        notificationBtn: !!notificationBtn,
+                        notificationPanel: !!notificationPanelEl,
+                        helpBtn: !!helpBtn,
+                        helpModal: !!helpModalEl,
+                        profileAvatarBtn: !!profileAvatarBtn,
+                        profileDropdown: !!profileDropdownEl,
+                        sidebarToggleBtn: !!sidebarToggleBtn,
+                        sidebar: !!sidebar
+                    });
+
+                    // Setup Notification Panel
+                    if (notificationBtn && notificationPanelEl) {
+                        notificationBtn.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            console.log('Notification button clicked');
+                            notificationPanelEl.classList.toggle('active');
+
+                            // Close other panels
+                            if (helpModalEl) helpModalEl.classList.remove('active');
+                            if (profileDropdownEl) profileDropdownEl.classList.remove('active');
+                        });
+
+                        if (closeNotificationPanel) {
+                            closeNotificationPanel.addEventListener('click', function() {
+                                notificationPanelEl.classList.remove('active');
+                            });
+                        }
+                    }
+
+                    // Setup Help Modal
+                    if (helpBtn && helpModalEl) {
+                        helpBtn.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            console.log('Help button clicked');
+                            helpModalEl.classList.toggle('active');
+
+                            // Close other panels
+                            if (notificationPanelEl) notificationPanelEl.classList.remove('active');
+                            if (profileDropdownEl) profileDropdownEl.classList.remove('active');
+                        });
+
+                        if (closeHelpModal) {
+                            closeHelpModal.addEventListener('click', function() {
+                                helpModalEl.classList.remove('active');
+                            });
+                        }
+                    }
+
+                    // Setup Profile Dropdown
+                    if (profileAvatarBtn && profileDropdownEl) {
+                        profileAvatarBtn.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            console.log('Profile avatar clicked');
+                            profileDropdownEl.classList.toggle('active');
+
+                            // Close other panels
+                            if (notificationPanelEl) notificationPanelEl.classList.remove('active');
+                            if (helpModalEl) helpModalEl.classList.remove('active');
+                        });
+                    }
+
+                    // Setup Logout
+                    if (logoutLink) {
+                        logoutLink.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+
+                            if (confirm('Are you sure you want to logout?')) {
+                                // Close dropdown
+                                if (profileDropdownEl) {
+                                    profileDropdownEl.classList.remove('active');
+                                }
+
+                                // Clear any stored user data
+                                sessionStorage.clear();
+                                localStorage.removeItem('userToken');
+
+                                // Redirect to login page
+                                window.location.href = '../auth/sign-in.html';
+                            }
+                        });
+                    }
+
+                    // Setup Sidebar Toggle
+                    if (sidebarToggleBtn && sidebar) {
+                        sidebarToggleBtn.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            console.log('Sidebar toggle clicked');
+
+                            // Toggle collapsed state on desktop
+                            if (window.innerWidth >= 768) {
+                                sidebar.classList.toggle('collapsed');
+                            } else {
+                                // Toggle mobile-open state on mobile
+                                sidebar.classList.toggle('mobile-open');
+                            }
+                        });
+                    }
+
+                    // Close dropdowns when clicking outside
+                    document.addEventListener('click', function(e) {
+                        if (notificationPanelEl && !e.target.closest('#notificationPanel') && !e.target.closest('#notificationBtn')) {
+                            notificationPanelEl.classList.remove('active');
+                        }
+
+                        if (helpModalEl && !e.target.closest('#helpModal') && !e.target.closest('#helpBtn')) {
+                            helpModalEl.classList.remove('active');
+                        }
+
+                        if (profileDropdownEl && !e.target.closest('#profileDropdown') && !e.target.closest('#profileAvatarBtn')) {
+                            profileDropdownEl.classList.remove('active');
+                        }
+
+                        // Close sidebar on mobile when clicking outside
+                        if (sidebar && window.innerWidth < 768) {
+                            if (!e.target.closest('#juryAppSidebar') && !e.target.closest('#sidebarToggleBtn')) {
+                                sidebar.classList.remove('mobile-open');
+                            }
+                        }
+                    });
+
+                    console.log('Header functionality initialized successfully');
+                }, 100);
+            })
+            .catch(error => console.error('Error loading header:', error));
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,2684 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>IFTx | The Future is Yours to Build</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+
+    <!-- Three.js -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+
+    <!-- GSAP + ScrollTrigger + SplitText -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollToPlugin.min.js"></script>
+
+    <style>
+        /* ─── CSS Variables ─────────────────────────────────── */
+        :root {
+            --primary: #7f13ec;
+            --accent-neon: #00ff9d;
+            --accent-blue: #00d4ff;
+            --bg-dark: #0a0510;
+            --surface-dark: #160d21;
+            --text-muted: #8b95a1;
+            --border-subtle: rgba(255, 255, 255, 0.05);
+        }
+
+        /* ─── Base ──────────────────────────────────────────── */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: #ffffff;
+            font-family: 'Space Grotesk', sans-serif;
+            overflow-x: hidden;
+        }
+
+        ::selection {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        /* ─── Utility ───────────────────────────────────────── */
+        .text-primary-custom {
+            color: var(--primary);
+        }
+
+        .text-neon {
+            color: var(--accent-neon);
+        }
+
+        .text-blue-accent {
+            color: var(--accent-blue);
+        }
+
+        .text-muted-custom {
+            color: var(--text-muted);
+        }
+
+        .bg-primary-custom {
+            background-color: var(--primary);
+        }
+
+        .bg-surface {
+            background-color: var(--surface-dark);
+        }
+
+        .bg-dark-custom {
+            background-color: var(--bg-dark);
+        }
+
+        /* Glass panel */
+        .glass-panel {
+            background: rgba(127, 19, 236, 0.05);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(127, 19, 236, 0.2);
+        }
+
+        /* Orb glow */
+        .orb-glow {
+            box-shadow: 0 0 80px 20px rgba(127, 19, 236, 0.3);
+        }
+
+        /* Text outline */
+        .text-outline {
+            -webkit-text-stroke: 1px rgba(255, 255, 255, 0.3);
+            color: transparent;
+        }
+
+        /* Hide scrollbar */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Marquee animation */
+        @keyframes marquee {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        .animate-marquee {
+            animation: marquee 30s linear infinite;
+        }
+
+        /* Spinning rings */
+        @keyframes spin-slow {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes spin-reverse {
+            to {
+                transform: rotate(-360deg);
+            }
+        }
+
+        .spin-slow {
+            animation: spin-slow 10s linear infinite;
+        }
+
+        .spin-reverse {
+            animation: spin-reverse 15s linear infinite;
+        }
+
+        /* Pulse dot */
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+        }
+
+        .pulse-dot {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        /* Bounce */
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-8px);
+            }
+        }
+
+        .float-bounce {
+            animation: bounce 2.5s ease-in-out infinite;
+        }
+
+        /* ─── Starfield Warp ─────────────────────────────────── */
+        #starfield-warp {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ─── Hero ──────────────────────────────────────────── */
+        .hero-section {
+            min-height: 90vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            padding: 5rem 1.5rem 3rem;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            border: 1px solid rgba(127, 19, 236, 0.3);
+            background: rgba(127, 19, 236, 0.1);
+            margin-bottom: 1.5rem;
+        }
+
+        .badge-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-neon);
+        }
+
+        .badge-text {
+            font-size: 0.625rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--primary);
+        }
+
+        .hero-heading {
+            font-size: clamp(3rem, 8vw, 5rem);
+            font-weight: 700;
+            line-height: 0.92;
+            letter-spacing: -0.04em;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-subtext {
+            font-size: 1.125rem;
+            color: var(--text-muted);
+            max-width: 32rem;
+            margin-bottom: 2rem;
+            line-height: 1.7;
+        }
+
+        .btn-primary-custom {
+            padding: 1rem 2rem;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 0.375rem;
+            font-weight: 700;
+            font-family: 'Space Grotesk', sans-serif;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: filter 0.2s;
+        }
+
+        .btn-primary-custom:hover {
+            filter: brightness(1.15);
+        }
+
+        .btn-outline-custom {
+            padding: 1rem 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.375rem;
+            font-weight: 700;
+            font-family: 'Space Grotesk', sans-serif;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-outline-custom:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Hero Visual — Spline */
+        .hero-visual-wrap {
+            position: relative;
+            width: 100%;
+            height: 520px;
+        }
+
+        .hero-bg-glow {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle, rgba(127, 19, 236, 0.18) 0%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(120px);
+            pointer-events: none;
+        }
+
+        /* Globe canvas */
+        #globe-canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+        }
+
+        #globe-canvas:active {
+            cursor: grabbing;
+        }
+
+        /* Floating stat chips around the globe */
+        .globe-chip {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.45rem 0.9rem;
+            border-radius: 9999px;
+            background: rgba(10, 5, 16, 0.75);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(127, 19, 236, 0.35);
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #fff;
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 5;
+            animation: chipFloat 3s ease-in-out infinite;
+        }
+
+        .globe-chip .chip-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .globe-chip:nth-child(2) {
+            top: 12%;
+            left: -2%;
+            animation-delay: 0s;
+        }
+
+        .globe-chip:nth-child(3) {
+            top: 22%;
+            right: 2%;
+            animation-delay: 0.8s;
+        }
+
+        .globe-chip:nth-child(4) {
+            bottom: 28%;
+            left: -4%;
+            animation-delay: 1.6s;
+        }
+
+        .globe-chip:nth-child(5) {
+            bottom: 14%;
+            right: 0%;
+            animation-delay: 0.4s;
+        }
+
+        @keyframes chipFloat {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-7px);
+            }
+        }
+
+        /* ─── Core Section ──────────────────────────────────── */
+        .section-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .section-heading {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+        }
+
+        .core-section {
+            padding: 6rem 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Subtle background glow */
+        .core-section::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(127, 19, 236, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        /* ── Animated border keyframes ───────────────────────── */
+        @keyframes border-spin {
+            to { --border-angle: 360deg; }
+        }
+
+        @property --border-angle {
+            syntax: '<angle>';
+            inherits: false;
+            initial-value: 0deg;
+        }
+
+        /* Pillar cards — wrapper keeps overflow visible for border */
+        .pillar-card-wrap {
+            position: relative;
+            border-radius: 1.25rem;
+            padding: 1.5px;                        /* space for the beam border */
+            background: conic-gradient(
+                from var(--border-angle, 0deg),
+                transparent 0%,
+                transparent 60%,
+                var(--beam-color-a) 75%,
+                var(--beam-color-b) 88%,
+                transparent 100%
+            );
+            animation: border-spin var(--beam-speed, 4s) linear infinite;
+            height: 100%;
+        }
+
+        .pillar-card-wrap.neon {
+            --beam-color-a: rgba(0, 255, 157, 0.9);
+            --beam-color-b: rgba(0, 255, 157, 0.25);
+            --beam-speed: 5s;
+        }
+
+        .pillar-card-wrap.blue {
+            --beam-color-a: rgba(0, 212, 255, 0.9);
+            --beam-color-b: rgba(0, 212, 255, 0.25);
+            --beam-speed: 4s;
+        }
+
+        .pillar-card-wrap.purple {
+            --beam-color-a: rgba(127, 19, 236, 1);
+            --beam-color-b: rgba(179, 102, 255, 0.3);
+            --beam-speed: 3.5s;
+        }
+
+        .pillar-card-wrap:hover {
+            animation-duration: 1.6s;
+        }
+
+        /* Pillar cards */
+        .pillar-card {
+            position: relative;
+            padding: 2.5rem 2rem;
+            border-radius: calc(1.25rem - 1px);
+            background: #0d0817;
+            transition: transform 0.35s, background 0.35s;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .pillar-card-wrap:hover .pillar-card {
+            transform: translateY(-6px);
+            background: rgba(18, 10, 28, 0.98);
+        }
+
+        /* GIF icon wrapper */
+        .pillar-gif {
+            width: 80px;
+            height: 80px;
+            border-radius: 1rem;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            flex-shrink: 0;
+        }
+
+        .pillar-gif img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 0.75rem;
+        }
+
+        /* Number tag */
+        .pillar-number {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.75rem;
+            font-size: 4rem;
+            font-weight: 900;
+            line-height: 1;
+            color: rgba(255, 255, 255, 0.03);
+            letter-spacing: -0.04em;
+            user-select: none;
+        }
+
+        .pillar-title {
+            font-size: 1.375rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: #fff;
+        }
+
+        .pillar-desc {
+            font-size: 0.9375rem;
+            color: var(--text-muted);
+            line-height: 1.65;
+            margin: 0;
+        }
+
+        /* Centre badge */
+        /* .core-center-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.875rem 1.75rem;
+            border-radius: 9999px;
+            background: var(--primary);
+            box-shadow: 0 0 60px rgba(127,19,236,0.35);
+            margin-bottom: 3.5rem;
+        }
+
+        .core-center-badge span {
+            font-size: 1.125rem;
+            font-weight: 900;
+            font-style: italic;
+            color: #fff;
+            letter-spacing: -0.02em;
+        } */
+
+        /* ─── Tools Grid ────────────────────────────────────── */
+        .tools-section {
+            padding: 6rem 1.5rem;
+            background: rgba(22, 13, 33, 0.5);
+        }
+
+        .tool-card {
+            padding: 2rem;
+            border-radius: 0.75rem;
+            background: rgba(127, 19, 236, 0.05);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: border-color 0.2s;
+            height: 100%;
+        }
+
+        .tool-card:hover {
+            border-color: rgba(127, 19, 236, 0.5);
+        }
+
+        .tool-card.neon:hover {
+            border-color: rgba(0, 255, 157, 0.5);
+        }
+
+        .tool-card.blue:hover {
+            border-color: rgba(0, 212, 255, 0.5);
+        }
+
+        .tool-icon-wrap {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 0.375rem;
+            background: rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            transition: background 0.2s;
+        }
+
+        .tool-card:hover .tool-icon-wrap {
+            background: rgba(127, 19, 236, 0.2);
+        }
+
+        .tool-card.neon:hover .tool-icon-wrap {
+            background: rgba(0, 255, 157, 0.2);
+        }
+
+        .tool-card.blue:hover .tool-icon-wrap {
+            background: rgba(0, 212, 255, 0.2);
+        }
+
+        .tool-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: #fff;
+        }
+
+        .tool-desc {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        /* ─── Timeline / Masonry Section ───────────────────── */
+        .timeline-section {
+            padding: 6rem 1.5rem;
+        }
+
+        /* Masonry grid — 3 cols on desktop, auto row height */
+        .masonry-grid {
+            columns: 3;
+            column-gap: 1.25rem;
+        }
+
+        @media (max-width: 991.98px) {
+            .masonry-grid {
+                columns: 2;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .masonry-grid {
+                columns: 1;
+            }
+        }
+
+        .masonry-item {
+            break-inside: avoid;
+            margin-bottom: 1.25rem;
+        }
+
+        /* Base card */
+        .ms-card {
+            position: relative;
+            border-radius: 1.25rem;
+            padding: 2rem;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s, background 0.3s;
+        }
+
+        .ms-card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Ghost date watermark */
+        .ms-date {
+            font-size: clamp(2.8rem, 6vw, 4.5rem);
+            font-weight: 900;
+            line-height: 1;
+            margin: 0 0 1rem 0;
+            letter-spacing: -0.04em;
+        }
+
+        .ms-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.22rem 0.7rem;
+            border-radius: 9999px;
+            font-size: 0.6rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            margin-bottom: 0.85rem;
+        }
+
+        .ms-badge .badge-pip {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+        }
+
+        .ms-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin-bottom: 0.6rem;
+            line-height: 1.2;
+        }
+
+        .ms-desc {
+            font-size: 0.875rem;
+            line-height: 1.65;
+            margin: 0;
+        }
+
+        /* Decorative corner circle */
+        .ms-card::before {
+            content: '';
+            position: absolute;
+            top: -3rem;
+            right: -3rem;
+            width: 9rem;
+            height: 9rem;
+            border-radius: 50%;
+            opacity: 0.12;
+            pointer-events: none;
+            transition: all 0.4s ease;
+        }
+
+        .ms-card:hover::before {
+            width: 180%;
+            height: 180%;
+            top: -40%;
+            right: -40%;
+            opacity: 0.25;
+        }
+
+        /* ── Variants — yellow #face48 / purple #69267d ── */
+
+        /* ══ SOFT PASTEL VARIANTS ══ */
+
+        /* Lavender */
+        .ms-lavender {
+            background: rgba(200, 180, 230, 0.18);
+            border: 1px solid rgba(200, 180, 230, 0.4);
+            color: #fff;
+            transition: background 0.3s, border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+        }
+
+        .ms-lavender:hover {
+            background: rgba(200, 180, 230, 0.85);
+            border-color: rgba(200, 180, 230, 0.9);
+            box-shadow: 0 8px 25px rgba(200, 180, 230, 0.2);
+            transform: translateY(-5px);
+        }
+
+        .ms-lavender .ms-date {
+            color: rgba(200, 180, 230, 0.4);
+            transition: color 0.3s;
+        }
+
+        .ms-lavender:hover .ms-date {
+            color: rgb(80 60 100 / 91%);
+        }
+
+        .ms-lavender .ms-badge {
+            background: rgba(200, 180, 230, 0.35);
+            color: #d4c0f0;
+            border: 1px solid rgba(200, 180, 230, 0.5);
+            transition: all 0.3s;
+        }
+
+        .ms-lavender:hover .ms-badge {
+            background: rgba(80, 60, 100, 0.2);
+            color: #4a3660;
+            border-color: rgba(80, 60, 100, 0.3);
+        }
+
+        .ms-lavender:hover .ms-badge .badge-pip {
+            background: #4a3660;
+        }
+
+        .ms-lavender .ms-badge .badge-pip {
+            background: #d4c0f0;
+            transition: background 0.3s;
+        }
+
+        .ms-lavender .ms-title {
+            color: #fff;
+            transition: color 0.3s;
+        }
+
+        .ms-lavender:hover .ms-title {
+            color: #2d1f3d;
+        }
+
+        .ms-lavender .ms-desc {
+            color: var(--text-muted);
+            transition: color 0.3s;
+        }
+
+        .ms-lavender:hover .ms-desc {
+            color: #4a3660;
+        }
+
+        .ms-lavender::before {
+            background: #c8b4e6;
+        }
+
+        /* Mint */
+        .ms-mint {
+            background: rgba(152, 230, 200, 0.15);
+            border: 1px solid rgba(152, 230, 200, 0.35);
+            color: #fff;
+            transition: background 0.3s, border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+        }
+
+        .ms-mint:hover {
+            background: rgba(152, 230, 200, 0.85);
+            border-color: rgba(152, 230, 200, 0.9);
+            box-shadow: 0 8px 25px rgba(152, 230, 200, 0.2);
+            transform: translateY(-5px);
+        }
+
+        .ms-mint .ms-date {
+            color: rgba(152, 230, 200, 0.35);
+            transition: color 0.3s;
+        }
+
+        .ms-mint:hover .ms-date {
+            color: rgba(40, 80, 65, 0.836);
+        }
+
+        .ms-mint .ms-badge {
+            background: rgba(152, 230, 200, 0.3);
+            color: #98e6c8;
+            border: 1px solid rgba(152, 230, 200, 0.5);
+            transition: all 0.3s;
+        }
+
+        .ms-mint:hover .ms-badge {
+            background: rgba(40, 80, 65, 0.2);
+            color: #1a5040;
+            border-color: rgba(40, 80, 65, 0.3);
+        }
+
+        .ms-mint:hover .ms-badge .badge-pip {
+            background: #1a5040;
+        }
+
+        .ms-mint .ms-badge .badge-pip {
+            background: #98e6c8;
+            transition: background 0.3s;
+        }
+
+        .ms-mint .ms-title {
+            color: #fff;
+            transition: color 0.3s;
+        }
+
+        .ms-mint:hover .ms-title {
+            color: #1a4035;
+        }
+
+        .ms-mint .ms-desc {
+            color: var(--text-muted);
+            transition: color 0.3s;
+        }
+
+        .ms-mint:hover .ms-desc {
+            color: #2a5a4a;
+        }
+
+        .ms-mint::before {
+            background: #98e6c8;
+        }
+
+        /* Peach */
+        .ms-peach {
+            background: rgba(255, 200, 170, 0.15);
+            border: 1px solid rgba(255, 200, 170, 0.4);
+            color: #fff;
+            transition: background 0.3s, border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+        }
+
+        .ms-peach:hover {
+            background: rgba(255, 200, 170, 0.85);
+            border-color: rgba(255, 200, 170, 0.9);
+            box-shadow: 0 8px 25px rgba(255, 200, 170, 0.2);
+            transform: translateY(-5px);
+        }
+
+        .ms-peach .ms-date {
+            color: rgba(255, 200, 170, 0.4);
+            transition: color 0.3s;
+        }
+
+        .ms-peach:hover .ms-date {
+            color: rgba(120, 60, 40, 0.83);
+        }
+
+        .ms-peach .ms-badge {
+            background: rgba(255, 200, 170, 0.35);
+            color: #ffc8aa;
+            border: 1px solid rgba(255, 200, 170, 0.5);
+            transition: all 0.3s;
+        }
+
+        .ms-peach:hover .ms-badge {
+            background: rgba(120, 60, 40, 0.2);
+            color: #6b3520;
+            border-color: rgba(120, 60, 40, 0.3);
+        }
+
+        .ms-peach:hover .ms-badge .badge-pip {
+            background: #6b3520;
+        }
+
+        .ms-peach .ms-badge .badge-pip {
+            background: #ffc8aa;
+            transition: background 0.3s;
+        }
+
+        .ms-peach .ms-title {
+            color: #fff;
+            transition: color 0.3s;
+        }
+
+        .ms-peach:hover .ms-title {
+            color: #5a2a15;
+        }
+
+        .ms-peach .ms-desc {
+            color: var(--text-muted);
+            transition: color 0.3s;
+        }
+
+        .ms-peach:hover .ms-desc {
+            color: #7a4530;
+        }
+
+        .ms-peach::before {
+            background: #ffc8aa;
+        }
+
+        /* Baby Blue */
+        .ms-babyblue {
+            background: rgba(160, 200, 240, 0.15);
+            border: 1px solid rgba(160, 200, 240, 0.4);
+            color: #fff;
+            transition: background 0.3s, border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+        }
+
+        .ms-babyblue:hover {
+            background: rgba(160, 200, 240, 0.85);
+            border-color: rgba(160, 200, 240, 0.9);
+            box-shadow: 0 8px 25px rgba(160, 200, 240, 0.2);
+            transform: translateY(-5px);
+        }
+
+        .ms-babyblue .ms-date {
+            color: rgba(160, 200, 240, 0.4);
+            transition: color 0.3s;
+        }
+
+        .ms-babyblue:hover .ms-date {
+            color: rgba(40, 70, 110, 0.837);
+        }
+
+        .ms-babyblue .ms-badge {
+            background: rgba(160, 200, 240, 0.35);
+            color: #a0c8f0;
+            border: 1px solid rgba(160, 200, 240, 0.5);
+            transition: all 0.3s;
+        }
+
+        .ms-babyblue:hover .ms-badge {
+            background: rgba(40, 70, 110, 0.2);
+            color: #1a3a5c;
+            border-color: rgba(40, 70, 110, 0.3);
+        }
+
+        .ms-babyblue:hover .ms-badge .badge-pip {
+            background: #1a3a5c;
+        }
+
+        .ms-babyblue .ms-badge .badge-pip {
+            background: #a0c8f0;
+            transition: background 0.3s;
+        }
+
+        .ms-babyblue .ms-title {
+            color: #fff;
+            transition: color 0.3s;
+        }
+
+        .ms-babyblue:hover .ms-title {
+            color: #1a3050;
+        }
+
+        .ms-babyblue .ms-desc {
+            color: var(--text-muted);
+            transition: color 0.3s;
+        }
+
+        .ms-babyblue:hover .ms-desc {
+            color: #2a4a6a;
+        }
+
+        .ms-babyblue::before {
+            background: #a0c8f0;
+        }
+
+        /* Soft Pink */
+        .ms-softpink {
+            background: rgba(255, 180, 200, 0.15);
+            border: 1px solid rgba(255, 180, 200, 0.4);
+            color: #fff;
+            transition: background 0.3s, border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+        }
+
+        .ms-softpink:hover {
+            background: rgba(255, 180, 200, 0.85);
+            border-color: rgba(255, 180, 200, 0.9);
+            box-shadow: 0 8px 25px rgba(255, 180, 200, 0.2);
+            transform: translateY(-5px);
+        }
+
+        .ms-softpink .ms-date {
+            color: rgba(255, 180, 200, 0.4);
+            transition: color 0.3s;
+        }
+
+        .ms-softpink:hover .ms-date {
+            color: rgba(120, 50, 70, 0.834);
+        }
+
+        .ms-softpink .ms-badge {
+            background: rgba(255, 180, 200, 0.35);
+            color: #ffb4c8;
+            border: 1px solid rgba(255, 180, 200, 0.5);
+            transition: all 0.3s;
+        }
+
+        .ms-softpink:hover .ms-badge {
+            background: rgba(120, 50, 70, 0.2);
+            color: #6b2a3a;
+            border-color: rgba(120, 50, 70, 0.3);
+        }
+
+        .ms-softpink:hover .ms-badge .badge-pip {
+            background: #6b2a3a;
+        }
+
+        .ms-softpink .ms-badge .badge-pip {
+            background: #ffb4c8;
+            transition: background 0.3s;
+        }
+
+        .ms-softpink .ms-title {
+            color: #fff;
+            transition: color 0.3s;
+        }
+
+        .ms-softpink:hover .ms-title {
+            color: #5a2030;
+        }
+
+        .ms-softpink .ms-desc {
+            color: var(--text-muted);
+            transition: color 0.3s;
+        }
+
+        .ms-softpink:hover .ms-desc {
+            color: #7a3a4a;
+        }
+
+        .ms-softpink::before {
+            background: #ffb4c8;
+        }
+
+        /* Soft Lemon */
+        .ms-lemon {
+            background: rgba(255, 240, 150, 0.15);
+            border: 1px solid rgba(255, 240, 150, 0.4);
+            color: #fff;
+            transition: background 0.3s, border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+        }
+
+        .ms-lemon:hover {
+            background: rgba(255, 240, 150, 0.85);
+            border-color: rgba(255, 240, 150, 0.9);
+            box-shadow: 0 8px 25px rgba(255, 240, 150, 0.2);
+            transform: translateY(-5px);
+        }
+
+        .ms-lemon .ms-date {
+            color: rgba(255, 240, 150, 0.4);
+            transition: color 0.3s;
+        }
+
+        .ms-lemon:hover .ms-date {
+            color: rgba(100, 89, 30, 0.83);
+        }
+
+        .ms-lemon .ms-badge {
+            background: rgba(255, 240, 150, 0.35);
+            color: #fff096;
+            border: 1px solid rgba(255, 240, 150, 0.5);
+            transition: all 0.3s;
+        }
+
+        .ms-lemon:hover .ms-badge {
+            background: rgba(100, 90, 30, 0.2);
+            color: #5a5010;
+            border-color: rgba(100, 90, 30, 0.3);
+        }
+
+        .ms-lemon:hover .ms-badge .badge-pip {
+            background: #5a5010;
+        }
+
+        .ms-lemon .ms-badge .badge-pip {
+            background: #fff096;
+            transition: background 0.3s;
+        }
+
+        .ms-lemon .ms-title {
+            color: #fff;
+            transition: color 0.3s;
+        }
+
+        .ms-lemon:hover .ms-title {
+            color: #4a4510;
+        }
+
+        .ms-lemon .ms-desc {
+            color: var(--text-muted);
+            transition: color 0.3s;
+        }
+
+        .ms-lemon:hover .ms-desc {
+            color: #6a6520;
+        }
+
+        .ms-lemon::before {
+            background: #fff096;
+        }
+
+        /* ══ END PASTEL VARIANTS ══ */
+
+        /* Solid yellow - BRIGHT */
+        .ms-yellow {
+            background: #ffdc00;
+            color: #1a0a00;
+            box-shadow: 0 8px 40px rgba(255, 220, 0, 0.4);
+        }
+
+        .ms-yellow:hover {
+            box-shadow: 0 14px 50px rgba(255, 220, 0, 0.6);
+            transform: translateY(-5px);
+        }
+
+        .ms-yellow .ms-date {
+            color: rgba(0, 0, 0, 0.12);
+        }
+
+        .ms-yellow .ms-badge {
+            background: rgba(0, 0, 0, 0.12);
+            color: rgba(0, 0, 0, 0.7);
+        }
+
+        .ms-yellow .ms-badge .badge-pip {
+            background: #1a0a00;
+        }
+
+        .ms-yellow .ms-title {
+            color: #1a0a00;
+        }
+
+        .ms-yellow .ms-desc {
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        .ms-yellow::before {
+            background: #1a0a00;
+        }
+
+        /* Yellow tint (light shade) - BRIGHT */
+        .ms-yellow-soft {
+            background: rgba(255, 220, 0, 0.18);
+            border: 1px solid rgba(255, 220, 0, 0.5);
+            color: #fff;
+        }
+
+        .ms-yellow-soft:hover {
+            background: rgba(255, 220, 0, 0.35);
+            border-color: rgba(255, 220, 0, 0.8);
+            box-shadow: 0 0 40px rgba(255, 220, 0, 0.4);
+            transform: translateY(-5px);
+        }
+
+        .ms-yellow-soft .ms-date {
+            color: rgba(255, 220, 0, 0.3);
+        }
+
+        .ms-yellow-soft .ms-badge {
+            background: rgba(255, 220, 0, 0.25);
+            color: #ffdc00;
+            border: 1px solid rgba(255, 220, 0, 0.5);
+        }
+
+        .ms-yellow-soft .ms-badge .badge-pip {
+            background: #ffdc00;
+        }
+
+        .ms-yellow-soft .ms-desc {
+            color: var(--text-muted);
+        }
+
+        .ms-yellow-soft::before {
+            background: #ffdc00;
+        }
+
+        /* Solid purple */
+        .ms-purple-solid {
+            background: #69267d;
+            color: #fff;
+            box-shadow: 0 8px 40px rgba(105, 38, 125, 0.4);
+        }
+
+        .ms-purple-solid:hover {
+            box-shadow: 0 14px 50px rgba(105, 38, 125, 0.6);
+            transform: translateY(-5px);
+        }
+
+        .ms-purple-solid .ms-date {
+            color: rgba(255, 255, 255, 0.15);
+        }
+
+        .ms-purple-solid .ms-badge {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+        }
+
+        .ms-purple-solid .ms-badge .badge-pip {
+            background: #face48;
+        }
+
+        .ms-purple-solid .ms-desc {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .ms-purple-solid::before {
+            background: #face48;
+            opacity: 0.25;
+        }
+
+        /* Purple tint (dark shade) */
+        .ms-purple-soft {
+            background: rgba(105, 38, 125, 0.15);
+            border: 1px solid rgba(105, 38, 125, 0.4);
+            color: #fff;
+        }
+
+        .ms-purple-soft:hover {
+            background: rgba(105, 38, 125, 0.3);
+            border-color: rgba(105, 38, 125, 0.7);
+            box-shadow: 0 0 35px rgba(105, 38, 125, 0.35);
+            transform: translateY(-5px);
+        }
+
+        .ms-purple-soft .ms-date {
+            color: rgba(105, 38, 125, 0.35);
+        }
+
+        .ms-purple-soft .ms-badge {
+            background: rgba(105, 38, 125, 0.25);
+            color: #d491e8;
+            border: 1px solid rgba(105, 38, 125, 0.4);
+        }
+
+        .ms-purple-soft .ms-badge .badge-pip {
+            background: #d491e8;
+        }
+
+        .ms-purple-soft .ms-desc {
+            color: var(--text-muted);
+        }
+
+        .ms-purple-soft::before {
+            background: #69267d;
+        }
+
+        /* Yellow + purple gradient */
+        .ms-gradient {
+            background: linear-gradient(135deg, #69267d 0%, #9b3ab8 50%, #face48 140%);
+            color: #fff;
+            box-shadow: 0 8px 40px rgba(105, 38, 125, 0.35);
+        }
+
+        .ms-gradient:hover {
+            box-shadow: 0 14px 55px rgba(105, 38, 125, 0.5);
+            transform: translateY(-5px);
+        }
+
+        .ms-gradient .ms-date {
+            color: rgba(255, 255, 255, 0.15);
+        }
+
+        .ms-gradient .ms-badge {
+            background: rgba(250, 206, 72, 0.25);
+            color: #face48;
+        }
+
+        .ms-gradient .ms-badge .badge-pip {
+            background: #face48;
+        }
+
+        .ms-gradient .ms-desc {
+            color: rgba(255, 255, 255, 0.72);
+        }
+
+        .ms-gradient::before {
+            background: #face48;
+            opacity: 0.2;
+        }
+
+        /* Tall modifier */
+        .ms-tall {
+            padding: 2.75rem 2rem;
+        }
+
+        .ms-tall .ms-title {
+            font-size: 1.6rem;
+        }
+
+        @media (max-width: 767.98px) {
+            .ms-card {
+                padding: 1.5rem;
+            }
+
+            .ms-date {
+                font-size: 2.5rem;
+            }
+        }
+
+        /* ─── CTA Section ───────────────────────────────────── */
+        .cta-section {
+            padding: 6rem 1.5rem;
+            position: relative;
+        }
+
+        .cta-panel {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 4rem 3rem;
+            border-radius: 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            background: rgba(127, 19, 236, 0.05);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(127, 19, 236, 0.4);
+        }
+
+        .cta-orb-tr {
+            position: absolute;
+            top: -8rem;
+            right: -8rem;
+            width: 16rem;
+            height: 16rem;
+            background: rgba(127, 19, 236, 0.2);
+            border-radius: 50%;
+            filter: blur(100px);
+        }
+
+        .cta-orb-bl {
+            position: absolute;
+            bottom: -8rem;
+            left: -8rem;
+            width: 16rem;
+            height: 16rem;
+            background: rgba(0, 212, 255, 0.2);
+            border-radius: 50%;
+            filter: blur(100px);
+        }
+
+        .cta-heading {
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 900;
+            letter-spacing: -0.04em;
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-cta-primary {
+            padding: 1.25rem 2.5rem;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 0.375rem;
+            font-weight: 700;
+            font-size: 1rem;
+            font-family: 'Space Grotesk', sans-serif;
+            cursor: pointer;
+            transition: box-shadow 0.2s;
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-cta-primary:hover {
+            box-shadow: 0 0 40px rgba(127, 19, 236, 0.5);
+        }
+
+        .btn-cta-outline {
+            padding: 1.25rem 2.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 0.375rem;
+            font-weight: 700;
+            font-size: 1rem;
+            font-family: 'Space Grotesk', sans-serif;
+            cursor: pointer;
+            transition: background 0.2s;
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-cta-outline:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* ─── Cursor ────────────────────────────────────────── */
+        #cursor-dot,
+        #cursor-ring {
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+        }
+
+        #cursor-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+        }
+
+        #cursor-ring {
+            width: 36px;
+            height: 36px;
+            border: 1.5px solid rgba(127, 19, 236, 0.5);
+            transition: width 0.2s, height 0.2s, border-color 0.2s;
+        }
+
+        body:has(a:hover) #cursor-ring,
+        body:has(button:hover) #cursor-ring {
+            width: 52px;
+            height: 52px;
+            border-color: var(--accent-neon);
+        }
+
+        /* ─── Noise overlay ─────────────────────────────────── */
+        #noise {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.025;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-size: 200px 200px;
+        }
+
+        /* ─── GSAP initial states ───────────────────────────── */
+        .gsap-fade-up {
+            opacity: 0;
+            transform: translateY(50px);
+        }
+
+        .gsap-fade-left {
+            opacity: 0;
+            transform: translateX(-60px);
+        }
+
+        .gsap-fade-right {
+            opacity: 0;
+            transform: translateX(60px);
+        }
+
+        .gsap-scale-in {
+            opacity: 0;
+            transform: scale(0.85);
+        }
+
+        /* Pillar card shimmer on hover */
+        .pillar-card {
+            --mx: 50%;
+            --my: 50%;
+        }
+
+        .pillar-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 1.25rem;
+            background: radial-gradient(circle at var(--mx) var(--my), rgba(255, 255, 255, 0.06) 0%, transparent 60%);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .pillar-card:hover::after {
+            opacity: 1;
+        }
+
+        /* CTA panel shimmer */
+        .cta-panel {
+            --mx: 50%;
+            --my: 50%;
+        }
+
+        .cta-panel::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 2rem;
+            background: radial-gradient(circle at var(--mx) var(--my), rgba(127, 19, 236, 0.12) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        /* ─── Responsive ────────────────────────────────────── */
+        @media (max-width: 991.98px) {
+            .hero-visual-wrap {
+                height: 380px;
+            }
+
+            .pillar-card {
+                padding: 2rem 1.5rem;
+            }
+
+            #cursor-dot,
+            #cursor-ring {
+                display: none;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .hero-section {
+                padding-top: 3rem;
+            }
+
+            .hero-heading {
+                letter-spacing: -0.02em;
+            }
+
+            .cta-panel {
+                padding: 3rem 1.5rem;
+            }
+        }
+
+        /* ─── Navbar ───────────────────────────────────────── */
+        .navbar-custom {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 1rem 1.5rem;
+            background: rgba(10, 5, 16, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: background 0.3s, padding 0.3s;
+        }
+
+        .navbar-custom.scrolled {
+            padding: 0.75rem 1.5rem;
+            background: rgba(10, 5, 16, 0.95);
+        }
+
+        .navbar-inner {
+            max-width: 1320px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .navbar-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: #fff;
+            letter-spacing: -0.02em;
+        }
+
+        .navbar-logo img {
+            width: 180px;
+        }
+
+        .navbar-logo:hover {
+            color: #fff;
+        }
+
+        .navbar-logo-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.9rem;
+            color: #fff;
+        }
+
+        .navbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .btn-nav-login {
+            padding: 0.6rem 1.25rem;
+            background: transparent;
+            color: #fff;
+            border: none;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            font-family: 'Space Grotesk', sans-serif;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .btn-nav-login:hover {
+            color: var(--primary);
+        }
+
+        .btn-nav-register {
+            position: relative;
+            padding: 0.6rem 1.25rem;
+            background: #face48;
+            color: #1a0a00;
+            border: none;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            font-family: 'Space Grotesk', sans-serif;
+            cursor: pointer;
+            overflow: hidden;
+            /* isolate stacking context so z-index on spans works cleanly */
+            isolation: isolate;
+        }
+
+        /* Purple wipe overlay — no skew to avoid flicker at scale edges */
+        .btn-nav-register::after {
+            content: '';
+            position: absolute;
+            inset: -2px;                           /* slightly oversized to hide edge bleed */
+            background: #69267d;
+            transform: scaleY(0);
+            transform-origin: bottom center;
+            transition: transform 0.26s cubic-bezier(0.65, 0, 0.35, 1);
+            z-index: 1;
+            border-radius: inherit;
+            will-change: transform;
+        }
+
+        .btn-nav-register:hover::after {
+            transform: scaleY(1);
+        }
+
+        /* Shared span base */
+        .btn-nav-register .btn-label-default {
+            display: block;
+            position: relative;
+            z-index: 2;
+            transition: transform 0.26s cubic-bezier(0.65, 0, 0.35, 1);
+            will-change: transform;
+        }
+
+        .btn-nav-register .btn-label-hover {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            z-index: 2;
+            transform: translateY(110%);
+            transition: transform 0.26s cubic-bezier(0.65, 0, 0.35, 1);
+            will-change: transform;
+        }
+
+        .btn-nav-register:hover .btn-label-default {
+            transform: translateY(-110%);
+        }
+
+        .btn-nav-register:hover .btn-label-hover {
+            transform: translateY(0);
+        }
+
+        /* Add padding to body to account for fixed navbar */
+        body {
+            padding-top: 70px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Custom cursor -->
+    <div id="cursor-ring"></div>
+    <div id="cursor-dot"></div>
+
+    <!-- Film grain noise -->
+    <div id="noise"></div>
+
+    <!-- ── Navbar ─────────────────────────────────────────── -->
+    <nav class="navbar-custom" id="navbar">
+        <div class="navbar-inner">
+            <a href="#" class="navbar-logo">
+                <img src="../../assets/IFT_logo.png">
+            </a>
+            <div class="navbar-actions">
+                <button class="btn-nav-login">Login</button>
+                <button class="btn-nav-register">
+                    <span class="btn-label-default">Register</span>
+                    <span class="btn-label-hover">Register</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ══════════════════════════════════════════════════════
+         MAIN CONTENT (no nav / sidebar / footer)
+    ══════════════════════════════════════════════════════ -->
+    <main>
+
+        <!-- ── Hero Section ─────────────────────────────────── -->
+        <section class="hero-section">
+            <!-- Starfield warp background -->
+            <canvas id="starfield-warp"></canvas>
+
+            <div class="container-xl" style="position:relative; z-index:2;">
+                <div class="row align-items-center g-5">
+
+                    <!-- Left: Copy -->
+                    <div class="col-12 col-lg-6" style="position:relative; z-index:10;">
+                        <div class="hero-badge gsap-hero-badge">
+                            <span class="badge-dot pulse-dot"></span>
+                            <span class="badge-text">v2.0 Mainnet Live</span>
+                        </div>
+
+                        <h1 class="hero-heading">
+                            <span class="gsap-hero-line d-block">THE FUTURE</span>
+                            <span class="gsap-hero-line d-block"><span class="text-outline">IS YOURS</span></span>
+                            <span class="gsap-hero-line d-block">TO BUILD</span>
+                        </h1>
+
+                        <p class="hero-subtext gsap-hero-sub">
+                            The premier high-performance ecosystem for creators, developers, and visionaries. Build,
+                            scale,
+                            and dominate the decentralized web.
+                        </p>
+
+                        <div class="d-flex flex-wrap gap-3 gsap-hero-btns">
+                            <button class="btn-primary-custom magnetic-btn">
+                                Get Started
+                                <span class="material-symbols-outlined" style="font-size:20px;">arrow_forward</span>
+                            </button>
+                            <button class="btn-outline-custom magnetic-btn">
+                                Explore Docs
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right: Interactive Globe -->
+                    <div class="col-12 col-lg-6">
+                        <div class="hero-visual-wrap">
+                            <div class="hero-bg-glow"></div>
+                            <canvas id="globe-canvas"></canvas>
+                            <!-- Floating stat chips -->
+                            <div class="globe-chip">
+                                <span class="chip-dot" style="background:#00ff9d;"></span>
+                                142 Nodes Active
+                            </div>
+                            <div class="globe-chip">
+                                <span class="chip-dot" style="background:#00d4ff;"></span>
+                                $2.4M Distributed
+                            </div>
+                            <div class="globe-chip">
+                                <span class="chip-dot" style="background:#7f13ec;"></span>
+                                38 Countries
+                            </div>
+                            <div class="globe-chip">
+                                <span class="chip-dot" style="background:#00ff9d;"></span>
+                                99.9% Uptime
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── Core Section ──────────────────────────────────── -->
+        <section class="core-section">
+            <div class="container-xl">
+
+                <!-- Header -->
+                <div class="text-center mb-5">
+                    <!-- <div class="core-center-badge">
+                        <span class="material-symbols-outlined text-white" style="font-size:1.25rem;">deployed_code</span>
+                        <span>IFTx</span>
+                    </div> -->
+                    <h2 class="section-heading mb-3">The IFTx Core</h2>
+                    <p class="text-muted-custom"
+                        style="max-width:520px; margin:0 auto; font-size:1rem; line-height:1.7;">
+                        Our ecosystem is built on three unbreakable pillars that empower the next generation of digital
+                        infrastructure.
+                    </p>
+                </div>
+
+                <!-- 3-pillar card grid -->
+                <div class="row g-4 justify-content-center">
+
+                    <!-- Pillar 1: Innovation -->
+                    <div class="col-12 col-md-4 d-flex">
+                        <div class="pillar-card-wrap neon" style="flex:1;">
+                            <div class="pillar-card neon">
+                                <span class="pillar-number">01</span>
+                                <div class="pillar-gif">
+                                    <img src="../../assets/gifs/idea.gif"
+                                        alt="Innovation" loading="lazy" />
+                                </div>
+                                <h3 class="pillar-title">Innovation</h3>
+                                <p class="pillar-desc">Rethinking the boundaries of decentralized compute — pushing what's
+                                    possible for creators and builders worldwide.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pillar 2: Mentorship -->
+                    <div class="col-12 col-md-4 d-flex">
+                        <div class="pillar-card-wrap purple" style="flex:1;">
+                            <div class="pillar-card purple">
+                                <span class="pillar-number">02</span>
+                                <div class="pillar-gif">
+                                    <img src="../../assets/gifs/mentorship.gif"
+                                        alt="Mentorship" loading="lazy" />
+                                </div>
+                                <h3 class="pillar-title">Mentorship</h3>
+                                <p class="pillar-desc">Direct access to the architects of the new web — experienced leaders
+                                    guiding the next wave of decentralised innovators.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pillar 3: Recognition -->
+                    <div class="col-12 col-md-4 d-flex">
+                        <div class="pillar-card-wrap blue" style="flex:1;">
+                            <div class="pillar-card blue">
+                                <span class="pillar-number">03</span>
+                                <div class="pillar-gif">
+                                    <img src="../../assets/gifs/recognition.gif"
+                                        alt="Recognition" loading="lazy" />
+                                </div>
+                                <h3 class="pillar-title">Recognition</h3>
+                                <p class="pillar-desc">A global stage for high-impact contributions — your work seen,
+                                    valued, and rewarded by the world's top ecosystem partners.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ── Tools for Creators ────────────────────────────── -->
+        <section class="tools-section">
+            <div class="container-xl">
+                <div class="d-flex flex-column flex-md-row align-items-md-end justify-content-between gap-4 mb-5">
+                    <div>
+                        <h2 class="section-heading mb-2">Tools for Creators</h2>
+                        <p class="text-muted-custom mb-0">Everything you need to build at the speed of thought.</p>
+                    </div>
+                    <a class="text-primary-custom fw-bold d-flex align-items-center gap-1 text-decoration-none"
+                        href="#">
+                        View All Documentation
+                        <span class="material-symbols-outlined" style="font-size:16px;">open_in_new</span>
+                    </a>
+                </div>
+
+                <div class="row g-4">
+                    <!-- Tool 1 -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="tool-card">
+                            <div class="tool-icon-wrap">
+                                <span class="material-symbols-outlined text-primary-custom">terminal</span>
+                            </div>
+                            <h3 class="tool-title">IFTx CLI</h3>
+                            <p class="tool-desc">Powerful command-line interface for seamless deployments and
+                                management.</p>
+                        </div>
+                    </div>
+                    <!-- Tool 2 -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="tool-card neon">
+                            <div class="tool-icon-wrap">
+                                <img style="width: 8rem;" src="../../assets/gifs/AI Searching.gif"
+                                        alt="AI Co-Pilot" loading="lazy" />
+                            </div>
+                            <h3 class="tool-title">AI Co-Pilot</h3>
+                            <p class="tool-desc">Integrated AI assistant trained specifically on the IFTx protocol
+                                stack.</p>
+                        </div>
+                    </div>
+                    <!-- Tool 3 -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="tool-card blue">
+                            <div class="tool-icon-wrap">
+                                <img style="width: 3rem;" src="../../assets/gifs/analytics.gif"
+                                        alt="analytics" loading="lazy" />
+                            </div>
+                            <h3 class="tool-title">Pulse Analytics</h3>
+                            <p class="tool-desc">Real-time usage data and performance metrics for your deployments.</p>
+                        </div>
+                    </div>
+                    <!-- Tool 4 -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="tool-card">
+                            <div class="tool-icon-wrap">
+                                <img style="width: 3rem;" src="../../assets/gifs/network.gif"
+                                        alt="network" loading="lazy" />
+                            </div>
+                            <h3 class="tool-title">Global SDK</h3>
+                            <p class="tool-desc">Modular software development kits for Javascript, Rust, and Go.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── Timeline / Masonry Section ───────────────────── -->
+        <section class="timeline-section">
+            <div class="container-xl">
+
+                <!-- Header -->
+                <div class="mb-5">
+                    <h2 class="section-heading mb-2">Mark Your Calendar</h2>
+                    <p class="text-muted-custom mb-0">Don't miss the key milestones of the IFTx Season.</p>
+                </div>
+
+                <!-- Masonry Grid -->
+                <div class="masonry-grid">
+
+                    <!-- Card 1 — Lavender, tall -->
+                    <div class="masonry-item">
+                        <div class="ms-card ms-lavender ms-tall">
+                            <p class="ms-date">OCT<br>12</p>
+                            <div class="ms-badge">
+                                <span class="badge-pip"></span>Registration Open
+                            </div>
+                            <h3 class="ms-title">The Genesis Phase</h3>
+                            <p class="ms-desc">Developer applications open globally for the IFTx ecosystem grant
+                                program. Founders, builders, and creators — your window starts now.</p>
+                        </div>
+                    </div>
+
+                    <!-- Card 2 — Mint, normal -->
+                    <div class="masonry-item">
+                        <div class="ms-card ms-mint">
+                            <p class="ms-date">NOV<br>05</p>
+                            <div class="ms-badge">
+                                <span class="badge-pip"></span>Hackathon
+                            </div>
+                            <h3 class="ms-title">IFTx Global Build</h3>
+                            <p class="ms-desc">48 hours of intense creation with $500k in bounties up for grabs.</p>
+                        </div>
+                    </div>
+
+                    <!-- Card 3 — Peach, normal -->
+                    <div class="masonry-item">
+                        <div class="ms-card ms-peach">
+                            <p class="ms-date">NOV<br>20</p>
+                            <div class="ms-badge">
+                                <span class="badge-pip"></span>Judging
+                            </div>
+                            <h3 class="ms-title">Expert Panel Review</h3>
+                            <p class="ms-desc">Industry veterans and ecosystem partners evaluate submissions across
+                                innovation, impact, and execution.</p>
+                        </div>
+                    </div>
+
+                    <!-- Card 4 — Baby Blue, normal -->
+                    <div class="masonry-item">
+                        <div class="ms-card ms-babyblue">
+                            <p class="ms-date">DEC<br>18</p>
+                            <div class="ms-badge">
+                                <span class="badge-pip"></span>Mainstage
+                            </div>
+                            <h3 class="ms-title">Final Showcase</h3>
+                            <p class="ms-desc">Top 10 projects pitch live to our network of venture partners.</p>
+                        </div>
+                    </div>
+
+                    <!-- Card 5 — Soft Pink, tall -->
+                    <div class="masonry-item">
+                        <div class="ms-card ms-softpink ms-tall">
+                            <p class="ms-date">DEC<br>22</p>
+                            <div class="ms-badge">
+                                <span class="badge-pip"></span>Awards
+                            </div>
+                            <h3 class="ms-title">Winners Announced</h3>
+                            <p class="ms-desc">The community votes, the panel deliberates, and the top three teams claim
+                                their share of the prize pool and ecosystem grants. Celebrate the builders who defined
+                                this season.</p>
+                        </div>
+                    </div>
+
+                    <!-- Card 6 — Lemon, normal -->
+                    <div class="masonry-item">
+                        <div class="ms-card ms-lemon">
+                            <p class="ms-date">JAN<br>01</p>
+                            <div class="ms-badge">
+                                <span class="badge-pip"></span>Launch
+                            </div>
+                            <h3 class="ms-title">Ecosystem v3.0</h3>
+                            <p class="ms-desc">The next evolution of IFTx goes live to the general public.</p>
+                        </div>
+                    </div>
+
+                </div><!-- /masonry-grid -->
+            </div>
+        </section>
+
+        <!-- ── CTA Section ───────────────────────────────────── -->
+        <section class="cta-section">
+            <div class="cta-panel">
+                <div class="cta-orb-tr"></div>
+                <div class="cta-orb-bl"></div>
+
+                <h2 class="cta-heading">
+                    READY TO <span class="text-primary-custom" style="font-style:italic;">REDEFINE</span> EVERYTHING?
+                </h2>
+
+                <div class="d-flex flex-column flex-md-row gap-3 justify-content-center">
+                    <button class="btn-cta-primary">Join the Community</button>
+                    <button class="btn-cta-outline">Contact Sales</button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        /* ══════════════════════════════════════════════════════════
+           GSAP ANIMATIONS
+        ══════════════════════════════════════════════════════════ */
+        gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+
+        /* ── 0. Navbar Scroll Effect ───────────────────────────── */
+        const navbar = document.getElementById('navbar');
+        if (navbar) {
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            });
+        }
+
+        /* ── 1. Custom Cursor ─────────────────────────────────── */
+        const cursorDot = document.getElementById('cursor-dot');
+        const cursorRing = document.getElementById('cursor-ring');
+
+        if (cursorDot && cursorRing) {
+            let mx = 0, my = 0;
+            window.addEventListener('mousemove', e => {
+                mx = e.clientX; my = e.clientY;
+                gsap.to(cursorDot, { x: mx, y: my, duration: 0.1, ease: 'none' });
+                gsap.to(cursorRing, { x: mx, y: my, duration: 0.35, ease: 'power2.out' });
+            });
+        }
+
+        /* ── 2. Hero Entrance ─────────────────────────────────── */
+        const heroTl = gsap.timeline({ delay: 0.2 });
+
+        heroTl
+            .from('.hero-badge', {
+                opacity: 0, y: -20, duration: 0.6, ease: 'back.out(2)'
+            })
+            .from('.gsap-hero-line', {
+                opacity: 0,
+                y: 60,
+                skewY: 3,
+                stagger: 0.1,
+                duration: 0.8,
+                ease: 'power4.out'
+            }, '-=0.2')
+            .from('.hero-subtext', {
+                opacity: 0, y: 24, duration: 0.6, ease: 'power3.out'
+            }, '-=0.3')
+            .from('.gsap-hero-btns', {
+                opacity: 0, y: 16, duration: 0.5, ease: 'power3.out'
+            }, '-=0.3')
+            .from('.hero-visual-wrap', {
+                opacity: 0, x: 50, duration: 0.9, ease: 'power3.out'
+            }, '-=0.8');
+
+        /* ── 5. Hero parallax on scroll ──────────────────────── */
+        gsap.to('.hero-badge, .hero-heading, .hero-subtext, .gsap-hero-btns', {
+            yPercent: -15,
+            ease: 'none',
+            scrollTrigger: {
+                trigger: '.hero-section',
+                start: 'top top',
+                end: 'bottom top',
+                scrub: 1.5
+            }
+        });
+
+        gsap.to('.hero-visual-wrap', {
+            yPercent: 10,
+            ease: 'none',
+            scrollTrigger: {
+                trigger: '.hero-section',
+                start: 'top top',
+                end: 'bottom top',
+                scrub: 2
+            }
+        });
+
+        /* ── 6. Core Section ──────────────────────────────────── */
+        gsap.from('.core-section .text-center', {
+            opacity: 0, y: 60,
+            duration: 0.9,
+            ease: 'power3.out',
+            scrollTrigger: {
+                trigger: '.core-section',
+                start: 'top 80%',
+                toggleActions: 'play none none none'
+            }
+        });
+
+        gsap.from('.pillar-card-wrap', {
+            opacity: 0,
+            y: 80,
+            stagger: 0.15,
+            duration: 0.85,
+            ease: 'power3.out',
+            scrollTrigger: {
+                trigger: '.pillar-card-wrap',
+                start: 'top 85%',
+                toggleActions: 'play none none none'
+            }
+        });
+
+        /* Pillar card mouse-follow shimmer */
+        document.querySelectorAll('.pillar-card').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const r = card.getBoundingClientRect();
+                const x = ((e.clientX - r.left) / r.width * 100).toFixed(1) + '%';
+                const y = ((e.clientY - r.top) / r.height * 100).toFixed(1) + '%';
+                card.style.setProperty('--mx', x);
+                card.style.setProperty('--my', y);
+            });
+        });
+
+        /* ── 7. Tools Section ─────────────────────────────────── */
+        gsap.from('.tools-section .section-heading, .tools-section .text-muted-custom, .tools-section a', {
+            opacity: 0, y: 40, stagger: 0.1, duration: 0.7, ease: 'power3.out',
+            scrollTrigger: {
+                trigger: '.tools-section',
+                start: 'top 80%',
+                toggleActions: 'play none none none'
+            }
+        });
+
+        gsap.from('.tool-card', {
+            opacity: 0,
+            y: 60,
+            scale: 0.95,
+            stagger: 0.1,
+            duration: 0.75,
+            ease: 'power3.out',
+            scrollTrigger: {
+                trigger: '.tool-card',
+                start: 'top 88%',
+                toggleActions: 'play none none none'
+            }
+        });
+
+        /* Tool card tilt */
+        document.querySelectorAll('.tool-card').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const r = card.getBoundingClientRect();
+                const x = (e.clientX - r.left - r.width / 2) / (r.width / 2);
+                const y = (e.clientY - r.top - r.height / 2) / (r.height / 2);
+                gsap.to(card, { rotateY: x * 8, rotateX: -y * 8, duration: 0.3, ease: 'power2.out', transformPerspective: 800 });
+            });
+            card.addEventListener('mouseleave', () => {
+                gsap.to(card, { rotateY: 0, rotateX: 0, duration: 0.6, ease: 'elastic.out(1, 0.4)' });
+            });
+        });
+
+        /* ── 8. Timeline / Masonry Section ───────────────────── */
+        gsap.from('.timeline-section .section-heading, .timeline-section .text-muted-custom', {
+            opacity: 0, x: -50, stagger: 0.12, duration: 0.8, ease: 'power3.out',
+            scrollTrigger: {
+                trigger: '.timeline-section',
+                start: 'top 82%',
+                toggleActions: 'play none none none'
+            }
+        });
+
+        gsap.from('.ms-card', {
+            opacity: 0,
+            y: 60,
+            scale: 0.95,
+            stagger: 0.1,
+            duration: 0.75,
+            ease: 'power3.out',
+            scrollTrigger: {
+                trigger: '.masonry-grid',
+                start: 'top 85%',
+                toggleActions: 'play none none none'
+            }
+        });
+
+        /* ── 9. CTA Section ───────────────────────────────────── */
+        gsap.from('.cta-panel', {
+            opacity: 0,
+            scale: 0.9,
+            y: 50,
+            duration: 1,
+            ease: 'power3.out',
+            scrollTrigger: {
+                trigger: '.cta-panel',
+                start: 'top 82%',
+                toggleActions: 'play none none none'
+            }
+        });
+
+        gsap.from('.cta-heading', {
+            opacity: 0, y: 40, duration: 0.8, ease: 'power3.out',
+            scrollTrigger: { trigger: '.cta-heading', start: 'top 85%', toggleActions: 'play none none none' }
+        });
+
+        gsap.from('.btn-cta-primary, .btn-cta-outline', {
+            opacity: 0, y: 20, stagger: 0.12, duration: 0.7, ease: 'power3.out',
+            scrollTrigger: { trigger: '.btn-cta-primary', start: 'top 88%', toggleActions: 'play none none none' }
+        });
+
+        /* CTA panel mouse shimmer */
+        const ctaPanel = document.querySelector('.cta-panel');
+        if (ctaPanel) {
+            ctaPanel.addEventListener('mousemove', e => {
+                const r = ctaPanel.getBoundingClientRect();
+                ctaPanel.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100).toFixed(1) + '%');
+                ctaPanel.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100).toFixed(1) + '%');
+            });
+        }
+
+        /* ── 10. Magnetic Buttons ─────────────────────────────── */
+        document.querySelectorAll('.magnetic-btn').forEach(btn => {
+            btn.addEventListener('mousemove', e => {
+                const r = btn.getBoundingClientRect();
+                const dx = (e.clientX - (r.left + r.width / 2)) * 0.35;
+                const dy = (e.clientY - (r.top + r.height / 2)) * 0.35;
+                gsap.to(btn, { x: dx, y: dy, duration: 0.3, ease: 'power2.out' });
+            });
+            btn.addEventListener('mouseleave', () => {
+                gsap.to(btn, { x: 0, y: 0, duration: 0.6, ease: 'elastic.out(1, 0.4)' });
+            });
+        });
+
+        /* ── 11. Core badge counter animation ─────────────────── */
+        ScrollTrigger.create({
+            trigger: '.core-center-badge',
+            start: 'top 85%',
+            onEnter: () => {
+                gsap.from('.core-center-badge', {
+                    scale: 0.5, opacity: 0, duration: 0.8, ease: 'back.out(2)'
+                });
+            }
+        });
+
+        /* ── 12. Floating ambient orbs (hero section) ─────────── */
+        gsap.to('.hero-bg-glow', {
+            scale: 1.3,
+            opacity: 0.5,
+            duration: 4,
+            ease: 'sine.inOut',
+            yoyo: true,
+            repeat: -1
+        });
+
+    </script>
+
+    <!-- ═══════════════════════════════════════════════════════
+         STARFIELD WARP  (Canvas 2D)
+    ═══════════════════════════════════════════════════════ -->
+    <script>
+        (function () {
+            const canvas = document.getElementById('starfield-warp');
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            const heroSection = canvas.parentElement;
+
+            /* ── Resize canvas to hero dimensions ─────────────── */
+            function resize() {
+                canvas.width  = heroSection.offsetWidth;
+                canvas.height = heroSection.offsetHeight;
+                cx = canvas.width  / 2;
+                cy = canvas.height / 2;
+            }
+
+            let cx, cy;
+            resize();
+            window.addEventListener('resize', resize);
+
+            /* ── Star pool ─────────────────────────────────────── */
+            const STAR_COUNT = 280;
+            const MAX_DEPTH   = 1200;
+            const WARP_SPEED  = 18;       /* px/frame at z=0  */
+            const TAIL_FACTOR = 0.18;     /* trail length     */
+
+            /* Accent colours — purple / cyan / neon-green mix */
+            const COLORS = ['#7f13ec', '#00d4ff', '#00ff9d', '#b066ff', '#ffffff'];
+
+            function mkStar() {
+                return {
+                    x: (Math.random() - 0.5) * MAX_DEPTH * 2,
+                    y: (Math.random() - 0.5) * MAX_DEPTH * 2,
+                    z: Math.random() * MAX_DEPTH,
+                    color: COLORS[Math.floor(Math.random() * COLORS.length)],
+                    size: 0.6 + Math.random() * 1.6
+                };
+            }
+
+            const stars = Array.from({ length: STAR_COUNT }, mkStar);
+
+            /* ── Render loop ──────────────────────────────────── */
+            let speed = WARP_SPEED;
+
+            function draw() {
+                /* Fade trail — semi-transparent clear */
+                ctx.fillStyle = 'rgba(10, 5, 16, 0.45)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                stars.forEach(s => {
+                    /* Project */
+                    const pz = s.z / MAX_DEPTH;             /* 0=far → 1=close   */
+                    const sx = (s.x / s.z) * MAX_DEPTH + cx;
+                    const sy = (s.y / s.z) * MAX_DEPTH + cy;
+
+                    /* Previous projected position (for tail) */
+                    const prevZ = s.z + speed;
+                    const prevPz = prevZ / MAX_DEPTH;
+                    const px = (s.x / prevZ) * MAX_DEPTH + cx;
+                    const py = (s.y / prevZ) * MAX_DEPTH + cy;
+
+                    const alpha = Math.pow(1 - pz, 0.7);
+                    const radius = s.size * (1 - pz) * 2.2;
+
+                    /* Streak line */
+                    const tailLen = (px - sx) * TAIL_FACTOR + (speed * 0.06 * (1 - pz));
+                    const tailX   = sx - (px - sx) * TAIL_FACTOR;
+                    const tailY   = sy - (py - sy) * TAIL_FACTOR;
+
+                    const grad = ctx.createLinearGradient(tailX, tailY, sx, sy);
+                    grad.addColorStop(0, 'transparent');
+                    grad.addColorStop(1, s.color + Math.round(alpha * 255).toString(16).padStart(2, '0'));
+
+                    ctx.beginPath();
+                    ctx.moveTo(tailX, tailY);
+                    ctx.lineTo(sx, sy);
+                    ctx.strokeStyle = grad;
+                    ctx.lineWidth = radius;
+                    ctx.stroke();
+
+                    /* Bright tip dot */
+                    ctx.beginPath();
+                    ctx.arc(sx, sy, radius * 0.7, 0, Math.PI * 2);
+                    ctx.fillStyle = s.color + Math.round(alpha * 255).toString(16).padStart(2, '0');
+                    ctx.fill();
+
+                    /* Move star towards viewer */
+                    s.z -= speed;
+
+                    /* Reset when it passes through the origin */
+                    if (s.z <= 1) {
+                        s.x = (Math.random() - 0.5) * MAX_DEPTH * 2;
+                        s.y = (Math.random() - 0.5) * MAX_DEPTH * 2;
+                        s.z = MAX_DEPTH;
+                        s.color = COLORS[Math.floor(Math.random() * COLORS.length)];
+                        s.size = 0.6 + Math.random() * 1.6;
+                    }
+                });
+
+                requestAnimationFrame(draw);
+            }
+
+            /* ── Speed-up on scroll into hero ─────────────────── */
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(e => {
+                    speed = e.isIntersecting ? WARP_SPEED : WARP_SPEED * 0.3;
+                });
+            }, { threshold: 0.1 });
+            observer.observe(heroSection);
+
+            draw();
+        })();
+    </script>
+
+    <!-- ═══════════════════════════════════════════════════════
+         INTERACTIVE EARTH GLOBE  (Three.js)
+    ═══════════════════════════════════════════════════════ -->
+    <script>
+        (function () {
+            const canvas = document.getElementById('globe-canvas');
+            if (!canvas || typeof THREE === 'undefined') return;
+
+            /* ── Renderer ─────────────────────────────────────── */
+            const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+            const wrap = canvas.parentElement;
+            let W = wrap.clientWidth, H = wrap.clientHeight;
+            renderer.setSize(W, H);
+
+            /* ── Scene / Camera ───────────────────────────────── */
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(45, W / H, 0.1, 100);
+            camera.position.z = 2.8;
+
+            /* ── Globe group ──────────────────────────────────── */
+            const globeGroup = new THREE.Group();
+            scene.add(globeGroup);
+
+            const RADIUS = 1;
+
+            /* ── Texture loader ───────────────────────────────── */
+            const loader = new THREE.TextureLoader();
+
+            /* High-res Earth textures from NASA / Three.js examples CDN */
+            const BASE = 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/textures/';
+            const earthDay   = loader.load('https://unpkg.com/three-globe/example/img/earth-day.jpg');
+            const earthBump  = loader.load('https://unpkg.com/three-globe/example/img/earth-topology.png');
+            const earthSpec  = loader.load('https://unpkg.com/three-globe/example/img/earth-water.png');
+            const earthCloud = loader.load('https://unpkg.com/three-globe/example/img/earth-clouds.png');
+            const earthNight = loader.load('https://unpkg.com/three-globe/example/img/earth-night.jpg');
+
+            /* ─ 1. Earth surface ─ */
+            const earthGeo = new THREE.SphereGeometry(RADIUS, 64, 64);
+            const earthMat = new THREE.MeshPhongMaterial({
+                map:          earthDay,
+                bumpMap:      earthBump,
+                bumpScale:    0.05,
+                specularMap:  earthSpec,
+                specular:     new THREE.Color(0x334466),
+                shininess:    25
+            });
+            const earthMesh = new THREE.Mesh(earthGeo, earthMat);
+            globeGroup.add(earthMesh);
+
+            /* ─ 2. Cloud layer ─ */
+            const cloudGeo = new THREE.SphereGeometry(RADIUS * 1.008, 64, 64);
+            const cloudMat = new THREE.MeshPhongMaterial({
+                map:         earthCloud,
+                transparent: true,
+                opacity:     0.35,
+                depthWrite:  false
+            });
+            const cloudMesh = new THREE.Mesh(cloudGeo, cloudMat);
+            globeGroup.add(cloudMesh);
+
+            /* ─ 3. Atmosphere glow (BackSide shell) ─ */
+            const atmGeo = new THREE.SphereGeometry(RADIUS * 1.08, 64, 64);
+            const atmMat = new THREE.MeshPhongMaterial({
+                color:       0x4488ff,
+                transparent: true,
+                opacity:     0.08,
+                side:        THREE.BackSide,
+                depthWrite:  false
+            });
+            globeGroup.add(new THREE.Mesh(atmGeo, atmMat));
+
+            /* ─ 4. Thin atmosphere fringe (FrontSide, very transparent) ─ */
+            const fringeGeo = new THREE.SphereGeometry(RADIUS * 1.02, 64, 64);
+            const fringeMat = new THREE.MeshPhongMaterial({
+                color:       0x88aaff,
+                transparent: true,
+                opacity:     0.04,
+                depthWrite:  false
+            });
+            globeGroup.add(new THREE.Mesh(fringeGeo, fringeMat));
+
+            /* ── Lights ───────────────────────────────────────── */
+            /* Soft ambient so dark side isn't pitch black */
+            scene.add(new THREE.AmbientLight(0x223344, 0.6));
+
+            /* Main sun-like directional light */
+            const sunLight = new THREE.DirectionalLight(0xfff5e0, 2.2);
+            sunLight.position.set(5, 3, 5);
+            scene.add(sunLight);
+
+            /* Subtle fill from the opposite side */
+            const fillLight = new THREE.DirectionalLight(0x334466, 0.4);
+            fillLight.position.set(-5, -2, -3);
+            scene.add(fillLight);
+
+            /* Rim / purple accent light */
+            const rimLight = new THREE.PointLight(0x7f13ec, 1.2, 8);
+            rimLight.position.set(-3, 2, -2);
+            scene.add(rimLight);
+
+            /* ── Helper: lat/lon → Vector3 ────────────────────── */
+            function latLonToVec3(lat, lon, r) {
+                const phi   = (90 - lat)  * (Math.PI / 180);
+                const theta = (lon + 180) * (Math.PI / 180);
+                return new THREE.Vector3(
+                    -r * Math.sin(phi) * Math.cos(theta),
+                     r * Math.cos(phi),
+                     r * Math.sin(phi) * Math.sin(theta)
+                );
+            }
+
+            /* ── City node dots ───────────────────────────────── */
+            const locations = [
+                [40.7,  -74.0],   // New York
+                [51.5,   -0.1],   // London
+                [35.7,  139.7],   // Tokyo
+                [ 1.3,  103.8],   // Singapore
+                [48.9,    2.3],   // Paris
+                [37.8, -122.4],   // San Francisco
+                [-23.5, -46.6],   // São Paulo
+                [28.6,   77.2],   // Delhi
+                [55.7,   37.6],   // Moscow
+                [-33.9, 151.2],   // Sydney
+                [19.4,  -99.1],   // Mexico City
+                [ 6.5,    3.4],   // Lagos
+                [25.2,   55.3],   // Dubai
+                [43.7,  -79.4],   // Toronto
+                [-34.6, -58.4],   // Buenos Aires
+            ];
+
+            const dotColors = [0x00ff9d, 0xface48, 0x00d4ff];
+            const dots = [];
+
+            locations.forEach(([lat, lon], i) => {
+                const pos = latLonToVec3(lat, lon, RADIUS * 1.015);
+                const geo = new THREE.SphereGeometry(0.018, 8, 8);
+                const mat = new THREE.MeshBasicMaterial({ color: dotColors[i % 3] });
+                const dot = new THREE.Mesh(geo, mat);
+                dot.position.copy(pos);
+                globeGroup.add(dot);
+                dots.push({ mesh: dot, phase: Math.random() * Math.PI * 2 });
+
+                /* Halo ring around each dot */
+                const haloGeo = new THREE.RingGeometry(0.022, 0.03, 16);
+                const haloMat = new THREE.MeshBasicMaterial({
+                    color: dotColors[i % 3], transparent: true, opacity: 0.5,
+                    side: THREE.DoubleSide, depthWrite: false
+                });
+                const halo = new THREE.Mesh(haloGeo, haloMat);
+                halo.position.copy(pos);
+                halo.lookAt(new THREE.Vector3(0, 0, 0));
+                halo.rotateY(Math.PI);
+                globeGroup.add(halo);
+            });
+
+            /* ── Outer orbit ring (tilted) ────────────────────── */
+            const orbitGeo = new THREE.TorusGeometry(RADIUS * 1.28, 0.0025, 6, 256);
+            const orbitMat = new THREE.MeshBasicMaterial({ color: 0x00d4ff, transparent: true, opacity: 0.3 });
+            const orbit = new THREE.Mesh(orbitGeo, orbitMat);
+            orbit.rotation.x = Math.PI / 3;
+            orbit.rotation.z = Math.PI / 6;
+            globeGroup.add(orbit);
+
+            /* ── Satellite dot on orbit ───────────────────────── */
+            const satGeo = new THREE.SphereGeometry(0.028, 8, 8);
+            const satMat = new THREE.MeshBasicMaterial({ color: 0x00d4ff });
+            const sat = new THREE.Mesh(satGeo, satMat);
+            globeGroup.add(sat);
+
+            /* ── Mouse drag ───────────────────────────────────── */
+            let isDragging = false, prevX = 0, prevY = 0;
+            let velX = 0, velY = 0;
+            let autoRotate = true;
+
+            canvas.addEventListener('mousedown', e => {
+                isDragging = true; autoRotate = false;
+                prevX = e.clientX; prevY = e.clientY;
+                velX = 0; velY = 0;
+            });
+            window.addEventListener('mousemove', e => {
+                if (!isDragging) return;
+                const dx = e.clientX - prevX;
+                const dy = e.clientY - prevY;
+                velX = dx * 0.006;
+                velY = dy * 0.006;
+                globeGroup.rotation.y += velX;
+                globeGroup.rotation.x += velY;
+                prevX = e.clientX; prevY = e.clientY;
+            });
+            window.addEventListener('mouseup', () => {
+                isDragging = false;
+                setTimeout(() => { autoRotate = true; }, 1800);
+            });
+
+            /* Touch support */
+            canvas.addEventListener('touchstart', e => {
+                isDragging = true; autoRotate = false;
+                prevX = e.touches[0].clientX; prevY = e.touches[0].clientY;
+            }, { passive: true });
+            canvas.addEventListener('touchmove', e => {
+                if (!isDragging) return;
+                const dx = e.touches[0].clientX - prevX;
+                const dy = e.touches[0].clientY - prevY;
+                globeGroup.rotation.y += dx * 0.006;
+                globeGroup.rotation.x += dy * 0.006;
+                prevX = e.touches[0].clientX; prevY = e.touches[0].clientY;
+            }, { passive: true });
+            canvas.addEventListener('touchend', () => {
+                isDragging = false;
+                setTimeout(() => { autoRotate = true; }, 1800);
+            });
+
+            /* ── Resize ───────────────────────────────────────── */
+            window.addEventListener('resize', () => {
+                W = wrap.clientWidth; H = wrap.clientHeight;
+                renderer.setSize(W, H);
+                camera.aspect = W / H;
+                camera.updateProjectionMatrix();
+            });
+
+            /* ── Render loop ──────────────────────────────────── */
+            const clock = new THREE.Clock();
+
+            function animate() {
+                requestAnimationFrame(animate);
+                const t = clock.getElapsedTime();
+
+                /* Auto-rotate globe + clouds at slightly different speeds */
+                if (autoRotate && !isDragging) {
+                    globeGroup.rotation.y += 0.0018;
+                    velX *= 0.92; velY *= 0.92;
+                } else if (!isDragging) {
+                    globeGroup.rotation.y += velX;
+                    globeGroup.rotation.x += velY;
+                    velX *= 0.92; velY *= 0.92;
+                }
+
+                /* Clouds drift slightly faster than the surface */
+                cloudMesh.rotation.y += 0.0003;
+
+                /* Pulse city dots */
+                dots.forEach(d => {
+                    const s = 0.85 + 0.6 * Math.abs(Math.sin(t * 1.6 + d.phase));
+                    d.mesh.scale.setScalar(s);
+                });
+
+                /* Satellite orbit */
+                const orbitR = RADIUS * 1.28;
+                sat.position.set(
+                    orbitR * Math.cos(t * 0.55) * Math.cos(Math.PI / 3),
+                    orbitR * Math.sin(t * 0.55),
+                    orbitR * Math.cos(t * 0.55) * Math.sin(Math.PI / 3)
+                );
+                sat.position.applyAxisAngle(new THREE.Vector3(0, 0, 1), Math.PI / 6);
+
+                /* Orbit ring slow rotation */
+                orbit.rotation.y = t * 0.12;
+
+                renderer.render(scene, camera);
+            }
+
+            animate();
+        })();
+    </script>
+</body>
+
+</html>

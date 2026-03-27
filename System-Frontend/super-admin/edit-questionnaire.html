@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Edit Questionnaire | Super Admin | ENpower IFT</title>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+
+    <!-- Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary: #5E2A97;
+            --secondary: #DEDE50;
+            --primary-light: #E8D4F0;
+            --background-light: #F7F7F7;
+            --surface-light: #FFFFFF;
+            --border-light: #EEEEEE;
+            --text-dark: #222222;
+            --text-muted: #666666;
+            --danger: #ef4444;
+            --success: #22c55e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            overflow: hidden;
+        }
+
+        .main-container {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow-y: auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        .content-wrapper {
+            flex: 1;
+            padding: 32px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Page Header */
+        .page-header {
+            margin-bottom: 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .page-header h1 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+
+        .page-header-subtitle {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary-custom {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px rgba(94, 42, 151, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.875rem;
+        }
+
+        .btn-primary-custom:hover {
+            background: #7B3FB5;
+        }
+
+        .btn-primary-custom:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .btn-secondary-custom {
+            background: white;
+            color: var(--text-dark);
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border-light);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.875rem;
+        }
+
+        .btn-secondary-custom:hover {
+            background: #f8fafc;
+        }
+
+        /* Form Card */
+        .form-card {
+            background: var(--surface-light);
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            border: 1px solid var(--border-light);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .form-label .required {
+            color: var(--danger);
+        }
+
+        .form-control {
+            width: 100%;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 0.875rem;
+            background: white;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(94, 42, 151, 0.1);
+        }
+
+        /* Questions Section */
+        .questions-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .questions-header h3 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin: 0;
+        }
+
+        .question-count {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            background: var(--background-light);
+            padding: 6px 12px;
+            border-radius: 6px;
+        }
+
+        .question-block {
+            background: #f8fafc;
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .question-block-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .question-number-badge {
+            background: var(--primary);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.875rem;
+            flex-shrink: 0;
+        }
+
+        .question-block-content {
+            flex: 1;
+        }
+
+        .question-input {
+            width: 100%;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+
+        .question-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(94, 42, 151, 0.1);
+        }
+
+        .question-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .question-type-select {
+            flex: 1;
+            min-width: 150px;
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 0.875rem;
+        }
+
+        .question-type-select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .required-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.875rem;
+        }
+
+        .required-checkbox input {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .delete-question-btn {
+            background: #fee2e2;
+            color: var(--danger);
+            border: none;
+            border-radius: 6px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .delete-question-btn:hover {
+            background: #fecaca;
+        }
+
+        .add-question-btn {
+            width: 100%;
+            padding: 16px;
+            border: 2px dashed var(--border-light);
+            border-radius: 12px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .add-question-btn:hover:not(:disabled) {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: rgba(94, 42, 151, 0.02);
+        }
+
+        .add-question-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .limit-message {
+            display: none;
+            color: var(--danger);
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-top: 8px;
+            text-align: center;
+        }
+
+        /* File Upload Section */
+        .file-upload-config {
+            background: rgba(94, 42, 151, 0.05);
+            border: 1px solid rgba(94, 42, 151, 0.1);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .file-upload-config h3 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .file-types-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .file-type-checkbox {
+            background: white;
+            border: 2px solid var(--border-light);
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .file-type-checkbox:hover {
+            border-color: var(--primary);
+        }
+
+        .file-type-checkbox input:checked + .material-symbols-outlined {
+            color: var(--primary);
+        }
+
+        .file-type-checkbox input:checked ~ label {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .file-type-checkbox input {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .file-type-checkbox .material-symbols-outlined {
+            font-size: 28px;
+            color: var(--text-muted);
+        }
+
+        .file-type-checkbox label {
+            flex: 1;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+
+        /* Validation Errors */
+        .validation-errors {
+            display: none;
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+
+        .validation-errors.show {
+            display: block;
+        }
+
+        .validation-errors h4 {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--danger);
+            margin-bottom: 8px;
+        }
+
+        .validation-errors ul {
+            margin: 0;
+            padding-left: 20px;
+            font-size: 0.875rem;
+            color: var(--danger);
+        }
+
+        /* Preview Modal */
+        .preview-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .preview-modal.show {
+            display: flex;
+        }
+
+        .preview-content {
+            background: white;
+            border-radius: 12px;
+            max-width: 900px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .preview-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 10;
+        }
+
+        .preview-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .preview-body {
+            padding: 32px;
+        }
+
+        .preview-question {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .preview-question-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .preview-question-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .preview-question-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .content-wrapper {
+                padding: 16px;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .header-actions {
+                flex-direction: column;
+            }
+
+            .file-types-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-container">
+        <!-- Include Sidebar -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Include Header -->
+            <div id="header-container"></div>
+
+            <div class="content-wrapper">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div>
+                        <h1>Edit Questionnaire</h1>
+                        <p class="page-header-subtitle">Active Version v2.4.1 • Modify questions and settings</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn-secondary-custom" onclick="window.location.href='questionnaire.html'">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">close</span>
+                            Cancel
+                        </button>
+                        <button class="btn-secondary-custom" onclick="previewQuestionnaire()">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">visibility</span>
+                            Preview
+                        </button>
+                        <button class="btn-primary-custom" onclick="saveQuestionnaire()">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">save</span>
+                            Update Questionnaire
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Validation Errors -->
+                <div class="validation-errors" id="validationErrors">
+                    <h4>Please fix the following errors:</h4>
+                    <ul id="validationErrorsList"></ul>
+                </div>
+
+                <!-- Basic Information -->
+                <div class="form-card">
+                    <div class="form-group">
+                        <label class="form-label">Questionnaire Title <span class="required">*</span></label>
+                        <input type="text" id="questionnaireTitle" class="form-control" placeholder="Enter questionnaire title" value="IFT Submission Questionnaire v2.4.1">
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="form-label">Submission Instructions <span class="required">*</span></label>
+                        <textarea id="submissionInstructions" class="form-control" rows="3" placeholder="Provide instructions for students">Please answer all required questions honestly and thoroughly. Your responses will be evaluated by our jury panel.</textarea>
+                    </div>
+                </div>
+
+                <!-- File Upload Configuration -->
+                <div class="file-upload-config">
+                    <h3>
+                        <span class="material-symbols-outlined">upload_file</span>
+                        Compulsory File Submission Settings <span class="required">*</span>
+                    </h3>
+                    <div class="file-types-grid">
+                        <div class="file-type-checkbox">
+                            <input type="checkbox" id="requirePPT" value="PPT" checked>
+                            <span class="material-symbols-outlined">slideshow</span>
+                            <label for="requirePPT">PPT Upload Required</label>
+                        </div>
+                        <div class="file-type-checkbox">
+                            <input type="checkbox" id="requirePDF" value="PDF/DOC" checked>
+                            <span class="material-symbols-outlined">description</span>
+                            <label for="requirePDF">PDF/DOC Upload Required</label>
+                        </div>
+                        <div class="file-type-checkbox">
+                            <input type="checkbox" id="requireVideo" value="Video">
+                            <span class="material-symbols-outlined">videocam</span>
+                            <label for="requireVideo">Video Upload Required</label>
+                        </div>
+                        <div class="file-type-checkbox">
+                            <input type="checkbox" id="requireImage" value="Image" checked>
+                            <span class="material-symbols-outlined">image</span>
+                            <label for="requireImage">Image Upload Required</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Questions Section -->
+                <div class="form-card">
+                    <div class="questions-header">
+                        <h3>Questions <span class="required">*</span></h3>
+                        <div class="question-count">
+                            <span id="questionCount">12</span> / 12 questions
+                        </div>
+                    </div>
+
+                    <div id="questionsList">
+                        <!-- Questions will be populated here -->
+                    </div>
+
+                    <button class="add-question-btn" id="addQuestionBtn" onclick="addQuestion()">
+                        <span class="material-symbols-outlined" style="font-size: 20px;">add</span>
+                        Add Question
+                    </button>
+                    <p class="limit-message" id="limitMessage">Maximum of 12 questions reached.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Preview Modal -->
+    <div class="preview-modal" id="previewModal">
+        <div class="preview-content">
+            <div class="preview-header">
+                <h2 id="previewTitle">Questionnaire Preview</h2>
+                <button class="btn-secondary-custom" onclick="closePreview()">
+                    <span class="material-symbols-outlined" style="font-size: 18px;">close</span>
+                    Close
+                </button>
+            </div>
+            <div class="preview-body" id="previewBody">
+                <!-- Preview content will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Load External Components -->
+    <script>
+        // Load sidebar
+        fetch('sidebar.html')
+            .then(response => response.text())
+            .then(data => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = data;
+
+                const elements = tempDiv.childNodes;
+                elements.forEach(node => {
+                    if (node.nodeType === 1 && node.tagName !== 'SCRIPT') {
+                        document.getElementById('sidebar-container').appendChild(node.cloneNode(true));
+                    } else if (node.nodeType === 3) {
+                        document.getElementById('sidebar-container').appendChild(node.cloneNode(true));
+                    }
+                });
+
+                const script = tempDiv.querySelector('script');
+                if (script) {
+                    const newScript = document.createElement('script');
+                    newScript.textContent = script.textContent;
+                    document.body.appendChild(newScript);
+                }
+            })
+            .catch(error => console.error('Error loading sidebar:', error));
+
+        // Load header
+        fetch('header.html')
+            .then(response => response.text())
+            .then(data => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = data;
+
+                const elements = tempDiv.childNodes;
+                elements.forEach(node => {
+                    if (node.nodeType === 1 || node.nodeType === 3) {
+                        document.getElementById('header-container').appendChild(node.cloneNode(true));
+                    }
+                });
+
+                const script = tempDiv.querySelector('script');
+                if (script) {
+                    const newScript = document.createElement('script');
+                    newScript.textContent = script.textContent;
+                    document.body.appendChild(newScript);
+                }
+            })
+            .catch(error => console.error('Error loading header:', error));
+    </script>
+
+    <!-- Questionnaire Management Script -->
+    <script>
+        const MAX_QUESTIONS = 12;
+        let questions = [
+            { id: 1, title: 'What is your full name?', type: 'short-text', required: true },
+            { id: 2, title: 'What is your email address?', type: 'short-text', required: true },
+            { id: 3, title: 'Describe your project idea in detail', type: 'long-text', required: true },
+            { id: 4, title: 'What problem does your project solve?', type: 'long-text', required: true },
+            { id: 5, title: 'What is your target audience?', type: 'short-text', required: true },
+            { id: 6, title: 'What technologies will you use?', type: 'short-text', required: false },
+            { id: 7, title: 'What is your project timeline?', type: 'short-text', required: true },
+            { id: 8, title: 'What is your team size?', type: 'multiple-choice', required: true },
+            { id: 9, title: 'What resources do you need?', type: 'checkbox', required: false },
+            { id: 10, title: 'What is your budget estimate?', type: 'short-text', required: false },
+            { id: 11, title: 'How will you measure success?', type: 'long-text', required: true },
+            { id: 12, title: 'Any additional information?', type: 'long-text', required: false }
+        ];
+
+        // Initialize questions on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateQuestionsList();
+            updateQuestionCount();
+            checkQuestionLimit();
+        });
+
+        function updateQuestionsList() {
+            const questionsList = document.getElementById('questionsList');
+            questionsList.innerHTML = '';
+
+            questions.forEach((question, index) => {
+                const questionBlock = document.createElement('div');
+                questionBlock.className = 'question-block';
+                questionBlock.innerHTML = `
+                    <div class="question-block-header">
+                        <div class="question-number-badge">${index + 1}</div>
+                        <div class="question-block-content">
+                            <input
+                                type="text"
+                                class="question-input"
+                                placeholder="Enter question text..."
+                                value="${question.title}"
+                                onchange="updateQuestionTitle(${question.id}, this.value)"
+                            >
+                            <div class="question-controls">
+                                <select class="question-type-select" onchange="updateQuestionType(${question.id}, this.value)">
+                                    <option value="short-text" ${question.type === 'short-text' ? 'selected' : ''}>Short Text</option>
+                                    <option value="long-text" ${question.type === 'long-text' ? 'selected' : ''}>Long Text</option>
+                                    <option value="multiple-choice" ${question.type === 'multiple-choice' ? 'selected' : ''}>Multiple Choice</option>
+                                    <option value="checkbox" ${question.type === 'checkbox' ? 'selected' : ''}>Checkbox</option>
+                                </select>
+                                <label class="required-checkbox">
+                                    <input
+                                        type="checkbox"
+                                        ${question.required ? 'checked' : ''}
+                                        onchange="updateQuestionRequired(${question.id}, this.checked)"
+                                    >
+                                    Required
+                                </label>
+                                <button class="delete-question-btn" onclick="deleteQuestion(${question.id})">
+                                    <span class="material-symbols-outlined" style="font-size: 18px;">delete</span>
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                questionsList.appendChild(questionBlock);
+            });
+        }
+
+        function updateQuestionTitle(questionId, newTitle) {
+            const question = questions.find(q => q.id === questionId);
+            if (question) {
+                question.title = newTitle;
+            }
+        }
+
+        function updateQuestionType(questionId, newType) {
+            const question = questions.find(q => q.id === questionId);
+            if (question) {
+                question.type = newType;
+            }
+        }
+
+        function updateQuestionRequired(questionId, isRequired) {
+            const question = questions.find(q => q.id === questionId);
+            if (question) {
+                question.required = isRequired;
+            }
+        }
+
+        function addQuestion() {
+            if (questions.length >= MAX_QUESTIONS) {
+                return;
+            }
+
+            const newQuestion = {
+                id: Date.now(),
+                title: '',
+                type: 'short-text',
+                required: false
+            };
+
+            questions.push(newQuestion);
+            updateQuestionsList();
+            updateQuestionCount();
+            checkQuestionLimit();
+        }
+
+        function deleteQuestion(questionId) {
+            if (confirm('Are you sure you want to delete this question?')) {
+                questions = questions.filter(q => q.id !== questionId);
+                updateQuestionsList();
+                updateQuestionCount();
+                checkQuestionLimit();
+            }
+        }
+
+        function updateQuestionCount() {
+            document.getElementById('questionCount').textContent = questions.length;
+        }
+
+        function checkQuestionLimit() {
+            const addBtn = document.getElementById('addQuestionBtn');
+            const limitMsg = document.getElementById('limitMessage');
+
+            if (questions.length >= MAX_QUESTIONS) {
+                addBtn.disabled = true;
+                limitMsg.style.display = 'block';
+            } else {
+                addBtn.disabled = false;
+                limitMsg.style.display = 'none';
+            }
+        }
+
+        function hideValidationErrors() {
+            document.getElementById('validationErrors').classList.remove('show');
+        }
+
+        function showValidationErrors(errors) {
+            const errorsList = document.getElementById('validationErrorsList');
+            errorsList.innerHTML = errors.map(error => `<li>${error}</li>`).join('');
+            document.getElementById('validationErrors').classList.add('show');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function validateQuestionnaire() {
+            const errors = [];
+            const title = document.getElementById('questionnaireTitle').value.trim();
+            const instructions = document.getElementById('submissionInstructions').value.trim();
+
+            if (!title) {
+                errors.push('Questionnaire title is required.');
+            }
+
+            if (!instructions) {
+                errors.push('Submission instructions are required.');
+            }
+
+            if (questions.length !== MAX_QUESTIONS) {
+                errors.push(`Exactly ${MAX_QUESTIONS} questions are required. Currently: ${questions.length} questions.`);
+            }
+
+            const emptyQuestions = questions.filter(q => !q.title.trim());
+            if (emptyQuestions.length > 0) {
+                errors.push(`${emptyQuestions.length} question(s) have empty titles.`);
+            }
+
+            const requirePPT = document.getElementById('requirePPT');
+            const requirePDF = document.getElementById('requirePDF');
+            const requireVideo = document.getElementById('requireVideo');
+            const requireImage = document.getElementById('requireImage');
+
+            const fileTypes = [requirePPT, requirePDF, requireVideo, requireImage];
+            const selectedFiles = fileTypes.filter(cb => cb.checked);
+
+            if (selectedFiles.length === 0) {
+                errors.push('At least one file type must be required for submission.');
+            }
+
+            return errors;
+        }
+
+        function saveQuestionnaire() {
+            hideValidationErrors();
+
+            const errors = validateQuestionnaire();
+            if (errors.length > 0) {
+                showValidationErrors(errors);
+                return;
+            }
+
+            if (confirm('Are you sure you want to update the live questionnaire? This will affect all future submissions.')) {
+                alert('Questionnaire updated successfully!');
+                window.location.href = 'questionnaire.html';
+            }
+        }
+
+        function previewQuestionnaire() {
+            const title = document.getElementById('questionnaireTitle').value.trim() || 'Untitled Questionnaire';
+            const instructions = document.getElementById('submissionInstructions').value.trim() || 'No instructions provided';
+
+            const requirePPT = document.getElementById('requirePPT');
+            const requirePDF = document.getElementById('requirePDF');
+            const requireVideo = document.getElementById('requireVideo');
+            const requireImage = document.getElementById('requireImage');
+
+            const fileRequirements = [];
+            if (requirePPT.checked) fileRequirements.push('PPT');
+            if (requirePDF.checked) fileRequirements.push('PDF/DOC');
+            if (requireVideo.checked) fileRequirements.push('Video');
+            if (requireImage.checked) fileRequirements.push('Image');
+
+            const typeLabels = {
+                'short-text': 'Short Text',
+                'long-text': 'Long Text',
+                'multiple-choice': 'Multiple Choice',
+                'checkbox': 'Checkbox'
+            };
+
+            let questionsHTML = '';
+            questions.forEach((q, i) => {
+                questionsHTML += `
+                    <div class="preview-question">
+                        <div class="preview-question-header">
+                            <div class="question-number-badge">${i + 1}</div>
+                            <div style="flex: 1;">
+                                <div class="preview-question-title">${q.title || 'Untitled Question'}</div>
+                                <div class="preview-question-meta">
+                                    Type: ${typeLabels[q.type] || q.type}
+                                    ${q.required ? '<span style="color: #ef4444;">• Required</span>' : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            let fileReqHTML = '';
+            if (fileRequirements.length > 0) {
+                const icons = {
+                    'PPT': 'slideshow',
+                    'PDF/DOC': 'description',
+                    'Video': 'videocam',
+                    'Image': 'image'
+                };
+                fileReqHTML = `
+                    <div style="background: rgba(94, 42, 151, 0.05); padding: 16px; border-radius: 8px; margin-top: 24px; border: 1px solid rgba(94, 42, 151, 0.1);">
+                        <h5 style="font-size: 0.875rem; font-weight: 700; margin: 0 0 12px 0; color: var(--primary);">
+                            <span class="material-symbols-outlined" style="font-size: 18px; vertical-align: middle; margin-right: 4px;">upload_file</span>
+                            Required File Submissions
+                        </h5>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            ${fileRequirements.map(req => `
+                                <div style="background: white; padding: 8px 16px; border-radius: 8px; display: flex; align-items: center; gap: 8px;">
+                                    <span class="material-symbols-outlined" style="color: var(--primary); font-size: 20px;">${icons[req]}</span>
+                                    <span style="font-weight: 500; font-size: 0.875rem;">${req}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            document.getElementById('previewTitle').textContent = title;
+            document.getElementById('previewBody').innerHTML = `
+                <div>
+                    <div style="margin-bottom: 24px;">
+                        <h3 style="font-size: 1.5rem; font-weight: 700; margin: 0 0 8px 0;">${title}</h3>
+                        <p style="color: var(--text-muted); margin: 0 0 4px 0; font-size: 0.875rem;">
+                            <strong>Total Questions:</strong> ${questions.length}
+                        </p>
+                        <p style="color: var(--text-muted); margin: 0; font-size: 0.875rem;">
+                            <strong>Instructions:</strong> ${instructions}
+                        </p>
+                    </div>
+
+                    <h4 style="font-size: 1rem; font-weight: 700; margin: 0 0 16px 0; color: var(--text-dark);">Questions</h4>
+                    ${questionsHTML}
+
+                    ${fileReqHTML}
+                </div>
+            `;
+
+            document.getElementById('previewModal').classList.add('show');
+        }
+
+        function closePreview() {
+            document.getElementById('previewModal').classList.remove('show');
+        }
+    </script>
+</body>
+
+</html>

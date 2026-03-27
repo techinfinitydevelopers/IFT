@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Successful - IFT</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+    <style>
+        :root {
+            --primary: #5E2A97;
+            --secondary: #DEDE50;
+            --primary-light: #E8D4F0;
+            --background-light: #F7F7F7;
+            --surface-light: #FFFFFF;
+            --border-light: #EEEEEE;
+            --text-dark: #222222;
+            --text-muted: #666666;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+
+        .success-left {
+            background: var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            min-height: 100vh;
+        }
+
+        .success-left img {
+            max-width: 600px;
+            border-radius: 12px;
+            object-fit: cover;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(34, 197, 94, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            animation: scaleIn 0.5s ease;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+            }
+            to {
+                transform: scale(1);
+            }
+        }
+
+        .success-icon .material-symbols-outlined {
+            font-size: 48px;
+            color: #22c55e;
+            font-variation-settings: 'FILL' 1;
+        }
+
+        .auth-right-content {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 0px;
+            max-width: 420px;
+            margin: auto;
+            text-align: center;
+        }
+
+        .login-head {
+            font-size: 2.25rem;
+            font-weight: 900;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .login-des {
+            font-size: 1rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .btn-primary {
+            background: var(--primary) !important;
+            color: #fff;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 700;
+            padding: 0.875rem 2rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(94, 42, 151, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: #7B3FB5 !important;
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(94, 42, 151, 0.4);
+        }
+
+        .text-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .text-link:hover {
+            color: #7B3FB5;
+            text-decoration: underline;
+        }
+
+        .text-secondary-light {
+            color: var(--text-muted);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .success-left {
+                display: none !important;
+            }
+
+            .login-head {
+                font-size: 1.75rem;
+            }
+
+            .auth-right-content {
+                padding: 2rem 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="d-flex flex-wrap">
+
+        <!-- LEFT IMAGE -->
+        <div class="col-lg-6 col-12 success-left">
+            <img src="https://lms.eskooly.com/assets/images/splash/banner-group-image01.png" alt="Success Illustration">
+        </div>
+
+        <!-- RIGHT PANEL -->
+        <div class="col-lg-6 col-12 d-flex align-items-center">
+            <div class="auth-right-content">
+
+                <div class="success-icon">
+                    <span class="material-symbols-outlined">check_circle</span>
+                </div>
+
+                <h2 class="login-head">Login Successful!</h2>
+                <p class="text-secondary-light mb-4 login-des">
+                    Welcome to your Dashboard! You have<br />successfully logged in.
+                </p>
+
+                <a href="../student/dashboard.html" class="btn btn-primary w-100 mb-4">
+                    Go to Dashboard
+                </a>
+
+                <p class="text-sm text-secondary-light">
+                    Not you? <a href="sign-in.html" class="text-link">Sign Out</a>
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>

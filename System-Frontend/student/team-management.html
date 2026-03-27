@@ -1,0 +1,1734 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Team Management - India's Future Tycoon</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap"
+        rel="stylesheet" />
+    <!-- Material Symbols -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <!-- Custom CSS -->
+    <style>
+        /* Material Icons */
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        /* CSS Variables */
+        :root {
+            --primary: #5E2A97;
+            --secondary: #DEDE50;
+            --primary-light: #E8D4F0;
+            --background-light: #F7F7F7;
+            --surface-light: #FFFFFF;
+            --border-light: #EEEEEE;
+            --text-dark: #222222;
+            --text-muted: #666666;
+        }
+
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            overflow: hidden;
+        }
+
+        .main-container {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+        }
+
+        /* Text Colors */
+        .text-primary-custom {
+            color: var(--primary) !important;
+        }
+
+        .text-muted-custom {
+            color: var(--text-muted);
+        }
+
+        .text-dark-custom {
+            color: var(--text-dark);
+        }
+
+        /* Border Colors */
+        .border-custom {
+            border-color: var(--border-light) !important;
+        }
+
+        /* Background Colors */
+        .bg-card {
+            background-color: var(--surface-light);
+        }
+
+        .bg-hover-custom {
+            transition: background-color 0.2s ease;
+        }
+
+        .bg-hover-custom:hover {
+            background-color: var(--background-light);
+        }
+
+        .bg-primary-subtle-custom {
+            background-color: rgba(94, 42, 151, 0.05);
+        }
+
+        /* Border Radius */
+        .rounded-custom-xl {
+            border-radius: 1rem !important;
+        }
+
+        .rounded-custom-2xl {
+            border-radius: 1.5rem !important;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 288px;
+            height: 100%;
+            background-color: var(--surface-light);
+            border-right: 1px solid var(--border-light);
+            overflow-y: auto;
+            z-index: 20;
+        }
+
+        .logo-img {
+            width: 40px;
+            height: 40px;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            border-radius: 8px;
+            /* box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); */
+        }
+
+        .sidebar-title {
+            color: var(--text-dark);
+            font-size: 1.125rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin: 0;
+        }
+
+        .sidebar-subtitle {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin: 0;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+            background-color: var(--background-light);
+            color: var(--text-dark);
+        }
+
+        .nav-item-active {
+            background-color: rgba(94, 42, 151, 0.1);
+            color: var(--primary);
+        }
+
+        .nav-item .material-symbols-outlined {
+            font-size: 20px;
+        }
+
+        .nav-item .material-symbols-outlined.filled {
+            font-variation-settings: 'FILL' 1;
+        }
+
+        .nav-text {
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .notification-badge {
+            margin-left: auto;
+            background-color: #ef4444;
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 999px;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 12px;
+            background-color: #f8fafc;
+            border: 1px solid #f1f5f9;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: #e2e8f0;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .user-info {
+            flex-grow: 1;
+            overflow: hidden;
+        }
+
+        .user-name {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-role {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logout-btn:hover {
+            color: #475569;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow-y: auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        .content-wrapper {
+            flex: 1;
+            padding: 2rem;
+        }
+
+        .max-w-1200 {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Breadcrumbs */
+        .breadcrumb-custom {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            align-items: center;
+            font-size: 0.875rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .breadcrumb-custom a {
+            color: var(--text-muted);
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .breadcrumb-custom a:hover {
+            text-decoration: underline;
+        }
+
+        .breadcrumb-custom .separator {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .breadcrumb-custom .current {
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        /* Page Header */
+        .page-title {
+            font-size: 2rem;
+            font-weight: 600;
+            line-height: 1.2;
+            letter-spacing: -0.033em;
+            margin-bottom: 0.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .page-title {
+                font-size: 2.5rem;
+            }
+        }
+
+        /* Team Card */
+        .team-card {
+            background-color: var(--surface-light);
+            border: 1px solid var(--border-light);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+        }
+
+        .team-logo {
+            width: 8rem;
+            height: 8rem;
+            border-radius: 1.5rem;
+            background-size: cover;
+            background-position: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .team-logo-ring {
+            box-shadow: 0 0 0 4px var(--background-light);
+        }
+
+        #teamAvatarContainer:hover .team-logo {
+            transform: scale(1.02);
+            box-shadow: 0 8px 12px -2px rgba(0, 0, 0, 0.15);
+        }
+
+        #teamAvatarContainer:hover .edit-icon-badge {
+            transform: scale(1.1);
+            background-color: #7B3FB5;
+        }
+
+        #teamAvatarContainer::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0);
+            border-radius: 1.5rem;
+            z-index: 1;
+            pointer-events: none;
+            transition: background-color 0.3s ease;
+        }
+
+        #teamAvatarContainer:hover::before {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .edit-icon-badge {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 9999px;
+            padding: 0.375rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border: 2px solid white;
+            transition: all 0.3s ease;
+            z-index: 2;
+            cursor: pointer;
+        }
+
+        .status-dot {
+            height: 0.5rem;
+            width: 0.5rem;
+            border-radius: 9999px;
+            background-color: #22c55e;
+        }
+
+        .divider-custom {
+            width: 100%;
+            height: 1px;
+            background-color: var(--border-light);
+            margin: 1.5rem 0;
+        }
+
+        .group-code-box {
+            background-color: var(--background-light);
+            border: 1px solid var(--border-light);
+            border-radius: 0.75rem;
+            padding: 0.25rem;
+            padding-left: 1rem;
+        }
+
+        .group-code-text {
+            font-family: 'Courier New', monospace;
+            font-size: 1.125rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+        }
+
+        .copy-btn {
+            width: 2.5rem;
+            height: 2.5rem;
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            color: var(--primary);
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .copy-btn:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .share-btn {
+            width: 2.5rem;
+            height: 2.5rem;
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            color: var(--primary);
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .share-btn:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        /* Tip Card */
+        .tip-card {
+            background-color: rgba(94, 42, 151, 0.05);
+            border: 1px solid rgba(94, 42, 151, 0.1);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        /* Roster Card */
+        .roster-card {
+            background-color: var(--surface-light);
+            border: 1px solid var(--border-light);
+            border-radius: 1.5rem;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            overflow: visible;
+        }
+
+        .roster-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .btn-primary-custom {
+            background-color: var(--primary);
+            color: white;
+            font-weight: 700;
+            padding: 0.625rem 1.25rem;
+            border-radius: 0.5rem;
+            border: none;
+            box-shadow: 0 4px 6px rgba(94, 42, 151, 0.3);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .btn-primary-custom:hover {
+            background-color: #7B3FB5;
+        }
+
+        .btn-primary-custom:active {
+            transform: scale(0.95);
+        }
+
+        /* Member List */
+        .member-item {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-light);
+            transition: background-color 0.2s ease;
+            position: relative;
+        }
+
+        .member-item:hover {
+            background-color: var(--background-light);
+        }
+
+        .member-item:last-child {
+            border-bottom: none;
+        }
+
+        .roster-card .d-flex.flex-column {
+            position: relative;
+            overflow: visible;
+        }
+
+        .member-avatar {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .badge-icon-wrapper {
+            position: absolute;
+            bottom: -0.25rem;
+            right: -0.25rem;
+            background-color: white;
+            border-radius: 50%;
+            padding: 0.125rem;
+        }
+
+        .badge-icon {
+            background-color: rgba(234, 179, 8, 0.1);
+            border-radius: 50%;
+            padding: 0.125rem;
+        }
+
+        .role-badge {
+            padding: 0.125rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.625rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+
+        .role-badge-lead {
+            background-color: rgba(94, 42, 151, 0.1);
+            color: var(--primary);
+            border: 1px solid rgba(94, 42, 151, 0.2);
+        }
+
+        .role-badge-member {
+            background-color: rgba(156, 163, 175, 0.1);
+            color: #6b7280;
+        }
+
+        .status-badge {
+            font-size: 0.75rem;
+            font-weight: 500;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+        }
+
+        .status-badge-active {
+            color: #16a34a;
+            background-color: rgba(34, 197, 94, 0.1);
+        }
+
+        .status-badge-pending {
+            color: #ea580c;
+            background-color: rgba(249, 115, 22, 0.1);
+        }
+
+        .more-btn {
+            color: var(--text-muted);
+            background: transparent;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .more-btn:hover {
+            background-color: rgba(156, 163, 175, 0.1);
+        }
+
+        .member-actions .position-relative {
+            position: relative;
+        }
+
+        .pending-avatar {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            background-color: var(--background-light);
+            border: 2px dashed var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+        }
+
+        .resend-btn {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--primary);
+            background: transparent;
+            border: none;
+            padding: 0.25rem 0.5rem;
+            cursor: pointer;
+        }
+
+        .resend-btn:hover {
+            text-decoration: underline;
+        }
+
+        /* Header Styles */
+        .top-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 40px;
+            background-color: var(--surface-light);
+            border-bottom: 1px solid var(--border-light);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-logo {
+            width: 32px;
+            height: 32px;
+            color: var(--primary);
+            flex-shrink: 0;
+        }
+
+        .header-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            letter-spacing: -0.015em;
+        }
+
+        .header-nav {
+            gap: 16px;
+        }
+
+        .nav-link-header {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .nav-link-header:hover {
+            color: var(--primary);
+        }
+
+        .nav-link-header.active {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .header-icon-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(94, 42, 151, 0.1);
+            border: none;
+            border-radius: 12px;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .header-icon-btn:hover {
+            background-color: rgba(94, 42, 151, 0.2);
+        }
+
+        .header-icon-btn .material-symbols-outlined {
+            font-size: 20px;
+        }
+
+        .header-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            border: 2px solid var(--surface-light);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .w-100 {
+            width: 100%;
+        }
+
+        .h-100 {
+            height: 100%;
+        }
+
+        @media (max-width: 991px) {
+            .top-header {
+                padding: 12px 16px;
+            }
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-content {
+            background-color: var(--surface-light);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin: 0;
+        }
+
+        .modal-close-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s ease;
+        }
+
+        .modal-close-btn:hover {
+            background-color: var(--background-light);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-dark);
+            background-color: var(--surface-light);
+            border: 1px solid var(--border-light);
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(94, 42, 151, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .form-helper {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+        }
+
+        .btn-secondary-custom {
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            font-weight: 600;
+            padding: 0.625rem 1.25rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary-custom:hover {
+            background-color: #E0E0E0;
+        }
+
+        /* Dropdown Menu */
+        .dropdown-menu-custom {
+            position: absolute;
+            top: calc(100% + 0.25rem);
+            right: 0;
+            background-color: var(--surface-light);
+            border: 1px solid var(--border-light);
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            min-width: 180px;
+            padding: 0.5rem 0;
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.2s ease;
+        }
+
+        .dropdown-menu-custom.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item-custom {
+            padding: 0.625rem 1rem;
+            font-size: 0.875rem;
+            color: var(--text-dark);
+            background: none;
+            border: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .dropdown-item-custom:hover {
+            background-color: var(--background-light);
+        }
+
+        .dropdown-item-custom.danger {
+            color: #ef4444;
+        }
+
+        .dropdown-item-custom.danger:hover {
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+
+        /* Responsive */
+        @media (max-width: 575.98px) {
+            .member-item {
+                flex-direction: column;
+                align-items: flex-start !important;
+            }
+
+            .member-actions {
+                width: 100%;
+                justify-content: space-between !important;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 1.5rem;
+            }
+
+            .modal-footer {
+                flex-direction: column;
+            }
+
+            .btn-primary-custom,
+            .btn-secondary-custom {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-container">
+        <!-- Include Sidebar -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Include Header -->
+            <div id="header-container"></div>
+
+            <div class="content-wrapper">
+                <div class="max-w-1200">
+            <!-- Breadcrumbs -->
+            <div class="breadcrumb-custom">
+                <a href="#">Dashboard</a>
+                <span class="separator">/</span>
+                <span class="current">Team Management</span>
+            </div>
+
+            <!-- Header Section -->
+            <div class="d-flex flex-column flex-md-row align-items-md-end justify-content-between gap-3 mb-4">
+                <div class="d-flex flex-column gap-2">
+                    <h1 class="page-title text-dark-custom">My Team</h1>
+                    <p class="text-muted-custom mb-0">Manage your squad members, roles, and competition details.</p>
+                </div>
+            </div>
+
+            <!-- Content Grid: Team Info + Roster -->
+            <div class="row g-4 mt-2">
+                <!-- Left Column: Team Identity Card -->
+                <div class="col-12 col-lg-4">
+                    <div class="d-flex flex-column gap-4">
+                        <!-- Team Card -->
+                        <div class="team-card d-flex flex-column align-items-center text-center">
+                            <div class="position-relative mb-4" style="cursor: pointer;" id="teamAvatarContainer">
+                                <div class="team-logo team-logo-ring" id="teamAvatar"
+                                    data-alt="Abstract geometric logo in blue and purple gradients representing innovation"
+                                    style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDh5d5svr3VjZuYwdZ9KhT2bW5NCGFEbo_ITp5s9dJPXTcsiOn1vRPLMoofPPyWhNByVinyIXYzN3iN-JRm2mGKTbJPfoGN-6X5MrplxY1TUf23GhFQML4RLNU__O210dBXjCLO6tSK6Yvq3An9Y9-v9Ct6nemjHHRTnNR1MtxZccVsvtdxZjfHZqvSPYm_UT-7NUL6ZM12RjqNtioDGAvfjLj9Bzwqxj_OmclerSloXo-Bh-mnGvQFbwP5BcV1-J4U80faTjnEedE");'>
+                                </div>
+                                <div class="edit-icon-badge" id="editAvatarBtn" title="Change team avatar">
+                                    <span class="material-symbols-outlined" style="font-size: 16px;">edit</span>
+                                </div>
+                                <input type="file" id="avatarFileInput" accept="image/*" style="position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0;">
+                            </div>
+                            <h2 class="text-dark-custom fs-5 fw-bold mb-1">Innovators Squad Alpha</h2>
+                            <p class="text-muted-custom small fw-medium mb-3">Track: Sustainable Energy</p>
+                            <div class="d-flex align-items-center gap-2 mb-4">
+                                <span class="status-dot"></span>
+                                <span class="small fw-medium" style="color: #16a34a;">Status: Active</span>
+                            </div>
+                            <div class="divider-custom"></div>
+                            <div class="w-100 d-flex flex-column gap-3">
+                                <label class="text-uppercase fw-bold text-muted-custom text-start"
+                                    style="font-size: 0.75rem; letter-spacing: 0.05em;">Group Code</label>
+                                <div class="group-code-box d-flex align-items-center gap-2">
+                                    <span class="flex-grow-1 group-code-text text-dark-custom">IFT-829</span>
+                                    <button class="copy-btn d-flex align-items-center justify-content-center"
+                                        title="Copy Code" id="copyCodeBtn">
+                                        <span class="material-symbols-outlined" style="font-size: 20px;">content_copy</span>
+                                    </button>
+                                    <button class="share-btn d-flex align-items-center justify-content-center"
+                                        title="Share Link" id="shareLinkBtn">
+                                        <span class="material-symbols-outlined" style="font-size: 20px;">share</span>
+                                    </button>
+                                </div>
+                                <p class="text-muted-custom text-start mb-0" style="font-size: 0.75rem;">Share this code
+                                    to invite members (Max 3 members including team leader).</p>
+                            </div>
+                        </div>
+
+                        <!-- Tip Card -->
+                        <div class="tip-card">
+                            <div class="d-flex align-items-start gap-3">
+                                <span class="material-symbols-outlined text-primary-custom mt-1">lightbulb</span>
+                                <div class="d-flex flex-column gap-1">
+                                    <h3 class="small fw-bold text-dark-custom mb-1">Pro Tip</h3>
+                                    <p class="small text-muted-custom mb-0" style="line-height: 1.6;">Ensure all members
+                                        have completed their profiles to unlock the submission portal for the next round.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Member Roster -->
+                <div class="col-12 col-lg-8">
+                    <div class="roster-card d-flex flex-column">
+                        <!-- Roster Header -->
+                        <div
+                            class="roster-header d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3">
+                            <div>
+                                <h3 class="fs-5 fw-bold text-dark-custom mb-1">Team Roster</h3>
+                                <p class="small text-muted-custom mb-0">2/3 Members (1 slot available)</p>
+                            </div>
+                            <button class="btn-primary-custom d-inline-flex align-items-center gap-2" id="addMemberBtn">
+                                <span class="material-symbols-outlined" style="font-size: 20px;">person_add</span>
+                                Add Member
+                            </button>
+                        </div>
+
+                        <!-- Member List -->
+                        <div class="d-flex flex-column" id="memberListContainer">
+                            <!-- Member 1: Lead -->
+                            <div class="member-item d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-3" data-member-role="lead">
+                                <div class="position-relative">
+                                    <div class="member-avatar"
+                                        data-alt="Portrait of Aarav Patel, a young student looking confident"
+                                        style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuATmAvoZeYOTlIm4Nj8G9WWG6Ea7xqFg8w_YbJU7esuXLASPfUkM7uNlSyXOuNzP9Dg_7AGxVz6mMArFpxdbYpU196QDVrDHr8_NbZZSzqdFAqQhstrhhwv6irBXD5W91QMn9tTXzW1PgwaulJ0VEBuSAZNV51_zKnZF20txWjgMX5ZxMQeaZY_pFISdhmUA5GIvjt1cd7M9pWzkcZ6-Yb7fAmhGz3NNeYkKpeVWKr-USogLPQ3QqO5qKj6UUqd2rap8hxXSoE75Eg");'>
+                                    </div>
+                                    <div class="badge-icon-wrapper">
+                                        <span class="material-symbols-outlined badge-icon" style="font-size: 16px; color: #eab308;">workspace_premium</span>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1" style="min-width: 0;">
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <h4 class="text-dark-custom fw-bold mb-0 text-truncate">Aarav Patel</h4>
+                                        <span class="role-badge role-badge-lead">Team Lead</span>
+                                    </div>
+                                    <p class="small text-muted-custom mb-0 text-truncate">aarav.patel@student.ift.org</p>
+                                </div>
+                                <div class="member-actions d-flex align-items-center gap-3 ms-sm-auto">
+                                    <span class="status-badge status-badge-active">Active</span>
+                                </div>
+                            </div>
+
+                            <!-- Member 2: Pending -->
+                            <div class="member-item d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-3" data-member-id="member-2">
+                                <div class="pending-avatar">
+                                    <span class="material-symbols-outlined" style="font-size: 24px;">person</span>
+                                </div>
+                                <div class="flex-grow-1" style="min-width: 0;">
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <h4 class="text-dark-custom fw-bold mb-0 text-truncate">Priya Mehta</h4>
+                                        <span class="role-badge role-badge-member">Member</span>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <p class="small text-muted-custom mb-0 text-truncate">priya.mehta@student.ift.org</p>
+                                        <button class="resend-btn">Resend invitation</button>
+                                    </div>
+                                </div>
+                                <div class="member-actions d-flex align-items-center gap-3 ms-sm-auto">
+                                    <span class="status-badge status-badge-pending">Pending</span>
+                                    <div class="position-relative">
+                                        <button class="more-btn" data-toggle-dropdown>
+                                            <span class="material-symbols-outlined">more_vert</span>
+                                        </button>
+                                        <div class="dropdown-menu-custom">
+                                            <button class="dropdown-item-custom danger" data-action="remove">
+                                                <span class="material-symbols-outlined" style="font-size: 18px;">person_remove</span>
+                                                Remove Member
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Member Modal -->
+    <div class="modal-overlay" id="addMemberModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Invite Team Member</h2>
+                <button class="modal-close-btn" id="closeModalBtn">
+                    <span class="material-symbols-outlined" style="font-size: 24px;">close</span>
+                </button>
+            </div>
+            <form id="inviteMemberForm">
+                <div class="form-group">
+                    <label class="form-label" for="memberEmail">Email Address</label>
+                    <input
+                        type="email"
+                        id="memberEmail"
+                        class="form-input"
+                        placeholder="Enter team member's email"
+                        required
+                    />
+                    <p class="form-helper">An invitation will be sent to this email address.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary-custom" id="cancelModalBtn">Cancel</button>
+                    <button type="submit" class="btn-primary-custom">
+                        <span class="material-symbols-outlined" style="font-size: 20px; vertical-align: middle;">send</span>
+                        Send Invitation
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+        crossorigin="anonymous"></script>
+
+    <!-- Load External Components -->
+    <script>
+        // Load sidebar
+        fetch('sidebar.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('sidebar-container').innerHTML = data;
+
+                // Set active sidebar menu item after sidebar is loaded
+                setTimeout(() => {
+                    const currentPage = window.location.pathname.split('/').pop() || 'dashboard.html';
+                    const navItems = document.querySelectorAll('.nav-item');
+
+                    navItems.forEach(item => {
+                        const href = item.getAttribute('href');
+
+                        // Remove active class from all items first
+                        item.classList.remove('nav-item-active');
+
+                        // Find the icon and update fill state
+                        const icon = item.querySelector('.material-symbols-outlined');
+                        if (icon) {
+                            icon.classList.remove('filled');
+                            icon.style.fontVariationSettings = "'FILL' 0";
+                        }
+
+                        // Add active class to matching item
+                        if (href === currentPage ||
+                            (currentPage === '' && href === 'dashboard.html') ||
+                            (currentPage === 'index.html' && href === 'dashboard.html')) {
+                            item.classList.add('nav-item-active');
+                            if (icon) {
+                                icon.classList.add('filled');
+                                icon.style.fontVariationSettings = "'FILL' 1";
+                            }
+                        }
+                    });
+
+                    console.log('Sidebar active menu item set for:', currentPage);
+                }, 200);
+            })
+            .catch(error => console.error('Error loading sidebar:', error));
+
+        // Load header
+        fetch('header.html')
+            .then(response => response.text())
+            .then(data => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = data;
+
+                // Extract and append all elements
+                const elements = tempDiv.childNodes;
+                elements.forEach(node => {
+                    if (node.nodeType === 1 || node.nodeType === 3) { // Element or Text node
+                        document.getElementById('header-container').appendChild(node.cloneNode(true));
+                    }
+                });
+
+                // Find and execute the script
+                const script = tempDiv.querySelector('script');
+                if (script) {
+                    const newScript = document.createElement('script');
+                    newScript.textContent = script.textContent;
+                    document.body.appendChild(newScript);
+                }
+            })
+            .catch(error => console.error('Error loading header:', error));
+
+        // Team Management Functionality
+        (function() {
+            let memberCounter = 2; // Start from 3 since we have 2 members already
+
+            function init() {
+                initCopyButton();
+                initShareButton();
+                initAvatarUpload();
+                initAddMemberModal();
+                initDropdownMenus();
+                initMemberRemoval();
+            }
+
+            // Copy code functionality
+            function initCopyButton() {
+                const copyBtn = document.getElementById('copyCodeBtn');
+                const groupCode = document.querySelector('.group-code-text');
+
+                if (copyBtn && groupCode) {
+                    copyBtn.addEventListener('click', function() {
+                        const code = groupCode.textContent.trim();
+
+                        // Copy to clipboard
+                        navigator.clipboard.writeText(code).then(() => {
+                            // Visual feedback
+                            const originalHTML = copyBtn.innerHTML;
+                            copyBtn.innerHTML = '<span class="material-symbols-outlined" style="font-size: 20px;">check</span>';
+                            copyBtn.style.backgroundColor = '#22c55e';
+                            copyBtn.style.color = 'white';
+
+                            // Reset after 2 seconds
+                            setTimeout(() => {
+                                copyBtn.innerHTML = originalHTML;
+                                copyBtn.style.backgroundColor = '';
+                                copyBtn.style.color = '';
+                            }, 2000);
+
+                            showToast('Team code copied to clipboard!', 'success');
+                        }).catch(err => {
+                            console.error('Failed to copy:', err);
+                            showToast('Failed to copy code', 'error');
+                        });
+                    });
+                }
+            }
+
+            // Share link functionality
+            function initShareButton() {
+                const shareBtn = document.getElementById('shareLinkBtn');
+                const groupCode = document.querySelector('.group-code-text');
+
+                if (shareBtn && groupCode) {
+                    shareBtn.addEventListener('click', function() {
+                        const code = groupCode.textContent.trim();
+                        const shareUrl = window.location.origin + '/join?code=' + code;
+
+                        // Check if Web Share API is available
+                        if (navigator.share) {
+                            navigator.share({
+                                title: 'Join My Team - India\'s Future Tycoon',
+                                text: 'Join my team using code: ' + code,
+                                url: shareUrl
+                            }).then(() => {
+                                showToast('Share link sent successfully!', 'success');
+                            }).catch(err => {
+                                // User cancelled or error occurred
+                                if (err.name !== 'AbortError') {
+                                    console.error('Share failed:', err);
+                                    fallbackShare(shareUrl);
+                                }
+                            });
+                        } else {
+                            // Fallback to copy link
+                            fallbackShare(shareUrl);
+                        }
+                    });
+                }
+            }
+
+            // Fallback share function - copy link to clipboard
+            function fallbackShare(url) {
+                navigator.clipboard.writeText(url).then(() => {
+                    showToast('Share link copied to clipboard!', 'success');
+                }).catch(err => {
+                    console.error('Failed to copy link:', err);
+                    showToast('Failed to copy link', 'error');
+                });
+            }
+
+            // Avatar upload functionality
+            function initAvatarUpload() {
+                const avatarContainer = document.getElementById('teamAvatarContainer');
+                const editBtn = document.getElementById('editAvatarBtn');
+                const fileInput = document.getElementById('avatarFileInput');
+                const teamAvatar = document.getElementById('teamAvatar');
+
+                console.log('Avatar upload initialized:', { avatarContainer, editBtn, fileInput, teamAvatar });
+
+                if (avatarContainer && editBtn && fileInput && teamAvatar) {
+                    // Function to open file picker
+                    function openFilePicker(e) {
+                        if (e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                        }
+                        console.log('Opening file picker...');
+                        console.log('File input element:', fileInput);
+                        console.log('File input visibility:', window.getComputedStyle(fileInput).visibility);
+                        console.log('File input opacity:', window.getComputedStyle(fileInput).opacity);
+
+                        // Try to trigger the file input
+                        try {
+                            // Reset the input value to allow selecting the same file again
+                            fileInput.value = '';
+
+                            // Multiple methods to trigger file input (browser compatibility)
+                            setTimeout(() => {
+                                fileInput.click();
+                                console.log('File input click triggered via setTimeout');
+                            }, 0);
+
+                            // Also try direct click
+                            fileInput.click();
+                            console.log('File input click triggered directly');
+
+                            // Dispatch a click event as fallback
+                            const clickEvent = new MouseEvent('click', {
+                                view: window,
+                                bubbles: true,
+                                cancelable: true
+                            });
+                            fileInput.dispatchEvent(clickEvent);
+                            console.log('File input click event dispatched');
+                        } catch (error) {
+                            console.error('Error triggering file input:', error);
+                        }
+                    }
+
+                    // Click on avatar container to trigger file input
+                    avatarContainer.addEventListener('click', function(e) {
+                        console.log('Avatar container clicked');
+                        openFilePicker(e);
+                    });
+
+                    // Also add direct listener to edit button
+                    editBtn.addEventListener('click', function(e) {
+                        console.log('Edit button clicked');
+                        openFilePicker(e);
+                    });
+
+                    // Handle file selection
+                    fileInput.addEventListener('change', function(e) {
+                        const file = e.target.files[0];
+                        console.log('File selected:', file);
+
+                        if (file) {
+                            // Validate file type
+                            if (!file.type.startsWith('image/')) {
+                                console.error('Invalid file type:', file.type);
+                                showToast('Please select a valid image file', 'error');
+                                return;
+                            }
+
+                            // Validate file size (max 5MB)
+                            if (file.size > 5 * 1024 * 1024) {
+                                console.error('File too large:', file.size);
+                                showToast('Image size should be less than 5MB', 'error');
+                                return;
+                            }
+
+                            // Read and preview the image
+                            const reader = new FileReader();
+
+                            reader.onload = function(event) {
+                                console.log('Image loaded successfully');
+                                console.log('Data URL length:', event.target.result.length);
+                                console.log('Team avatar element before update:', teamAvatar);
+                                console.log('Current background-image:', teamAvatar.style.backgroundImage);
+
+                                // Update the avatar with the new image
+                                const dataUrl = event.target.result;
+                                teamAvatar.style.backgroundImage = `url("${dataUrl}")`;
+
+                                console.log('New background-image set to:', teamAvatar.style.backgroundImage);
+                                console.log('Computed background-image:', window.getComputedStyle(teamAvatar).backgroundImage);
+
+                                // Show success message
+                                showToast('Team avatar updated successfully!', 'success');
+
+                                // Here you would typically upload the file to your server
+                                // uploadAvatarToServer(file);
+                            };
+
+                            reader.onerror = function() {
+                                console.error('Failed to read file');
+                                showToast('Failed to read image file', 'error');
+                            };
+
+                            reader.readAsDataURL(file);
+                        }
+                    });
+                } else {
+                    console.error('One or more avatar elements not found');
+                }
+            }
+
+            // Placeholder function for server upload
+            // Uncomment and implement when backend is ready
+            /*
+            function uploadAvatarToServer(file) {
+                const formData = new FormData();
+                formData.append('avatar', file);
+
+                fetch('/api/team/avatar', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Avatar uploaded successfully:', data);
+                })
+                .catch(error => {
+                    console.error('Error uploading avatar:', error);
+                    showToast('Failed to upload avatar to server', 'error');
+                });
+            }
+            */
+
+            // Add member modal functionality
+            function initAddMemberModal() {
+                const modal = document.getElementById('addMemberModal');
+                const addMemberBtn = document.getElementById('addMemberBtn');
+                const closeModalBtn = document.getElementById('closeModalBtn');
+                const cancelModalBtn = document.getElementById('cancelModalBtn');
+                const inviteForm = document.getElementById('inviteMemberForm');
+                const emailInput = document.getElementById('memberEmail');
+
+                // Open modal
+                if (addMemberBtn) {
+                    addMemberBtn.addEventListener('click', function() {
+                        modal.classList.add('active');
+                        // Focus on email input after modal opens
+                        setTimeout(() => emailInput.focus(), 300);
+                    });
+                }
+
+                // Close modal functions
+                function closeModal() {
+                    modal.classList.remove('active');
+                    // Reset form
+                    inviteForm.reset();
+                }
+
+                // Close on X button click
+                if (closeModalBtn) {
+                    closeModalBtn.addEventListener('click', closeModal);
+                }
+
+                // Close on Cancel button click
+                if (cancelModalBtn) {
+                    cancelModalBtn.addEventListener('click', closeModal);
+                }
+
+                // Close on overlay click (outside modal content)
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        closeModal();
+                    }
+                });
+
+                // Close on Escape key
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && modal.classList.contains('active')) {
+                        closeModal();
+                    }
+                });
+
+                // Handle form submission
+                if (inviteForm) {
+                    inviteForm.addEventListener('submit', function(e) {
+                        e.preventDefault();
+
+                        const email = emailInput.value.trim();
+
+                        if (email) {
+                            // Extract name from email (before @)
+                            const emailName = email.split('@')[0];
+                            const memberName = emailName.split('.').map(word =>
+                                word.charAt(0).toUpperCase() + word.slice(1)
+                            ).join(' ');
+
+                            // Add member to the list
+                            addMemberToList(memberName, email);
+
+                            // Update member count
+                            updateMemberCount();
+
+                            // Close modal
+                            closeModal();
+
+                            // Show success message
+                            showToast('Invitation sent to ' + email + ' successfully!', 'success');
+
+                            // Here you would typically send the invitation to your server
+                            // sendInvitation(email);
+
+                            console.log('Sending invitation to:', email);
+                        }
+                    });
+                }
+            }
+
+            // Add new member to the list
+            function addMemberToList(name, email) {
+                memberCounter++;
+                const memberId = 'member-' + memberCounter;
+
+                const memberHTML = `
+                    <div class="member-item d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-3" data-member-id="${memberId}">
+                        <div class="pending-avatar">
+                            <span class="material-symbols-outlined" style="font-size: 24px;">person</span>
+                        </div>
+                        <div class="flex-grow-1" style="min-width: 0;">
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <h4 class="text-dark-custom fw-bold mb-0 text-truncate">${name}</h4>
+                                <span class="role-badge role-badge-member">Member</span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <p class="small text-muted-custom mb-0 text-truncate">${email}</p>
+                                <button class="resend-btn">Resend invitation</button>
+                            </div>
+                        </div>
+                        <div class="member-actions d-flex align-items-center gap-3 ms-sm-auto">
+                            <span class="status-badge status-badge-pending">Pending</span>
+                            <div class="position-relative">
+                                <button class="more-btn" data-toggle-dropdown>
+                                    <span class="material-symbols-outlined">more_vert</span>
+                                </button>
+                                <div class="dropdown-menu-custom">
+                                    <button class="dropdown-item-custom danger" data-action="remove">
+                                        <span class="material-symbols-outlined" style="font-size: 18px;">person_remove</span>
+                                        Remove Member
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                const memberList = document.getElementById('memberListContainer');
+
+                // Add the new member at the end of the list (after all existing members)
+                if (memberList) {
+                    memberList.insertAdjacentHTML('beforeend', memberHTML);
+                } else {
+                    console.error('Member list container not found!');
+                }
+
+                // Re-initialize dropdown and removal for new member
+                initDropdownMenus();
+                initMemberRemoval();
+            }
+
+            // Update member count in header
+            function updateMemberCount() {
+                const memberItems = document.querySelectorAll('.member-item');
+                const totalMembers = memberItems.length;
+                const availableSlots = 3 - totalMembers;
+
+                const countText = document.querySelector('.roster-header p');
+                if (countText) {
+                    if (availableSlots > 0) {
+                        countText.textContent = `${totalMembers}/3 Members (${availableSlots} slot${availableSlots !== 1 ? 's' : ''} available)`;
+                    } else {
+                        countText.textContent = '3/3 Members (Team Full)';
+                    }
+                }
+
+                // Update add member button
+                const addBtn = document.getElementById('addMemberBtn');
+                if (addBtn) {
+                    if (availableSlots <= 0) {
+                        addBtn.disabled = true;
+                        addBtn.innerHTML = '<span class="material-symbols-outlined" style="font-size: 20px;">person_add</span>Team Full';
+                        addBtn.style.opacity = '0.6';
+                        addBtn.style.cursor = 'not-allowed';
+                    } else {
+                        addBtn.disabled = false;
+                        addBtn.innerHTML = '<span class="material-symbols-outlined" style="font-size: 20px;">person_add</span>Add Member';
+                        addBtn.style.opacity = '1';
+                        addBtn.style.cursor = 'pointer';
+                    }
+                }
+            }
+
+            // Initialize dropdown menus
+            function initDropdownMenus() {
+                const dropdownButtons = document.querySelectorAll('[data-toggle-dropdown]');
+
+                dropdownButtons.forEach(button => {
+                    // Remove existing listeners to avoid duplicates
+                    const newButton = button.cloneNode(true);
+                    button.parentNode.replaceChild(newButton, button);
+
+                    newButton.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const dropdown = this.nextElementSibling;
+
+                        // Close all other dropdowns
+                        document.querySelectorAll('.dropdown-menu-custom.show').forEach(menu => {
+                            if (menu !== dropdown) {
+                                menu.classList.remove('show');
+                            }
+                        });
+
+                        // Toggle current dropdown
+                        dropdown.classList.toggle('show');
+                    });
+                });
+
+                // Close dropdowns when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!e.target.closest('[data-toggle-dropdown]')) {
+                        document.querySelectorAll('.dropdown-menu-custom.show').forEach(menu => {
+                            menu.classList.remove('show');
+                        });
+                    }
+                });
+            }
+
+            // Initialize member removal
+            function initMemberRemoval() {
+                const removeButtons = document.querySelectorAll('[data-action="remove"]');
+
+                removeButtons.forEach(button => {
+                    // Remove existing listeners to avoid duplicates
+                    const newButton = button.cloneNode(true);
+                    button.parentNode.replaceChild(newButton, button);
+
+                    newButton.addEventListener('click', function() {
+                        const memberItem = this.closest('.member-item');
+                        const memberName = memberItem.querySelector('h4').textContent;
+
+                        if (confirm(`Are you sure you want to remove ${memberName} from the team?`)) {
+                            // Remove the member
+                            memberItem.remove();
+
+                            // Update member count
+                            updateMemberCount();
+
+                            // Show success message
+                            showToast(`${memberName} has been removed from the team`, 'success');
+                        }
+
+                        // Close dropdown
+                        document.querySelectorAll('.dropdown-menu-custom.show').forEach(menu => {
+                            menu.classList.remove('show');
+                        });
+                    });
+                });
+            }
+
+            // Toast notification system
+            function showToast(message, type = 'info') {
+                // Remove existing toast if any
+                const existingToast = document.querySelector('.custom-toast');
+                if (existingToast) {
+                    existingToast.remove();
+                }
+
+                const toast = document.createElement('div');
+                toast.className = 'custom-toast';
+
+                const colors = {
+                    success: '#22c55e',
+                    error: '#ef4444',
+                    info: '#5E2A97',
+                    warning: '#DEDE50'
+                };
+
+                toast.style.cssText = `
+                    position: fixed;
+                    bottom: 24px;
+                    right: 24px;
+                    background-color: ${colors[type]};
+                    color: white;
+                    padding: 16px 24px;
+                    border-radius: 12px;
+                    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+                    z-index: 9999;
+                    font-family: 'Poppins', sans-serif;
+                    font-size: 0.875rem;
+                    font-weight: 500;
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    animation: slideIn 0.3s ease;
+                    max-width: 400px;
+                `;
+
+                const icon = document.createElement('span');
+                icon.className = 'material-symbols-outlined';
+                icon.style.fontSize = '20px';
+                icon.textContent = type === 'success' ? 'check_circle' :
+                    type === 'error' ? 'error' :
+                        type === 'warning' ? 'warning' : 'info';
+
+                toast.appendChild(icon);
+                toast.appendChild(document.createTextNode(message));
+                document.body.appendChild(toast);
+
+                // Auto remove after 3 seconds
+                setTimeout(() => {
+                    toast.style.animation = 'slideOut 0.3s ease';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+
+            // Add toast animations
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from {
+                        transform: translateX(400px);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                }
+                @keyframes slideOut {
+                    from {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                    to {
+                        transform: translateX(400px);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+
+            // Initialize when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                // DOM already loaded, wait for external components
+                setTimeout(init, 500);
+            }
+        })();
+    </script>
+</body>
+
+</html>

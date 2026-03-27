@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>IFT Student Dashboard</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+    <!-- Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary: #5E2A97;
+            --secondary: #DEDE50;
+            --primary-light: #E8D4F0;
+            --background-light: #F7F7F7;
+            --surface-light: #FFFFFF;
+            --border-light: #EEEEEE;
+            --text-dark: #222222;
+            --text-muted: #666666;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            overflow: hidden;
+        }
+
+        .main-container {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 288px;
+            height: 100%;
+            background-color: var(--surface-light);
+            border-right: 1px solid var(--border-light);
+            overflow-y: auto;
+            z-index: 20;
+        }
+
+        .logo-img {
+            width: 40px;
+            height: 40px;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            border-radius: 8px;
+            /* box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); */
+        }
+
+        .sidebar-title {
+            color: var(--text-dark);
+            font-size: 1.125rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin: 0;
+        }
+
+        .sidebar-subtitle {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin: 0;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+            background-color: var(--background-light);
+            color: var(--text-dark);
+        }
+
+        .nav-item-active {
+            background-color: rgba(94, 42, 151, 0.1);
+            color: var(--primary);
+        }
+
+        .nav-item .material-symbols-outlined {
+            font-size: 20px;
+        }
+
+        .nav-item .material-symbols-outlined.filled {
+            font-variation-settings: 'FILL' 1;
+        }
+
+        .nav-text {
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .notification-badge {
+            margin-left: auto;
+            background-color: #ef4444;
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 999px;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 12px;
+            background-color: #f8fafc;
+            border: 1px solid #f1f5f9;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: #e2e8f0;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .user-info {
+            flex-grow: 1;
+            overflow: hidden;
+        }
+
+        .user-name {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-role {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logout-btn:hover {
+            color: #475569;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow-y: auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        .content-wrapper {
+            flex: 1;
+            padding: 40px;
+            max-width: 1280px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Welcome Banner */
+        .welcome-banner {
+            margin-bottom: 32px;
+        }
+
+        .welcome-banner h2 {
+            font-size: 2.25rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+            letter-spacing: -0.025em;
+        }
+
+        .welcome-banner p {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        .phase-badge {
+            text-align: right;
+        }
+
+        .phase-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .phase-value {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* Card Styles */
+        .card-custom {
+            background-color: var(--surface-light);
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            padding: 24px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .badge-draft {
+            background-color: #fff7ed;
+            color: #c2410c;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid #fed7aa;
+            white-space: nowrap;
+        }
+
+        .icon-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(94, 42, 151, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+        }
+
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+
+        .card-subtitle {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .progress-section {
+            margin-top: 24px;
+        }
+
+        .progress-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #475569;
+            margin-bottom: 8px;
+        }
+
+        .progress-percentage {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .progress-bar-custom {
+            height: 10px;
+            background-color: #f1f5f9;
+            border-radius: 999px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--primary);
+            border-radius: 999px;
+            width: 40%;
+            box-shadow: 0 0 10px rgba(94, 42, 151, 0.4);
+        }
+
+        .btn-primary-custom {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background-color: var(--primary);
+            color: white;
+            font-weight: 500;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px rgba(94, 42, 151, 0.3);
+        }
+
+        .btn-primary-custom:hover {
+            background-color: #7B3FB5;
+        }
+
+        /* Team Card */
+        .team-card {
+            position: relative;
+            overflow: hidden;
+            background-color: #0f172a;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            min-height: 260px;
+        }
+
+        .team-bg {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            background-size: cover;
+            background-position: center;
+            transition: transform 0.7s;
+        }
+
+        .team-card:hover .team-bg {
+            transform: scale(1.05);
+        }
+
+        .team-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.5), transparent);
+        }
+
+        .team-content {
+            position: relative;
+            z-index: 10;
+        }
+
+        .team-label {
+            color: #93c5fd;
+            font-weight: 500;
+            font-size: 0.875rem;
+            margin-bottom: 4px;
+            letter-spacing: 0.05em;
+        }
+
+        .team-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 8px;
+        }
+
+        .avatar-group {
+            display: flex;
+            align-items: center;
+            margin-top: 8px;
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid #0f172a;
+            background-color: #e2e8f0;
+            margin-left: -8px;
+        }
+
+        .avatar:first-child {
+            margin-left: 0;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .avatar-count {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid #0f172a;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #475569;
+            margin-left: -8px;
+        }
+
+        .join-code-box {
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            border-radius: 8px;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .join-code-label {
+            color: #cbd5e1;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .join-code-value {
+            color: white;
+            font-family: monospace;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            font-size: 1.125rem;
+        }
+
+        .btn-copy {
+            background-color: white;
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 0.875rem;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-copy:hover {
+            background-color: #f1f5f9;
+        }
+
+        /* Timeline */
+        .timeline-card {
+            background-color: var(--surface-light);
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            padding: 24px;
+        }
+
+        .timeline-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .timeline-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .timeline-link {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .timeline-link:hover {
+            text-decoration: underline;
+        }
+
+        .timeline-container {
+            position: relative;
+            padding-left: 8px;
+        }
+
+        .timeline-line {
+            position: absolute;
+            left: 27px;
+            top: 41px;
+            bottom: 0;
+            width: 2px;
+            background-color: #e2e8f0;
+            height: 64%;
+        }
+
+        .timeline-item {
+            position: relative;
+            display: flex;
+            gap: 24px;
+            padding-bottom: 32px;
+        }
+
+        .timeline-item:last-child {
+            padding-bottom: 0;
+        }
+
+        .timeline-item-past {
+            opacity: 0.6;
+        }
+
+        .timeline-icon {
+            margin-top: 4px;
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .timeline-icon-past {
+            background-color: #f1f5f9;
+            border: 2px solid #cbd5e1;
+        }
+
+        .timeline-icon-current {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(94, 42, 151, 0.3);
+            border: 4px solid rgba(94, 42, 151, 0.1);
+        }
+
+        .timeline-icon-future {
+            background-color: white;
+            border: 2px solid #e2e8f0;
+        }
+
+        .timeline-content {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .timeline-content:hover {
+            background-color: #f8fafc;
+        }
+
+        .timeline-content-current {
+            background-color: rgba(94, 42, 151, 0.05);
+            border: 1px solid rgba(94, 42, 151, 0.1);
+            padding: 16px;
+            border-radius: 12px;
+        }
+
+        .timeline-event-title {
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+
+        .timeline-event-title-current {
+            color: var(--primary);
+        }
+
+        .timeline-desc {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .timeline-date {
+            font-size: 0.75rem;
+            font-weight: 700;
+            background-color: #f1f5f9;
+            color: #64748b;
+            padding: 4px 12px;
+            border-radius: 999px;
+            white-space: nowrap;
+        }
+
+        .timeline-date-current {
+            background-color: white;
+            color: var(--primary);
+            border: 1px solid rgba(94, 42, 151, 0.2);
+        }
+
+        .deadline-badge {
+            font-size: 10px;
+            font-weight: 700;
+            color: #f97316;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 4px;
+        }
+
+        /* Notifications */
+        .notifications-card {
+            background-color: var(--surface-light);
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .notifications-header {
+            padding: 20px;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notifications-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .notifications-mark-read {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            transition: color 0.2s;
+        }
+
+        .notifications-mark-read:hover {
+            color: var(--primary);
+        }
+
+        .notifications-body {
+            flex: 1;
+            padding: 8px;
+            overflow-y: auto;
+        }
+
+        .notification-item {
+            display: flex;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .notification-item:hover {
+            background-color: #f8fafc;
+        }
+
+        .notification-item-priority {
+            background-color: rgba(94, 42, 151, 0.05);
+            border-left: 2px solid var(--primary);
+        }
+
+        .notification-icon {
+            margin-top: 4px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .notification-icon-green {
+            background-color: #dcfce7;
+            color: #16a34a;
+        }
+
+        .notification-icon-primary {
+            background-color: rgba(94, 42, 151, 0.2);
+            color: var(--primary);
+        }
+
+        .notification-icon-purple {
+            background-color: #f3e8ff;
+            color: #9333ea;
+        }
+
+        .notification-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .notification-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #1e293b;
+            line-height: 1.4;
+        }
+
+        .notification-text {
+            font-size: 0.75rem;
+            color: #64748b;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .notification-time {
+            font-size: 10px;
+            color: #94a3b8;
+            font-weight: 500;
+            margin-top: 4px;
+        }
+
+        .notifications-footer {
+            padding: 12px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .btn-view-all {
+            width: 100%;
+            padding: 8px;
+            text-align: center;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #64748b;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .btn-view-all:hover {
+            color: var(--primary);
+        }
+
+        @media (max-width: 768px) {
+            .content-wrapper {
+                padding: 24px;
+            }
+
+            .welcome-banner h2 {
+                font-size: 1.875rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-container">
+        <!-- Include Sidebar -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Include Header -->
+            <div id="header-container"></div>
+
+            <div class="content-wrapper">
+                <!-- Welcome Banner -->
+                <div class="row align-items-start align-items-md-center mb-4 welcome-banner">
+                    <div class="col-12 col-md-8">
+                        <h2>Welcome back, Rohan!</h2>
+                        <p>Let's continue your innovation journey towards becoming a India's Future Tycoon.</p>
+                    </div>
+                    <div class="col-12 col-md-4 d-none d-md-block phase-badge">
+                        <p class="phase-label mb-1">Current Phase</p>
+                        <p class="phase-value mb-0">Regional Rounds</p>
+                    </div>
+                </div>
+
+                <!-- Top Grid: Status Cards -->
+                <div class="row g-4 mb-4">
+                    <!-- Submission Card -->
+                    <div class="col-12 col-lg-6">
+                        <div class="card-custom">
+                            <div>
+                                <div class="d-flex justify-content-between align-items-start mb-4">
+                                    <div>
+                                        <div class="d-flex align-items-center gap-2 mb-1">
+                                            <h3 class="card-title mb-0">Idea Submission</h3>
+                                            <span class="badge-draft">Draft Saved</span>
+                                        </div>
+                                        <p class="card-subtitle mb-0">Last edited 2 hours ago</p>
+                                    </div>
+                                    <div class="icon-circle">
+                                        <span class="material-symbols-outlined">edit_document</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="progress-section">
+                                <div class="d-flex justify-content-between align-items-end mb-2">
+                                    <span class="progress-label">Submission Completeness</span>
+                                    <span class="progress-percentage">40%</span>
+                                </div>
+                                <div class="progress-bar-custom">
+                                    <div class="progress-fill"></div>
+                                </div>
+                                <button class="btn-primary-custom">
+                                    <span class="material-symbols-outlined" style="font-size: 20px;">edit</span>
+                                    Resume Editing
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Team Card -->
+                    <div class="col-12 col-lg-6">
+                        <div class="team-card">
+                            <!-- Background Image with Overlay -->
+                            <div class="team-bg"
+                                style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCBdz4MU7hl72n742-D1UTETHS1n-qkl2rjP__C37SdVz3ZgNcmDyLDXtWj8Nx9q5am5hwz5lSE1cDMiSFy-6hGw8-65TixXtPl5IvFb8Vft9kTl3xtA-YWrOg4oxcaFSpQecD7WEtSrj76zl0vOyhOspGhdIpklBqVtEbQzbu39FvJHQ0KavX5Kiba5oZysYQ-vwGvelgHDyiWHZGhWoVw5Mit_7iSQbFuPYx9IaH63AlRXlIoJuxDoAsxReh9Rfr2remyX95ZYVw");'>
+                            </div>
+                            <div class="team-overlay"></div>
+                            <div class="team-content">
+                                <div class="d-flex justify-content-between align-items-end">
+                                    <div>
+                                        <p class="team-label">YOUR SQUAD</p>
+                                        <h3 class="team-name">Team Innovators</h3>
+                                        <!-- Avatars -->
+                                        <div class="avatar-group">
+                                            <div class="avatar">
+                                                <img alt="Member 1"
+                                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCVpsBZkMEcEwCX7euWDwS5Koo1BTCs5YsrewrEj4hgT5fVu75wrkq8b8uymMA1bkAKpD9TFg5_fFf7h-HFoU2NoHdaIoZz2VDymUqph2HNP4q3cXx9DzLkRtiWhe_JobOhbFIamJT9lTodUPf5BPTMQLfjh0iPl1LsmepX9E_WNhbe7iAUzjGluAIDMj5io_J2sJ__CN-R19_EYFWVWkqgU23p7XTOSrQY2Sxp8f4sQcV-Iu0L5hI_SzXilQP8XsWhaNbTPgJ23t0" />
+                                            </div>
+                                            <div class="avatar">
+                                                <img alt="Member 2"
+                                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZyTFo0aVLuWpaoowrDuDZlrjMM_Es3UpSKPvIETn2Tnz7TuGjcC6nzslHTlHR93YgG1TvSegLu5b2cMxL3hHcpiySB3up6gIguQgW8_gWL_Qwx-2Ve7_qnKkKoYV-yvsISCfi6_LKeDCf_cqxKbdKFYvUM1gfrU-ycsY-eiSYDL8LfQTm1tT37ASYp1pIFlxuwCMFDuC1Yi2_3Fg418j0nRLTUkqqwrmnKTf962Q8FNIJrodLQ7-7aGXHHjXYeewYogXdN77kess" />
+                                            </div>
+                                            <div class="avatar-count">
+                                                +1
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="join-code-box">
+                                    <div class="d-flex flex-column">
+                                        <span class="join-code-label">Join Code</span>
+                                        <span class="join-code-value">IFT-8829</span>
+                                    </div>
+                                    <button class="btn-copy">
+                                        <span class="material-symbols-outlined"
+                                            style="font-size: 14px;">content_copy</span>
+                                        Copy
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Grid: Timeline & Notifications -->
+                <div class="row g-4">
+                    <!-- Important Dates Timeline -->
+                    <div class="col-12 col-lg-8">
+                        <div class="timeline-card">
+                            <div class="timeline-header">
+                                <h3 class="timeline-title mb-0">Important Dates</h3>
+                                <a class="timeline-link" href="#">View Calendar</a>
+                            </div>
+                            <div class="timeline-container">
+                                <!-- Connecting Line -->
+                                <div class="timeline-line"></div>
+
+                                <!-- Timeline Item: Past -->
+                                <div class="timeline-item timeline-item-past">
+                                    <div class="timeline-icon timeline-icon-past">
+                                        <span class="material-symbols-outlined"
+                                            style="font-size: 18px; color: #64748b;">check</span>
+                                    </div>
+                                    <div class="timeline-content w-100">
+                                        <div
+                                            class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
+                                            <div>
+                                                <p class="timeline-event-title mb-1">Registration Ends</p>
+                                                <p class="timeline-desc mb-0">Registration closed successfully</p>
+                                            </div>
+                                            <span class="timeline-date">Oct 10, 2023</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Timeline Item: Current/Active -->
+                                <div class="timeline-item">
+                                    <div class="timeline-icon timeline-icon-current">
+                                        <span class="material-symbols-outlined" style="font-size: 18px;">edit</span>
+                                    </div>
+                                    <div class="timeline-content timeline-content-current w-100">
+                                        <div
+                                            class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
+                                            <div>
+                                                <p class="timeline-event-title timeline-event-title-current mb-1">Idea
+                                                    Submission Deadline</p>
+                                                <p class="timeline-desc mb-0">Submit your draft before this date</p>
+                                            </div>
+                                            <div class="d-flex flex-column align-items-end gap-1">
+                                                <span class="timeline-date timeline-date-current">Nov 15, 2023</span>
+                                                <span class="deadline-badge">UPCOMING</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Timeline Item: Future -->
+                                <div class="timeline-item">
+                                    <div class="timeline-icon timeline-icon-future">
+                                        <span class="material-symbols-outlined"
+                                            style="font-size: 18px; color: #94a3b8;">emoji_events</span>
+                                    </div>
+                                    <div class="timeline-content w-100">
+                                        <div
+                                            class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
+                                            <div>
+                                                <p class="timeline-event-title mb-1">Grand Finale</p>
+                                                <p class="timeline-desc mb-0">Live event in New Delhi</p>
+                                            </div>
+                                            <span class="timeline-date">Jan 20, 2024</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notifications Panel -->
+                    <div class="col-12 col-lg-4">
+                        <div class="notifications-card">
+                            <div class="notifications-header">
+                                <h3 class="notifications-title mb-0">Notifications</h3>
+                                <button class="notifications-mark-read">
+                                    <span class="material-symbols-outlined">mark_email_read</span>
+                                </button>
+                            </div>
+                            <div class="notifications-body">
+                                <!-- Notification Item 1 -->
+                                <a class="notification-item" href="#">
+                                    <div class="notification-icon notification-icon-green">
+                                        <span class="material-symbols-outlined"
+                                            style="font-size: 14px;">group_add</span>
+                                    </div>
+                                    <div class="notification-content">
+                                        <p class="notification-title mb-0">New Teammate Joined</p>
+                                        <p class="notification-text mb-0">Priya Singh has joined "Team Innovators" using
+                                            your code.</p>
+                                        <p class="notification-time mb-0">2 hours ago</p>
+                                    </div>
+                                </a>
+
+                                <!-- Notification Item 2 -->
+                                <a class="notification-item notification-item-priority" href="#">
+                                    <div class="notification-icon notification-icon-primary">
+                                        <span class="material-symbols-outlined"
+                                            style="font-size: 14px;">priority_high</span>
+                                    </div>
+                                    <div class="notification-content">
+                                        <p class="notification-title mb-0">Deadline Approaching</p>
+                                        <p class="notification-text mb-0">Your idea submission draft is incomplete. 5
+                                            days remaining.</p>
+                                        <p class="notification-time mb-0">1 day ago</p>
+                                    </div>
+                                </a>
+
+                                <!-- Notification Item 3 -->
+                                <a class="notification-item" href="#">
+                                    <div class="notification-icon notification-icon-purple">
+                                        <span class="material-symbols-outlined" style="font-size: 14px;">campaign</span>
+                                    </div>
+                                    <div class="notification-content">
+                                        <p class="notification-title mb-0">Webinar Alert</p>
+                                        <p class="notification-text mb-0">"How to Pitch Perfect" workshop starting
+                                            tomorrow at 4 PM.</p>
+                                        <p class="notification-time mb-0">2 days ago</p>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="notifications-footer">
+                                <button class="btn-view-all">
+                                    View all notifications
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Load External Components -->
+    <script>
+        // Load sidebar
+        fetch('sidebar.html')
+            .then(response => response.text())
+            .then(data => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = data;
+
+                // Extract and append all elements EXCEPT script
+                const elements = tempDiv.childNodes;
+                elements.forEach(node => {
+                    if (node.nodeType === 1 && node.tagName !== 'SCRIPT') { // Element node but not script
+                        document.getElementById('sidebar-container').appendChild(node.cloneNode(true));
+                    } else if (node.nodeType === 3) { // Text node
+                        document.getElementById('sidebar-container').appendChild(node.cloneNode(true));
+                    }
+                });
+
+                // Now execute the script AFTER HTML is in DOM
+                const script = tempDiv.querySelector('script');
+                if (script) {
+                    const newScript = document.createElement('script');
+                    newScript.textContent = script.textContent;
+                    document.body.appendChild(newScript);
+                }
+
+                console.log('Sidebar loaded and script executed');
+            })
+            .catch(error => console.error('Error loading sidebar:', error));
+
+        // Load header
+        fetch('header.html')
+            .then(response => response.text())
+            .then(data => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = data;
+
+                // Extract and append all elements
+                const elements = tempDiv.childNodes;
+                elements.forEach(node => {
+                    if (node.nodeType === 1 || node.nodeType === 3) { // Element or Text node
+                        document.getElementById('header-container').appendChild(node.cloneNode(true));
+                    }
+                });
+
+                // Find and execute the script
+                const script = tempDiv.querySelector('script');
+                if (script) {
+                    const newScript = document.createElement('script');
+                    newScript.textContent = script.textContent;
+                    document.body.appendChild(newScript);
+                }
+            })
+            .catch(error => console.error('Error loading header:', error));
+    </script>
+
+    <!-- Dashboard Functionality -->
+    <script>
+        // Dashboard JavaScript Functionality
+        (function () {
+            // Initialize when DOM is ready
+            function init() {
+                initCopyButton();
+                initNotifications();
+                initProgressAnimation();
+                initButtonHoverEffects();
+                initTimelineAnimations();
+                animateCardsOnLoad();
+                updateDynamicContent();
+            }
+
+            // Copy join code functionality
+            function initCopyButton() {
+                const copyBtn = document.querySelector('.btn-copy');
+                if (copyBtn) {
+                    copyBtn.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        const joinCode = document.querySelector('.join-code-value');
+
+                        if (joinCode) {
+                            // Copy to clipboard
+                            const code = joinCode.textContent;
+                            navigator.clipboard.writeText(code).then(() => {
+                                // Visual feedback
+                                const originalHTML = copyBtn.innerHTML;
+                                copyBtn.innerHTML = '<span class="material-symbols-outlined" style="font-size: 14px;">check</span> Copied!';
+                                copyBtn.style.backgroundColor = '#22c55e';
+                                copyBtn.style.color = 'white';
+
+                                // Reset after 2 seconds
+                                setTimeout(() => {
+                                    copyBtn.innerHTML = originalHTML;
+                                    copyBtn.style.backgroundColor = '';
+                                    copyBtn.style.color = '';
+                                }, 2000);
+
+                                // Show toast notification
+                                showToast('Join code copied to clipboard!', 'success');
+                            }).catch(err => {
+                                console.error('Failed to copy:', err);
+                                showToast('Failed to copy code', 'error');
+                            });
+                        }
+                    });
+                }
+            }
+
+            // Notification management
+            function initNotifications() {
+                const markReadBtn = document.querySelector('.notifications-mark-read');
+                const notificationItems = document.querySelectorAll('.notification-item');
+
+                // Mark all as read
+                if (markReadBtn) {
+                    markReadBtn.addEventListener('click', function () {
+                        notificationItems.forEach(item => {
+                            item.style.opacity = '0.6';
+                            const priorityClass = item.classList.contains('notification-item-priority');
+                            if (priorityClass) {
+                                item.classList.remove('notification-item-priority');
+                            }
+                        });
+
+                        // Update icon
+                        this.querySelector('.material-symbols-outlined').textContent = 'check';
+                        showToast('All notifications marked as read', 'success');
+
+                        // Reset after 3 seconds
+                        setTimeout(() => {
+                            notificationItems.forEach(item => {
+                                item.style.opacity = '';
+                            });
+                            this.querySelector('.material-symbols-outlined').textContent = 'mark_email_read';
+                        }, 3000);
+                    });
+                }
+
+                // Individual notification click
+                notificationItems.forEach(item => {
+                    item.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        this.style.opacity = '0.6';
+
+                        // Simulate navigation delay
+                        setTimeout(() => {
+                            console.log('Navigating to notification details...');
+                        }, 300);
+                    });
+                });
+
+                // View all notifications button
+                const viewAllBtn = document.querySelector('.btn-view-all');
+                if (viewAllBtn) {
+                    viewAllBtn.addEventListener('click', function () {
+                        showToast('Opening all notifications...', 'info');
+                        setTimeout(() => {
+                            window.location.href = '#notifications';
+                        }, 500);
+                    });
+                }
+            }
+
+            // Animated progress bar on load
+            function initProgressAnimation() {
+                const progressFill = document.querySelector('.progress-fill');
+                if (progressFill) {
+                    // Start from 0 and animate to 40%
+                    progressFill.style.width = '0%';
+                    setTimeout(() => {
+                        progressFill.style.transition = 'width 1.5s cubic-bezier(0.4, 0, 0.2, 1)';
+                        progressFill.style.width = '40%';
+                    }, 500);
+                }
+            }
+
+            // Button hover and click effects
+            function initButtonHoverEffects() {
+                const primaryBtns = document.querySelectorAll('.btn-primary-custom');
+
+                primaryBtns.forEach(btn => {
+                    btn.addEventListener('click', function (e) {
+                        // Resume editing button
+                        if (this.textContent.includes('Resume Editing')) {
+                            e.preventDefault();
+                            this.innerHTML = '<span class="material-symbols-outlined" style="font-size: 20px;">hourglass_empty</span> Loading...';
+                            this.style.opacity = '0.7';
+
+                            setTimeout(() => {
+                                showToast('Opening idea submission form...', 'info');
+                                // Navigate to idea submissions page
+                                setTimeout(() => {
+                                    window.location.href = 'idea-submissions.html';
+                                }, 1000);
+                            }, 500);
+                        }
+                    });
+                });
+
+                // Timeline link
+                const timelineLink = document.querySelector('.timeline-link');
+                if (timelineLink) {
+                    timelineLink.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        showToast('Loading calendar view...', 'info');
+                        setTimeout(() => {
+                            window.location.href = '#calendar';
+                        }, 500);
+                    });
+                }
+            }
+
+            // Timeline item hover animations
+            function initTimelineAnimations() {
+                const timelineItems = document.querySelectorAll('.timeline-item');
+
+                timelineItems.forEach(item => {
+                    item.addEventListener('mouseenter', function () {
+                        const icon = this.querySelector('.timeline-icon');
+                        if (icon) {
+                            icon.style.transform = 'scale(1.1) rotate(5deg)';
+                            icon.style.transition = 'transform 0.3s ease';
+                        }
+                    });
+
+                    item.addEventListener('mouseleave', function () {
+                        const icon = this.querySelector('.timeline-icon');
+                        if (icon) {
+                            icon.style.transform = 'scale(1) rotate(0deg)';
+                        }
+                    });
+                });
+            }
+
+            // Animate cards on page load
+            function animateCardsOnLoad() {
+                const cards = document.querySelectorAll('.card-custom, .team-card, .timeline-card, .notifications-card');
+
+                cards.forEach((card, index) => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(20px)';
+
+                    setTimeout(() => {
+                        card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, 100 + (index * 100));
+                });
+            }
+
+            // Update dynamic content (timestamps, etc.)
+            function updateDynamicContent() {
+                // Update "Last edited" timestamp
+                const lastEdited = document.querySelector('.card-subtitle');
+                if (lastEdited && lastEdited.textContent.includes('Last edited')) {
+                    // Simulate dynamic time update
+                    setInterval(() => {
+                        const hours = Math.floor(Math.random() * 3) + 1;
+                        lastEdited.textContent = `Last edited ${hours} hours ago`;
+                    }, 60000); // Update every minute
+                }
+
+                // Add countdown to deadline
+                const deadlineBadge = document.querySelector('.deadline-badge');
+                if (deadlineBadge) {
+                    setInterval(() => {
+                        const pulseAnimation = 'pulse 1s ease';
+                        deadlineBadge.style.animation = pulseAnimation;
+                    }, 3000);
+                }
+            }
+
+            // Toast notification system
+            function showToast(message, type = 'info') {
+                // Remove existing toast if any
+                const existingToast = document.querySelector('.custom-toast');
+                if (existingToast) {
+                    existingToast.remove();
+                }
+
+                const toast = document.createElement('div');
+                toast.className = 'custom-toast';
+
+                const colors = {
+                    success: '#22c55e',
+                    error: '#ef4444',
+                    info: '#5E2A97',
+                    warning: '#DEDE50'
+                };
+
+                toast.style.cssText = `
+                    position: fixed;
+                    bottom: 24px;
+                    right: 24px;
+                    background-color: ${colors[type]};
+                    color: white;
+                    padding: 16px 24px;
+                    border-radius: 12px;
+                    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+                    z-index: 9999;
+                    font-family: 'Poppins', sans-serif;
+                    font-size: 0.875rem;
+                    font-weight: 500;
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    animation: slideIn 0.3s ease;
+                    max-width: 400px;
+                `;
+
+                const icon = document.createElement('span');
+                icon.className = 'material-symbols-outlined';
+                icon.style.fontSize = '20px';
+                icon.textContent = type === 'success' ? 'check_circle' :
+                    type === 'error' ? 'error' :
+                        type === 'warning' ? 'warning' : 'info';
+
+                toast.appendChild(icon);
+                toast.appendChild(document.createTextNode(message));
+                document.body.appendChild(toast);
+
+                // Auto remove after 3 seconds
+                setTimeout(() => {
+                    toast.style.animation = 'slideOut 0.3s ease';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+
+            // Add toast animations
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from {
+                        transform: translateX(400px);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                }
+                @keyframes slideOut {
+                    from {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                    to {
+                        transform: translateX(400px);
+                        opacity: 0;
+                    }
+                }
+                @keyframes pulse {
+                    0%, 100% {
+                        transform: scale(1);
+                        opacity: 1;
+                    }
+                    50% {
+                        transform: scale(1.05);
+                        opacity: 0.8;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+
+            // Initialize everything when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                // DOM already loaded, wait a bit for external components to load
+                setTimeout(init, 500);
+            }
+        })();
+    </script>
+</body>
+
+</html>

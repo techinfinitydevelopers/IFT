@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Team Invitation - India's Future Tycoon</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap"
+        rel="stylesheet" />
+    <!-- Material Symbols -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <!-- Custom CSS -->
+    <style>
+        /* Material Icons */
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        /* CSS Variables - Brand Guidelines */
+        :root {
+            --primary: #5E2A97;
+            --secondary: #DEDE50;
+            --primary-light: #E8D4F0;
+            --background-light: #F7F7F7;
+            --surface-light: #FFFFFF;
+            --border-light: #EEEEEE;
+            --text-dark: #222222;
+            --text-muted: #666666;
+        }
+
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Background Decoration */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -10%;
+            left: -5%;
+            width: 40%;
+            height: 40%;
+            background: radial-gradient(circle, rgba(94, 42, 151, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: -1;
+            filter: blur(60px);
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: -10%;
+            right: -5%;
+            width: 30%;
+            height: 30%;
+            background: radial-gradient(circle, rgba(94, 42, 151, 0.05) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: -1;
+            filter: blur(50px);
+        }
+
+        /* Success Banner */
+        .success-banner {
+            background-color: rgba(94, 42, 151, 0.1);
+            border-bottom: 1px solid rgba(94, 42, 151, 0.2);
+            padding: 0.75rem 1rem;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .success-banner-text {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .invite-code {
+            letter-spacing: 0.1em;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Logo */
+        .logo-image {
+            max-width: 200px;
+            height: auto;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem 1.5rem;
+            overflow-y: auto;
+        }
+
+        .content-wrapper {
+            width: 100%;
+            max-width: 550px;
+        }
+
+        /* Invitation Card */
+        .invitation-card {
+            background-color: var(--surface-light);
+            border: 1px solid var(--border-light);
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        /* Card Header */
+        .card-header-pattern {
+            height: 6rem;
+            background-color: var(--primary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-header-pattern::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            opacity: 0.2;
+            background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0);
+            background-size: 20px 20px;
+        }
+
+        .team-avatar-wrapper {
+            position: absolute;
+            bottom: -2.25rem;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .team-avatar-ring {
+            padding: 0.25rem;
+            background-color: var(--surface-light);
+            border-radius: 50%;
+        }
+
+        .team-avatar {
+            width: 4.5rem;
+            height: 4.5rem;
+            border-radius: 50%;
+            background-color: rgba(94, 42, 151, 0.1);
+            border: 3px solid var(--surface-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .team-avatar .material-symbols-outlined {
+            font-size: 2rem;
+            color: var(--primary);
+        }
+
+        /* Card Body */
+        .card-body-content {
+            padding: 3rem 1.75rem 1.75rem;
+            text-align: center;
+        }
+
+        .invitation-badge {
+            display: inline-block;
+            padding: 0.2rem 0.65rem;
+            background-color: rgba(94, 42, 151, 0.1);
+            color: var(--primary);
+            border-radius: 9999px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.75rem;
+        }
+
+        .invitation-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 0.35rem;
+        }
+
+        .invitation-subtitle {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            max-width: 400px;
+            margin: 0 auto 1.5rem;
+            line-height: 1.5;
+        }
+
+        /* Team Details Box */
+        .team-details-box {
+            background-color: var(--background-light);
+            border-radius: 0.875rem;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border-light);
+        }
+
+        .team-detail-item {
+            margin-bottom: 1rem;
+        }
+
+        .team-detail-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .team-detail-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 0.2rem;
+        }
+
+        .team-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .divider {
+            width: 2.5rem;
+            height: 1px;
+            background-color: var(--border-light);
+            margin: 0 auto;
+        }
+
+        .team-leader-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            margin-top: 0.35rem;
+        }
+
+        .leader-avatar {
+            width: 1.75rem;
+            height: 1.75rem;
+            border-radius: 50%;
+            border: 1px solid rgba(94, 42, 151, 0.2);
+            object-fit: cover;
+        }
+
+        .leader-name {
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.8rem;
+            margin-bottom: 0px !important;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            flex-direction: row;
+            gap: 0.75rem;
+        }
+
+        .btn-primary-custom {
+            background-color: var(--primary);
+            color: white;
+            font-weight: 700;
+            padding: 0.875rem 1.25rem;
+            border-radius: 0.625rem;
+            border: none;
+            box-shadow: 0 6px 12px rgba(94, 42, 151, 0.25);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            font-size: 0.875rem;
+            flex: 1;
+        }
+
+        .btn-primary-custom:hover {
+            background-color: #7B3FB5;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(94, 42, 151, 0.3);
+        }
+
+        .btn-primary-custom:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary-custom .material-symbols-outlined {
+            transition: transform 0.3s ease;
+        }
+
+        .btn-primary-custom:hover .material-symbols-outlined {
+            transform: translateX(4px);
+        }
+
+        .divider-or {
+            position: relative;
+            padding: 0.65rem 0;
+        }
+
+        .divider-or::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background-color: var(--border-light);
+        }
+
+        .divider-or-text {
+            position: relative;
+            background-color: var(--surface-light);
+            padding: 0 0.65rem;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            display: inline-block;
+        }
+
+        .btn-secondary-custom {
+            background-color: transparent;
+            color: var(--primary);
+            font-weight: 700;
+            padding: 0.875rem 1.25rem;
+            border-radius: 0.625rem;
+            border: 2px solid rgba(94, 42, 151, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            flex: 1;
+        }
+
+        .btn-secondary-custom:hover {
+            border-color: var(--primary);
+            background-color: rgba(94, 42, 151, 0.05);
+            color: var(--primary);
+        }
+
+        /* Card Footer */
+        .card-footer-custom {
+            background-color: rgba(247, 247, 247, 0.5);
+            padding: 0.75rem 1.5rem;
+            border-top: 1px solid var(--border-light);
+            text-align: center;
+        }
+
+        .footer-link {
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            transition: color 0.2s ease;
+        }
+
+        .footer-link:hover {
+            color: var(--primary);
+        }
+
+        /* Global Footer */
+        .global-footer {
+            padding: 0.75rem 1.5rem;
+            text-align: center;
+        }
+
+        .footer-text {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 576px) {
+            .invitation-title {
+                font-size: 1.35rem;
+            }
+
+            .card-body-content {
+                padding: 2.75rem 1.25rem 1.5rem;
+            }
+
+            .team-name {
+                font-size: 1rem;
+            }
+
+            .main-content {
+                padding: 0.75rem 1rem;
+            }
+
+            .logo-nav {
+                padding: 0.75rem 1rem;
+            }
+
+            .team-avatar {
+                width: 4rem;
+                height: 4rem;
+            }
+
+            .team-avatar .material-symbols-outlined {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Success Banner -->
+    <div class="success-banner">
+        <div class="container">
+            <div class="success-banner-text">
+                <span class="material-symbols-outlined" style="font-size: 1rem;">check_circle</span>
+                <span>Invite Code Applied: <span class="invite-code">IFT-7729-QX</span></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <div class="content-wrapper">
+            <!-- Logo -->
+            <div class="text-center mb-4">
+                <img src="../assets/IFT_logo.png" alt="IFT Logo" class="logo-image">
+            </div>
+
+            <!-- Invitation Card -->
+            <div class="invitation-card">
+                <!-- Card Body -->
+                <div class="card-body-content">
+                    <span class="invitation-badge">New Invitation</span>
+                    <h1 class="invitation-title">You've been invited!</h1>
+                    <p class="invitation-subtitle">
+                        Join your colleagues and start collaborating on projects together.
+                    </p>
+
+                    <!-- Team Details Box -->
+                    <div class="team-details-box">
+                        <div class="team-detail-item">
+                            <p class="team-detail-label">Team Name</p>
+                            <p class="team-name">Global Innovation Scholars</p>
+                        </div>
+                        <div class="team-detail-item">
+                            <div class="divider"></div>
+                        </div>
+                        <div class="team-detail-item">
+                            <p class="team-detail-label">Team Leader</p>
+                            <div class="team-leader-info">
+                                <img alt="Team Leader Portrait" class="leader-avatar"
+                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3HxZoE3QBIPFSG6vc1nTvRM30ku6Jj3lps567aBRB1g69lsxvPX3xivdcO4NmRzT1wC_kvQyskjlCVHHa-C5La8zkUGpePAcDH3hJ5s7a9Do5vg-SR1t9YhIq8u1GVkn1YB9PPbzsfQQAQLfjgqHhFowNqU4JgLf5AgD2ZIyzQSQgLDvFFuLD7NeZ7LhJrqj7OA1XuZ5g4tc5pOyjnK-E7S2Oqwz5NIgIu4KheUYL99pHE4knsNNvQsu66rH5USfLFD5oyAoG-4Y" />
+                                <p class="leader-name">Alexandre Sterling</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="action-buttons">
+                        <a href="../auth/sign-up.html" class="btn-primary-custom">
+                            <span>Register to Join</span>
+                            <span class="material-symbols-outlined" style="font-size: 1.25rem;">arrow_forward</span>
+                        </a>
+                        <a href="../auth/sign-in.html" class="btn-secondary-custom">
+                            Login to Join
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Card Footer -->
+                <div class="card-footer-custom">
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Global Footer -->
+    <footer class="global-footer">
+        <p class="footer-text">© 2025 IFT Platform. All rights reserved</p>
+    </footer>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>

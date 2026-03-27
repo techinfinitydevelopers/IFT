@@ -1,0 +1,1722 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>AI Idea Evaluation - IFT Jury Portal</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+    <style>
+        :root {
+            --primary-color: #5E2A97;
+            --secondary-color: #DEDE50;
+            --background-light: #F7F7F7;
+            --text-dark: #222222;
+            --text-muted: #666666;
+            --border-color: #EEEEEE;
+            --white: #FFFFFF;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--background-light);
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Layout */
+        .dashboard-container {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            background: var(--background-light);
+        }
+
+        .content-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 3rem;
+            width: 100%;
+        }
+
+        /* Sidebar Container */
+        #sidebar-container {
+            flex-shrink: 0;
+        }
+
+        /* Header Container */
+        #header-container {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        /* Breadcrumbs */
+        .breadcrumb-nav {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.875rem;
+        }
+
+        .breadcrumb-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            transition: color 0.2s ease;
+        }
+
+        .breadcrumb-link:hover {
+            color: var(--primary-color);
+        }
+
+        .breadcrumb-separator {
+            color: #cbd5e1;
+            font-size: 1rem;
+        }
+
+        .breadcrumb-current {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        /* Submission Header Card */
+        .submission-header {
+            background: var(--white);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .submission-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .submission-id {
+            background: rgba(94, 42, 151, 0.1);
+            color: var(--primary-color);
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.25rem 0.625rem;
+            border-radius: 0.375rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .submission-category {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .submission-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+            line-height: 1.2;
+        }
+
+        .submission-school {
+            color: var(--text-muted);
+            font-size: 1.125rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+
+        .tag-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .tag {
+            padding: 0.375rem 0.875rem;
+            border-radius: 9999px;
+            background: var(--background-light);
+            border: 1px solid var(--border-color);
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .team-avatars {
+            display: flex;
+            margin-left: auto;
+            justify-content: flex-end;
+        }
+
+        .team-avatar {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            border: 2px solid var(--white);
+            margin-left: -0.75rem;
+        }
+
+        .team-avatar:first-child {
+            margin-left: 0;
+        }
+
+        .team-avatar {
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .team-avatar:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 10;
+            position: relative;
+        }
+
+        .abstract-section {
+            margin-top: 2rem;
+        }
+
+        .abstract-heading {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 0.75rem;
+        }
+
+        .abstract-text {
+            color: var(--text-muted);
+            line-height: 1.7;
+            font-size: 0.9375rem;
+        }
+
+        /* Media Cards */
+        .media-card {
+            background: var(--white);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .media-card:hover {
+            border-color: rgba(94, 42, 151, 0.3);
+            box-shadow: 0 4px 12px rgba(94, 42, 151, 0.1);
+        }
+
+        .media-card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .media-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .media-icon.ppt {
+            background: rgba(249, 115, 22, 0.1);
+            color: #f97316;
+        }
+
+        .media-icon.video {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        .media-icon .material-symbols-outlined {
+            font-size: 24px;
+        }
+
+        .media-open-icon {
+            color: #cbd5e1;
+            transition: color 0.2s ease;
+        }
+
+        .media-card:hover .media-open-icon {
+            color: var(--primary-color);
+        }
+
+        .media-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .media-description {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .media-preview {
+            width: 100%;
+            height: 8rem;
+            background: var(--background-light);
+            border-radius: 0.75rem;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .media-preview-bg {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            opacity: 0.5;
+            filter: grayscale(100%);
+            transition: all 0.3s ease;
+        }
+
+        .media-card:hover .media-preview-bg {
+            filter: grayscale(0%);
+            opacity: 0.7;
+        }
+
+        .media-preview-btn {
+            position: relative;
+            z-index: 10;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.95);
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .video-play-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            background: var(--white);
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 10;
+            position: relative;
+        }
+
+        .video-play-icon .material-symbols-outlined {
+            padding-left: 0.125rem;
+        }
+
+        /* Q&A Accordion */
+        .qa-card {
+            background: var(--white);
+            border-radius: 1rem;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .qa-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .qa-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0;
+        }
+
+        .qa-title .material-symbols-outlined {
+            color: var(--primary-color);
+        }
+
+        .qa-item {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .qa-item:last-child {
+            border-bottom: none;
+        }
+
+        .qa-question {
+            width: 100%;
+            padding: 1.5rem;
+            background: none;
+            border: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+            font-size: 0.9375rem;
+            color: var(--text-dark);
+            cursor: pointer;
+            text-align: left;
+            transition: background 0.2s ease;
+        }
+
+        .qa-question:hover {
+            background: var(--background-light);
+        }
+
+        .qa-chevron {
+            transition: transform 0.3s ease;
+        }
+
+        .qa-question[aria-expanded="true"] .qa-chevron {
+            transform: rotate(180deg);
+        }
+
+        .qa-answer {
+            padding: 0 1.5rem 1.5rem 1.5rem;
+            color: var(--text-muted);
+            line-height: 1.7;
+            font-size: 0.9375rem;
+        }
+
+        /* AI Evaluation Button */
+        .ai-evaluate-section {
+            margin-top: 2rem;
+        }
+
+        .ai-evaluate-btn {
+            width: 25%;
+            background: linear-gradient(135deg, var(--primary-color) 0%, #7B3FB5 100%);
+            color: var(--white);
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 12px rgba(94, 42, 151, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .ai-evaluate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(94, 42, 151, 0.4);
+        }
+
+        .ai-evaluate-btn .material-symbols-outlined {
+            font-size: 24px;
+        }
+
+        /* AI Evaluation Modal */
+        .ai-eval-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.34);
+            z-index: 10002;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .ai-eval-modal.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .ai-eval-container {
+            background: #ffffff;
+            border-radius: 1.25rem;
+            width: 90%;
+            max-width: 900px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+            overflow: hidden;
+        }
+
+        .ai-eval-modal.show .ai-eval-container {
+            transform: scale(1);
+        }
+
+        .ai-eval-header {
+            padding: 1.75rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .ai-eval-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin: 0 0 0.75rem 0;
+        }
+
+        .ai-eval-description {
+            font-size: 0.9375rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .ai-eval-status-btn {
+            background: #5865F2;
+            color: #fff;
+            border: none;
+            padding: 0.625rem 1.25rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-top: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .ai-eval-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0;
+        }
+
+        .ai-terminal {
+            background: #0d0d0d;
+            padding: 1.5rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            color: #4ade80;
+            min-height: 300px;
+            border-top: 3px solid #22c55e;
+        }
+
+        .terminal-line {
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            opacity: 0;
+            animation: fadeInLine 0.3s ease forwards;
+        }
+
+        @keyframes fadeInLine {
+            to {
+                opacity: 1;
+            }
+        }
+
+        .terminal-icon {
+            font-size: 16px;
+        }
+
+        .terminal-icon.check {
+            color: #22c55e;
+        }
+
+        .terminal-icon.spinner {
+            color: #fbbf24;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .score-value {
+            margin-left: auto;
+            font-weight: 700;
+            color: #22c55e;
+        }
+
+        .warning-line {
+            color: #fbbf24;
+            margin: 1rem 0;
+            font-weight: 600;
+        }
+
+        .total-score-line {
+            color: #fff;
+            font-weight: 700;
+            font-size: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .qualified-line {
+            color: #22c55e;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .ai-eval-footer {
+            padding: 1.5rem 2rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .done-btn {
+            background: #5865F2;
+            color: #fff;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 0.5rem;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .done-btn:hover {
+            background: #4752c4;
+        }
+
+        /* AI Results Display */
+        .ai-results-section {
+            margin-top: 2rem;
+            display: none;
+        }
+
+        .ai-results-card {
+            background: var(--white);
+            border-radius: 1rem;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .ai-results-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(94, 42, 151, 0.05);
+        }
+
+        .ai-results-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0;
+        }
+
+        .ai-results-body {
+            padding: 1.5rem;
+        }
+
+        .criteria-result {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .criteria-result:last-child {
+            border-bottom: none;
+        }
+
+        .criteria-name {
+            font-size: 0.9375rem;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        .criteria-score {
+            font-size: 0.9375rem;
+            font-weight: 700;
+            color: #22c55e;
+        }
+
+        .total-score-display {
+            background: rgba(94, 42, 151, 0.1);
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            margin-top: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .total-score-label {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .total-score-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .qualification-badge {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            margin-top: 1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .warning-badge {
+            background: rgba(251, 191, 36, 0.1);
+            color: #f59e0b;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            margin-top: 1rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: 5.5rem;
+            right: 2rem;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .toast {
+            background: var(--white);
+            border-radius: 0.75rem;
+            padding: 1rem 1.25rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            min-width: 320px;
+            max-width: 400px;
+            transform: translateX(450px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            border-left: 4px solid;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            border-left-color: #10B981;
+        }
+
+        .toast.info {
+            border-left-color: #3B82F6;
+        }
+
+        .toast-icon {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .toast.success .toast-icon {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10B981;
+        }
+
+        .toast.info .toast-icon {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3B82F6;
+        }
+
+        .toast-icon .material-symbols-outlined {
+            font-size: 18px;
+            font-variation-settings: 'FILL' 1;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin: 0 0 0.125rem 0;
+        }
+
+        .toast-message {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 0.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s ease;
+        }
+
+        .toast-close:hover {
+            color: var(--text-dark);
+        }
+
+        .toast-close .material-symbols-outlined {
+            font-size: 18px;
+        }
+
+        /* Media Preview Modal */
+        .media-preview-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 10001;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .media-preview-modal.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .media-preview-content {
+            background: var(--white);
+            border-radius: 1rem;
+            width: 90%;
+            max-width: 1200px;
+            height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+
+        .media-preview-modal.show .media-preview-content {
+            transform: scale(1);
+        }
+
+        .media-preview-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .media-preview-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .media-preview-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .media-preview-close:hover {
+            background: var(--background-light);
+            color: var(--text-dark);
+        }
+
+        .media-preview-body {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .media-preview-body iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .media-preview-body video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #000;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .content-wrapper {
+                padding: 1.5rem;
+            }
+
+            .submission-title {
+                font-size: 1.5rem;
+            }
+
+            .media-preview-content {
+                width: 95%;
+                height: 90vh;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .content-wrapper {
+                padding: 1rem;
+            }
+
+            .submission-header {
+                padding: 1.5rem;
+            }
+
+            .submission-title {
+                font-size: 1.25rem;
+            }
+
+            .team-avatars {
+                margin-left: 0;
+                margin-top: 1rem;
+            }
+
+            .toast-container {
+                right: 1rem;
+                left: 1rem;
+            }
+
+            .toast {
+                min-width: auto;
+                max-width: none;
+            }
+
+            .ai-evaluate-btn {
+                font-size: 0.9375rem;
+                padding: 0.875rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar Container -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header Container -->
+            <div id="header-container"></div>
+
+            <!-- Page Content -->
+            <div class="content-wrapper">
+                <!-- Breadcrumbs -->
+                <nav class="breadcrumb-nav">
+                    <a href="dashboard.html" class="breadcrumb-link">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">dashboard</span>
+                        Dashboard
+                    </a>
+                    <span class="material-symbols-outlined breadcrumb-separator" style="font-size: 16px;">chevron_right</span>
+                    <a href="assigned-ideas.html" class="breadcrumb-link">Evaluations</a>
+                    <span class="material-symbols-outlined breadcrumb-separator" style="font-size: 16px;">chevron_right</span>
+                    <span class="breadcrumb-current">Team Spark - AI Evaluation</span>
+                </nav>
+
+                <!-- Submission Header Card -->
+                <div class="submission-header">
+                    <div class="row align-items-start">
+                        <div class="col-12 col-md-8">
+                            <div class="submission-meta">
+                                <span class="submission-id">#8821</span>
+                                <span class="submission-category">Renewable Energy</span>
+                            </div>
+                            <h1 class="submission-title">Project Solar Clean</h1>
+                            <p class="submission-school">St. Mary's High School</p>
+                            <p class="submission-school" style="color: var(--primary-color); font-weight: 600; margin-top: 0.5rem;">
+                                <span class="material-symbols-outlined" style="font-size: 18px; vertical-align: middle; margin-right: 0.25rem;">groups</span>
+                                Team Spark
+                            </p>
+                            <div class="tag-group">
+                                <span class="tag">Sustainability</span>
+                                <span class="tag">Hardware</span>
+                                <span class="tag">Social Impact</span>
+                            </div>
+                        </div>
+                        <!-- Team Avatar Group -->
+                        <div class="col-12 col-md-4">
+                            <div class="team-avatars">
+                                <img class="team-avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCK0BoJGEJIUJDhmhFpR12UhYVqq4u0ExRZolOFbKZaCrwVAM5QSXABY0XnOLZkRSItBBMv3aSNvAZ01QX3UiQ7Xp41XBfSClzM2E3D0vIqIET3LTl-VcX5GNDp-8NYT5DWapd7FmU3XSOnAQXW_6nsTQdhETdu-yqWCmW-_aqnO5MLQ45MFAy-REaNot711jiQnKK-gI5yLOdc2CrtRPqh_LMLI228h3V2K7jmjCMDEH-g5e-Mcd5Rz2xIuEroYoaPLN3_Lj0vy6E" alt="Team member 1" data-bs-toggle="tooltip" data-bs-placement="top" title="Priya Sharma" />
+                                <img class="team-avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuALlxklNRD8pSqUYxEBnQfxsjk9ItvUS2Bv5S-rTpVlA8egLlgPvPmHfUGfVLl3OUHIduv8H5f-yBiZvKwPYIRRvt0YfAfmdcdP2O3Hy4cxiPsdRIVAV_kt-AwnbqOz_S2v3_ycZDr-A8yZXVpqzWf9ZzD21jfeSTu1jv2KWKzUeUMB0T4zPvBGe3QX8OkgmlqcfEfb-KlBQCq0T5Ne2Dn-eQv6OesQE_CZ1UlvBfxq7NYkT8KMV2jDOULKSxs3qLKStj_L7mVDMrQ" alt="Team member 2" data-bs-toggle="tooltip" data-bs-placement="top" title="Rahul Verma" />
+                                <img class="team-avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBkqCVlb6-Ik64Uu66aFrQ3a1cwW9nY85j6PzTMGqy0a4cNlaRiG5u_Oznaqkl8t81sTShn9dvfr4LO2GwZHIp7paDkoHJ3Tv-2Eqrlr1KeCmv-o_HhMR73yyadr3vItpENEzpAWif9QrGITuOs-w5JptxniogO0UF0vTL_HhFNly3fSQuksY8rsVpIvDH-9BhmDr-fEhj46BFJfd2dt7SrML8LeFFPHbOHBrdEQycHKh9Ng7C6RUB2XFYp6p9p6rPQ3ESpZVDDpBo" alt="Team member 3" data-bs-toggle="tooltip" data-bs-placement="top" title="Ananya Gupta" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="abstract-section">
+                        <h3 class="abstract-heading">Abstract</h3>
+                        <p class="abstract-text">Our project aims to provide affordable, solar-powered water filtration for rural communities. By utilizing locally sourced materials and a novel filtration membrane, we can reduce waterborne diseases by up to 40% in targeted villages. The system is modular, requiring minimal maintenance, and the solar component ensures it operates entirely off-grid.</p>
+                    </div>
+                </div>
+
+                <!-- Media Attachments -->
+                <div class="row g-4 mb-4">
+                    <!-- PPT Viewer Placeholder -->
+                    <div class="col-12 col-md-6">
+                        <div class="media-card" onclick="openPitchDeck()">
+                            <div class="media-card-header">
+                                <div class="media-icon ppt">
+                                    <span class="material-symbols-outlined">slideshow</span>
+                                </div>
+                                <span class="material-symbols-outlined media-open-icon">open_in_new</span>
+                            </div>
+                            <h3 class="media-title">Pitch Deck</h3>
+                            <p class="media-description">View the detailed 12-slide presentation.</p>
+                            <div class="media-preview">
+                                <div class="media-preview-bg" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuARQ8GKInydMH8jSzkuTpdnavEC5UmLx6ts-h5ldu60c6VCaSSy5fqK8dKXD_qnRRHbKet0-9DWZ1onPqsfKmFWb1pNdIZTaxcFcWiW8Icl7XDbNP-T3P0ORPdqjanaO6iDTzSnkVV35ixffskqiiuV2yCs9GcowRDPm8i9IGpnEZxdiL8K9bKQ56ydAhS-m9hgEWHEpS5pYzIBGhPqifFz0GE81idyEwBbFw8roJO_kuckOF9s6NRodzbR6ddH9Cg1pzVFqDzmORk");'></div>
+                                <button class="media-preview-btn" onclick="event.stopPropagation(); openPitchDeck();">Preview Slides</button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Video Placeholder -->
+                    <div class="col-12 col-md-6">
+                        <div class="media-card" onclick="openVideoPitch()">
+                            <div class="media-card-header">
+                                <div class="media-icon video">
+                                    <span class="material-symbols-outlined">play_circle</span>
+                                </div>
+                                <span class="material-symbols-outlined media-open-icon">open_in_new</span>
+                            </div>
+                            <h3 class="media-title">Video Pitch</h3>
+                            <p class="media-description">Watch the 2-minute prototype demo.</p>
+                            <div class="media-preview">
+                                <div class="media-preview-bg" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB6qKJdf--z4Uxwwc9jHzGuFTv5WFxufp5tZ3kf0HP-tAS4aLBJjXAT0XujckrgnenLivKjbp7vUXsE6DoaggOIhPDVF-woKliiIKgUGmvJAy-ukirnnwVKiPDwUR_PobJgZbGOjNiZNf0L1ZytiewDBaqwtX8VNAZNGACeykGVesy4_99DL_AJJx-89jIQxiTuBVjEc39d_31ToLTrHY8zOyL9z97OUxHx96I-MHEsty2T74gk9mqwqliHqXjKEdtXWfRicqYoXZo");'></div>
+                                <div class="video-play-icon" onclick="event.stopPropagation(); openVideoPitch();">
+                                    <span class="material-symbols-outlined">play_arrow</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Q&A Accordion -->
+                <div class="qa-card">
+                    <div class="qa-header">
+                        <h3 class="qa-title">
+                            <span class="material-symbols-outlined">quiz</span>
+                            Questionnaire
+                        </h3>
+                    </div>
+                    <div class="accordion" id="qaAccordion">
+                        <div class="qa-item">
+                            <button class="qa-question" type="button" data-bs-toggle="collapse" data-bs-target="#question1" aria-expanded="true" aria-controls="question1">
+                                <span>Describe the person or group you are trying to help. Who are they, and what is their daily struggle related to this problem?</span>
+                                <span class="material-symbols-outlined qa-chevron">keyboard_arrow_down</span>
+                            </button>
+                            <div id="question1" class="collapse show" data-bs-parent="#qaAccordion">
+                                <div class="qa-answer">
+                                    [Answer will be displayed here]
+                                </div>
+                            </div>
+                        </div>
+                        <div class="qa-item">
+                            <button class="qa-question" type="button" data-bs-toggle="collapse" data-bs-target="#question2" aria-expanded="false" aria-controls="question2">
+                                <span>What exact problem are they facing? When, where, and why does this problem matter? Why is this problem important to solve now?</span>
+                                <span class="material-symbols-outlined qa-chevron">keyboard_arrow_down</span>
+                            </button>
+                            <div id="question2" class="collapse" data-bs-parent="#qaAccordion">
+                                <div class="qa-answer">
+                                    [Answer will be displayed here]
+                                </div>
+                            </div>
+                        </div>
+                        <div class="qa-item">
+                            <button class="qa-question" type="button" data-bs-toggle="collapse" data-bs-target="#question3" aria-expanded="false" aria-controls="question3">
+                                <span>How did you discover this problem? What evidence (surveys, observations, data, conversations) convinced you it's real and worth solving?</span>
+                                <span class="material-symbols-outlined qa-chevron">keyboard_arrow_down</span>
+                            </button>
+                            <div id="question3" class="collapse" data-bs-parent="#qaAccordion">
+                                <div class="qa-answer">
+                                    [Answer will be displayed here]
+                                </div>
+                            </div>
+                        </div>
+                        <div class="qa-item">
+                            <button class="qa-question" type="button" data-bs-toggle="collapse" data-bs-target="#question4" aria-expanded="false" aria-controls="question4">
+                                <span>What is your solution? Describe exactly what you're building or doing to solve the problem — be specific about features, processes, or interventions.</span>
+                                <span class="material-symbols-outlined qa-chevron">keyboard_arrow_down</span>
+                            </button>
+                            <div id="question4" class="collapse" data-bs-parent="#qaAccordion">
+                                <div class="qa-answer">
+                                    [Answer will be displayed here]
+                                </div>
+                            </div>
+                        </div>
+                        <div class="qa-item">
+                            <button class="qa-question" type="button" data-bs-toggle="collapse" data-bs-target="#question5" aria-expanded="false" aria-controls="question5">
+                                <span>What is unique or different about your solution compared to other ideas or approaches?</span>
+                                <span class="material-symbols-outlined qa-chevron">keyboard_arrow_down</span>
+                            </button>
+                            <div id="question5" class="collapse" data-bs-parent="#qaAccordion">
+                                <div class="qa-answer">
+                                    [Answer will be displayed here]
+                                </div>
+                            </div>
+                        </div>
+                        <div class="qa-item">
+                            <button class="qa-question" type="button" data-bs-toggle="collapse" data-bs-target="#question6" aria-expanded="false" aria-controls="question6">
+                                <span>How will you implement it? Include any required technology, materials, partnerships, or support.</span>
+                                <span class="material-symbols-outlined qa-chevron">keyboard_arrow_down</span>
+                            </button>
+                            <div id="question6" class="collapse" data-bs-parent="#qaAccordion">
+                                <div class="qa-answer">
+                                    [Answer will be displayed here]
+                                </div>
+                            </div>
+                        </div>
+                        <div class="qa-item">
+                            <button class="qa-question" type="button" data-bs-toggle="collapse" data-bs-target="#question7" aria-expanded="false" aria-controls="question7">
+                                <span>What impact do you expect? Estimate who it will help, how many people will benefit, and what will change in their lives.</span>
+                                <span class="material-symbols-outlined qa-chevron">keyboard_arrow_down</span>
+                            </button>
+                            <div id="question7" class="collapse" data-bs-parent="#qaAccordion">
+                                <div class="qa-answer">
+                                    [Answer will be displayed here]
+                                </div>
+                            </div>
+                        </div>
+                        <div class="qa-item">
+                            <button class="qa-question" type="button" data-bs-toggle="collapse" data-bs-target="#question8" aria-expanded="false" aria-controls="question8">
+                                <span>Is this solution feasible with your team's current skills, time, and resources?</span>
+                                <span class="material-symbols-outlined qa-chevron">keyboard_arrow_down</span>
+                            </button>
+                            <div id="question8" class="collapse" data-bs-parent="#qaAccordion">
+                                <div class="qa-answer">
+                                    [Answer will be displayed here]
+                                </div>
+                            </div>
+                        </div>
+                        <div class="qa-item">
+                            <button class="qa-question" type="button" data-bs-toggle="collapse" data-bs-target="#question9" aria-expanded="false" aria-controls="question9">
+                                <span>What are the biggest challenges or risks you foresee? What could go wrong, and how do you plan to overcome or mitigate those risks?</span>
+                                <span class="material-symbols-outlined qa-chevron">keyboard_arrow_down</span>
+                            </button>
+                            <div id="question9" class="collapse" data-bs-parent="#qaAccordion">
+                                <div class="qa-answer">
+                                    [Answer will be displayed here]
+                                </div>
+                            </div>
+                        </div>
+                        <div class="qa-item">
+                            <button class="qa-question" type="button" data-bs-toggle="collapse" data-bs-target="#question10" aria-expanded="false" aria-controls="question10">
+                                <span>How will you test or validate whether your solution works? What would success look like after 3 months, 6 months, or 1 year?</span>
+                                <span class="material-symbols-outlined qa-chevron">keyboard_arrow_down</span>
+                            </button>
+                            <div id="question10" class="collapse" data-bs-parent="#qaAccordion">
+                                <div class="qa-answer">
+                                    [Answer will be displayed here]
+                                </div>
+                            </div>
+                        </div>
+                        <div class="qa-item">
+                            <button class="qa-question" type="button" data-bs-toggle="collapse" data-bs-target="#question11" aria-expanded="false" aria-controls="question11">
+                                <span>How will the solution be sustained beyond IFT? Can it continue through community involvement, funding, or partnerships?</span>
+                                <span class="material-symbols-outlined qa-chevron">keyboard_arrow_down</span>
+                            </button>
+                            <div id="question11" class="collapse" data-bs-parent="#qaAccordion">
+                                <div class="qa-answer">
+                                    [Answer will be displayed here]
+                                </div>
+                            </div>
+                        </div>
+                        <div class="qa-item">
+                            <button class="qa-question" type="button" data-bs-toggle="collapse" data-bs-target="#question12" aria-expanded="false" aria-controls="question12">
+                                <span>How does this idea reflect your team's mission, values, or passion? Why does this matter to you personally or as a team?</span>
+                                <span class="material-symbols-outlined qa-chevron">keyboard_arrow_down</span>
+                            </button>
+                            <div id="question12" class="collapse" data-bs-parent="#qaAccordion">
+                                <div class="qa-answer">
+                                    [Answer will be displayed here]
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Evaluation Button -->
+                <div class="ai-evaluate-section">
+                    <button class="ai-evaluate-btn" onclick="evaluateWithAI()">
+                        <span class="material-symbols-outlined">auto_awesome</span>
+                        Evaluate With AI
+                    </button>
+                </div>
+
+                <!-- AI Results Section -->
+                <div class="ai-results-section" id="aiResultsSection">
+                    <div class="ai-results-card">
+                        <div class="ai-results-header">
+                            <h3 class="ai-results-title">
+                                <span class="material-symbols-outlined" style="color: var(--primary-color);">auto_awesome</span>
+                                AI Evaluation Results
+                            </h3>
+                        </div>
+                        <div class="ai-results-body">
+                            <div class="criteria-result">
+                                <span class="criteria-name">Uniqueness</span>
+                                <span class="criteria-score">8/10</span>
+                            </div>
+                            <div class="criteria-result">
+                                <span class="criteria-name">Ease of Implementation</span>
+                                <span class="criteria-score">6/10</span>
+                            </div>
+                            <div class="criteria-result">
+                                <span class="criteria-name">Feasibility</span>
+                                <span class="criteria-score">5/10</span>
+                            </div>
+                            <div class="criteria-result">
+                                <span class="criteria-name">Impact</span>
+                                <span class="criteria-score">9/10</span>
+                            </div>
+                            <div class="criteria-result">
+                                <span class="criteria-name">Sustainability</span>
+                                <span class="criteria-score">7/10</span>
+                            </div>
+                            <div class="criteria-result">
+                                <span class="criteria-name">Conceptual Clarity</span>
+                                <span class="criteria-score">9/10</span>
+                            </div>
+                            <div class="criteria-result">
+                                <span class="criteria-name">Empathy</span>
+                                <span class="criteria-score">9/10</span>
+                            </div>
+                            <div class="criteria-result">
+                                <span class="criteria-name">Creativity</span>
+                                <span class="criteria-score">8/10</span>
+                            </div>
+                            <div class="criteria-result">
+                                <span class="criteria-name">Communication</span>
+                                <span class="criteria-score">9/10</span>
+                            </div>
+                            <div class="criteria-result">
+                                <span class="criteria-name">Flexible Thinking</span>
+                                <span class="criteria-score">8/10</span>
+                            </div>
+
+                            <div class="warning-badge">
+                                ⚠️ NO ATTACHMENTS: -3 marks
+                            </div>
+
+                            <div class="total-score-display">
+                                <span class="total-score-label">Total Score</span>
+                                <span class="total-score-number">75/100</span>
+                            </div>
+
+                            <div class="qualification-badge">
+                                <span class="material-symbols-outlined">check_circle</span>
+                                QUALIFIED FOR TOP 400
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- AI Evaluation Modal -->
+    <div class="ai-eval-modal" id="aiEvalModal">
+        <div class="ai-eval-container">
+            <div class="ai-eval-header">
+                <h2 class="ai-eval-title">AI Evaluation</h2>
+                <p class="ai-eval-description">An adaptive AI-driven educational platform that personalizes learning experiences for neurodiverse students, including those with ADHD, dyslexia, and autism. The system dynamically adjusts content presentation, pace, and teaching methods based on individual learning styles and preferences, while providing a customizable interface that respects sensory needs and learning patterns.</p>
+                <button class="ai-eval-status-btn" id="evalStatusBtn">
+                    <span class="material-symbols-outlined" style="font-size: 18px;">autorenew</span>
+                    <span id="statusBtnText">Evaluating...</span>
+                </button>
+            </div>
+            <div class="ai-eval-body">
+                <div class="ai-terminal" id="aiTerminal">
+                    <div class="terminal-line">
+                        <span class="material-symbols-outlined terminal-icon spinner">autorenew</span>
+                        <span>Sending submission data...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="ai-eval-footer" id="aiEvalFooter" style="display: none;">
+                <button class="done-btn" onclick="closeAIEvalModal()">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Media Preview Modal -->
+    <div class="media-preview-modal" id="mediaPreviewModal">
+        <div class="media-preview-content">
+            <div class="media-preview-header">
+                <h3 class="media-preview-title" id="mediaPreviewTitle">
+                    <span class="material-symbols-outlined">slideshow</span>
+                    Preview
+                </h3>
+                <button class="media-preview-close" onclick="closeMediaPreview()">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="media-preview-body" id="mediaPreviewBody">
+                <!-- Content will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // AI Evaluation Function
+        function evaluateWithAI() {
+            const modal = document.getElementById('aiEvalModal');
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+
+            // Start the evaluation animation sequence
+            startEvaluationSequence();
+        }
+
+        function closeAIEvalModal() {
+            const modal = document.getElementById('aiEvalModal');
+            modal.classList.remove('show');
+            document.body.style.overflow = 'auto';
+
+            // Show the results section below the Evaluate button
+            const resultsSection = document.getElementById('aiResultsSection');
+            resultsSection.style.display = 'block';
+
+            // Smooth scroll to results
+            setTimeout(() => {
+                resultsSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 400);
+
+            // Reset the modal for next use
+            setTimeout(() => {
+                const terminal = document.getElementById('aiTerminal');
+                terminal.innerHTML = `
+                    <div class="terminal-line">
+                        <span class="material-symbols-outlined terminal-icon spinner">autorenew</span>
+                        <span>Sending submission data...</span>
+                    </div>
+                `;
+                document.getElementById('aiEvalFooter').style.display = 'none';
+                document.getElementById('statusBtnText').textContent = 'Evaluating...';
+            }, 300);
+        }
+
+        function startEvaluationSequence() {
+            const terminal = document.getElementById('aiTerminal');
+
+            // Stage 1: Initial loading
+            setTimeout(() => {
+                terminal.innerHTML = `
+                    <div class="terminal-line">
+                        <span class="material-symbols-outlined terminal-icon check">check_circle</span>
+                        <span>Ready</span>
+                    </div>
+                `;
+            }, 1000);
+
+            // Stage 2: Show scoring criteria
+            const criteria = [
+                { name: 'Uniqueness', score: 8 },
+                { name: 'Ease of Implementation', score: 6 },
+                { name: 'Feasibility', score: 5 },
+                { name: 'Impact', score: 9 },
+                { name: 'Sustainability', score: 7 },
+                { name: 'Conceptual Clarity', score: 9 },
+                { name: 'Empathy', score: 9 },
+                { name: 'Creativity', score: 8 },
+                { name: 'Communication', score: 9 },
+                { name: 'Flexible Thinking', score: 8 }
+            ];
+
+            let delay = 1500;
+            criteria.forEach((criterion, index) => {
+                setTimeout(() => {
+                    const line = document.createElement('div');
+                    line.className = 'terminal-line';
+                    line.innerHTML = `
+                        <span class="material-symbols-outlined terminal-icon check">check_circle</span>
+                        <span>${criterion.name}</span>
+                        <span class="score-value">${criterion.score}/10</span>
+                    `;
+                    terminal.appendChild(line);
+
+                    // Scroll to bottom
+                    terminal.scrollTop = terminal.scrollHeight;
+                }, delay);
+                delay += 300;
+            });
+
+            // Stage 3: Show additional checks
+            const additionalChecks = [
+                'Resources Alignment',
+                'Risk Awareness',
+                'Impact Continuity',
+                'Sustainability Logic',
+                'Team Fit',
+                'Learning Loop'
+            ];
+
+            additionalChecks.forEach((check, index) => {
+                setTimeout(() => {
+                    const line = document.createElement('div');
+                    line.className = 'terminal-line';
+                    line.innerHTML = `
+                        <span class="material-symbols-outlined terminal-icon check">check_circle</span>
+                        <span>${check}</span>
+                        <span class="material-symbols-outlined terminal-icon check">check</span>
+                    `;
+                    terminal.appendChild(line);
+                    terminal.scrollTop = terminal.scrollHeight;
+                }, delay);
+                delay += 250;
+            });
+
+            // Stage 4: Show warning about attachments
+            setTimeout(() => {
+                const line = document.createElement('div');
+                line.className = 'terminal-line warning-line';
+                line.innerHTML = `
+                    <span>NO ATTACHMENTS: -3 marks</span>
+                `;
+                terminal.appendChild(line);
+                const subLine = document.createElement('div');
+                subLine.className = 'terminal-line';
+                subLine.style.color = '#999';
+                subLine.style.fontSize = '0.8125rem';
+                subLine.style.paddingLeft = '1.5rem';
+                subLine.innerHTML = `• No attachments uploaded with the submission`;
+                terminal.appendChild(subLine);
+                terminal.scrollTop = terminal.scrollHeight;
+            }, delay);
+            delay += 800;
+
+            // Stage 5: Show total score
+            setTimeout(() => {
+                const line = document.createElement('div');
+                line.className = 'terminal-line total-score-line';
+                line.innerHTML = `
+                    <span>Total Score: <span style="color: #22c55e;">75/100</span></span>
+                `;
+                terminal.appendChild(line);
+                terminal.scrollTop = terminal.scrollHeight;
+            }, delay);
+            delay += 600;
+
+            // Stage 6: Show qualification status
+            setTimeout(() => {
+                const line = document.createElement('div');
+                line.className = 'terminal-line qualified-line';
+                line.innerHTML = `
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <span>QUALIFIED FOR TOP 400</span>
+                `;
+                terminal.appendChild(line);
+                terminal.scrollTop = terminal.scrollHeight;
+
+                // Show Done button
+                document.getElementById('aiEvalFooter').style.display = 'flex';
+                document.getElementById('statusBtnText').textContent = 'Completed';
+            }, delay);
+        }
+
+        // Toast notification function
+        function showToast(title, message, type = 'info') {
+            const toastContainer = document.getElementById('toastContainer');
+            const toastId = 'toast-' + Date.now();
+
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.id = toastId;
+
+            const icon = type === 'success' ? 'check_circle' : 'info';
+
+            toast.innerHTML = `
+                <div class="toast-icon">
+                    <span class="material-symbols-outlined">${icon}</span>
+                </div>
+                <div class="toast-content">
+                    <p class="toast-title">${title}</p>
+                    <p class="toast-message">${message}</p>
+                </div>
+                <button class="toast-close" onclick="closeToast('${toastId}')">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            `;
+
+            toastContainer.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
+
+            setTimeout(() => {
+                closeToast(toastId);
+            }, 4000);
+        }
+
+        function closeToast(toastId) {
+            const toast = document.getElementById(toastId);
+            if (toast) {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }
+        }
+
+        // Open Pitch Deck
+        function openPitchDeck() {
+            showToast('Opening Pitch Deck', 'Loading the 12-slide presentation...', 'info');
+
+            const modal = document.getElementById('mediaPreviewModal');
+            const title = document.getElementById('mediaPreviewTitle');
+            const body = document.getElementById('mediaPreviewBody');
+
+            title.innerHTML = '<span class="material-symbols-outlined">slideshow</span> Pitch Deck Preview';
+
+            body.innerHTML = `
+                <iframe src="https://docs.google.com/presentation/d/e/2PACX-1vQj8VxV0hJ0l5vZhN-8_wQDj6qF0XRVZL2VnxKwPZQ5_1vJ7xYpF2VnKL0_FfGxJ8Q/embed?start=false&loop=false&delayms=3000"
+                        frameborder="0"
+                        allowfullscreen="true"
+                        mozallowfullscreen="true"
+                        webkitallowfullscreen="true">
+                </iframe>
+            `;
+
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Open Video Pitch
+        function openVideoPitch() {
+            showToast('Opening Video Pitch', 'Loading the 2-minute prototype demo...', 'info');
+
+            const modal = document.getElementById('mediaPreviewModal');
+            const title = document.getElementById('mediaPreviewTitle');
+            const body = document.getElementById('mediaPreviewBody');
+
+            title.innerHTML = '<span class="material-symbols-outlined">play_circle</span> Video Pitch';
+
+            body.innerHTML = `
+                <video controls autoplay>
+                    <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            `;
+
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Close Media Preview
+        function closeMediaPreview() {
+            const modal = document.getElementById('mediaPreviewModal');
+            const body = document.getElementById('mediaPreviewBody');
+
+            modal.classList.remove('show');
+            document.body.style.overflow = 'auto';
+
+            setTimeout(() => {
+                body.innerHTML = '';
+            }, 300);
+        }
+
+        // Initialize Bootstrap tooltips
+        document.addEventListener('DOMContentLoaded', function() {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            // Close media preview modal when clicking outside
+            const mediaPreviewModal = document.getElementById('mediaPreviewModal');
+            mediaPreviewModal.addEventListener('click', function(e) {
+                if (e.target === mediaPreviewModal) {
+                    closeMediaPreview();
+                }
+            });
+        });
+    </script>
+
+    <!-- Load Sidebar -->
+    <script>
+        fetch('sidebar.html')
+            .then(response => response.text())
+            .then(data => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = data;
+
+                const sidebar = tempDiv.querySelector('aside');
+                const sidebarScript = tempDiv.querySelector('script');
+                const sidebarStyle = tempDiv.querySelector('style');
+
+                if (sidebar) {
+                    document.getElementById('sidebar-container').appendChild(sidebar);
+                }
+
+                if (sidebarStyle) {
+                    document.head.appendChild(sidebarStyle);
+                }
+
+                if (sidebarScript) {
+                    const script = document.createElement('script');
+                    script.textContent = sidebarScript.textContent;
+                    document.body.appendChild(script);
+                }
+
+                setTimeout(() => {
+                    const currentPage = window.location.pathname.split('/').pop() || 'AI-idea-evaluation.html';
+                    const navItems = document.querySelectorAll('.nav-item');
+
+                    navItems.forEach(item => {
+                        const href = item.getAttribute('href');
+
+                        item.classList.remove('nav-item-active');
+
+                        const icon = item.querySelector('.material-symbols-outlined');
+                        if (icon) {
+                            icon.classList.remove('filled');
+                            icon.style.fontVariationSettings = "'FILL' 0";
+                        }
+
+                        if (href === 'assigned-ideas.html') {
+                            item.classList.add('nav-item-active');
+                            if (icon) {
+                                icon.classList.add('filled');
+                                icon.style.fontVariationSettings = "'FILL' 1";
+                            }
+                        }
+                    });
+                }, 200);
+            })
+            .catch(error => console.error('Error loading sidebar:', error));
+    </script>
+
+    <!-- Load Header -->
+    <script>
+        fetch('header.html')
+            .then(response => response.text())
+            .then(data => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = data;
+
+                const elements = tempDiv.childNodes;
+                elements.forEach(node => {
+                    if (node.nodeType === 1 || node.nodeType === 3) {
+                        document.getElementById('header-container').appendChild(node.cloneNode(true));
+                    }
+                });
+
+                const script = tempDiv.querySelector('script');
+                if (script) {
+                    const newScript = document.createElement('script');
+                    newScript.textContent = script.textContent;
+                    document.body.appendChild(newScript);
+                }
+            })
+            .catch(error => console.error('Error loading header:', error));
+    </script>
+</body>
+
+</html>

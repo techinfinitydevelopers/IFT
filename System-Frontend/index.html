@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>India Future Tycoon - Innovation Platform</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap"
+        rel="stylesheet">
+
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #5E2A97;
+            --primary-hover: #7B3FB5;
+            --secondary: #DEDE50;
+            --background: #F7F7F7;
+            --white: #FFFFFF;
+            --text-dark: #222222;
+            --text-muted: #666666;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #F7F7F7 0%, #E8D4F0 100%);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1250px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .logo-section {
+            margin-bottom: 2.5rem;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        img.logo {
+            width: 300px;
+        }
+
+        /* .logo-text {
+            font-size: 2.25rem;
+            font-weight: 900;
+            color: var(--primary);
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+        } */
+
+        .tagline {
+            font-size: 1rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1.25rem;
+            margin-top: 2.5rem;
+        }
+
+        .portal-card {
+            background: var(--white);
+            border-radius: 14px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(94, 42, 151, 0.12);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .portal-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+
+        .portal-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .portal-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 32px rgba(94, 42, 151, 0.2);
+        }
+
+        .portal-card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .portal-card:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .portal-card:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .portal-card:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        .icon-circle {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(94, 42, 151, 0.1), rgba(222, 222, 80, 0.15));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .portal-card:hover .icon-circle {
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .icon-circle .material-symbols-outlined {
+            font-size: 32px;
+            color: var(--primary);
+            transition: color 0.3s ease;
+        }
+
+        .portal-card:hover .icon-circle .material-symbols-outlined {
+            color: var(--white);
+            font-variation-settings: 'FILL' 1;
+        }
+
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin: 0;
+        }
+
+        .card-description {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        .card-arrow {
+            margin-top: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: var(--primary);
+            transition: gap 0.3s ease;
+        }
+
+        .portal-card:hover .card-arrow {
+            gap: 0.75rem;
+        }
+
+        .card-arrow .material-symbols-outlined {
+            font-size: 18px;
+        }
+
+        .footer-text {
+            margin-top: 2.5rem;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            animation: fadeIn 1s ease 0.5s backwards;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .cards-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1.5rem;
+            }
+
+            .logo-text {
+                font-size: 2rem;
+            }
+
+            .tagline {
+                font-size: 1rem;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .portal-card {
+                padding: 1.5rem;
+            }
+
+            .icon-circle {
+                width: 64px;
+                height: 64px;
+            }
+
+            .icon-circle .material-symbols-outlined {
+                font-size: 32px;
+            }
+
+            .card-title {
+                font-size: 1.125rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo-text {
+                font-size: 1.5rem;
+            }
+
+            .tagline {
+                font-size: 0.875rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Logo Section -->
+        <div class="logo-section">
+            <a href="#">
+                <img src="../assets/IFT_logo.png" alt="IFT Logo" class="logo">
+            </a>
+            <p class="tagline">Empowering Young Innovators to Shape Tomorrow</p>
+        </div>
+
+        <!-- Portal Cards Grid -->
+        <div class="cards-grid">
+            <!-- Sign In Card -->
+            <a href="/auth/sign-in.html" class="portal-card">
+                <div class="icon-circle">
+                    <span class="material-symbols-outlined">login</span>
+                </div>
+                <h2 class="card-title">Sign In</h2>
+                <p class="card-description">Access your account to continue your innovation journey</p>
+                <div class="card-arrow">
+                    <span>Enter Portal</span>
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                </div>
+            </a>
+
+            <!-- Sign Up Card -->
+            <a href="/auth/sign-up.html" class="portal-card">
+                <div class="icon-circle">
+                    <span class="material-symbols-outlined">person_add</span>
+                </div>
+                <h2 class="card-title">Sign Up</h2>
+                <p class="card-description">Join the community of future tycoons and start innovating</p>
+                <div class="card-arrow">
+                    <span>Get Started</span>
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                </div>
+            </a>
+
+            <!-- Student Dashboard Card -->
+            <a href="/student/dashboard.html" class="portal-card">
+                <div class="icon-circle">
+                    <span class="material-symbols-outlined">school</span>
+                </div>
+                <h2 class="card-title">Student Portal</h2>
+                <p class="card-description">Submit ideas, track progress, and collaborate with your team</p>
+                <div class="card-arrow">
+                    <span>Open Dashboard</span>
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                </div>
+            </a>
+
+            <!-- Jury Dashboard Card -->
+            <a href="/jury/dashboard.html" class="portal-card">
+                <div class="icon-circle">
+                    <span class="material-symbols-outlined">gavel</span>
+                </div>
+                <h2 class="card-title">Jury Portal</h2>
+                <p class="card-description">Evaluate submissions and guide the next generation of innovators</p>
+                <div class="card-arrow">
+                    <span>Start Evaluating</span>
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                </div>
+            </a>
+
+            <!-- Super Admin Dashboard Card -->
+            <a href="/super-admin/dashboard.html" class="portal-card">
+                <div class="icon-circle">
+                    <span class="material-symbols-outlined">admin_panel_settings</span>
+                </div>
+                <h2 class="card-title">Super Admin Portal</h2>
+                <p class="card-description">Manage all aspects of the innovation platform</p>
+                <div class="card-arrow">
+                    <span>Access Portal</span>
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                </div>
+            </a>
+        </div>
+
+        <!-- Footer Text -->
+        <p class="footer-text">
+            Select your portal to begin
+        </p>
+    </div>
+</body>
+
+</html>

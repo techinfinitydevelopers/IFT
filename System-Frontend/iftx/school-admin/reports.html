@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Reports & Analytics | Super Admin | ENpower IFT</title>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+
+    <!-- Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary: #5E2A97;
+            --secondary: #DEDE50;
+            --primary-light: #E8D4F0;
+            --background-light: #F7F7F7;
+            --surface-light: #FFFFFF;
+            --border-light: #EEEEEE;
+            --text-dark: #222222;
+            --text-muted: #666666;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            overflow: hidden;
+        }
+
+        .main-container {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow-y: auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        .content-wrapper {
+            flex: 1;
+            padding: 32px;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Page Header */
+        .page-header {
+            margin-bottom: 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .page-header h1 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+
+        .page-header-subtitle {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .btn-filter {
+            background: white;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-filter:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-filter.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Cards */
+        .analytics-card {
+            background: var(--surface-light);
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            border: 1px solid var(--border-light);
+            padding: 24px;
+            height: 100%;
+        }
+
+        .analytics-card-trend {
+            background: var(--surface-light);
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            border: 1px solid var(--border-light);
+            padding: 24px;
+            /* height: 100%; */
+        }
+
+        .card-header-custom {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 24px;
+        }
+
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin: 0 0 4px 0;
+        }
+
+        .card-subtitle {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(94, 42, 151, 0.1);
+            color: var(--primary);
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid rgba(94, 42, 151, 0.2);
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Region Stats */
+        .region-stat {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .region-label {
+            font-size: 0.625rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+        }
+
+        .region-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+
+        .progress-bar-custom {
+            width: 100%;
+            height: 6px;
+            background: var(--background-light);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 999px;
+            transition: width 0.3s ease;
+        }
+
+        /* Completion Circles */
+        .completion-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 32px;
+            padding: 24px 0;
+        }
+
+        .completion-item {
+            text-align: center;
+        }
+
+        .circle-progress {
+            position: relative;
+            width: 112px;
+            height: 112px;
+            margin: 0 auto 12px;
+        }
+
+        .circle-progress svg {
+            transform: rotate(-90deg);
+        }
+
+        .circle-bg {
+            fill: transparent;
+            stroke: var(--background-light);
+            stroke-width: 8;
+        }
+
+        .circle-fill {
+            fill: transparent;
+            stroke-width: 8;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.3s ease;
+        }
+
+        .circle-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .completion-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Donut Chart */
+        .donut-chart {
+            position: relative;
+            width: 192px;
+            height: 192px;
+            margin: 0 auto;
+        }
+
+        .donut-chart svg {
+            transform: rotate(-90deg);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .legend-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin: 0;
+        }
+
+        .legend-sublabel {
+            font-size: 0.625rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* Trend Badge */
+        .trend-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(94, 42, 151, 0.1);
+            color: var(--primary);
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(94, 42, 151, 0.2);
+        }
+
+        .trend-value {
+            font-size: 1.125rem;
+            font-weight: 700;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .content-wrapper {
+                padding: 16px;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .completion-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-container">
+        <!-- Include Sidebar -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Include Header -->
+            <div id="header-container"></div>
+
+            <div class="content-wrapper">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div>
+                        <h1>Reports & Analytics</h1>
+                        <p class="page-header-subtitle">Comprehensive insights for IFT submissions and evaluations</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn-filter active">Real-time</button>
+                        <button class="btn-filter">Historical</button>
+                        <div class="btn-filter">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">calendar_today</span>
+                            Last 30 Days
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Row: Map & Completion Status -->
+                <div class="row g-4 mb-4">
+                    <!-- Global Submission Density -->
+                    <div class="col-12 col-lg-8">
+                        <div class="analytics-card">
+                            <div class="card-header-custom">
+                                <div>
+                                    <h2 class="card-title">Student Submission Distribution</h2>
+                                    <p class="card-subtitle">Regional distribution of student team submissions</p>
+                                </div>
+                                <span class="status-badge">
+                                    <span class="pulse-dot"></span>
+                                    340 Teams Active
+                                </span>
+                            </div>
+                            <div style="position: relative; width: 100%; aspect-ratio: 16/9; background: #f8fafc; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-light);">
+                                <img style="width: 100%; height: 100%; object-fit: cover; opacity: 0.8; mix-blend-mode: multiply;" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDqjQl8mZ56v7NY_eNTJYXylBoB7QFP2hyOllC73LkQ9LGAjeqq70wBMsxplYrNulK0yYIN8shqQ0uOM6em33PKKJt0PXClFYOyYiUW1Xlnnr1PiR55MCeBnwsodRkh71xrhmYSOELEBNyJIDPSVXaSjcCxwaM0YzcXNfkl7_WDHBGMNz9IiAl3USWR6SMhDGy7r4zY5wlRti_YhPp8vTZEBeSxbCA364sCLBemCsKCEI1Zl8y1GXN1mV-kpkDvhGhgq-hSBRpovU8" />
+                                <div style="position: absolute; inset: 0; padding: 32px; display: flex; flex-direction: column; justify-content: flex-end;">
+                                    <div class="row g-3">
+                                        <div class="col-12 col-sm-6 col-lg-3">
+                                            <div class="region-stat">
+                                                <p class="region-label">Delhi NCR</p>
+                                                <p class="region-value">1,245</p>
+                                                <div class="progress-bar-custom">
+                                                    <div class="progress-fill" style="width: 85%; background: var(--primary);"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-sm-6 col-lg-3">
+                                            <div class="region-stat">
+                                                <p class="region-label">Mumbai</p>
+                                                <p class="region-value">982</p>
+                                                <div class="progress-bar-custom">
+                                                    <div class="progress-fill" style="width: 70%; background: #0EA5E9;"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-sm-6 col-lg-3">
+                                            <div class="region-stat">
+                                                <p class="region-label">Bangalore</p>
+                                                <p class="region-value">1,456</p>
+                                                <div class="progress-bar-custom">
+                                                    <div class="progress-fill" style="width: 95%; background: #0D9488;"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-sm-6 col-lg-3">
+                                            <div class="region-stat">
+                                                <p class="region-label">Others</p>
+                                                <p class="region-value">598</p>
+                                                <div class="progress-bar-custom">
+                                                    <div class="progress-fill" style="width: 45%; background: #94a3b8;"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Completion Status -->
+                    <div class="col-12 col-lg-4">
+                        <div class="analytics-card">
+                            <h2 class="card-title" style="margin-bottom: 32px;">Submission Status</h2>
+                            <div class="completion-grid">
+                                <div class="completion-item">
+                                    <div class="circle-progress">
+                                        <svg width="112" height="112" viewBox="0 0 112 112">
+                                            <circle class="circle-bg" cx="56" cy="56" r="48"></circle>
+                                            <circle class="circle-fill" cx="56" cy="56" r="48"
+                                                stroke="var(--primary)"
+                                                stroke-dasharray="301.59"
+                                                stroke-dashoffset="30"></circle>
+                                        </svg>
+                                        <div class="circle-text">90%</div>
+                                    </div>
+                                    <p class="completion-label">Questionnaires</p>
+                                </div>
+                                <div class="completion-item">
+                                    <div class="circle-progress">
+                                        <svg width="112" height="112" viewBox="0 0 112 112">
+                                            <circle class="circle-bg" cx="56" cy="56" r="48"></circle>
+                                            <circle class="circle-fill" cx="56" cy="56" r="48"
+                                                stroke="#0EA5E9"
+                                                stroke-dasharray="301.59"
+                                                stroke-dashoffset="45"></circle>
+                                        </svg>
+                                        <div class="circle-text">85%</div>
+                                    </div>
+                                    <p class="completion-label">File Uploads</p>
+                                </div>
+                                <div class="completion-item">
+                                    <div class="circle-progress">
+                                        <svg width="112" height="112" viewBox="0 0 112 112">
+                                            <circle class="circle-bg" cx="56" cy="56" r="48"></circle>
+                                            <circle class="circle-fill" cx="56" cy="56" r="48"
+                                                stroke="#0D9488"
+                                                stroke-dasharray="301.59"
+                                                stroke-dashoffset="90"></circle>
+                                        </svg>
+                                        <div class="circle-text">70%</div>
+                                    </div>
+                                    <p class="completion-label">Evaluated</p>
+                                </div>
+                                <div class="completion-item">
+                                    <div class="circle-progress">
+                                        <svg width="112" height="112" viewBox="0 0 112 112">
+                                            <circle class="circle-bg" cx="56" cy="56" r="48"></circle>
+                                            <circle class="circle-fill" cx="56" cy="56" r="48"
+                                                stroke="#f59e0b"
+                                                stroke-dasharray="301.59"
+                                                stroke-dashoffset="165"></circle>
+                                        </svg>
+                                        <div class="circle-text">45%</div>
+                                    </div>
+                                    <p class="completion-label">Finalized</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Second Row: Jury Profile & Score Trend -->
+                <div class="row g-4 mb-4">
+                    <!-- Jury Evaluation Profile -->
+                    <div class="col-12 col-md-5">
+                        <div class="analytics-card">
+                            <div class="card-header-custom">
+                                <div>
+                                    <h2 class="card-title">Jury Evaluation Distribution</h2>
+                                    <p class="card-subtitle">Evaluation patterns across jury members</p>
+                                </div>
+                            </div>
+                            <div class="row align-items-center">
+                                <div class="col-6">
+                                    <div class="donut-chart">
+                                        <svg width="192" height="192" viewBox="0 0 192 192">
+                                            <!-- Outer ring - Strict -->
+                                            <circle cx="96" cy="96" r="80" fill="transparent" stroke="var(--background-light)" stroke-width="12"></circle>
+                                            <circle cx="96" cy="96" r="80" fill="transparent" stroke="var(--primary)" stroke-width="12" stroke-dasharray="502" stroke-dashoffset="150" stroke-linecap="round"></circle>
+
+                                            <!-- Middle ring - Balanced -->
+                                            <circle cx="96" cy="96" r="60" fill="transparent" stroke="var(--background-light)" stroke-width="12"></circle>
+                                            <circle cx="96" cy="96" r="60" fill="transparent" stroke="#0EA5E9" stroke-width="12" stroke-dasharray="377" stroke-dashoffset="100" stroke-linecap="round"></circle>
+
+                                            <!-- Inner ring - Lenient -->
+                                            <circle cx="96" cy="96" r="40" fill="transparent" stroke="var(--background-light)" stroke-width="12"></circle>
+                                            <circle cx="96" cy="96" r="40" fill="transparent" stroke="#0D9488" stroke-width="12" stroke-dasharray="251" stroke-dashoffset="180" stroke-linecap="round"></circle>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div style="display: flex; flex-direction: column; gap: 20px;">
+                                        <div class="legend-item">
+                                            <span class="legend-dot" style="background: var(--primary);"></span>
+                                            <div>
+                                                <p class="legend-label">High Scorer</p>
+                                                <p class="legend-sublabel">28 Jury</p>
+                                            </div>
+                                        </div>
+                                        <div class="legend-item">
+                                            <span class="legend-dot" style="background: #0EA5E9;"></span>
+                                            <div>
+                                                <p class="legend-label">Moderate</p>
+                                                <p class="legend-sublabel">52 Jury</p>
+                                            </div>
+                                        </div>
+                                        <div class="legend-item">
+                                            <span class="legend-dot" style="background: #0D9488;"></span>
+                                            <div>
+                                                <p class="legend-label">Conservative</p>
+                                                <p class="legend-sublabel">18 Jury</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Team Performance Trend -->
+                    <div class="col-12 col-md-7">
+                        <div class="analytics-card">
+                            <div class="card-header-custom">
+                                <div>
+                                    <h2 class="card-title">Team Performance Trend</h2>
+                                    <p class="card-subtitle">Average team scores across evaluation rounds</p>
+                                </div>
+                                <div class="trend-badge">
+                                    <span class="material-symbols-outlined" style="font-size: 18px;">trending_up</span>
+                                    <span class="trend-value">+8.5%</span>
+                                </div>
+                            </div>
+                            <div style="position: relative; padding: 20px 0;">
+                                <div style="display: flex; align-items: end; gap: 16px; height: 180px; background: #f8fafc; border-radius: 8px; padding: 20px;">
+                                    <!-- Bar 1 - Round 1 -->
+                                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 8px; height: 100%;">
+                                        <div class="perf-bar" style="width: 100%; height: 62.5%; background: linear-gradient(to top, var(--primary), #9B5FC7); border-radius: 6px 6px 0 0; position: relative; cursor: pointer; transition: all 0.3s ease;" data-score="62.5" data-round="Round 1">
+                                            <div style="position: absolute; top: -30px; left: 50%; transform: translateX(-50%); background: var(--primary); color: white; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; white-space: nowrap; box-shadow: 0 2px 8px rgba(94, 42, 151, 0.3);">62.5</div>
+                                        </div>
+                                    </div>
+                                    <!-- Bar 2 - Round 2 -->
+                                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 8px; height: 100%;">
+                                        <div class="perf-bar" style="width: 100%; height: 65.8%; background: linear-gradient(to top, var(--primary), #9B5FC7); border-radius: 6px 6px 0 0; position: relative; cursor: pointer; transition: all 0.3s ease;" data-score="65.8" data-round="Round 2">
+                                            <div style="position: absolute; top: -30px; left: 50%; transform: translateX(-50%); background: var(--primary); color: white; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; white-space: nowrap; box-shadow: 0 2px 8px rgba(94, 42, 151, 0.3);">65.8</div>
+                                        </div>
+                                    </div>
+                                    <!-- Bar 3 - Round 3 -->
+                                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 8px; height: 100%;">
+                                        <div class="perf-bar" style="width: 100%; height: 74.2%; background: linear-gradient(to top, var(--primary), #9B5FC7); border-radius: 6px 6px 0 0; position: relative; cursor: pointer; transition: all 0.3s ease;" data-score="74.2" data-round="Round 3">
+                                            <div style="position: absolute; top: -30px; left: 50%; transform: translateX(-50%); background: var(--primary); color: white; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; white-space: nowrap; box-shadow: 0 2px 8px rgba(94, 42, 151, 0.3);">74.2</div>
+                                        </div>
+                                    </div>
+                                    <!-- Bar 4 - Round 4 -->
+                                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 8px; height: 100%;">
+                                        <div class="perf-bar" style="width: 100%; height: 82.5%; background: linear-gradient(to top, var(--primary), #9B5FC7); border-radius: 6px 6px 0 0; position: relative; cursor: pointer; transition: all 0.3s ease;" data-score="82.5" data-round="Round 4">
+                                            <div style="position: absolute; top: -30px; left: 50%; transform: translateX(-50%); background: var(--primary); color: white; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; white-space: nowrap; box-shadow: 0 2px 8px rgba(94, 42, 151, 0.3);">82.5</div>
+                                        </div>
+                                    </div>
+                                    <!-- Bar 5 - Final -->
+                                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 8px; height: 100%;">
+                                        <div class="perf-bar" style="width: 100%; height: 78.9%; background: linear-gradient(to top, var(--primary), #9B5FC7); border-radius: 6px 6px 0 0; position: relative; cursor: pointer; transition: all 0.3s ease;" data-score="78.9" data-round="Final">
+                                            <div style="position: absolute; top: -30px; left: 50%; transform: translateX(-50%); background: var(--primary); color: white; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; white-space: nowrap; box-shadow: 0 2px 8px rgba(94, 42, 151, 0.3);">78.9</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Tooltip container -->
+                                <div id="perfTooltip" style="position: absolute; display: none; background: var(--text-dark); color: white; padding: 8px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; pointer-events: none; z-index: 100; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.3);"></div>
+                            </div>
+                            <div class="d-flex justify-content-between" style="padding: 0 24px; font-size: 0.625rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">
+                                <span>Round 1</span>
+                                <span>Round 2</span>
+                                <span>Round 3</span>
+                                <span>Round 4</span>
+                                <span>Final</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Daily Submission Trend -->
+                <div class="analytics-card-trend mb-4">
+                    <div class="card-header-custom" style="margin-bottom: 24px;">
+                        <div>
+                            <h2 class="card-title">Team Submission Trend</h2>
+                            <p class="card-subtitle">Daily team submission activity over the last 30 days</p>
+                        </div>
+                        <div class="trend-badge">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">trending_up</span>
+                            <span class="trend-value">+22.8%</span>
+                        </div>
+                    </div>
+                    <div style="position: relative; height: 300px; padding: 20px 10px 40px 50px;">
+                        <!-- Grid lines and Y-axis labels -->
+                        <div style="position: absolute; left: 50px; right: 10px; top: 20px; bottom: 40px;">
+                            <div style="position: absolute; left: 0; right: 0; top: 0%; border-top: 1px dashed #e5e7eb;"></div>
+                            <span style="position: absolute; left: -45px; top: 0%; transform: translateY(-50%); font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">500</span>
+
+                            <div style="position: absolute; left: 0; right: 0; top: 25%; border-top: 1px dashed #e5e7eb;"></div>
+                            <span style="position: absolute; left: -45px; top: 25%; transform: translateY(-50%); font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">375</span>
+
+                            <div style="position: absolute; left: 0; right: 0; top: 50%; border-top: 1px dashed #e5e7eb;"></div>
+                            <span style="position: absolute; left: -45px; top: 50%; transform: translateY(-50%); font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">250</span>
+
+                            <div style="position: absolute; left: 0; right: 0; top: 75%; border-top: 1px dashed #e5e7eb;"></div>
+                            <span style="position: absolute; left: -45px; top: 75%; transform: translateY(-50%); font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">125</span>
+
+                            <div style="position: absolute; left: 0; right: 0; top: 100%; border-top: 1px dashed #e5e7eb;"></div>
+                            <span style="position: absolute; left: -45px; top: 100%; transform: translateY(-50%); font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">0</span>
+                        </div>
+
+                        <!-- SVG Line Graph -->
+                        <svg style="position: absolute; left: 50px; right: 10px; top: 20px; bottom: 40px; width: calc(100% - 60px); height: calc(100% - 60px);" viewBox="0 0 900 240" preserveAspectRatio="none">
+                            <defs>
+                                <linearGradient id="dailyTrendGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" style="stop-color: var(--primary); stop-opacity: 0.3"/>
+                                    <stop offset="100%" style="stop-color: var(--primary); stop-opacity: 0.05"/>
+                                </linearGradient>
+                            </defs>
+
+                            <!-- Area fill -->
+                            <path d="M 0 180 L 30 165 L 60 170 L 90 155 L 120 145 L 150 160 L 180 150 L 210 135 L 240 140 L 270 125 L 300 115 L 330 130 L 360 120 L 390 105 L 420 110 L 450 95 L 480 85 L 510 100 L 540 90 L 570 75 L 600 80 L 630 65 L 660 55 L 690 70 L 720 60 L 750 45 L 780 50 L 810 35 L 840 40 L 870 25 L 900 30 L 900 240 L 0 240 Z" fill="url(#dailyTrendGradient)" />
+
+                            <!-- Line -->
+                            <path d="M 0 180 L 30 165 L 60 170 L 90 155 L 120 145 L 150 160 L 180 150 L 210 135 L 240 140 L 270 125 L 300 115 L 330 130 L 360 120 L 390 105 L 420 110 L 450 95 L 480 85 L 510 100 L 540 90 L 570 75 L 600 80 L 630 65 L 660 55 L 690 70 L 720 60 L 750 45 L 780 50 L 810 35 L 840 40 L 870 25 L 900 30" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+                            <!-- Data points (showing every 3rd day for clarity) -->
+                            <circle class="trend-point" cx="0" cy="180" r="4" fill="white" stroke="var(--primary)" stroke-width="2" data-teams="125" data-day="Day 1"/>
+                            <circle class="trend-point" cx="90" cy="155" r="4" fill="white" stroke="var(--primary)" stroke-width="2" data-teams="168" data-day="Day 3"/>
+                            <circle class="trend-point" cx="180" cy="150" r="4" fill="white" stroke="var(--primary)" stroke-width="2" data-teams="175" data-day="Day 6"/>
+                            <circle class="trend-point" cx="270" cy="125" r="4" fill="white" stroke="var(--primary)" stroke-width="2" data-teams="218" data-day="Day 9"/>
+                            <circle class="trend-point" cx="360" cy="120" r="4" fill="white" stroke="var(--primary)" stroke-width="2" data-teams="228" data-day="Day 12"/>
+                            <circle class="trend-point" cx="450" cy="95" r="4" fill="white" stroke="var(--primary)" stroke-width="2" data-teams="270" data-day="Day 15"/>
+                            <circle class="trend-point" cx="540" cy="90" r="4" fill="white" stroke="var(--primary)" stroke-width="2" data-teams="282" data-day="Day 18"/>
+                            <circle class="trend-point" cx="630" cy="65" r="4" fill="white" stroke="var(--primary)" stroke-width="2" data-teams="338" data-day="Day 21"/>
+                            <circle class="trend-point" cx="720" cy="60" r="4" fill="white" stroke="var(--primary)" stroke-width="2" data-teams="352" data-day="Day 24"/>
+                            <circle class="trend-point" cx="810" cy="35" r="4" fill="white" stroke="var(--primary)" stroke-width="2" data-teams="412" data-day="Day 27"/>
+                            <circle class="trend-point" cx="900" cy="30" r="4" fill="white" stroke="var(--primary)" stroke-width="2" data-teams="428" data-day="Day 30"/>
+                        </svg>
+
+                        <!-- Tooltip container -->
+                        <div id="trendTooltip" style="position: absolute; display: none; background: var(--text-dark); color: white; padding: 8px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; pointer-events: none; z-index: 100; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.3);"></div>
+
+                        <!-- X-axis labels -->
+                        <div style="position: absolute; left: 50px; right: 10px; bottom: 0; height: 40px; display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Day 1</span>
+                            <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Day 6</span>
+                            <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Day 12</span>
+                            <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Day 18</span>
+                            <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Day 24</span>
+                            <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Day 30</span>
+                        </div>
+                    </div>
+
+                    <!-- Stats Summary -->
+                    <div class="row g-3" style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border-light);">
+                        <div class="col-6 col-md-3">
+                            <div style="text-align: center; padding: 16px; background: rgba(94, 42, 151, 0.05); border-radius: 8px;">
+                                <p style="font-size: 1.5rem; font-weight: 700; color: var(--primary); margin: 0 0 4px 0;">4,281</p>
+                                <p style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600; margin: 0; text-transform: uppercase; letter-spacing: 0.05em;">Total Teams</p>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div style="text-align: center; padding: 16px; background: rgba(94, 42, 151, 0.05); border-radius: 8px;">
+                                <p style="font-size: 1.5rem; font-weight: 700; color: var(--primary); margin: 0 0 4px 0;">143</p>
+                                <p style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600; margin: 0; text-transform: uppercase; letter-spacing: 0.05em;">Daily Average</p>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div style="text-align: center; padding: 16px; background: rgba(94, 42, 151, 0.05); border-radius: 8px;">
+                                <p style="font-size: 1.5rem; font-weight: 700; color: #22c55e; margin: 0 0 4px 0;">312</p>
+                                <p style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600; margin: 0; text-transform: uppercase; letter-spacing: 0.05em;">Peak Day</p>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div style="text-align: center; padding: 16px; background: rgba(94, 42, 151, 0.05); border-radius: 8px;">
+                                <p style="font-size: 1.5rem; font-weight: 700; color: #ef4444; margin: 0 0 4px 0;">42</p>
+                                <p style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600; margin: 0; text-transform: uppercase; letter-spacing: 0.05em;">Lowest Day</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Load External Components -->
+    <script>
+        // Load sidebar
+        fetch('sidebar.html')
+            .then(response => response.text())
+            .then(data => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = data;
+
+                const elements = tempDiv.childNodes;
+                elements.forEach(node => {
+                    if (node.nodeType === 1 && node.tagName !== 'SCRIPT') {
+                        document.getElementById('sidebar-container').appendChild(node.cloneNode(true));
+                    } else if (node.nodeType === 3) {
+                        document.getElementById('sidebar-container').appendChild(node.cloneNode(true));
+                    }
+                });
+
+                const script = tempDiv.querySelector('script');
+                if (script) {
+                    const newScript = document.createElement('script');
+                    newScript.textContent = script.textContent;
+                    document.body.appendChild(newScript);
+                }
+            })
+            .catch(error => console.error('Error loading sidebar:', error));
+
+        // Load header
+        fetch('header.html')
+            .then(response => response.text())
+            .then(data => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = data;
+
+                const elements = tempDiv.childNodes;
+                elements.forEach(node => {
+                    if (node.nodeType === 1 || node.nodeType === 3) {
+                        document.getElementById('header-container').appendChild(node.cloneNode(true));
+                    }
+                });
+
+                const script = tempDiv.querySelector('script');
+                if (script) {
+                    const newScript = document.createElement('script');
+                    newScript.textContent = script.textContent;
+                    document.body.appendChild(newScript);
+                }
+            })
+            .catch(error => console.error('Error loading header:', error));
+    </script>
+
+    <!-- Tooltip Scripts -->
+    <script>
+        // Team Performance Trend Bar Chart Tooltips
+        document.addEventListener('DOMContentLoaded', function() {
+            const perfBars = document.querySelectorAll('.perf-bar');
+            const perfTooltip = document.getElementById('perfTooltip');
+
+            perfBars.forEach(bar => {
+                bar.addEventListener('mouseenter', function(e) {
+                    const score = this.getAttribute('data-score');
+                    const round = this.getAttribute('data-round');
+                    perfTooltip.innerHTML = `${round}: ${score} pts`;
+                    perfTooltip.style.display = 'block';
+                });
+
+                bar.addEventListener('mousemove', function(e) {
+                    const rect = this.closest('div').getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    perfTooltip.style.left = (x + 10) + 'px';
+                    perfTooltip.style.top = (y - 30) + 'px';
+                });
+
+                bar.addEventListener('mouseleave', function() {
+                    perfTooltip.style.display = 'none';
+                });
+
+                // Add hover effect - scale up bar slightly
+                bar.addEventListener('mouseenter', function() {
+                    this.style.transform = 'scaleY(1.05)';
+                    this.style.boxShadow = '0 4px 16px rgba(94, 42, 151, 0.4)';
+                });
+
+                bar.addEventListener('mouseleave', function() {
+                    this.style.transform = 'scaleY(1)';
+                    this.style.boxShadow = 'none';
+                });
+            });
+
+            // Team Submission Trend Tooltips
+            const trendPoints = document.querySelectorAll('.trend-point');
+            const trendTooltip = document.getElementById('trendTooltip');
+
+            trendPoints.forEach(point => {
+                point.addEventListener('mouseenter', function(e) {
+                    const teams = this.getAttribute('data-teams');
+                    const day = this.getAttribute('data-day');
+                    trendTooltip.innerHTML = `${day}: ${teams} teams`;
+                    trendTooltip.style.display = 'block';
+                });
+
+                point.addEventListener('mousemove', function(e) {
+                    const rect = this.closest('div').getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    trendTooltip.style.left = (x + 10) + 'px';
+                    trendTooltip.style.top = (y - 30) + 'px';
+                });
+
+                point.addEventListener('mouseleave', function() {
+                    trendTooltip.style.display = 'none';
+                });
+
+                // Add hover effect
+                point.addEventListener('mouseenter', function() {
+                    this.setAttribute('r', '6');
+                });
+
+                point.addEventListener('mouseleave', function() {
+                    this.setAttribute('r', '4');
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

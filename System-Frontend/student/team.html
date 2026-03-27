@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Team Management | India Future Tycoon</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+    <!-- Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary: #5E2A97;
+            --secondary: #DEDE50;
+            --primary-light: #E8D4F0;
+            --background-light: #F7F7F7;
+            --surface-light: #FFFFFF;
+            --border-light: #EEEEEE;
+            --text-dark: #222222;
+            --text-muted: #666666;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            overflow: hidden;
+        }
+
+        .main-container {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 288px;
+            height: 100%;
+            background-color: var(--surface-light);
+            border-right: 1px solid var(--border-light);
+            overflow-y: auto;
+            z-index: 20;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow-y: auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        .content-wrapper {
+            flex: 1;
+            padding: 40px;
+            max-width: 1280px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Page Header */
+        .page-header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 12px;
+            letter-spacing: -0.025em;
+        }
+
+        .page-header h1 .highlight {
+            color: var(--primary);
+        }
+
+        .page-header p {
+            font-size: 1.125rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Team Cards */
+        .team-action-card {
+            background-color: var(--surface-light);
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+            border: 1px solid var(--border-light);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .team-action-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(94, 42, 151, 0.12);
+        }
+
+        .card-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 12px;
+            background-color: rgba(94, 42, 151, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .card-icon .material-symbols-outlined {
+            font-size: 32px;
+            color: var(--primary);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 12px;
+        }
+
+        .card-description {
+            font-size: 1rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 32px;
+            flex-grow: 1;
+        }
+
+        /* Form Styles */
+        .form-label-custom {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .form-input-custom {
+            width: 100%;
+            padding: 14px 16px;
+            background-color: var(--background-light);
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            font-size: 1rem;
+            color: var(--text-dark);
+            transition: all 0.2s;
+            margin-bottom: 24px;
+        }
+
+        .form-input-custom:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(94, 42, 151, 0.1);
+        }
+
+        .form-input-custom::placeholder {
+            color: #94a3b8;
+        }
+
+        .team-code-input {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            font-family: 'Courier New', monospace;
+        }
+
+        .input-helper {
+            font-size: 0.75rem;
+            color: var(--primary);
+            font-weight: 500;
+            margin-top: -16px;
+            margin-bottom: 24px;
+        }
+
+        /* Buttons */
+        .btn-primary-gradient {
+            width: 100%;
+            padding: 14px 20px;
+            background: linear-gradient(135deg, var(--primary) 0%, #8e44ad 100%);
+            color: white;
+            font-weight: 700;
+            font-size: 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 16px rgba(94, 42, 151, 0.3);
+        }
+
+        .btn-primary-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(94, 42, 151, 0.4);
+        }
+
+        .btn-primary-gradient:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary-solid {
+            width: 100%;
+            padding: 14px 20px;
+            background-color: var(--primary);
+            color: white;
+            font-weight: 700;
+            font-size: 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 16px rgba(94, 42, 151, 0.3);
+        }
+
+        .btn-primary-solid:hover {
+            background-color: #7B3FB5;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(94, 42, 151, 0.4);
+        }
+
+        .btn-primary-solid:active {
+            transform: translateY(0);
+        }
+
+        .btn-disclaimer {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            text-align: center;
+            margin-top: 12px;
+        }
+
+        /* Info Banner */
+        .info-banner {
+            background-color: rgba(94, 42, 151, 0.05);
+            border: 1px solid rgba(94, 42, 151, 0.1);
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 48px;
+        }
+
+        .info-banner-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .info-banner-content {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .avatar-stack {
+            display: flex;
+            margin-right: 8px;
+        }
+
+        .avatar-item {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 2px solid var(--surface-light);
+            margin-left: -12px;
+            overflow: hidden;
+            background-color: #e2e8f0;
+        }
+
+        .avatar-item:first-child {
+            margin-left: 0;
+        }
+
+        .avatar-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .avatar-count {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 2px solid var(--surface-light);
+            background-color: var(--primary);
+            color: white;
+            font-weight: 700;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: -12px;
+        }
+
+        .banner-text h3 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+
+        .banner-text p {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .banner-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-outline {
+            padding: 10px 20px;
+            border: 2px solid var(--primary);
+            background-color: transparent;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 0.875rem;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-outline:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-light {
+            padding: 10px 20px;
+            border: none;
+            background-color: rgba(94, 42, 151, 0.1);
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 0.875rem;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-light:hover {
+            background-color: rgba(94, 42, 151, 0.2);
+        }
+
+        /* Background Decoration */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -10%;
+            left: -5%;
+            width: 40%;
+            height: 40%;
+            background: radial-gradient(circle, rgba(94, 42, 151, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: 0;
+            filter: blur(80px);
+            pointer-events: none;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: -10%;
+            right: -5%;
+            width: 30%;
+            height: 30%;
+            background: radial-gradient(circle, rgba(94, 42, 151, 0.05) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: 0;
+            filter: blur(60px);
+            pointer-events: none;
+        }
+
+        @media (max-width: 768px) {
+            .content-wrapper {
+                padding: 24px;
+            }
+
+            .page-header h1 {
+                font-size: 2rem;
+            }
+
+            .page-header p {
+                font-size: 1rem;
+            }
+
+            .team-action-card {
+                padding: 28px;
+            }
+
+            .info-banner-inner {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .banner-buttons {
+                width: 100%;
+                flex-direction: column;
+            }
+
+            .btn-outline,
+            .btn-light {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-container">
+        <!-- Include Sidebar -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Include Header -->
+            <div id="header-container"></div>
+
+            <div class="content-wrapper">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <h1>Form Your <span class="highlight">Dream Team</span></h1>
+                    <p>Every great journey starts with a team. Choose your path to the India Future Tycoon finals.</p>
+                </div>
+
+                <!-- Team Action Cards -->
+                <div class="row g-4">
+                    <!-- Create Your Team -->
+                    <div class="col-12 col-lg-6">
+                        <div class="team-action-card">
+                            <div class="card-icon">
+                                <span class="material-symbols-outlined">groups</span>
+                            </div>
+                            <h2 class="card-title">Create Your Team</h2>
+                            <p class="card-description">
+                                Start something new. As a team leader, you'll be able to invite your friends and manage your progress throughout the competition.
+                            </p>
+                            <div>
+                                <label class="form-label-custom" for="team-name">Team Name</label>
+                                <input
+                                    class="form-input-custom"
+                                    id="team-name"
+                                    placeholder="Enter a cool team name..."
+                                    type="text"
+                                />
+                                <button class="btn-primary-gradient">
+                                    <span>Create Team</span>
+                                    <span class="material-symbols-outlined" style="font-size: 18px;">arrow_forward</span>
+                                </button>
+                                <p class="btn-disclaimer">By creating a team, you agree to the competition guidelines.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Join a Team -->
+                    <div class="col-12 col-lg-6">
+                        <div class="team-action-card">
+                            <div class="card-icon">
+                                <span class="material-symbols-outlined">person_add</span>
+                            </div>
+                            <h2 class="card-title">Join a Team</h2>
+                            <p class="card-description">
+                                Have a code from your friend? Enter it below to instantly join their team and start collaborating on your business idea.
+                                <span style="display: block; margin-top: 8px; font-size: 0.75rem; color: #94a3b8; font-style: italic;">Demo code: IFT829</span>
+                            </p>
+                            <div>
+                                <label class="form-label-custom" for="team-code">Team Code</label>
+                                <input
+                                    class="form-input-custom team-code-input"
+                                    id="team-code"
+                                    maxlength="6"
+                                    placeholder="000000"
+                                    type="text"
+                                />
+                                <p class="input-helper">Enter the unique 6-digit code shared by your teammate.</p>
+                                <button class="btn-primary-solid">
+                                    <span>Join Team</span>
+                                    <span class="material-symbols-outlined" style="font-size: 18px;">login</span>
+                                </button>
+                                <p class="btn-disclaimer">Ask your team leader for the code if you don't have one.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info Banner -->
+                <div class="info-banner">
+                    <div class="info-banner-inner">
+                        <div class="info-banner-content">
+                            <div class="avatar-stack">
+                                <div class="avatar-item">
+                                    <img alt="Student 1" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7QXt9_sC7UZlO05kOcvlYqFQlP3yE3zn_aYKqAZM2TAjedxiKKHXagJzqj5TA-sdmpEyX_KkS3k9jnYYPVkHUr6t27uBBtVIHvu3jnMQVOhRrT3MLLqJ9pdWCvJlxare1goEjjhr12PK7heU0-tkAME3F-amah2fv20wm4ikXUxNiPq3pwCsDT1-VU-GstjCAelu0Bt99kfyqiVW-YLNEG1bP_FA6stkt9ePDAxcaw82smcroDohfngenz4oxlA5FONXZfPqUzcQ" />
+                                </div>
+                                <div class="avatar-item">
+                                    <img alt="Student 2" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA27_t0Hdi6sKNeRkSqmynNkq3kGwOkZGBGx93ruZWTsHWJgnK5O8KPJZHoPr8Gcq-Mp9qFi32QyOEA661e_SaeNP2wkafMne89W9_yEU1b7EyslwaPEnSVmC-JZZXWzEes-vtghp5_aUWYudZXn7-T_2qLIFdJETXQ3ohjv0kTCcBik_BCRQwcF8ug4fpYtLSEw8wBx43MuemcYTkyDh84w-6tVPX8IN4Ayday8TOVLhLlFo7ckRx60-cv8lskQmeseepPQ1q0UjE" />
+                                </div>
+                                <div class="avatar-item">
+                                    <img alt="Student 3" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBpsXKmjB1PmR7O1sMHcEuIi15Fob5qzFAd3H6EDwXwOnQJ4a_0IPRKRC6K_9yQsXYCNeQGdMvl1UqOCqx0OYM8tX3b8Ju3XZsl4Ozk58l4ZSpks0qqbVkhZ6h_rTuyN-AsA_x6zRrEEgkQGydVwO2YnbA3Gp29n8hoaICy9PciaRS73xzw2BlExgiyO9S2unZMZqudF70fFqxbNvVf8EHVQRfOHtxxFUMpTcu-6DYv_Z0JR_1wMfcysol6vZztFIGVBqv7qcWUWS0" />
+                                </div>
+                                <div class="avatar-count">+5k</div>
+                            </div>
+                            <div class="banner-text">
+                                <h3>Join 5,000+ Entrepreneurs</h3>
+                                <p>Students from all over India are building the future.</p>
+                            </div>
+                        </div>
+                        <div class="banner-buttons">
+                            <button class="btn-outline">View Rules</button>
+                            <button class="btn-light">Need Help?</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Load External Components -->
+    <script>
+        // Load sidebar
+        fetch('sidebar.html')
+            .then(response => response.text())
+            .then(data => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = data;
+
+                // Extract and append all elements EXCEPT script
+                const elements = tempDiv.childNodes;
+                elements.forEach(node => {
+                    if (node.nodeType === 1 && node.tagName !== 'SCRIPT') { // Element node but not script
+                        document.getElementById('sidebar-container').appendChild(node.cloneNode(true));
+                    } else if (node.nodeType === 3) { // Text node
+                        document.getElementById('sidebar-container').appendChild(node.cloneNode(true));
+                    }
+                });
+
+                // Now execute the script AFTER HTML is in DOM
+                const script = tempDiv.querySelector('script');
+                if (script) {
+                    const newScript = document.createElement('script');
+                    newScript.textContent = script.textContent;
+                    document.body.appendChild(newScript);
+                }
+
+                console.log('Sidebar loaded and script executed');
+            })
+            .catch(error => console.error('Error loading sidebar:', error));
+
+        // Load header
+        fetch('header.html')
+            .then(response => response.text())
+            .then(data => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = data;
+
+                // Extract and append all elements
+                const elements = tempDiv.childNodes;
+                elements.forEach(node => {
+                    if (node.nodeType === 1 || node.nodeType === 3) { // Element or Text node
+                        document.getElementById('header-container').appendChild(node.cloneNode(true));
+                    }
+                });
+
+                // Find and execute the script
+                const script = tempDiv.querySelector('script');
+                if (script) {
+                    const newScript = document.createElement('script');
+                    newScript.textContent = script.textContent;
+                    document.body.appendChild(newScript);
+                }
+            })
+            .catch(error => console.error('Error loading header:', error));
+    </script>
+
+    <!-- Team Page Functionality -->
+    <script>
+        // Team page functionality
+        (function () {
+            function init() {
+                initCreateTeam();
+                initJoinTeam();
+                initBannerButtons();
+                animateCards();
+            }
+
+            // Create team functionality
+            function initCreateTeam() {
+                const createBtn = document.querySelector('.btn-primary-gradient');
+                const teamNameInput = document.getElementById('team-name');
+
+                if (createBtn && teamNameInput) {
+                    createBtn.addEventListener('click', function() {
+                        const teamName = teamNameInput.value.trim();
+
+                        if (!teamName) {
+                            showToast('Please enter a team name', 'warning');
+                            teamNameInput.focus();
+                            return;
+                        }
+
+                        // Simulate team creation
+                        this.innerHTML = '<span class="material-symbols-outlined" style="font-size: 18px;">hourglass_empty</span> Creating Team...';
+                        this.style.opacity = '0.7';
+                        this.disabled = true;
+
+                        setTimeout(() => {
+                            showToast('Redirecting to team creation...', 'success');
+                            setTimeout(() => {
+                                // Navigate to create-team page
+                                window.location.href = 'create-team.html';
+                            }, 1000);
+                        }, 500);
+                    });
+
+                    // Enter key support
+                    teamNameInput.addEventListener('keypress', function(e) {
+                        if (e.key === 'Enter') {
+                            createBtn.click();
+                        }
+                    });
+                }
+            }
+
+            // Join team functionality
+            function initJoinTeam() {
+                const joinBtn = document.querySelector('.btn-primary-solid');
+                const teamCodeInput = document.getElementById('team-code');
+
+                // Dummy team code for testing
+                const VALID_TEAM_CODE = 'IFT829';
+
+                if (joinBtn && teamCodeInput) {
+                    // Auto-format team code input
+                    teamCodeInput.addEventListener('input', function() {
+                        this.value = this.value.toUpperCase();
+                    });
+
+                    joinBtn.addEventListener('click', function() {
+                        const teamCode = teamCodeInput.value.trim();
+
+                        if (!teamCode || teamCode.length !== 6) {
+                            showToast('Please enter a valid 6-digit team code', 'warning');
+                            teamCodeInput.focus();
+                            return;
+                        }
+
+                        // Validate team code
+                        if (teamCode !== VALID_TEAM_CODE) {
+                            showToast('Invalid team code. Try: ' + VALID_TEAM_CODE, 'error');
+                            return;
+                        }
+
+                        // Simulate team join
+                        this.innerHTML = '<span class="material-symbols-outlined" style="font-size: 18px;">hourglass_empty</span> Joining Team...';
+                        this.style.opacity = '0.7';
+                        this.disabled = true;
+
+                        setTimeout(() => {
+                            showToast('Successfully joined team!', 'success');
+                            setTimeout(() => {
+                                // Navigate to team management page
+                                window.location.href = 'team-management.html';
+                            }, 1000);
+                        }, 500);
+                    });
+
+                    // Enter key support
+                    teamCodeInput.addEventListener('keypress', function(e) {
+                        if (e.key === 'Enter') {
+                            joinBtn.click();
+                        }
+                    });
+                }
+            }
+
+            // Banner buttons
+            function initBannerButtons() {
+                const viewRulesBtn = document.querySelector('.btn-outline');
+                const needHelpBtn = document.querySelector('.btn-light');
+
+                if (viewRulesBtn) {
+                    viewRulesBtn.addEventListener('click', function() {
+                        showToast('Opening competition rules...', 'info');
+                        setTimeout(() => {
+                            window.location.href = '#rules';
+                        }, 500);
+                    });
+                }
+
+                if (needHelpBtn) {
+                    needHelpBtn.addEventListener('click', function() {
+                        showToast('Opening help center...', 'info');
+                        setTimeout(() => {
+                            window.location.href = 'faq.html';
+                        }, 500);
+                    });
+                }
+            }
+
+            // Animate cards on load
+            function animateCards() {
+                const cards = document.querySelectorAll('.team-action-card, .info-banner');
+
+                cards.forEach((card, index) => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(20px)';
+
+                    setTimeout(() => {
+                        card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, 100 + (index * 100));
+                });
+            }
+
+            // Toast notification system
+            function showToast(message, type = 'info') {
+                const existingToast = document.querySelector('.custom-toast');
+                if (existingToast) {
+                    existingToast.remove();
+                }
+
+                const toast = document.createElement('div');
+                toast.className = 'custom-toast';
+
+                const colors = {
+                    success: '#22c55e',
+                    error: '#ef4444',
+                    info: '#5E2A97',
+                    warning: '#f59e0b'
+                };
+
+                toast.style.cssText = `
+                    position: fixed;
+                    bottom: 24px;
+                    right: 24px;
+                    background-color: ${colors[type]};
+                    color: white;
+                    padding: 16px 24px;
+                    border-radius: 12px;
+                    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+                    z-index: 9999;
+                    font-family: 'Poppins', sans-serif;
+                    font-size: 0.875rem;
+                    font-weight: 500;
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    animation: slideIn 0.3s ease;
+                    max-width: 400px;
+                `;
+
+                const icon = document.createElement('span');
+                icon.className = 'material-symbols-outlined';
+                icon.style.fontSize = '20px';
+                icon.textContent = type === 'success' ? 'check_circle' :
+                    type === 'error' ? 'error' :
+                    type === 'warning' ? 'warning' : 'info';
+
+                toast.appendChild(icon);
+                toast.appendChild(document.createTextNode(message));
+                document.body.appendChild(toast);
+
+                setTimeout(() => {
+                    toast.style.animation = 'slideOut 0.3s ease';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+
+            // Add toast animations
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from {
+                        transform: translateX(400px);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                }
+                @keyframes slideOut {
+                    from {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                    to {
+                        transform: translateX(400px);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+
+            // Initialize
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                setTimeout(init, 500);
+            }
+        })();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,1887 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Jury Management | Super Admin | ENpower IFT</title>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+
+    <!-- Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary: #5E2A97;
+            --secondary: #DEDE50;
+            --primary-light: #E8D4F0;
+            --background-light: #F7F7F7;
+            --surface-light: #FFFFFF;
+            --border-light: #EEEEEE;
+            --text-dark: #222222;
+            --text-muted: #666666;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            overflow: hidden;
+        }
+
+        .main-container {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow-y: auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        .content-wrapper {
+            flex: 1;
+            padding: 32px;
+            max-width: 100%;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Page Header */
+        .page-header {
+            margin-bottom: 32px;
+        }
+
+        .page-header h1 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+
+        .breadcrumb {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            background: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .breadcrumb-item a {
+            color: var(--text-muted);
+            text-decoration: none;
+        }
+
+        .breadcrumb-item a:hover {
+            color: var(--primary);
+        }
+
+        .breadcrumb-item.active {
+            color: var(--text-dark);
+        }
+
+        /* Stats Cards */
+        .stat-card {
+            background: var(--surface-light);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            border: 1px solid var(--border-light);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .stat-icon.blue {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+
+        .stat-icon.purple {
+            background: rgba(147, 51, 234, 0.1);
+            color: #9333ea;
+        }
+
+        .stat-icon.orange {
+            background: rgba(249, 115, 22, 0.1);
+            color: #f97316;
+        }
+
+        .stat-badge {
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .stat-badge.success {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .stat-badge.warning {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .stat-badge.danger {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .stat-value {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin: 8px 0 0 0;
+        }
+
+        .stat-value.warning {
+            color: #f97316;
+        }
+
+        /* Main Card */
+        .main-card {
+            background: var(--surface-light);
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            border: 1px solid var(--border-light);
+            overflow: hidden;
+        }
+
+        .main-card-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        /* Search & Filter */
+        .search-input {
+            position: relative;
+        }
+
+        .search-input .material-symbols-outlined {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 20px;
+        }
+
+        .search-input input {
+            width: 100%;
+            padding: 10px 12px 10px 44px;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            font-size: 0.875rem;
+            background: #f8fafc;
+        }
+
+        .search-input input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(94, 42, 151, 0.1);
+        }
+
+        /* Table */
+        .custom-table {
+            width: 100%;
+            font-size: 0.875rem;
+        }
+
+        .custom-table thead {
+            background: #f8fafc;
+        }
+
+        .custom-table th {
+            padding: 16px 24px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            text-align: left;
+        }
+
+        .custom-table td {
+            padding: 20px 24px;
+            vertical-align: middle;
+            border-bottom: 1px solid #f8f9fa;
+        }
+
+        .custom-table tbody tr {
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+
+        .custom-table tbody tr:hover {
+            background: rgba(94, 42, 151, 0.03);
+        }
+
+        .juror-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .juror-name {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin: 0;
+        }
+
+        .juror-email {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .expertise-badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        .expertise-badge.sustainability {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .expertise-badge.fintech {
+            background: #e9d5ff;
+            color: #7c3aed;
+        }
+
+        .expertise-badge.deeptech {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .progress-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .progress-bar-custom {
+            flex: 1;
+            height: 6px;
+            background: #f1f5f9;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 999px;
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .status-badge.active {
+            color: #16a34a;
+        }
+
+        .status-badge.active .status-dot {
+            background: #16a34a;
+        }
+
+        .status-badge.busy {
+            color: #ea580c;
+        }
+
+        .status-badge.busy .status-dot {
+            background: #ea580c;
+        }
+
+        .status-badge.inactive {
+            color: #64748b;
+        }
+
+        .status-badge.inactive .status-dot {
+            background: #64748b;
+        }
+
+        /* Action Button */
+        .btn-action {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-muted);
+        }
+
+        .btn-action:hover {
+            background: #f8fafc;
+        }
+
+        /* Pagination */
+        .pagination-custom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            border-top: 1px solid var(--border-light);
+        }
+
+        .pagination-info {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .page-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--border-light);
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .page-btn:hover {
+            background: #f8fafc;
+        }
+
+        .page-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Details Sidebar */
+        .details-sidebar {
+            position: fixed;
+            top: 0;
+            right: -450px;
+            width: 450px;
+            height: 100vh;
+            background: var(--surface-light);
+            box-shadow: -4px 0 24px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            transition: right 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .details-sidebar.open {
+            right: 0;
+        }
+
+        .details-sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .details-sidebar-overlay.show {
+            display: block;
+            opacity: 1;
+        }
+
+        .details-sidebar-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .details-sidebar-header h2 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .details-sidebar-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--border-light);
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-muted);
+        }
+
+        .details-sidebar-close:hover {
+            background: #f8fafc;
+            color: var(--text-dark);
+        }
+
+        .details-sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        .profile-section {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .profile-avatar-large {
+            width: 96px;
+            height: 96px;
+            border-radius: 24px;
+            object-fit: cover;
+            margin: 0 auto 16px;
+            box-shadow: 0 4px 12px rgba(94, 42, 151, 0.2);
+            position: relative;
+        }
+
+        .online-indicator {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            width: 20px;
+            height: 20px;
+            background: #16a34a;
+            border: 4px solid white;
+            border-radius: 50%;
+        }
+
+        .profile-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0 0 4px 0;
+        }
+
+        .profile-role {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin: 0 0 16px 0;
+        }
+
+        .profile-badges {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .profile-badge {
+            font-size: 0.625rem;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 999px;
+            text-transform: uppercase;
+        }
+
+        .profile-badge.primary {
+            background: rgba(94, 42, 151, 0.1);
+            color: var(--primary);
+        }
+
+        .profile-badge.expert {
+            background: #fed7aa;
+            color: #9a3412;
+        }
+
+        .detail-section {
+            margin-bottom: 32px;
+        }
+
+        .detail-section-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .performance-subsection {
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .performance-subtitle {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin: 0 0 12px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .performance-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .performance-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid var(--border-light);
+        }
+
+        .performance-label {
+            font-size: 0.625rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        .performance-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .performance-value.pending-color {
+            color: #ea580c;
+        }
+
+        .performance-completion {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-light);
+        }
+
+        .completion-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .completion-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .completion-percentage {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .availability-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .day-column {
+            text-align: center;
+        }
+
+        .day-label {
+            font-size: 0.625rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .day-bar {
+            height: 32px;
+            border-radius: 6px;
+        }
+
+        .day-bar.available {
+            background: var(--primary);
+        }
+
+        .day-bar.partial {
+            background: rgba(94, 42, 151, 0.4);
+        }
+
+        .day-bar.unavailable {
+            background: #e2e8f0;
+        }
+
+        .availability-note {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .assignment-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .assignment-item {
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .assignment-info h6 {
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin: 0 0 4px 0;
+        }
+
+        .assignment-info p {
+            font-size: 0.625rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .assignment-status .material-symbols-outlined {
+            font-size: 18px;
+        }
+
+        .assignment-status.completed {
+            color: #16a34a;
+        }
+
+        .assignment-status.pending {
+            color: #ea580c;
+        }
+
+        .admin-section {
+            padding: 20px;
+            background: rgba(94, 42, 151, 0.05);
+            border: 1px solid rgba(94, 42, 151, 0.1);
+            border-radius: 12px;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .admin-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .admin-title .material-symbols-outlined {
+            color: var(--primary);
+            font-size: 16px;
+        }
+
+        .admin-title h5 {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin: 0;
+        }
+
+        .weightage-control {
+            margin-bottom: 16px;
+        }
+
+        .weightage-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .weightage-value {
+            color: var(--primary);
+        }
+
+        .weightage-slider {
+            width: 100%;
+            height: 6px;
+            background: rgba(94, 42, 151, 0.2);
+            border-radius: 999px;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .weightage-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .details-footer {
+            padding: 24px;
+            border-top: 1px solid var(--border-light);
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-secondary-custom {
+            flex: 1;
+            background: white;
+            color: var(--text-dark);
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border-light);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary-custom:hover {
+            background: #f8fafc;
+        }
+
+        .btn-primary-custom {
+            flex: 1;
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px rgba(94, 42, 151, 0.3);
+        }
+
+        .btn-primary-custom:hover {
+            background: #7B3FB5;
+        }
+
+        /* Buttons */
+        .btn-export {
+            background: white;
+            color: var(--text-dark);
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-export:hover {
+            background: #f8fafc;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .content-wrapper {
+                padding: 16px;
+            }
+
+            .details-sidebar {
+                width: 100%;
+                right: -100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-container">
+        <!-- Include Sidebar -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Include Header -->
+            <div id="header-container"></div>
+
+            <div class="content-wrapper">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div class="row align-items-center">
+                        <div class="col-12 col-md-6">
+                            <h1>Jury Management</h1>
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="dashboard.html">Admin</a></li>
+                                    <li class="breadcrumb-item active">Jury</li>
+                                </ol>
+                            </nav>
+                        </div>
+                        <div class="col-12 col-md-6 d-flex justify-content-md-end align-items-center gap-3 mt-3 mt-md-0">
+                            <button class="btn-export">
+                                <span class="material-symbols-outlined" style="font-size: 18px;">file_download</span>
+                                Export Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="row g-4 mb-4">
+                    <div class="col-12 col-md-4">
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon blue">
+                                    <span class="material-symbols-outlined">groups</span>
+                                </div>
+                                <span class="stat-badge success">
+                                    <span class="material-symbols-outlined" style="font-size: 12px;">trending_up</span>
+                                    +12%
+                                </span>
+                            </div>
+                            <div>
+                                <p class="stat-label">Total Jury</p>
+                                <h3 class="stat-value">128</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon purple">
+                                    <span class="material-symbols-outlined">assignment</span>
+                                </div>
+                                <span class="stat-badge" style="background: #f1f5f9; color: var(--text-muted); text-transform: uppercase; font-size: 0.625rem;">Live Tracking</span>
+                            </div>
+                            <div>
+                                <p class="stat-label">Assigned Ideas</p>
+                                <h3 class="stat-value">1,042</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon orange">
+                                    <span class="material-symbols-outlined">pending_actions</span>
+                                </div>
+                                <span class="stat-badge danger">
+                                    <span class="material-symbols-outlined" style="font-size: 12px;">priority_high</span>
+                                    High
+                                </span>
+                            </div>
+                            <div>
+                                <p class="stat-label">Pending Evaluations</p>
+                                <h3 class="stat-value warning">314</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Data Card -->
+                <div class="main-card">
+                    <!-- Search & Filters -->
+                    <div class="main-card-header">
+                        <div class="row align-items-center g-3">
+                            <div class="col-12 col-md-6">
+                                <div class="search-input">
+                                    <span class="material-symbols-outlined">search</span>
+                                    <input type="text" id="searchInput" placeholder="Search by name, expertise or department...">
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6 d-flex align-items-center gap-3 justify-content-md-end">
+                                <select class="form-select" id="completionFilter" style="width: auto; font-size: 0.875rem;">
+                                    <option value="">All Completion</option>
+                                    <option value="high">High (75-100%)</option>
+                                    <option value="medium">Medium (50-74%)</option>
+                                    <option value="low">Low (0-49%)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Table -->
+                    <div class="table-responsive">
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Juror Details</th>
+                                    <th style="text-align: center;">Assigned</th>
+                                    <th>Completion</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Row 1 -->
+                                <tr data-juror-name="Dr. Sarah Jenkins" data-expertise="sustainability" data-status="active" data-completion="85" data-page="1">
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <img class="juror-avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA98fJ1DlMn80UOi8IrSxMazePF2rr-8g2rsAIozfRttpvIz4DNa-r0M9nuvde1LZLCljIs6-Ksy7sPeKj0J8sFACYYk44tGRMrLAZ_qal0m7tlm5_7IK5lRtjMbE2TbEbql67CT-wBBdDG8TUzMlo8O7UIg01uGpz_zuwEC857dD0HLr-oYFyhxGjYXNwMVIJmem1RnZhIHfUaxhLgob-1-u5cG3zTiR_8aImrWZyueKqXbe-lKh6RqJU0ts8RjNwa0f_Urn1hlZE" alt="Dr. Sarah Jenkins">
+                                            <div>
+                                                <p class="juror-name">Dr. Sarah Jenkins</p>
+                                                <p class="juror-email">sarah.j@enpower.edu</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="text-align: center; font-weight: 600;">24</td>
+                                    <td>
+                                        <div class="progress-container">
+                                            <div class="progress-bar-custom">
+                                                <div class="progress-fill" style="width: 85%;"></div>
+                                            </div>
+                                            <span class="progress-text">85%</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge active">
+                                            <span class="status-dot"></span>
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn-action view-details">
+                                            <span class="material-symbols-outlined">visibility</span>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Row 2 -->
+                                <tr data-juror-name="Michael Chen" data-expertise="fintech" data-status="busy" data-completion="42" data-page="1">
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <img class="juror-avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDug5-m6SEIvhQfcMRrcc-a9_axxlYfBbteeyq0XyHlS5QSeJByIZgOxVNa-Sj5gy2QJKbfmmDWyd-nZuDCv5t95qrEwtznkjn8tLhHMCTySRXw_Do-XrHqDNe27d-lLSwpRPANtkZ5N2NcRe4gLSxGK69RRbHXezubISsv1-anp9AlZ8rMgU4fAd4mMJjI246OqFHbeP8VFCj3fxn47NLI70LbUKGs9V-Lml-Bv8l95W6OU3dYz6vpV5mKYEzBce64afCTG_rt4zk" alt="Michael Chen">
+                                            <div>
+                                                <p class="juror-name">Michael Chen</p>
+                                                <p class="juror-email">m.chen@venture.cap</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="text-align: center; font-weight: 600;">18</td>
+                                    <td>
+                                        <div class="progress-container">
+                                            <div class="progress-bar-custom">
+                                                <div class="progress-fill" style="width: 42%;"></div>
+                                            </div>
+                                            <span class="progress-text">42%</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge busy">
+                                            <span class="status-dot"></span>
+                                            Busy
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn-action view-details">
+                                            <span class="material-symbols-outlined">visibility</span>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Row 3 -->
+                                <tr data-juror-name="Marcus Thorne" data-expertise="deeptech" data-status="inactive" data-completion="100" data-page="1">
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <img class="juror-avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCehVObCS9oYaE7QEW9Nh17IwwcB7VBBnZ41XK1YkCAaZKaG3_0zwS-N0-R0K5F9YkK01Qnley8zdftjQs7boi8Loz3RKkU8QZYaiCHL6Z2ZCxy1yhZ7t_ww87Zp_auPthHTRw8fQEe-OMOrxBhrWRxul25qdB8I64oSY6xd7K0Ti3TMfCbWKRyIAp33qI8cogBScv44eWJy-gCp9aqzWnihRcC0Rc74HxJBHRPKMPiJFDCzCtrqqihnx9MKOM21EE-wJyOdxI6NA8" alt="Marcus Thorne">
+                                            <div>
+                                                <p class="juror-name">Marcus Thorne</p>
+                                                <p class="juror-email">marcus@techlabs.org</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="text-align: center; font-weight: 600;">32</td>
+                                    <td>
+                                        <div class="progress-container">
+                                            <div class="progress-bar-custom">
+                                                <div class="progress-fill" style="width: 100%;"></div>
+                                            </div>
+                                            <span class="progress-text">100%</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge inactive">
+                                            <span class="status-dot"></span>
+                                            Inactive
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn-action view-details">
+                                            <span class="material-symbols-outlined">visibility</span>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Row 4 -->
+                                <tr data-juror-name="Dr. Emma Rodriguez" data-expertise="healthcare" data-status="active" data-completion="68" data-page="1">
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <img class="juror-avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBY9qR5n_J8zNhXbvK3WxPQvL9mRgTs4UoJcPqDxLmNpOqRsTuVwXyZ1234abcdefgh" alt="Dr. Emma Rodriguez">
+                                            <div>
+                                                <p class="juror-name">Dr. Emma Rodriguez</p>
+                                                <p class="juror-email">e.rodriguez@medtech.org</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="text-align: center; font-weight: 600;">22</td>
+                                    <td>
+                                        <div class="progress-container">
+                                            <div class="progress-bar-custom">
+                                                <div class="progress-fill" style="width: 68%;"></div>
+                                            </div>
+                                            <span class="progress-text">68%</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge active">
+                                            <span class="status-dot"></span>
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn-action view-details">
+                                            <span class="material-symbols-outlined">visibility</span>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Row 5 -->
+                                <tr data-juror-name="James Patterson" data-expertise="education" data-status="active" data-completion="91" data-page="1">
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <img class="juror-avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmnPqRsTuVwXyZ1234defghijk5678lmnopqrst" alt="James Patterson">
+                                            <div>
+                                                <p class="juror-name">James Patterson</p>
+                                                <p class="juror-email">j.patterson@eduinnovate.com</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="text-align: center; font-weight: 600;">28</td>
+                                    <td>
+                                        <div class="progress-container">
+                                            <div class="progress-bar-custom">
+                                                <div class="progress-fill" style="width: 91%;"></div>
+                                            </div>
+                                            <span class="progress-text">91%</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge active">
+                                            <span class="status-dot"></span>
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn-action view-details">
+                                            <span class="material-symbols-outlined">visibility</span>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Page 2 Data -->
+                                <!-- Row 6 -->
+                                <tr data-juror-name="Sofia Chen" data-expertise="ai" data-status="busy" data-completion="55" data-page="2">
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <img class="juror-avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDxYzAbc123defgh456ijklmnop789qrstuv" alt="Sofia Chen">
+                                            <div>
+                                                <p class="juror-name">Sofia Chen</p>
+                                                <p class="juror-email">s.chen@airesearch.io</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="text-align: center; font-weight: 600;">20</td>
+                                    <td>
+                                        <div class="progress-container">
+                                            <div class="progress-bar-custom">
+                                                <div class="progress-fill" style="width: 55%;"></div>
+                                            </div>
+                                            <span class="progress-text">55%</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge busy">
+                                            <span class="status-dot"></span>
+                                            Busy
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn-action view-details">
+                                            <span class="material-symbols-outlined">visibility</span>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Row 7 -->
+                                <tr data-juror-name="Dr. Raj Kumar" data-expertise="sustainability" data-status="active" data-completion="78" data-page="2">
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <img class="juror-avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuE123defgh456ijklmnop789qrstuvwxyz" alt="Dr. Raj Kumar">
+                                            <div>
+                                                <p class="juror-name">Dr. Raj Kumar</p>
+                                                <p class="juror-email">r.kumar@greentech.in</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="text-align: center; font-weight: 600;">26</td>
+                                    <td>
+                                        <div class="progress-container">
+                                            <div class="progress-bar-custom">
+                                                <div class="progress-fill" style="width: 78%;"></div>
+                                            </div>
+                                            <span class="progress-text">78%</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge active">
+                                            <span class="status-dot"></span>
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn-action view-details">
+                                            <span class="material-symbols-outlined">visibility</span>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Row 8 -->
+                                <tr data-juror-name="Linda Martinez" data-expertise="marketing" data-status="active" data-completion="83" data-page="2">
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <img class="juror-avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuFabcdefgh123456ijklmnopqrstuvwxyz" alt="Linda Martinez">
+                                            <div>
+                                                <p class="juror-name">Linda Martinez</p>
+                                                <p class="juror-email">l.martinez@brandstrategy.co</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="text-align: center; font-weight: 600;">19</td>
+                                    <td>
+                                        <div class="progress-container">
+                                            <div class="progress-bar-custom">
+                                                <div class="progress-fill" style="width: 83%;"></div>
+                                            </div>
+                                            <span class="progress-text">83%</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge active">
+                                            <span class="status-dot"></span>
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn-action view-details">
+                                            <span class="material-symbols-outlined">visibility</span>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Row 9 -->
+                                <tr data-juror-name="Kevin O'Brien" data-expertise="fintech" data-status="busy" data-completion="34" data-page="2">
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <img class="juror-avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuGdefghijk789lmnopqrstuvwxyz123456" alt="Kevin O'Brien">
+                                            <div>
+                                                <p class="juror-name">Kevin O'Brien</p>
+                                                <p class="juror-email">k.obrien@financetech.ie</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="text-align: center; font-weight: 600;">15</td>
+                                    <td>
+                                        <div class="progress-container">
+                                            <div class="progress-bar-custom">
+                                                <div class="progress-fill" style="width: 34%;"></div>
+                                            </div>
+                                            <span class="progress-text">34%</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge busy">
+                                            <span class="status-dot"></span>
+                                            Busy
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn-action view-details">
+                                            <span class="material-symbols-outlined">visibility</span>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Row 10 -->
+                                <tr data-juror-name="Dr. Amara Okafor" data-expertise="biotech" data-status="active" data-completion="95" data-page="2">
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <img class="juror-avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuHijklmnop456qrstuvwxyz789abc123def" alt="Dr. Amara Okafor">
+                                            <div>
+                                                <p class="juror-name">Dr. Amara Okafor</p>
+                                                <p class="juror-email">a.okafor@biopharma.ng</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="text-align: center; font-weight: 600;">30</td>
+                                    <td>
+                                        <div class="progress-container">
+                                            <div class="progress-bar-custom">
+                                                <div class="progress-fill" style="width: 95%;"></div>
+                                            </div>
+                                            <span class="progress-text">95%</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge active">
+                                            <span class="status-dot"></span>
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn-action view-details">
+                                            <span class="material-symbols-outlined">visibility</span>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Page 3 Data -->
+                                <!-- Row 11 -->
+                                <tr data-juror-name="Thomas Anderson" data-expertise="cybersecurity" data-status="inactive" data-completion="100" data-page="3">
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <img class="juror-avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuIlmnopqr123stuvwxyz456abcdef789ghi" alt="Thomas Anderson">
+                                            <div>
+                                                <p class="juror-name">Thomas Anderson</p>
+                                                <p class="juror-email">t.anderson@cybersec.com</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="text-align: center; font-weight: 600;">35</td>
+                                    <td>
+                                        <div class="progress-container">
+                                            <div class="progress-bar-custom">
+                                                <div class="progress-fill" style="width: 100%;"></div>
+                                            </div>
+                                            <span class="progress-text">100%</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge inactive">
+                                            <span class="status-dot"></span>
+                                            Inactive
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn-action view-details">
+                                            <span class="material-symbols-outlined">visibility</span>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Row 12 -->
+                                <tr data-juror-name="Priya Sharma" data-expertise="ecommerce" data-status="active" data-completion="62" data-page="3">
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <img class="juror-avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuJopqrstu456vwxyz789abcdefghi123jkl" alt="Priya Sharma">
+                                            <div>
+                                                <p class="juror-name">Priya Sharma</p>
+                                                <p class="juror-email">p.sharma@ecommhub.in</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="text-align: center; font-weight: 600;">21</td>
+                                    <td>
+                                        <div class="progress-container">
+                                            <div class="progress-bar-custom">
+                                                <div class="progress-fill" style="width: 62%;"></div>
+                                            </div>
+                                            <span class="progress-text">62%</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge active">
+                                            <span class="status-dot"></span>
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn-action view-details">
+                                            <span class="material-symbols-outlined">visibility</span>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Row 13 -->
+                                <tr data-juror-name="Alexandre Dubois" data-expertise="aerospace" data-status="busy" data-completion="47" data-page="3">
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <img class="juror-avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuKrstuvwx789yzabc123defghijkl456mno" alt="Alexandre Dubois">
+                                            <div>
+                                                <p class="juror-name">Alexandre Dubois</p>
+                                                <p class="juror-email">a.dubois@aerospace.fr</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="text-align: center; font-weight: 600;">17</td>
+                                    <td>
+                                        <div class="progress-container">
+                                            <div class="progress-bar-custom">
+                                                <div class="progress-fill" style="width: 47%;"></div>
+                                            </div>
+                                            <span class="progress-text">47%</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge busy">
+                                            <span class="status-dot"></span>
+                                            Busy
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn-action view-details">
+                                            <span class="material-symbols-outlined">visibility</span>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Row 14 -->
+                                <tr data-juror-name="Nina Petrov" data-expertise="robotics" data-status="active" data-completion="88" data-page="3">
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <img class="juror-avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuLuvwxyz123abcdef456ghijklmno789pqr" alt="Nina Petrov">
+                                            <div>
+                                                <p class="juror-name">Nina Petrov</p>
+                                                <p class="juror-email">n.petrov@robotics.ru</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="text-align: center; font-weight: 600;">25</td>
+                                    <td>
+                                        <div class="progress-container">
+                                            <div class="progress-bar-custom">
+                                                <div class="progress-fill" style="width: 88%;"></div>
+                                            </div>
+                                            <span class="progress-text">88%</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge active">
+                                            <span class="status-dot"></span>
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn-action view-details">
+                                            <span class="material-symbols-outlined">visibility</span>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Row 15 -->
+                                <tr data-juror-name="Dr. Hassan Al-Rashid" data-expertise="renewable" data-status="active" data-completion="76" data-page="3">
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <img class="juror-avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuMxyzabc456defghi789jklmnopqr123stu" alt="Dr. Hassan Al-Rashid">
+                                            <div>
+                                                <p class="juror-name">Dr. Hassan Al-Rashid</p>
+                                                <p class="juror-email">h.alrashid@solarenergy.ae</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="text-align: center; font-weight: 600;">23</td>
+                                    <td>
+                                        <div class="progress-container">
+                                            <div class="progress-bar-custom">
+                                                <div class="progress-fill" style="width: 76%;"></div>
+                                            </div>
+                                            <span class="progress-text">76%</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge active">
+                                            <span class="status-dot"></span>
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn-action view-details">
+                                            <span class="material-symbols-outlined">visibility</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="pagination-custom">
+                        <p class="pagination-info" id="paginationInfo">
+                            Showing <span style="font-weight: 600;">1-5</span> of <span style="font-weight: 600;">128</span> Jurors
+                        </p>
+                        <div class="pagination-controls">
+                            <button class="page-btn" id="prevBtn" disabled>
+                                <span class="material-symbols-outlined" style="font-size: 18px;">chevron_left</span>
+                            </button>
+                            <button class="page-btn active" data-page-num="1">1</button>
+                            <button class="page-btn" data-page-num="2">2</button>
+                            <button class="page-btn" data-page-num="3">3</button>
+                            <button class="page-btn" id="nextBtn">
+                                <span class="material-symbols-outlined" style="font-size: 18px;">chevron_right</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Details Sidebar Overlay -->
+    <div class="details-sidebar-overlay" id="detailsOverlay"></div>
+
+    <!-- Details Sidebar -->
+    <div class="details-sidebar" id="detailsSidebar">
+        <div class="details-sidebar-header">
+            <h2>Juror Details</h2>
+            <button class="details-sidebar-close" id="closeSidebar">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div class="details-sidebar-content" id="sidebarContent">
+            <!-- Content will be dynamically loaded here -->
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Load External Components -->
+    <script>
+        // Load sidebar
+        fetch('sidebar.html')
+            .then(response => response.text())
+            .then(data => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = data;
+
+                const elements = tempDiv.childNodes;
+                elements.forEach(node => {
+                    if (node.nodeType === 1 && node.tagName !== 'SCRIPT') {
+                        document.getElementById('sidebar-container').appendChild(node.cloneNode(true));
+                    } else if (node.nodeType === 3) {
+                        document.getElementById('sidebar-container').appendChild(node.cloneNode(true));
+                    }
+                });
+
+                const script = tempDiv.querySelector('script');
+                if (script) {
+                    const newScript = document.createElement('script');
+                    newScript.textContent = script.textContent;
+                    document.body.appendChild(newScript);
+                }
+            })
+            .catch(error => console.error('Error loading sidebar:', error));
+
+        // Load header
+        fetch('header.html')
+            .then(response => response.text())
+            .then(data => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = data;
+
+                const elements = tempDiv.childNodes;
+                elements.forEach(node => {
+                    if (node.nodeType === 1 || node.nodeType === 3) {
+                        document.getElementById('header-container').appendChild(node.cloneNode(true));
+                    }
+                });
+
+                const script = tempDiv.querySelector('script');
+                if (script) {
+                    const newScript = document.createElement('script');
+                    newScript.textContent = script.textContent;
+                    document.body.appendChild(newScript);
+                }
+            })
+            .catch(error => console.error('Error loading header:', error));
+
+        // Search and Filter Functionality
+        const searchInput = document.getElementById('searchInput');
+        const completionFilter = document.getElementById('completionFilter');
+        const tableRows = document.querySelectorAll('.custom-table tbody tr');
+
+        function filterTable() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const completionValue = completionFilter.value;
+
+            tableRows.forEach(row => {
+                const jurorName = row.getAttribute('data-juror-name').toLowerCase();
+                const completion = parseInt(row.getAttribute('data-completion'));
+
+                const matchesSearch = jurorName.includes(searchTerm);
+
+                let matchesCompletion = true;
+                if (completionValue === 'high') {
+                    matchesCompletion = completion >= 75 && completion <= 100;
+                } else if (completionValue === 'medium') {
+                    matchesCompletion = completion >= 50 && completion < 75;
+                } else if (completionValue === 'low') {
+                    matchesCompletion = completion >= 0 && completion < 50;
+                }
+
+                if (matchesSearch && matchesCompletion) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        searchInput.addEventListener('input', filterTable);
+        completionFilter.addEventListener('change', filterTable);
+
+        // Pagination functionality
+        let currentPage = 1;
+        const rowsPerPage = 5;
+        const totalJurors = 128;
+        const allTableRows = document.querySelectorAll('.custom-table tbody tr');
+        const paginationInfo = document.getElementById('paginationInfo');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const pageButtons = document.querySelectorAll('.page-btn[data-page-num]');
+
+        function showPage(page) {
+            currentPage = page;
+
+            // Show/hide rows based on current page
+            allTableRows.forEach(row => {
+                const rowPage = parseInt(row.getAttribute('data-page'));
+                if (rowPage === currentPage) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            // Update pagination info
+            const startRow = (currentPage - 1) * rowsPerPage + 1;
+            const endRow = Math.min(currentPage * rowsPerPage, totalJurors);
+            paginationInfo.innerHTML = `Showing <span style="font-weight: 600;">${startRow}-${endRow}</span> of <span style="font-weight: 600;">${totalJurors}</span> Jurors`;
+
+            // Update active state of page buttons
+            pageButtons.forEach(btn => {
+                if (parseInt(btn.getAttribute('data-page-num')) === currentPage) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            // Update prev/next button states
+            prevBtn.disabled = currentPage === 1;
+            nextBtn.disabled = currentPage === 3;
+        }
+
+        // Page number buttons
+        pageButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const pageNum = parseInt(this.getAttribute('data-page-num'));
+                showPage(pageNum);
+            });
+        });
+
+        // Previous button
+        prevBtn.addEventListener('click', function() {
+            if (currentPage > 1) {
+                showPage(currentPage - 1);
+            }
+        });
+
+        // Next button
+        nextBtn.addEventListener('click', function() {
+            if (currentPage < 3) {
+                showPage(currentPage + 1);
+            }
+        });
+
+        // Initialize first page
+        showPage(1);
+
+        // Details Sidebar functionality
+        const detailsSidebar = document.getElementById('detailsSidebar');
+        const detailsOverlay = document.getElementById('detailsOverlay');
+        const closeSidebar = document.getElementById('closeSidebar');
+        const sidebarContent = document.getElementById('sidebarContent');
+
+        function openDetailsSidebar(jurorName) {
+            // Sample juror data - in real app, this would come from API
+            const jurorData = {
+                'Dr. Sarah Jenkins': {
+                    name: 'Dr. Sarah Jenkins',
+                    role: 'Senior Researcher, Green Institute',
+                    avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC6DJIP6_lsXfv3pt0I-UZUUpo18Thfx3Bt_vo0tmVDp_m5zdKSd9aQ4_sO-eliZYs47vzbBNFdEtOJcxj-NZAMOPj2egdoqbgO621NrqB6OEfTlM9s_nuTwUb_f_o356iqLizAeCXzSeaxwZz2muBqsXWD6apGx4U8w2xizlz6D8W83XsLWSPh3uBKuhRxGPcM4_iNRCOZ3u1wff0M5yKuxhO2PMqudUsHqgFD2JJLGJBgGn31lV9QgB_HiqLQ7d30fHfvyGbyI_c',
+                    status: 'active',
+                    assigned: 24,
+                    evaluated: 20,
+                    pending: 4,
+                    completionRate: 85,
+                    assignments: [
+                        { title: 'Eco-Friendly Packaging', id: '#IFT-22481', status: 'completed' },
+                        { title: 'Smart Urban Farming', id: '#IFT-22485', status: 'pending' },
+                        { title: 'Renewable Energy Solution', id: '#IFT-22492', status: 'completed' },
+                        { title: 'Zero Waste Initiative', id: '#IFT-22503', status: 'pending' }
+                    ]
+                },
+                'Michael Chen': {
+                    name: 'Michael Chen',
+                    role: 'Venture Capitalist, Tech Investments',
+                    avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDug5-m6SEIvhQfcMRrcc-a9_axxlYfBbteeyq0XyHlS5QSeJByIZgOxVNa-Sj5gy2QJKbfmmDWyd-nZuDCv5t95qrEwtznkjn8tLhHMCTySRXw_Do-XrHqDNe27d-lLSwpRPANtkZ5N2NcRe4gLSxGK69RRbHXezubISsv1-anp9AlZ8rMgU4fAd4mMJjI246OqFHbeP8VFCj3fxn47NLI70LbUKGs9V-Lml-Bv8l95W6OU3dYz6vpV5mKYEzBce64afCTG_rt4zk',
+                    status: 'busy',
+                    assigned: 18,
+                    evaluated: 8,
+                    pending: 10,
+                    completionRate: 42,
+                    assignments: [
+                        { title: 'Blockchain Payment System', id: '#IFT-22456', status: 'completed' },
+                        { title: 'Digital Wallet Innovation', id: '#IFT-22467', status: 'pending' },
+                        { title: 'Crypto Exchange Platform', id: '#IFT-22479', status: 'pending' }
+                    ]
+                },
+                'Marcus Thorne': {
+                    name: 'Marcus Thorne',
+                    role: 'Chief Technology Officer, TechLabs',
+                    avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCehVObCS9oYaE7QEW9Nh17IwwcB7VBBnZ41XK1YkCAaZKaG3_0zwS-N0-R0K5F9YkK01Qnley8zdftjQs7boi8Loz3RKkU8QZYaiCHL6Z2ZCxy1yhZ7t_ww87Zp_auPthHTRw8fQEe-OMOrxBhrWRxul25qdB8I64oSY6xd7K0Ti3TMfCbWKRyIAp33qI8cogBScv44eWJy-gCp9aqzWnihRcC0Rc74HxJBHRPKMPiJFDCzCtrqqihnx9MKOM21EE-wJyOdxI6NA8',
+                    status: 'inactive',
+                    assigned: 32,
+                    evaluated: 32,
+                    pending: 0,
+                    completionRate: 100,
+                    assignments: [
+                        { title: 'AI-Powered Diagnostics', id: '#IFT-22401', status: 'completed' },
+                        { title: 'Quantum Computing App', id: '#IFT-22415', status: 'completed' },
+                        { title: 'Neural Network Framework', id: '#IFT-22428', status: 'completed' }
+                    ]
+                }
+            };
+
+            const juror = jurorData[jurorName] || {
+                name: jurorName,
+                role: 'Jury Member',
+                avatar: 'https://via.placeholder.com/96',
+                status: 'active',
+                assigned: 18,
+                evaluated: 13,
+                pending: 5,
+                completionRate: 72,
+                assignments: []
+            };
+
+            const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+
+            sidebarContent.innerHTML = `
+                <!-- Profile Section -->
+                <div class="profile-section">
+                    <div style="position: relative; display: inline-block;">
+                        <img class="profile-avatar-large" src="${juror.avatar}" alt="${juror.name}">
+                        ${juror.status === 'active' ? '<span class="online-indicator"></span>' : ''}
+                    </div>
+                    <h3 class="profile-name">${juror.name}</h3>
+                    <p class="profile-role">${juror.role}</p>
+                    <div class="profile-badges">
+                        <span class="profile-badge primary">Primary</span>
+                        <span class="profile-badge expert">Expert</span>
+                    </div>
+                </div>
+
+                <!-- Evaluation Performance & Load Overview -->
+                <div class="detail-section">
+                    <div class="detail-section-title">
+                        <span class="material-symbols-outlined">analytics</span>
+                        Evaluation Performance & Load Overview
+                    </div>
+
+                    <!-- Evaluation Progress -->
+                    <div class="performance-subsection">
+                        <h6 class="performance-subtitle">Evaluation Progress</h6>
+                        <div class="performance-grid">
+                            <div class="performance-item">
+                                <span class="performance-label">Assigned</span>
+                                <span class="performance-value">${juror.assigned || 18}</span>
+                            </div>
+                            <div class="performance-item">
+                                <span class="performance-label">Evaluated</span>
+                                <span class="performance-value">${juror.evaluated || 13}</span>
+                            </div>
+                            <div class="performance-item">
+                                <span class="performance-label">Pending</span>
+                                <span class="performance-value pending-color">${juror.pending || 5}</span>
+                            </div>
+                        </div>
+                        <div class="performance-completion">
+                            <div class="completion-header">
+                                <span class="completion-label">Completion</span>
+                                <span class="completion-percentage">${juror.completionRate || 72}%</span>
+                            </div>
+                            <div class="progress-bar-custom">
+                                <div class="progress-fill" style="width: ${juror.completionRate || 72}%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Assignment Overview -->
+                <div class="detail-section">
+                    <div class="detail-section-title">
+                        <span class="material-symbols-outlined">list_alt</span>
+                        Assignment Overview
+                    </div>
+                    <div class="assignment-list">
+                        ${juror.assignments.map(assignment => `
+                            <div class="assignment-item">
+                                <div class="assignment-info">
+                                    <h6>${assignment.title}</h6>
+                                    <p>ID: ${assignment.id}</p>
+                                </div>
+                                <div class="assignment-status ${assignment.status}">
+                                    <span class="material-symbols-outlined">
+                                        ${assignment.status === 'completed' ? 'check_circle' : 'pending'}
+                                    </span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+
+            detailsSidebar.classList.add('open');
+            detailsOverlay.classList.add('show');
+        }
+
+        function closeDetailsSidebar() {
+            detailsSidebar.classList.remove('open');
+            detailsOverlay.classList.remove('show');
+        }
+
+        // View details button functionality
+        document.querySelectorAll('.view-details').forEach(button => {
+            button.addEventListener('click', function() {
+                const row = this.closest('tr');
+                const jurorName = row.getAttribute('data-juror-name');
+                openDetailsSidebar(jurorName);
+            });
+        });
+
+        // Close sidebar events
+        closeSidebar.addEventListener('click', closeDetailsSidebar);
+        detailsOverlay.addEventListener('click', closeDetailsSidebar);
+
+        // Close sidebar on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && detailsSidebar.classList.contains('open')) {
+                closeDetailsSidebar();
+            }
+        });
+    </script>
+</body>
+
+</html>

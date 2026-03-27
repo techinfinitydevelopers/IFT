@@ -1,0 +1,1673 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>India's Future Tycoon - IFT Portal</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+
+    <style>
+        :root {
+            --primary-color: #5E2A97;
+            --secondary-color: #DEDE50;
+            --background-light: #F7F7F7;
+            --background-dark: #0F0F0F;
+            --text-dark: #222222;
+            --text-muted: #666666;
+            --text-light: #FFFFFF;
+            --border-color: #EEEEEE;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: var(--background-dark);
+            color: var(--text-light);
+            overflow-x: hidden;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--background-dark);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #7B3FB5;
+        }
+
+        /* Background Effects */
+        .grid-background {
+            position: fixed;
+            inset: 0;
+            background-image: radial-gradient(circle, rgba(94, 42, 151, 0.15) 1px, transparent 1px);
+            background-size: 30px 30px;
+            opacity: 0.3;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(15, 15, 15, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(94, 42, 151, 0.2);
+            padding: 1rem 0;
+        }
+
+        .header-content {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-img {
+            width: 250px;
+            height: 50px;
+            background-size: contain;
+            background-position: left center;
+            background-repeat: no-repeat;
+            flex-shrink: 0;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--primary-color);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px rgba(94, 42, 151, 0.5);
+        }
+
+        .logo-icon .material-symbols-outlined {
+            color: white;
+            font-size: 24px;
+        }
+
+        .logo-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-light);
+            letter-spacing: -0.02em;
+        }
+
+        .logo-text .highlight {
+            color: var(--primary-color);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color);
+        }
+
+        .btn-register {
+            background: rgba(94, 42, 151, 0.1);
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 0.5rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-register:hover {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 0 20px rgba(94, 42, 151, 0.5);
+        }
+
+        /* Hero Section */
+        .hero-section {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding-top: 80px;
+            z-index: 1;
+        }
+
+        .badge-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
+            background: rgba(94, 42, 151, 0.2);
+            border: 1px solid rgba(94, 42, 151, 0.4);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--primary-color);
+            margin-bottom: 2rem;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.5;
+                transform: scale(1.2);
+            }
+        }
+
+        .hero-title {
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: 900;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-title .highlight {
+            color: var(--primary-color);
+            font-style: italic;
+        }
+
+        .hero-description {
+            font-size: 1.125rem;
+            color: #94a3b8;
+            line-height: 1.8;
+            max-width: 600px;
+            margin-bottom: 2rem;
+        }
+
+        .btn-primary-custom {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem 2.5rem;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            border: none;
+            box-shadow: 0 0 30px rgba(94, 42, 151, 0.4);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary-custom:hover {
+            background: #7B3FB5;
+            box-shadow: 0 0 40px rgba(94, 42, 151, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary-custom {
+            background: transparent;
+            color: var(--text-light);
+            padding: 1rem 2.5rem;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            border: 1px solid #475569;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-secondary-custom:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        /* Globe Visual */
+        .globe-container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .globe-glow {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle, rgba(94, 42, 151, 0.3), transparent);
+            filter: blur(60px);
+        }
+
+        .globe-circle {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            aspect-ratio: 1;
+            border: 1px solid rgba(94, 42, 151, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .globe-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            opacity: 0.6;
+            mix-blend-mode: screen;
+        }
+
+        .stat-badge {
+            position: absolute;
+            background: rgba(15, 15, 15, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(94, 42, 151, 0.3);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            text-align: center;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .stat-badge:nth-child(2) {
+            top: -2rem;
+            right: -2rem;
+            animation-delay: 0s;
+        }
+
+        .stat-badge:nth-child(3) {
+            top: 50%;
+            left: -3rem;
+            animation-delay: 1s;
+        }
+
+        .stat-badge:nth-child(4) {
+            bottom: -2rem;
+            right: 40%;
+            animation-delay: 2s;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.625rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
+        /* AI Section */
+        .ai-section {
+            position: relative;
+            padding: 8rem 0;
+            border-top: 1px solid rgba(94, 42, 151, 0.2);
+            border-bottom: 1px solid rgba(94, 42, 151, 0.2);
+            z-index: 1;
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 900;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-description {
+            font-size: 1rem;
+            color: #94a3b8;
+            line-height: 1.8;
+            margin-bottom: 2rem;
+        }
+
+        .glass-card {
+            background: rgba(94, 42, 151, 0.05);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(94, 42, 151, 0.2);
+            border-radius: 16px;
+            padding: 2rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            border-color: rgba(94, 42, 151, 0.5);
+            background: rgba(94, 42, 151, 0.08);
+            box-shadow: inset 0 0 30px rgba(94, 42, 151, 0.1);
+        }
+
+        .glass-card-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(94, 42, 151, 0.2);
+            color: var(--primary-color);
+            border-radius: 8px;
+            flex-shrink: 0;
+        }
+
+        .glass-card-title {
+            font-size: 0.875rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+        }
+
+        .glass-card-description {
+            font-size: 0.875rem;
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        .ai-visual {
+            position: relative;
+            background: rgba(94, 42, 151, 0.05);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(94, 42, 151, 0.2);
+            border-radius: 16px;
+            aspect-ratio: 1;
+            max-width: 500px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .ai-placeholder-icon {
+            font-size: 200px;
+            color: rgba(94, 42, 151, 0.2);
+        }
+
+        .ai-visual img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.4;
+            mix-blend-mode: overlay;
+        }
+
+        .ai-status-bar {
+            position: absolute;
+            bottom: 2rem;
+            left: 2rem;
+            right: 2rem;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(12px);
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .ai-status-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar-custom {
+            width: 100%;
+            height: 4px;
+            background: #1e293b;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-fill {
+            width: 66%;
+            height: 100%;
+            background: var(--primary-color);
+            box-shadow: 0 0 10px var(--primary-color);
+        }
+
+        .ai-status-text {
+            font-size: 0.625rem;
+            color: #94a3b8;
+            font-style: italic;
+            font-family: monospace;
+        }
+
+        /* Journey Steps Section */
+        .journey-section {
+            position: relative;
+            padding: 8rem 0;
+            z-index: 1;
+        }
+
+        .step-card {
+            background: rgba(94, 42, 151, 0.05);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(94, 42, 151, 0.2);
+            border-radius: 16px;
+            padding: 2.5rem;
+            position: relative;
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+
+        .step-card:hover {
+            border-color: rgba(94, 42, 151, 0.5);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(94, 42, 151, 0.2);
+        }
+
+        .step-number {
+            position: absolute;
+            top: -1.5rem;
+            left: 2rem;
+            width: 48px;
+            height: 48px;
+            background: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.25rem;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(94, 42, 151, 0.5);
+        }
+
+        .step-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .step-description {
+            font-size: 0.875rem;
+            color: #94a3b8;
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+        }
+
+        .step-features {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .step-features li {
+            font-size: 0.75rem;
+            color: #64748b;
+            font-family: monospace;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-features li::before {
+            content: ">";
+            margin-right: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        /* Hall of Fame Section */
+        .hall-of-fame-section {
+            position: relative;
+            padding: 8rem 0;
+            background: rgba(94, 42, 151, 0.03);
+            z-index: 1;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #22c55e;
+        }
+
+        .status-dot.inactive {
+            background: #475569;
+        }
+
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 2rem;
+        }
+
+        .leaderboard-table thead th {
+            text-align: left;
+            padding: 1.5rem 1rem;
+            border-bottom: 1px solid rgba(94, 42, 151, 0.2);
+            color: #64748b;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 600;
+        }
+
+        .leaderboard-table tbody tr {
+            border-bottom: 1px solid rgba(94, 42, 151, 0.1);
+            transition: background 0.2s ease;
+        }
+
+        .leaderboard-table tbody tr:hover {
+            background: rgba(94, 42, 151, 0.05);
+        }
+
+        .leaderboard-table tbody td {
+            padding: 1.5rem 1rem;
+        }
+
+        .rank-badge {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            background: rgba(94, 42, 151, 0.2);
+            border: 1px solid rgba(94, 42, 151, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--primary-color);
+            transition: all 0.3s ease;
+        }
+
+        .leaderboard-table tbody tr:hover .rank-badge {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 0 15px rgba(94, 42, 151, 0.5);
+        }
+
+        .leaderboard-table tbody tr:first-child .rank-badge {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 0 15px rgba(94, 42, 151, 0.5);
+        }
+
+        .team-name {
+            font-weight: 700;
+            color: var(--text-light);
+        }
+
+        .team-school {
+            font-size: 0.75rem;
+            color: #64748b;
+            display: block;
+            margin-top: 0.25rem;
+        }
+
+        .venture-name {
+            color: #cbd5e1;
+        }
+
+        .ai-score {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .score-value {
+            font-family: monospace;
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .score-bar {
+            width: 100px;
+            height: 4px;
+            background: #1e293b;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .score-bar-fill {
+            height: 100%;
+            background: var(--primary-color);
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.625rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .status-funded {
+            border: 1px solid rgba(34, 197, 94, 0.5);
+            color: #22c55e;
+        }
+
+        .status-acquired {
+            border: 1px solid rgba(94, 42, 151, 0.5);
+            color: var(--primary-color);
+        }
+
+        .status-scaling {
+            border: 1px solid rgba(71, 85, 105, 0.5);
+            color: #64748b;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            position: relative;
+            padding: 10rem 0;
+            text-align: center;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .cta-background {
+            position: absolute;
+            inset: 0;
+            background: rgba(94, 42, 151, 0.1);
+            transform: skewY(-3deg);
+            transform-origin: right;
+        }
+
+        .cta-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-title {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 900;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            margin-bottom: 1.5rem;
+        }
+
+        .cta-description {
+            font-size: 1.25rem;
+            color: #94a3b8;
+            max-width: 700px;
+            margin: 0 auto 3rem;
+        }
+
+        /* Footer */
+        .footer {
+            position: relative;
+            padding: 3rem 0;
+            border-top: 1px solid rgba(94, 42, 151, 0.2);
+            background: #000000;
+            z-index: 1;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            opacity: 0.5;
+        }
+
+        .footer-logo-icon {
+            width: 24px;
+            height: 24px;
+            background: var(--primary-color);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .footer-logo-icon .material-symbols-outlined {
+            font-size: 14px;
+            color: white;
+        }
+
+        .footer-logo-text {
+            font-size: 0.875rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .footer-social {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .footer-social a {
+            color: #475569;
+            transition: color 0.3s ease;
+        }
+
+        .footer-social a:hover {
+            color: var(--primary-color);
+        }
+
+        .footer-version {
+            color: #475569;
+            font-size: 0.75rem;
+            font-family: monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* Mobile Menu Toggle */
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .mobile-menu-toggle .material-symbols-outlined {
+            font-size: 28px;
+        }
+
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            top: 70px;
+            left: 0;
+            right: 0;
+            background: rgba(15, 15, 15, 0.98);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(94, 42, 151, 0.2);
+            padding: 1rem;
+            z-index: 999;
+        }
+
+        .mobile-nav.active {
+            display: block;
+        }
+
+        .mobile-nav a {
+            display: block;
+            padding: 1rem;
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid rgba(94, 42, 151, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .mobile-nav a:hover {
+            color: var(--primary-color);
+            background: rgba(94, 42, 151, 0.05);
+        }
+
+        .mobile-nav a:last-child {
+            border-bottom: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .hero-title {
+                font-size: clamp(2rem, 6vw, 3.5rem);
+            }
+
+            .section-title {
+                font-size: clamp(1.75rem, 4vw, 2.5rem);
+            }
+
+            .globe-circle {
+                max-width: 400px;
+            }
+
+            .stat-badge:nth-child(2) {
+                top: -1.5rem;
+                right: -1.5rem;
+            }
+
+            .stat-badge:nth-child(3) {
+                top: 50%;
+                left: -2rem;
+            }
+
+            .stat-badge:nth-child(4) {
+                bottom: -1.5rem;
+                right: 35%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            /* Header */
+            .header {
+                padding: 0.75rem 0;
+            }
+
+            .header-content {
+                padding: 0 1rem;
+            }
+
+            .logo-img {
+                width: 180px;
+                height: 40px;
+            }
+
+            .nav-links {
+                display: none !important;
+            }
+
+            .mobile-menu-toggle {
+                display: block;
+            }
+
+            /* Hero Section */
+            .hero-section {
+                padding: 5rem 1rem 3rem;
+                min-height: auto;
+            }
+
+            .badge-status {
+                font-size: 0.625rem;
+                padding: 0.375rem 0.75rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .pulse-dot {
+                width: 6px;
+                height: 6px;
+            }
+
+            .hero-title {
+                font-size: clamp(1.75rem, 8vw, 2.5rem);
+                margin-bottom: 1rem;
+            }
+
+            .hero-description {
+                font-size: 1rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .btn-primary-custom,
+            .btn-secondary-custom {
+                width: 100%;
+                padding: 0.875rem 1.5rem;
+                font-size: 0.8125rem;
+            }
+
+            /* Globe and Stats */
+            .globe-container {
+                margin-top: 2rem;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .globe-circle {
+                max-width: 300px;
+                padding: 1.5rem;
+                margin: 0 auto;
+            }
+
+            .globe-image {
+                width: 100%;
+                height: 100%;
+            }
+
+            .stat-badge {
+                position: static !important;
+                margin: 0.5rem 0;
+                padding: 0.75rem 1rem;
+                width: 200px;
+                max-width: 100%;
+                animation: none;
+            }
+
+            .stat-value {
+                font-size: 1.25rem;
+            }
+
+            .stat-label {
+                font-size: 0.625rem;
+            }
+
+            /* Journey Steps Section */
+            .journey-section {
+                padding: 4rem 0;
+            }
+
+            .step-card {
+                padding: 2rem 1.5rem;
+            }
+
+            .step-number {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+                left: 1.5rem;
+            }
+
+            .step-title {
+                font-size: 1rem;
+                margin-top: 0.75rem;
+            }
+
+            .step-description {
+                font-size: 0.8125rem;
+                margin-bottom: 1rem;
+            }
+
+            .step-features li {
+                font-size: 0.6875rem;
+            }
+
+            /* AI Section */
+            .ai-section {
+                padding: 4rem 0;
+            }
+
+            .ai-visual {
+                max-width: 100%;
+                margin-bottom: 2rem;
+            }
+
+            .ai-placeholder-icon {
+                font-size: 120px;
+            }
+
+            .ai-status-bar {
+                left: 1rem;
+                right: 1rem;
+                bottom: 1rem;
+                padding: 0.75rem;
+            }
+
+            .ai-status-label {
+                font-size: 0.625rem;
+                margin-bottom: 0.375rem;
+            }
+
+            .ai-status-text {
+                font-size: 0.5625rem;
+            }
+
+            .glass-card {
+                padding: 1.25rem;
+                gap: 0.75rem;
+            }
+
+            .glass-card-icon {
+                width: 32px;
+                height: 32px;
+            }
+
+            .glass-card-icon .material-symbols-outlined {
+                font-size: 18px;
+            }
+
+            .glass-card-title {
+                font-size: 0.8125rem;
+            }
+
+            .glass-card-description {
+                font-size: 0.8125rem;
+            }
+
+            /* Hall of Fame Section */
+            .hall-of-fame-section {
+                padding: 4rem 0;
+            }
+
+            .leaderboard-table {
+                font-size: 0.75rem;
+            }
+
+            .leaderboard-table thead th,
+            .leaderboard-table tbody td {
+                padding: 0.75rem 0.5rem;
+            }
+
+            .rank-badge {
+                width: 28px;
+                height: 28px;
+                font-size: 0.75rem;
+            }
+
+            .team-name {
+                font-size: 0.875rem;
+            }
+
+            .team-school {
+                font-size: 0.625rem;
+            }
+
+            .venture-name {
+                font-size: 0.8125rem;
+            }
+
+            .score-value {
+                font-size: 0.875rem;
+            }
+
+            .score-bar {
+                width: 60px;
+            }
+
+            .status-badge {
+                font-size: 0.5625rem;
+                padding: 0.25rem 0.5rem;
+            }
+
+            /* CTA Section */
+            .cta-section {
+                padding: 5rem 0;
+            }
+
+            .cta-title {
+                font-size: clamp(2rem, 8vw, 3rem);
+                margin-bottom: 1rem;
+            }
+
+            .cta-description {
+                font-size: 1rem;
+                margin-bottom: 2rem;
+            }
+
+            /* Footer */
+            .footer {
+                padding: 2rem 0;
+            }
+
+            .footer-logo-text {
+                font-size: 0.75rem;
+            }
+
+            .footer-social {
+                gap: 1.5rem;
+            }
+
+            .footer-social .material-symbols-outlined {
+                font-size: 20px;
+            }
+
+            /* Hide some elements on very small screens */
+            .status-indicator {
+                display: none;
+            }
+
+            /* Table responsive improvements */
+            .leaderboard-table thead th:nth-child(3),
+            .leaderboard-table tbody td:nth-child(3) {
+                display: none;
+            }
+
+            .section-description {
+                font-size: 0.9375rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-section {
+                padding: 4rem 1rem 2rem;
+            }
+
+            .hero-title {
+                font-size: 1.75rem;
+            }
+
+            .globe-circle {
+                max-width: 250px;
+                padding: 1rem;
+            }
+
+            .stat-badge {
+                padding: 0.625rem 0.875rem;
+                width: 160px;
+                margin: 0.375rem 0;
+            }
+
+            .stat-value {
+                font-size: 1.125rem;
+            }
+
+            .stat-label {
+                font-size: 0.5625rem;
+            }
+
+            .step-card {
+                padding: 1.5rem 1rem;
+            }
+
+            .step-number {
+                width: 36px;
+                height: 36px;
+                font-size: 0.875rem;
+                left: 1rem;
+            }
+
+            .ai-status-bar {
+                padding: 0.5rem;
+            }
+
+            .cta-section {
+                padding: 4rem 0;
+            }
+
+            .cta-title {
+                font-size: 1.75rem;
+            }
+
+            .cta-description {
+                font-size: 0.875rem;
+            }
+
+            /* Simplify table for small screens */
+            .leaderboard-table {
+                font-size: 0.6875rem;
+            }
+
+            .leaderboard-table thead th,
+            .leaderboard-table tbody td {
+                padding: 0.625rem 0.375rem;
+            }
+
+            .score-bar {
+                display: none;
+            }
+
+            .ai-score {
+                gap: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Background Grid -->
+    <div class="grid-background"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content d-flex justify-content-between align-items-center">
+            <div class="logo-section">
+                <div class="logo-img" style='background-image: url("../assets/IFT_logo.png");'>
+                </div>
+            </div>
+            <nav class="nav-links d-none d-md-flex">
+                <a href="#challenge" class="nav-link">The Challenge</a>
+                <a href="#ai-tech" class="nav-link">AI Tech</a>
+                <a href="#leaderboard" class="nav-link">Leaderboard</a>
+                <a href="/auth/sign-up.html" class="btn-register">Register</a>
+            </nav>
+            <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Mobile Navigation -->
+    <div class="mobile-nav" id="mobileNav">
+        <a href="#challenge">The Challenge</a>
+        <a href="#ai-tech">AI Tech</a>
+        <a href="#leaderboard">Leaderboard</a>
+        <a href="/auth/sign-up.html">Register</a>
+    </div>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="container">
+                <div class="row align-items-center g-5">
+                    <div class="col-lg-6">
+                        <div class="badge-status">
+                            <span class="pulse-dot"></span>
+                            India's Largest Student Stage
+                        </div>
+                        <h1 class="hero-title">
+                            THE FUTURE <br />
+                            <span class="highlight">BELONGS TO</span><br />
+                            TYCOONS.
+                        </h1>
+                        <p class="hero-description">
+                            Step into the digital grid. Compete with India's brightest minds in the ultimate AI-powered
+                            entrepreneurship championship.
+                        </p>
+                        <div class="d-flex flex-wrap gap-3">
+                            <a href="/auth/sign-up.html" class="btn-primary-custom">
+                                Initialize Entry
+                            </a>
+                            <a href="/auth/sign-in.html" class="btn-secondary-custom">
+                                Authenticate Access
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="globe-container">
+                            <div class="globe-glow"></div>
+                            <div class="globe-circle">
+                                <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&h=800&fit=crop"
+                                    alt="Students Innovating" class="globe-image" />
+                                <div class="stat-badge">
+                                    <p class="stat-value">50K+</p>
+                                    <p class="stat-label">Students</p>
+                                </div>
+                                <div class="stat-badge">
+                                    <p class="stat-value">₹10L+</p>
+                                    <p class="stat-label">Prize Pool</p>
+                                </div>
+                                <div class="stat-badge">
+                                    <p class="stat-value">200+</p>
+                                    <p class="stat-label">Institutes</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Journey Steps Section -->
+        <section class="journey-section" id="challenge">
+            <div class="container">
+                <div class="text-center mb-5">
+                    <h2 class="section-title">The Journey to <span class="highlight">Stardom</span></h2>
+                    <p class="section-description" style="max-width: 700px; margin: 0 auto;">
+                        Three phases to transform your idea into an empire.
+                    </p>
+                </div>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="step-card">
+                            <div class="step-number">01</div>
+                            <h3 class="step-title">The Prototype</h3>
+                            <p class="step-description">
+                                Submit your core business model. Our AI performs the first level of viability screening
+                                and market fit analysis.
+                            </p>
+                            <ul class="step-features">
+                                <li>Concept Validation</li>
+                                <li>Financial Forecasting</li>
+                                <li>Team Matrix Check</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="step-card">
+                            <div class="step-number">02</div>
+                            <h3 class="step-title">The Simulation</h3>
+                            <p class="step-description">
+                                Shortlisted teams enter a high-stakes business simulation environment to test agility
+                                and decision making.
+                            </p>
+                            <ul class="step-features">
+                                <li>Stress Testing</li>
+                                <li>Resource Allocation</li>
+                                <li>Pivot Mechanics</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="step-card">
+                            <div class="step-number">03</div>
+                            <h3 class="step-title">The Coliseum</h3>
+                            <p class="step-description">
+                                Top 10 finalists pitch live in Mumbai to a panel of India's most aggressive venture
+                                capitalists and tech leaders.
+                            </p>
+                            <ul class="step-features">
+                                <li>Live Pitch Deck</li>
+                                <li>Q&A Fire Round</li>
+                                <li>Instant Funding Potential</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- AI Section -->
+        <section class="ai-section" id="ai-tech">
+            <div class="container">
+                <div class="row align-items-center g-5">
+                    <div class="col-lg-5 order-lg-1">
+                        <div class="ai-visual">
+                            <!-- <span class="material-symbols-outlined ai-placeholder-icon">psychology</span> -->
+                            <img src="/assets/ai-powered-evaluation-matrix.jpeg" alt="AI Technology" />
+                            <div class="ai-status-bar">
+                                <p class="ai-status-label">Processing...</p>
+                                <div class="progress-bar-custom">
+                                    <div class="progress-fill"></div>
+                                </div>
+                                <p class="ai-status-text">Analyzing Business Scalability Index: 88.4%</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-7 order-lg-2">
+                        <h2 class="section-title">
+                            AI-POWERED <br />
+                            <span class="highlight">EVALUATION MATRIX</span>
+                        </h2>
+                        <p class="section-description">
+                            Gone are the days of biased judging. Our neural network architecture analyzes your business
+                            pitches across 156 different data points, ensuring only the most robust ventures rise to the
+                            top.
+                        </p>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <div class="glass-card">
+                                    <div class="glass-card-icon">
+                                        <span class="material-symbols-outlined">query_stats</span>
+                                    </div>
+                                    <div>
+                                        <h4 class="glass-card-title">Sentiment Analysis</h4>
+                                        <p class="glass-card-description">Natural Language Processing of your pitch
+                                            delivery.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="glass-card">
+                                    <div class="glass-card-icon">
+                                        <span class="material-symbols-outlined">hub</span>
+                                    </div>
+                                    <div>
+                                        <h4 class="glass-card-title">Market Modeling</h4>
+                                        <p class="glass-card-description">Real-time simulation of market adoption
+                                            curves.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Hall of Fame Section -->
+        <section class="hall-of-fame-section" id="leaderboard">
+            <div class="container">
+                <div
+                    class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-end mb-4 gap-3">
+                    <div>
+                        <h2 class="section-title mb-0">Hall of <span class="highlight">Fame</span></h2>
+                        <p class="section-description mb-0">Legends of the previous seasons.</p>
+                    </div>
+                    <div class="text-end">
+                        <div class="ai-status-label mb-2">Live Grid Status</div>
+                        <div class="status-indicator">
+                            <span class="status-dot"></span>
+                            <span class="status-dot"></span>
+                            <span class="status-dot"></span>
+                            <span class="status-dot inactive"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="leaderboard-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Tycoon / Team</th>
+                                <th>Idea</th>
+                                <th>AI Score</th>
+                                <th class="text-end">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div class="rank-badge">01</div>
+                                </td>
+                                <td>
+                                    <span class="team-name">Aryan Malhotra</span>
+                                    <span class="team-school">IIT Bombay</span>
+                                </td>
+                                <td><span class="venture-name">EcoFlow Solutions</span></td>
+                                <td>
+                                    <div class="ai-score">
+                                        <span class="score-value">98.2</span>
+                                        <div class="score-bar">
+                                            <div class="score-bar-fill" style="width: 98%;"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-end">
+                                    <span class="status-badge status-funded">Funded</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="rank-badge">02</div>
+                                </td>
+                                <td>
+                                    <span class="team-name">Priya Sharma</span>
+                                    <span class="team-school">BITS Pilani</span>
+                                </td>
+                                <td><span class="venture-name">MedLink Neural</span></td>
+                                <td>
+                                    <div class="ai-score">
+                                        <span class="score-value">96.5</span>
+                                        <div class="score-bar">
+                                            <div class="score-bar-fill" style="width: 96%;"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-end">
+                                    <span class="status-badge status-acquired">Acquired</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="rank-badge">03</div>
+                                </td>
+                                <td>
+                                    <span class="team-name">Karthik R.</span>
+                                    <span class="team-school">IIM Ahmedabad</span>
+                                </td>
+                                <td><span class="venture-name">Z-Crypt Finance</span></td>
+                                <td>
+                                    <div class="ai-score">
+                                        <span class="score-value">94.8</span>
+                                        <div class="score-bar">
+                                            <div class="score-bar-fill" style="width: 94%;"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-end">
+                                    <span class="status-badge status-scaling">Scaling</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="cta-section" id="register">
+            <div class="cta-background"></div>
+            <div class="container">
+                <div class="cta-content">
+                    <h2 class="cta-title">
+                        Ready to enter <br />
+                        the <span class="highlight">grid?</span>
+                    </h2>
+                    <p class="cta-description">
+                        Registration closes in 04 Days : 12 Hours : 55 Mins. Don't let your legacy be a missed
+                        opportunity.
+                    </p>
+                    <div class="d-flex flex-column flex-md-row justify-content-center align-items-center gap-3">
+                        <a href="auth/sign-in.html" class="btn-primary-custom">
+                            Initialize Registration
+                        </a>
+                        <a href="#guidelines" class="btn-secondary-custom">
+                            Download Guidelines
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-4">
+                    <div class="footer-logo">
+                        <span class="footer-logo-text">India's Future Tycoon © 2026</span>
+                    </div>
+                    <div class="footer-social">
+                        <a href="#"><span class="material-symbols-outlined">contact_support</span></a>
+                        <a href="#"><span class="material-symbols-outlined">email</span></a>
+                        <!-- <a href="#"><span class="material-symbols-outlined"></span></a> -->
+                    </div>
+                    <!-- <div class="footer-version">
+                        System Version: 1.0.4-Stable
+                    </div> -->
+                </div>
+            </div>
+        </footer>
+    </main>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Mobile Menu Script -->
+    <script>
+        // Mobile menu toggle
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const mobileNav = document.getElementById('mobileNav');
+
+        if (mobileMenuToggle && mobileNav) {
+            mobileMenuToggle.addEventListener('click', function() {
+                mobileNav.classList.toggle('active');
+                const icon = this.querySelector('.material-symbols-outlined');
+                if (mobileNav.classList.contains('active')) {
+                    icon.textContent = 'close';
+                } else {
+                    icon.textContent = 'menu';
+                }
+            });
+
+            // Close mobile menu when clicking on a link
+            const mobileNavLinks = mobileNav.querySelectorAll('a');
+            mobileNavLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    mobileNav.classList.remove('active');
+                    const icon = mobileMenuToggle.querySelector('.material-symbols-outlined');
+                    icon.textContent = 'menu';
+                });
+            });
+
+            // Close mobile menu when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!mobileMenuToggle.contains(event.target) && !mobileNav.contains(event.target)) {
+                    mobileNav.classList.remove('active');
+                    const icon = mobileMenuToggle.querySelector('.material-symbols-outlined');
+                    icon.textContent = 'menu';
+                }
+            });
+        }
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+                if (href !== '#' && href !== '#guidelines') {
+                    e.preventDefault();
+                    const target = document.querySelector(href);
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

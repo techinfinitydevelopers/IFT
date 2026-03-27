@@ -2,6 +2,7 @@ import os
 import uuid
 import threading
 import time
+from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -72,6 +73,7 @@ def reeval_list(request):
             if diff > max_diff: max_diff = diff
 
     stats = None
+    param_stats = []
     if compared > 0:
         above_20 = compared - within_20
         stats = {
@@ -91,6 +93,40 @@ def reeval_list(request):
             'above_20_pct': round(above_20 / compared * 100),
         }
 
+        # Parameter-wise comparison
+        param_fields = [
+            ('Uniqueness', 'uniqueness_score'),
+            ('Ease of Implementation', 'ease_of_implementation_score'),
+            ('Feasibility', 'feasibility_score'),
+            ('Impact', 'impactful_score'),
+            ('Sustainability', 'sustainable_score'),
+            ('Conceptual Clarity', 'conceptual_clarity_score'),
+            ('Empathy', 'empathy_score'),
+            ('Creativity', 'creativity_score'),
+            ('Communication', 'communication_score'),
+            ('Flexible Thinking', 'flexible_thinking_score'),
+        ]
+        for label, field in param_fields:
+            ai_vals = []
+            mentor_vals = []
+            for item in items:
+                s = item['submission']
+                m = item['mentor']
+                if s.is_evaluated and m and m.mentor_total_score > 0:
+                    ai_vals.append(getattr(s, field, 0) or 0)
+                    mentor_vals.append(getattr(m, field, 0) or 0)
+            if ai_vals:
+                mode_ai_p = Counter(ai_vals).most_common(1)[0][0]
+                mode_mentor_p = Counter(mentor_vals).most_common(1)[0][0]
+                mode_diff_p = mode_ai_p - mode_mentor_p
+                param_stats.append({
+                    'label': label,
+                    'avg_ai': mode_ai_p,
+                    'avg_mentor': mode_mentor_p,
+                    'diff': mode_diff_p,
+                    'abs_diff': abs(mode_diff_p),
+                })
+
     context = {
         'items': items,
         'total': submissions.count(),
@@ -98,6 +134,7 @@ def reeval_list(request):
         'with_mentor': MentorScore.objects.count(),
         'pending_count': pending_count,
         'stats': stats,
+        'param_stats': param_stats,
     }
     return render(request, 're_evaluation/list.html', context)
 

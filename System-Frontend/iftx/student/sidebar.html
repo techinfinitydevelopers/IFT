@@ -1,0 +1,531 @@
+<style>
+    /* Sidebar Styles */
+    .sidebar {
+        width: 280px;
+        background: #FFFFFF;
+        border-right: 1px solid #EEEEEE;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        position: sticky;
+        top: 0;
+        font-family: 'Poppins', sans-serif;
+        transition: all 0.3s ease;
+    }
+
+    .sidebar.collapsed {
+        width: 80px;
+    }
+
+    .sidebar.collapsed .sidebar-title,
+    .sidebar.collapsed .sidebar-subtitle,
+    .sidebar.collapsed .nav-text,
+    .sidebar.collapsed .user-info {
+        opacity: 0;
+        width: 0;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+
+    .sidebar.collapsed .logo-img {
+        width: 50px;
+        height: 50px;
+        margin: 0 auto;
+        background-position: center;
+    }
+
+    .sidebar.collapsed .nav-item {
+        justify-content: center;
+        padding-left: 1.7rem;
+    }
+
+    .sidebar.collapsed .nav-item .material-symbols-outlined {
+        margin: 0;
+    }
+
+    .sidebar.collapsed .user-avatar {
+        margin: 0 auto;
+    }
+
+    .sidebar.collapsed .logout-btn {
+        display: none;
+    }
+
+    .sidebar.collapsed .user-profile {
+        justify-content: center;
+    }
+
+    .sidebar.collapsed .notification-badge {
+        display: none;
+    }
+
+    .sidebar-header {
+        border-bottom: 1px solid #F7F7F7;
+    }
+
+    .logo-img {
+        width: 250px;
+        height: 50px;
+        background-size: contain;
+        background-position: left center;
+        background-repeat: no-repeat;
+        flex-shrink: 0;
+    }
+
+    .sidebar-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #222222;
+        margin: 0;
+        line-height: 1.2;
+    }
+
+    .sidebar-subtitle {
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: #5E2A97;
+        margin: 0;
+        line-height: 1.2;
+    }
+
+    /* Navigation Items */
+    .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        color: #222222;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        margin-bottom: 0.25rem;
+    }
+
+    .nav-item:hover {
+        background: #F7F7F7;
+        color: #222222;
+    }
+
+    .nav-item .material-symbols-outlined {
+        font-size: 24px;
+        color: #666666;
+        transition: all 0.2s ease;
+    }
+
+    .nav-item.nav-item-active {
+        background: rgba(94, 42, 151, 0.1);
+        color: #5E2A97;
+        /* border-left: 4px solid #5E2A97; */
+        padding-left: calc(1rem - 4px);
+    }
+
+    .nav-item.nav-item-active .material-symbols-outlined {
+        color: #5E2A97;
+        font-variation-settings: 'FILL' 1;
+    }
+
+    .nav-item .material-symbols-outlined.filled {
+        font-variation-settings: 'FILL' 1;
+    }
+
+    .nav-text {
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .notification-badge {
+        margin-left: auto;
+        font-size: 0.625rem;
+        font-weight: 700;
+        background: #EF4444;
+        color: white;
+        padding: 0.125rem 0.375rem;
+        border-radius: 9999px;
+        min-width: 1.125rem;
+        text-align: center;
+        line-height: 1.2;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 1.125rem;
+    }
+
+    /* Sidebar Footer */
+    .sidebar-footer {
+        border-top: 1px solid #EEEEEE;
+        margin-top: auto;
+    }
+
+    .user-profile {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+    .user-profile:hover {
+        background: #F7F7F7;
+    }
+
+    .user-avatar {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 50%;
+        overflow: hidden;
+        flex-shrink: 0;
+        border: 2px solid #EEEEEE;
+    }
+
+    .user-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .user-info {
+        flex: 1;
+    }
+
+    .user-name {
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: #222222;
+        margin: 0 0 0.125rem 0;
+        line-height: 1.2;
+    }
+
+    .user-role {
+        font-size: 0.75rem;
+        color: #666666;
+        margin: 0;
+        line-height: 1.2;
+    }
+
+    .logout-btn {
+        background: none;
+        border: none;
+        color: #666666;
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 0.375rem;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .logout-btn:hover {
+        background: rgba(94, 42, 151, 0.1);
+        color: #5E2A97;
+    }
+
+    .logout-btn .material-symbols-outlined {
+        font-size: 20px;
+    }
+
+    /* Mobile Overlay */
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 998;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .sidebar-overlay.active {
+        display: block;
+        opacity: 1;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .sidebar {
+            position: fixed;
+            left: -280px;
+            z-index: 999;
+            transition: left 0.3s ease;
+        }
+
+        .sidebar.mobile-open {
+            left: 0;
+        }
+
+        .sidebar.collapsed {
+            left: -80px;
+        }
+
+        .sidebar.collapsed.mobile-open {
+            left: 0;
+        }
+    }
+</style>
+
+<!-- Sidebar -->
+<aside class="sidebar d-md-flex flex-column" id="studentAppSidebar">
+    <div class="sidebar-header p-3 pb-1">
+        <div class="d-flex align-items-center">
+            <div class="logo-img"
+                style='background-image: url("../../assets/IFT_logo.png");'>
+            </div>
+            <!-- <div class="d-flex flex-column" style="margin-left: 10px;">
+                <h1 class="sidebar-title">IFT</h1>
+                <p class="sidebar-subtitle">India's Future Tycoon</p>
+            </div> -->
+        </div>
+    </div>
+    <nav class="flex-grow-1 px-3 d-flex flex-column gap-2 mt-3">
+        <!-- Dashboard -->
+        <a class="nav-item" href="dashboard.html">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span class="nav-text">Dashboard</span>
+        </a>
+
+        <!-- My Profile -->
+        <a class="nav-item" href="profile.html">
+            <span class="material-symbols-outlined">person</span>
+            <span class="nav-text">My Profile</span>
+        </a>
+
+        <!-- Idea Submission -->
+        <a class="nav-item" href="idea-submissions.html">
+            <span class="material-symbols-outlined">lightbulb</span>
+            <span class="nav-text">Idea Submission</span>
+        </a>
+
+        <!-- My Idea -->
+        <a class="nav-item" href="my-idea.html">
+            <span class="material-symbols-outlined">folder_open</span>
+            <span class="nav-text">My Idea</span>
+        </a>
+
+        <!-- Team -->
+        <a class="nav-item" href="team.html">
+            <span class="material-symbols-outlined">group</span>
+            <span class="nav-text">Team</span>
+        </a>
+
+        <!-- Idea Corner -->
+        <a class="nav-item" href="idea-corner.html">
+            <span class="material-symbols-outlined">forum</span>
+            <span class="nav-text">Idea Corner</span>
+        </a>
+
+        <!-- Hall of Fame -->
+        <a class="nav-item" href="../halloffame.html">
+            <span class="material-symbols-outlined">emoji_events</span>
+            <span class="nav-text">Hall of Fame</span>
+        </a>
+
+        <!-- Notifications -->
+        <a class="nav-item" href="notifications.html">
+            <span class="material-symbols-outlined">notifications</span>
+            <span class="nav-text">Notifications</span>
+            <span class="notification-badge">3</span>
+        </a>
+    </nav>
+    <div class="sidebar-footer p-3 mt-auto">
+        <div class="user-profile">
+            <div class="user-avatar">
+                <img alt="Student Profile Avatar"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuAY6iaiuM97ukhXnkazQO4ZEzVdkIlgOyUQ0xIW_ZYSRjhORA4PvjrpGUSehGXjXjaRFLQ227P1dyOoIB5EmUt1fSgTZgJ9qdSUGdyS3RfS3dKbzonPwrp9ENytz14BwcvT_ooy5rrq8RdJUUJAGSM40jDW0kzhk0BmETKlnnf4iA8CZtLcqtXs89sn0ZToW5seXzTbLU3esfQXCgMSOr0Oe-sq-g6DuIYwgAGqg2xOV4hjJGirhWM8L7hk34VKsuti0EQYb5IehuM" />
+            </div>
+            <div class="user-info flex-grow-1" id="userInfoDiv">
+                <p class="user-name">Rohan Sharma</p>
+                <p class="user-role">Student • Grade 11</p>
+            </div>
+            <button class="logout-btn" id="logoutBtn">
+                <span class="material-symbols-outlined">logout</span>
+            </button>
+        </div>
+    </div>
+</aside>
+
+<script>
+    // Sidebar JavaScript Functionality
+    (function() {
+        // Set active navigation item based on current page
+        function setActiveNavItem() {
+            const currentPage = window.location.pathname.split('/').pop() || 'dashboard.html';
+            const navItems = document.querySelectorAll('.nav-item');
+
+            navItems.forEach(item => {
+                const href = item.getAttribute('href');
+
+                // Remove active class from all items first
+                item.classList.remove('nav-item-active');
+
+                // Find the icon and update fill state
+                const icon = item.querySelector('.material-symbols-outlined');
+                if (icon) {
+                    icon.classList.remove('filled');
+                }
+
+                // Add active class to matching item
+                if (href === currentPage ||
+                    (currentPage === '' && href === 'dashboard.html') ||
+                    (currentPage === 'index.html' && href === 'dashboard.html')) {
+                    item.classList.add('nav-item-active');
+                    if (icon) {
+                        icon.classList.add('filled');
+                    }
+                }
+            });
+        }
+
+        // Profile redirect functionality
+        function handleProfileRedirect() {
+            const userInfoDiv = document.getElementById('userInfoDiv');
+            console.log('Profile redirect - userInfoDiv:', userInfoDiv);
+            if (userInfoDiv) {
+                userInfoDiv.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('User info clicked, redirecting to profile...');
+                    // Redirect to profile page
+                    window.location.href = 'profile.html';
+                });
+
+                // Add pointer cursor to indicate clickability
+                userInfoDiv.style.cursor = 'pointer';
+            }
+        }
+
+        // Logout functionality
+        function handleLogout() {
+            const logoutBtn = document.getElementById('logoutBtn');
+            console.log('Logout - logoutBtn:', logoutBtn);
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    console.log('Logout clicked');
+                    // Show confirmation dialog
+                    if (confirm('Are you sure you want to logout?')) {
+                        // Clear any stored user data
+                        sessionStorage.clear();
+                        localStorage.removeItem('userToken');
+
+                        console.log('Redirecting to sign-in...');
+                        // Redirect to sign-in page
+                        window.location.href = '../auth/sign-in.html';
+                    }
+                });
+            }
+        }
+
+        // Add hover effects to navigation items
+        function addNavHoverEffects() {
+            const navItems = document.querySelectorAll('.nav-item');
+
+            navItems.forEach(item => {
+                item.addEventListener('mouseenter', function() {
+                    if (!this.classList.contains('nav-item-active')) {
+                        const icon = this.querySelector('.material-symbols-outlined');
+                        if (icon && !icon.classList.contains('filled')) {
+                            icon.style.fontVariationSettings = "'FILL' 0.5";
+                        }
+                    }
+                });
+
+                item.addEventListener('mouseleave', function() {
+                    if (!this.classList.contains('nav-item-active')) {
+                        const icon = this.querySelector('.material-symbols-outlined');
+                        if (icon && !icon.classList.contains('filled')) {
+                            icon.style.fontVariationSettings = "'FILL' 0";
+                        }
+                    }
+                });
+            });
+        }
+
+        // Notification badge animation
+        function animateNotificationBadge() {
+            const badge = document.querySelector('.notification-badge');
+            if (badge) {
+                // Add pulse animation
+                setInterval(() => {
+                    badge.style.animation = 'none';
+                    setTimeout(() => {
+                        badge.style.animation = 'pulse 0.5s ease';
+                    }, 10);
+                }, 3000);
+            }
+        }
+
+        // Add click ripple effect to nav items
+        function addRippleEffect(e, element) {
+            const ripple = document.createElement('span');
+            const rect = element.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            ripple.style.position = 'absolute';
+            ripple.style.borderRadius = '50%';
+            ripple.style.backgroundColor = 'rgba(47, 13, 242, 0.3)';
+            ripple.style.transform = 'scale(0)';
+            ripple.style.animation = 'ripple 0.6s ease-out';
+            ripple.style.pointerEvents = 'none';
+
+            element.style.position = 'relative';
+            element.style.overflow = 'hidden';
+            element.appendChild(ripple);
+
+            setTimeout(() => ripple.remove(), 600);
+        }
+
+        function attachRippleEffects() {
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    addRippleEffect(e, this);
+                });
+            });
+        }
+
+        // Add CSS for pulse animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes pulse {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.1); }
+            }
+            @keyframes ripple {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Initialize all functionality
+        function initializeSidebar() {
+            console.log('Initializing sidebar...');
+            setActiveNavItem();
+            handleProfileRedirect();
+            handleLogout();
+            addNavHoverEffects();
+            animateNotificationBadge();
+            attachRippleEffects();
+            console.log('Sidebar initialization complete');
+        }
+
+        // Since this script is executed after sidebar HTML is inserted,
+        // we can initialize immediately
+        initializeSidebar();
+    })();
+</script>

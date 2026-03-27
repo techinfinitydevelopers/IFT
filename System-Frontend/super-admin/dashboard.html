@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Super Admin Dashboard: Analytics Command Center</title>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+
+    <!-- Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary: #5E2A97;
+            --secondary: #DEDE50;
+            --primary-light: #E8D4F0;
+            --background-light: #F7F7F7;
+            --surface-light: #FFFFFF;
+            --border-light: #EEEEEE;
+            --text-dark: #222222;
+            --text-muted: #666666;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            overflow: hidden;
+        }
+
+        .main-container {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow-y: auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        .content-wrapper {
+            flex: 1;
+            padding: 18px;
+            max-width: 100%;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Header Section */
+        .page-header {
+            margin-bottom: 32px;
+        }
+
+        .page-header h1 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+
+        .page-header p {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .phase-badge {
+            background: rgba(94, 42, 151, 0.1);
+            border: 1px solid rgba(94, 42, 151, 0.2);
+            padding: 6px 16px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .phase-badge-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            border-radius: 50%;
+            position: relative;
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+                transform: scale(1.2);
+            }
+        }
+
+        .phase-badge-text {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .date-select {
+            background: var(--surface-light);
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+        }
+
+        .date-select select {
+            border: none;
+            background: transparent;
+            font-weight: 500;
+            outline: none;
+        }
+
+        /* KPI Cards */
+        .kpi-card {
+            background: var(--surface-light);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            border: 1px solid var(--border-light);
+            height: 100%;
+        }
+
+        .kpi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .kpi-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .kpi-trend {
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .kpi-trend.positive {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .kpi-trend.neutral {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .kpi-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 12px;
+        }
+
+        .kpi-value-unit {
+            font-size: 1.125rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+
+        /* Section Card */
+        .section-card {
+            background: var(--surface-light);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            border: 1px solid var(--border-light);
+            margin-bottom: 24px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .section-link {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .section-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Table Styles */
+        .custom-table {
+            width: 100%;
+            font-size: 0.875rem;
+        }
+
+        .custom-table thead {
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .custom-table th {
+            padding: 12px 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            text-align: left;
+        }
+
+        .custom-table td {
+            padding: 16px 8px;
+            vertical-align: middle;
+            border-bottom: 1px solid #f8f9fa;
+        }
+
+        .custom-table tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .badge-custom {
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 6px;
+        }
+
+        .progress-custom {
+            height: 6px;
+            background: #f1f5f9;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .progress-bar-custom {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 999px;
+        }
+
+        /* Chart Container */
+        .chart-container {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            height: 128px;
+            padding: 0 16px;
+            margin-bottom: 16px;
+        }
+
+        .chart-bar {
+            flex: 1;
+            background: var(--primary);
+            border-radius: 4px 4px 0 0;
+            margin: 0 2px;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .chart-bar:hover {
+            opacity: 0.8;
+        }
+
+        .chart-labels {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 16px;
+            font-size: 0.625rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        /* Funnel Styles */
+        .funnel-container {
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .funnel-stage {
+            flex: 1;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            border: 1px solid rgba(94, 42, 151, 0.2);
+        }
+
+        .funnel-stage:first-child {
+            background: rgba(94, 42, 151, 0.05);
+            border-radius: 12px 0 0 12px;
+            border-left: 1px solid rgba(94, 42, 151, 0.2);
+        }
+
+        .funnel-stage:last-child {
+            background: var(--primary);
+            border-radius: 0 12px 12px 0;
+            border-right: 1px solid var(--primary);
+            box-shadow: 0 0 20px rgba(94, 42, 151, 0.3);
+        }
+
+        .funnel-stage:nth-child(2) {
+            background: rgba(94, 42, 151, 0.1);
+        }
+
+        .funnel-stage:nth-child(3) {
+            background: rgba(94, 42, 151, 0.2);
+        }
+
+        .funnel-stage:nth-child(4) {
+            background: rgba(94, 42, 151, 0.3);
+        }
+
+        .funnel-step {
+            font-size: 0.625rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+        }
+
+        .funnel-stage:last-child .funnel-step {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .funnel-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+
+        .funnel-stage:last-child .funnel-value {
+            color: white;
+        }
+
+        .funnel-label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .funnel-stage:last-child .funnel-label {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .funnel-arrow {
+            position: absolute;
+            right: -16px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+            width: 32px;
+            height: 32px;
+            background: var(--surface-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .funnel-arrow .material-symbols-outlined {
+            color: var(--primary);
+            font-size: 14px;
+        }
+
+        /* Stats Grid */
+        .stat-box {
+            padding: 16px;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .stat-note {
+            font-size: 0.625rem;
+            color: #16a34a;
+            font-weight: 500;
+            margin-top: 4px;
+        }
+
+        /* Intelligence Feed */
+        .intelligence-feed {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .feed-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 16px;
+            border-radius: 8px;
+            background: #f8fafc;
+            border-left: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .feed-item:hover {
+            background: #f1f5f9;
+            transform: translateX(4px);
+        }
+
+        .feed-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .feed-icon .material-symbols-outlined {
+            font-size: 18px;
+        }
+
+        .feed-icon-success {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .feed-item:has(.feed-icon-success) {
+            border-left-color: #16a34a;
+        }
+
+        .feed-icon-warning {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .feed-item:has(.feed-icon-warning) {
+            border-left-color: #d97706;
+        }
+
+        .feed-icon-info {
+            background: rgba(94, 42, 151, 0.1);
+            color: var(--primary);
+        }
+
+        .feed-item:has(.feed-icon-info) {
+            border-left-color: var(--primary);
+        }
+
+        .feed-content {
+            flex: 1;
+        }
+
+        .feed-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin: 0 0 4px 0;
+            line-height: 1.4;
+        }
+
+        .feed-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .content-wrapper {
+                padding: 16px;
+            }
+
+            .funnel-container {
+                flex-direction: column;
+            }
+
+            .funnel-stage {
+                width: 100%;
+            }
+
+            .funnel-arrow {
+                top: auto;
+                bottom: -16px;
+                right: 50%;
+                transform: translateX(50%) rotate(90deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-container">
+        <!-- Include Sidebar -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Include Header -->
+            <div id="header-container"></div>
+
+            <div class="content-wrapper">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div class="row align-items-center">
+                        <div class="col-12 col-md-6">
+                            <h1>Analytics Command Center</h1>
+                            <p class="mb-0">Real-time performance metrics for IFT Season 5</p>
+                        </div>
+                        <div class="col-12 col-md-6 d-flex justify-content-md-end align-items-center gap-3 mt-3 mt-md-0">
+                            <div class="phase-badge">
+                                <span class="phase-badge-dot"></span>
+                                <span class="phase-badge-text">Phase 1: Initial Screening</span>
+                            </div>
+                            <div class="date-select">
+                                <span class="material-symbols-outlined" style="font-size: 14px; color: var(--text-muted);">calendar_today</span>
+                                <select>
+                                    <option>Oct 01 - Oct 31, 2023</option>
+                                    <option>Last 7 Days</option>
+                                    <option>Last 30 Days</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KPI Grid -->
+                <div class="row g-3 mb-4">
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <span class="kpi-label">Total Submissions</span>
+                                <span class="kpi-trend positive">
+                                    <span class="material-symbols-outlined" style="font-size: 12px;">trending_up</span>
+                                    12%
+                                </span>
+                            </div>
+                            <div class="kpi-value">12,482</div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <span class="kpi-label">Active Juries</span>
+                                <span class="kpi-label">85/100 Online</span>
+                            </div>
+                            <div class="kpi-value">342</div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <span class="kpi-label">Score Average</span>
+                                <span class="kpi-label" style="color: var(--primary);">Goal: 7.5</span>
+                            </div>
+                            <div class="kpi-value">6.8<span class="kpi-value-unit">/10</span></div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <span class="kpi-label">Time-to-Review</span>
+                                <span class="kpi-trend neutral">-0.5m</span>
+                            </div>
+                            <div class="kpi-value">4.2<span class="kpi-value-unit">m</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Jury Evaluation Progress Section -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <h3 class="section-title">Jury Evaluation Progress</h3>
+                        <a class="section-link" href="#">
+                            View Detailed Log
+                            <span class="material-symbols-outlined" style="font-size: 14px;">arrow_forward</span>
+                        </a>
+                    </div>
+
+                    <div class="row gx-4 gy-4">
+                        <!-- Jury Performance -->
+                        <div class="col-12 col-lg-3">
+                            <div class="p-3">
+                                <h4 class="section-title mb-4" style="font-size: 0.875rem;">Jury Performance</h4>
+
+                                <div class="mb-4">
+                                    <div class="d-flex justify-content-between mb-2" style="font-size: 0.75rem;">
+                                        <span class="text-muted">Evaluation Rate</span>
+                                        <span class="fw-bold">78%</span>
+                                    </div>
+                                    <div class="progress-custom">
+                                        <div class="progress-bar-custom" style="width: 78%;"></div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <div class="d-flex justify-content-between mb-2" style="font-size: 0.75rem;">
+                                        <span class="text-muted">Inter-rater Reliability</span>
+                                        <span class="fw-bold">0.82</span>
+                                    </div>
+                                    <div class="progress-custom">
+                                        <div class="progress-bar-custom" style="width: 82%;"></div>
+                                    </div>
+                                </div>
+
+                                <div class="mt-4">
+                                    <p class="mb-3" style="font-size: 0.625rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Top Performers</p>
+                                    <div class="d-flex align-items-center justify-content-between mb-3">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; border-radius: 4px; background: #f1f5f9; font-size: 0.625rem; font-weight: 700;">DR</div>
+                                            <span style="font-size: 0.75rem; font-weight: 500;">David Rose</span>
+                                        </div>
+                                        <span class="badge-custom" style="background: #dcfce7; color: #16a34a;">98%</span>
+                                    </div>
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; border-radius: 4px; background: #f1f5f9; font-size: 0.625rem; font-weight: 700;">SJ</div>
+                                            <span style="font-size: 0.75rem; font-weight: 500;">Sarah Jenkins</span>
+                                        </div>
+                                        <span class="badge-custom" style="background: #dcfce7; color: #16a34a;">94%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Scoring Weightage Matrix -->
+                        <div class="col-12 col-lg-6">
+                            <div class="p-3">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h4 class="section-title mb-0" style="font-size: 0.875rem;">Scoring Weightage Matrix</h4>
+                                    <button class="btn btn-sm" style="font-size: 0.75rem; background: #f8fafc; border: 1px solid var(--border-light); padding: 4px 12px;">Edit Configuration</button>
+                                </div>
+
+                                <table class="custom-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Criteria</th>
+                                            <th>Weight</th>
+                                            <th>Data Type</th>
+                                            <th style="text-align: right;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="fw-semibold">Innovation</td>
+                                            <td>
+                                                <select class="form-select form-select-sm" style="width: auto; font-size: 0.75rem;">
+                                                    <option>30%</option>
+                                                    <option>35%</option>
+                                                    <option>40%</option>
+                                                </select>
+                                            </td>
+                                            <td><span class="badge-custom" style="background: #f1f5f9; color: var(--text-dark);">SCALE_1_10</span></td>
+                                            <td style="text-align: right;">
+                                                <span class="material-symbols-outlined" style="font-size: 14px; color: var(--text-muted); cursor: pointer;">more_vert</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-semibold">Feasibility</td>
+                                            <td>
+                                                <select class="form-select form-select-sm" style="width: auto; font-size: 0.75rem;">
+                                                    <option>25%</option>
+                                                    <option>20%</option>
+                                                    <option>30%</option>
+                                                </select>
+                                            </td>
+                                            <td><span class="badge-custom" style="background: #f1f5f9; color: var(--text-dark);">SCALE_1_10</span></td>
+                                            <td style="text-align: right;">
+                                                <span class="material-symbols-outlined" style="font-size: 14px; color: var(--text-muted); cursor: pointer;">more_vert</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-semibold">Market Potential</td>
+                                            <td>
+                                                <select class="form-select form-select-sm" style="width: auto; font-size: 0.75rem;">
+                                                    <option>25%</option>
+                                                    <option>30%</option>
+                                                </select>
+                                            </td>
+                                            <td><span class="badge-custom" style="background: #f1f5f9; color: var(--text-dark);">SCALE_1_10</span></td>
+                                            <td style="text-align: right;">
+                                                <span class="material-symbols-outlined" style="font-size: 14px; color: var(--text-muted); cursor: pointer;">more_vert</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-semibold">Presentation</td>
+                                            <td>
+                                                <select class="form-select form-select-sm" style="width: auto; font-size: 0.75rem;">
+                                                    <option>20%</option>
+                                                    <option>15%</option>
+                                                </select>
+                                            </td>
+                                            <td><span class="badge-custom" style="background: #f1f5f9; color: var(--text-dark);">SCALE_1_10</span></td>
+                                            <td style="text-align: right;">
+                                                <span class="material-symbols-outlined" style="font-size: 14px; color: var(--text-muted); cursor: pointer;">more_vert</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Score Distribution -->
+                        <div class="col-12 col-lg-3">
+                            <div class="p-3">
+                                <h4 class="section-title mb-4" style="font-size: 0.875rem;">Score Distribution</h4>
+
+                                <div class="chart-container">
+                                    <div class="chart-bar" style="height: 20%; background: #f1f5f9;"></div>
+                                    <div class="chart-bar" style="height: 35%; background: #f1f5f9;"></div>
+                                    <div class="chart-bar" style="height: 55%; background: rgba(94, 42, 151, 0.4);"></div>
+                                    <div class="chart-bar" style="height: 85%; background: rgba(94, 42, 151, 0.6);"></div>
+                                    <div class="chart-bar" style="height: 65%; background: var(--primary);"></div>
+                                    <div class="chart-bar" style="height: 40%; background: rgba(94, 42, 151, 0.6);"></div>
+                                    <div class="chart-bar" style="height: 15%; background: #f1f5f9;"></div>
+                                </div>
+
+                                <div class="chart-labels">
+                                    <span>1</span>
+                                    <span>2</span>
+                                    <span>3</span>
+                                    <span>4</span>
+                                    <span>5</span>
+                                    <span>6</span>
+                                    <span>7</span>
+                                </div>
+
+                                <div class="mt-3 p-3" style="background: rgba(94, 42, 151, 0.05); border-radius: 8px;">
+                                    <p class="mb-1" style="font-size: 0.625rem; color: var(--text-muted); font-weight: 500;">Distribution insight:</p>
+                                    <p class="mb-0" style="font-size: 0.75rem; font-weight: 600;">Skewed towards higher scores (Avg: 6.8). Jury consensus is high.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Intelligence Feed -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <h3 class="section-title d-flex align-items-center gap-2">
+                            <span class="material-symbols-outlined" style="color: var(--primary);">trending_up</span>
+                            Recent Intelligence Feed
+                        </h3>
+                    </div>
+
+                    <div class="intelligence-feed">
+                        <!-- Feed Item 1 -->
+                        <div class="feed-item">
+                            <div class="feed-icon feed-icon-success">
+                                <span class="material-symbols-outlined">check_circle</span>
+                            </div>
+                            <div class="feed-content">
+                                <p class="feed-title">FinTech category evaluation completed 100%.</p>
+                                <p class="feed-meta">5 hours ago • Automated Notification</p>
+                            </div>
+                        </div>
+
+                        <!-- Feed Item 2 -->
+                        <div class="feed-item">
+                            <div class="feed-icon feed-icon-warning">
+                                <span class="material-symbols-outlined">warning</span>
+                            </div>
+                            <div class="feed-content">
+                                <p class="feed-title">Anomaly detected in "Rural Innovation" scoring. Juror #412 is 3σ from mean.</p>
+                                <p class="feed-meta">5 hours ago • System Audit</p>
+                            </div>
+                        </div>
+
+                        <!-- Feed Item 3 -->
+                        <div class="feed-item">
+                            <div class="feed-icon feed-icon-info">
+                                <span class="material-symbols-outlined">info</span>
+                            </div>
+                            <div class="feed-content">
+                                <p class="feed-title">Shortlisting phase reached critical mass (90%).</p>
+                                <p class="feed-meta">1 day ago • Strategy Milestone</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Load External Components -->
+    <script>
+        // Load sidebar
+        fetch('sidebar.html')
+            .then(response => response.text())
+            .then(data => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = data;
+
+                // Extract and append all elements EXCEPT script
+                const elements = tempDiv.childNodes;
+                elements.forEach(node => {
+                    if (node.nodeType === 1 && node.tagName !== 'SCRIPT') {
+                        document.getElementById('sidebar-container').appendChild(node.cloneNode(true));
+                    } else if (node.nodeType === 3) {
+                        document.getElementById('sidebar-container').appendChild(node.cloneNode(true));
+                    }
+                });
+
+                // Now execute the script AFTER HTML is in DOM
+                const script = tempDiv.querySelector('script');
+                if (script) {
+                    const newScript = document.createElement('script');
+                    newScript.textContent = script.textContent;
+                    document.body.appendChild(newScript);
+                }
+
+                console.log('Sidebar loaded and script executed');
+            })
+            .catch(error => console.error('Error loading sidebar:', error));
+
+        // Load header
+        fetch('header.html')
+            .then(response => response.text())
+            .then(data => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = data;
+
+                // Extract and append all elements
+                const elements = tempDiv.childNodes;
+                elements.forEach(node => {
+                    if (node.nodeType === 1 || node.nodeType === 3) {
+                        document.getElementById('header-container').appendChild(node.cloneNode(true));
+                    }
+                });
+
+                // Find and execute the script
+                const script = tempDiv.querySelector('script');
+                if (script) {
+                    const newScript = document.createElement('script');
+                    newScript.textContent = script.textContent;
+                    document.body.appendChild(newScript);
+                }
+            })
+            .catch(error => console.error('Error loading header:', error));
+    </script>
+</body>
+
+</html>
