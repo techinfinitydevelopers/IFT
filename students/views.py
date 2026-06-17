@@ -96,6 +96,8 @@ def dashboard(request):
             user=request.user,
             name=request.user.get_full_name() or request.user.username,
             email=request.user.email,
+            school_name='Not Assigned',
+            grade='10',
         )
 
     from students.models import TeamMembership
