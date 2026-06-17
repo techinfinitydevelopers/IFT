@@ -1,4 +1,4 @@
-# Railway deployment
+# Railway deployment - v3
 FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -13,10 +13,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+# Cache bust - force fresh copy
+ADD . /app/
 
 RUN python manage.py collectstatic --noinput 2>/dev/null || true
 
 EXPOSE 8000
 
-CMD gunicorn ift_platform.wsgi --bind 0.0.0.0:${PORT:-8000}
+CMD ["gunicorn", "ift_platform.wsgi", "--bind", "0.0.0.0:8000"]
