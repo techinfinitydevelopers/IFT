@@ -91,8 +91,12 @@ def dashboard(request):
     try:
         student = request.user.student_profile
     except Student.DoesNotExist:
-        messages.error(request, 'Please complete your profile first.')
-        return redirect('accounts:sign_in')
+        # Auto-create student profile if missing
+        student = Student.objects.create(
+            user=request.user,
+            name=request.user.get_full_name() or request.user.username,
+            email=request.user.email,
+        )
 
     from students.models import TeamMembership
 

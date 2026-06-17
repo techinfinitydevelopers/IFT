@@ -35,7 +35,10 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 CSRF_TRUSTED_ORIGINS = [origin for origin in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',') if origin]
 if not DEBUG:
     ALLOWED_HOSTS += ['.railway.app']
-    CSRF_TRUSTED_ORIGINS += ['https://*.railway.app']
+    CSRF_TRUSTED_ORIGINS += ['https://*.railway.app', 'https://ift-production.up.railway.app']
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 
 # Application definition
