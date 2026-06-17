@@ -1,0 +1,67 @@
+{% extends "accounts/auth_base.html" %}
+
+{% block title %}Sign In - IFT{% endblock %}
+
+{% block content %}
+<h1>Sign In to your Account</h1>
+<p class="subtitle">Welcome back! please enter your detail</p>
+
+<form method="post" action="{% url 'accounts:sign_in' %}">
+    {% csrf_token %}
+
+    <!-- Email -->
+    <div class="form-group">
+        <div class="icon">
+            <iconify-icon icon="mage:email"></iconify-icon>
+        </div>
+        <input type="email" class="form-control" id="email" name="email" placeholder="Email" required value="{{ request.POST.email|default:'' }}">
+    </div>
+
+    <!-- Password -->
+    <div class="form-group">
+        <div class="password-wrapper">
+            <div class="icon">
+                <iconify-icon icon="solar:lock-password-outline"></iconify-icon>
+            </div>
+            <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+            <i class="ri-eye-line toggle-password" data-target="password"></i>
+        </div>
+    </div>
+
+    <!-- Remember & Forgot -->
+    <div class="remember-forgot">
+        <div class="form-check" style="margin-bottom: 0;">
+            <input class="form-check-input" type="checkbox" id="remember" name="remember_me">
+            <label class="form-check-label" for="remember">Remember me</label>
+        </div>
+        <a href="{% url 'accounts:password_reset' %}">Forgot Password?</a>
+    </div>
+
+    <!-- Sign In Button -->
+    <button type="submit" class="btn-primary">Sign In</button>
+</form>
+
+<!-- Divider -->
+<div class="divider">
+    <span>Or sign in with</span>
+</div>
+
+<!-- Social Login -->
+<div class="social-buttons">
+    <button type="button" class="btn-social">
+        <iconify-icon icon="ic:baseline-facebook" style="font-size: 20px; color: #1877F2;"></iconify-icon>
+        Facebook
+    </button>
+    <button type="button" class="btn-social">
+        <iconify-icon icon="flat-color-icons:google" style="font-size: 20px;"></iconify-icon>
+        Google
+    </button>
+</div>
+
+<!-- Sign Up Link -->
+<div class="signup-link">
+    Don't have an account? <a href="{% url 'accounts:sign_up' %}">Sign Up as Student</a>
+    <br><span style="font-size:0.85rem;color:#999;">or</span><br>
+    <a href="{% url 'accounts:school_sign_up' %}">Register as School</a>
+</div>
+{% endblock %}

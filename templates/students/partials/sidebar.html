@@ -1,0 +1,60 @@
+{% load static %}
+<!-- Sidebar Overlay (mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Sidebar -->
+<aside class="sidebar d-md-flex flex-column" id="studentAppSidebar">
+    <div class="sidebar-header p-3 pb-1">
+        <div class="d-flex align-items-center">
+            <div class="logo-img" style='background-image: url("{% static "images/IFT_logo.png" %}");'></div>
+        </div>
+    </div>
+    <nav class="flex-grow-1 px-3 d-flex flex-column gap-2 mt-3" style="overflow-y: auto;">
+        <a class="nav-item {% if active_page == 'dashboard' %}nav-item-active{% endif %}" href="{% url 'students:dashboard' %}">
+            <span class="material-symbols-outlined" {% if active_page == 'dashboard' %}style="font-variation-settings: 'FILL' 1;"{% endif %}>dashboard</span>
+            <span class="nav-text">Dashboard</span>
+        </a>
+        <a class="nav-item {% if active_page == 'profile' %}nav-item-active{% endif %}" href="{% url 'students:student_profile' %}">
+            <span class="material-symbols-outlined" {% if active_page == 'profile' %}style="font-variation-settings: 'FILL' 1;"{% endif %}>person</span>
+            <span class="nav-text">My Profile</span>
+        </a>
+        <a class="nav-item {% if active_page == 'submit' %}nav-item-active{% endif %}" href="{% url 'students:submit_idea' %}">
+            <span class="material-symbols-outlined" {% if active_page == 'submit' %}style="font-variation-settings: 'FILL' 1;"{% endif %}>lightbulb</span>
+            <span class="nav-text">Idea Submission</span>
+        </a>
+        <a class="nav-item {% if active_page == 'resources' %}nav-item-active{% endif %}" href="#">
+            <span class="material-symbols-outlined">menu_book</span>
+            <span class="nav-text">Learning Resources</span>
+        </a>
+        <a class="nav-item {% if active_page == 'my_idea' %}nav-item-active{% endif %}" href="{% url 'students:my_idea' %}">
+            <span class="material-symbols-outlined" {% if active_page == 'my_idea' %}style="font-variation-settings: 'FILL' 1;"{% endif %}>description</span>
+            <span class="nav-text">My Idea</span>
+        </a>
+        <a class="nav-item {% if active_page == 'team' %}nav-item-active{% endif %}" href="{% url 'students:team_page' %}">
+            <span class="material-symbols-outlined">groups</span>
+            <span class="nav-text">Team</span>
+        </a>
+        <a class="nav-item {% if active_page == 'idea_corner' %}nav-item-active{% endif %}" href="{% url 'students:idea_corner' %}">
+            <span class="material-symbols-outlined" {% if active_page == 'idea_corner' %}style="font-variation-settings: 'FILL' 1;"{% endif %}>forum</span>
+            <span class="nav-text">Idea Corner</span>
+        </a>
+        <a class="nav-item {% if active_page == 'halloffame' %}nav-item-active{% endif %}" href="#">
+            <span class="material-symbols-outlined">emoji_events</span>
+            <span class="nav-text">Hall of Fame</span>
+        </a>
+    </nav>
+    <div class="sidebar-footer p-3 mt-auto">
+        <div class="user-profile">
+            <div class="user-avatar">
+                {{ request.user.first_name|first|upper }}
+            </div>
+            <div class="user-info flex-grow-1">
+                <p class="user-name">{{ request.user.get_full_name|default:request.user.username }}</p>
+                <p class="user-role">Student</p>
+            </div>
+            <a href="{% url 'accounts:sign_out' %}" class="logout-btn" title="Logout">
+                <span class="material-symbols-outlined">logout</span>
+            </a>
+        </div>
+    </div>
+</aside>

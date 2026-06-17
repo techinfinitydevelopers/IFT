@@ -1,0 +1,907 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>IFT Student Dashboard</title>
+    <link rel="icon" type="image/png" href="{% static 'images/IFT_logo.png' %}">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+    <!-- Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <style>
+        :root {
+            --primary: #5E2A97;
+            --secondary: #DEDE50;
+            --primary-light: #E8D4F0;
+            --background-light: #F7F7F7;
+            --surface-light: #FFFFFF;
+            --border-light: #EEEEEE;
+            --text-dark: #222222;
+            --text-muted: #666666;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            overflow: hidden;
+        }
+
+        .main-container { display: flex; height: 100vh; width: 100%; }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: 280px;
+            background: #FFFFFF;
+            border-right: 1px solid #EEEEEE;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: sticky;
+            top: 0;
+            transition: all 0.3s ease;
+            z-index: 20;
+        }
+
+        .sidebar.collapsed { width: 80px; }
+        .sidebar.collapsed .sidebar-title,
+        .sidebar.collapsed .sidebar-subtitle,
+        .sidebar.collapsed .nav-text,
+        .sidebar.collapsed .user-info { opacity: 0; width: 0; overflow: hidden; white-space: nowrap; }
+        .sidebar.collapsed .logo-img { width: 50px; height: 50px; margin: 0 auto; background-position: center; }
+        .sidebar.collapsed .nav-item { justify-content: center; padding-left: 1.7rem; }
+        .sidebar.collapsed .nav-item .material-symbols-outlined { margin: 0; }
+        .sidebar.collapsed .user-avatar { margin: 0 auto; }
+        .sidebar.collapsed .logout-btn { display: none; }
+        .sidebar.collapsed .user-profile { justify-content: center; }
+        .sidebar.collapsed .notification-badge { display: none; }
+
+        .sidebar-header { border-bottom: 1px solid #F7F7F7; }
+
+        .logo-img {
+            width: 250px; height: 50px;
+            background-size: contain; background-position: left center; background-repeat: no-repeat;
+            flex-shrink: 0;
+        }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.75rem 1rem; border-radius: 0.5rem;
+            text-decoration: none; color: #222222;
+            transition: all 0.2s ease; cursor: pointer;
+            margin-bottom: 0.25rem; position: relative;
+        }
+        .nav-item:hover { background: #F7F7F7; color: #222222; }
+        .nav-item .material-symbols-outlined { font-size: 24px; color: #666666; transition: all 0.2s ease; }
+        .nav-item.nav-item-active { background: rgba(94, 42, 151, 0.1); color: #5E2A97; }
+        .nav-item.nav-item-active .material-symbols-outlined { color: #5E2A97; font-variation-settings: 'FILL' 1; }
+        .nav-text { font-size: 0.875rem; font-weight: 500; }
+
+        .notification-badge {
+            position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%);
+            font-size: 0.625rem; font-weight: 700; background: #EF4444; color: white;
+            padding: 0.125rem 0.375rem; border-radius: 9999px; min-width: 1.125rem;
+            text-align: center; line-height: 1.2; display: inline-flex;
+            align-items: center; justify-content: center; height: 1.125rem;
+        }
+
+        .sidebar-footer { border-top: 1px solid #EEEEEE; margin-top: auto; }
+        .user-profile {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.75rem; border-radius: 0.5rem; transition: all 0.2s ease; cursor: pointer;
+        }
+        .user-profile:hover { background: #F7F7F7; }
+        .user-avatar {
+            width: 2.5rem; height: 2.5rem; border-radius: 50%;
+            overflow: hidden; flex-shrink: 0; border: 2px solid #EEEEEE;
+            background: var(--primary); display: flex; align-items: center;
+            justify-content: center; color: white; font-weight: 700; font-size: 1rem;
+        }
+        .user-info { flex: 1; }
+        .user-name { font-size: 0.875rem; font-weight: 700; color: #222222; margin: 0 0 0.125rem 0; line-height: 1.2; }
+        .user-role { font-size: 0.75rem; color: #666666; margin: 0; line-height: 1.2; }
+        .logout-btn {
+            background: none; border: none; color: #666666; cursor: pointer;
+            padding: 0.5rem; border-radius: 0.375rem; transition: all 0.2s ease;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .logout-btn:hover { background: rgba(94, 42, 151, 0.1); color: #5E2A97; }
+        .logout-btn .material-symbols-outlined { font-size: 20px; }
+
+        /* Mobile sidebar */
+        .sidebar-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 998; opacity: 0; transition: opacity 0.3s ease;
+        }
+        .sidebar-overlay.active { display: block; opacity: 1; }
+
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; left: -280px; z-index: 999; transition: left 0.3s ease; }
+            .sidebar.mobile-open { left: 0; }
+            .sidebar.collapsed { left: -80px; }
+            .sidebar.collapsed.mobile-open { left: 0; }
+        }
+
+        /* ===== HEADER ===== */
+        .top-header {
+            height: 64px; background: #FFFFFF; border-bottom: 1px solid #EEEEEE;
+            display: flex; align-items: center; padding: 12px 2rem;
+            position: sticky; top: 0; z-index: 100;
+        }
+        .header-icon-btn {
+            width: 2.5rem; height: 2.5rem; border-radius: 0.5rem; border: none;
+            background: #F7F7F7; color: #666666; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;
+        }
+        .header-icon-btn:hover { background: #EEEEEE; color: #5E2A97; }
+        .header-icon-btn .material-symbols-outlined { font-size: 22px; }
+        .header-avatar {
+            width: 2.5rem; height: 2.5rem; border-radius: 50%;
+            background: var(--primary); display: flex; align-items: center;
+            justify-content: center; color: white; font-weight: 700; font-size: 0.875rem;
+            border: 2px solid #5E2A97; cursor: pointer; transition: all 0.2s ease;
+        }
+        .header-avatar:hover { transform: scale(1.05); box-shadow: 0 0 0 4px rgba(94,42,151,0.1); }
+
+        /* Header Dropdowns */
+        .header-dropdown {
+            display: none; position: absolute; top: calc(100% + 12px); right: 0;
+            background: #fff; border-radius: 16px; padding: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12); border: 1px solid #f0f0f0;
+            min-width: 260px; z-index: 200;
+        }
+        .header-dropdown.show { display: block; }
+        .header-dropdown.notif-dropdown { min-width: 320px; }
+        .dropdown-link {
+            display: flex; align-items: center; gap: 12px; padding: 10px 4px;
+            text-decoration: none; color: var(--text-dark); font-size: 0.9rem; font-weight: 500;
+            border-radius: 8px; transition: background 0.15s;
+        }
+        .dropdown-link:hover { background: #f8f8f8; }
+        .notif-item {
+            display: flex; align-items: flex-start; gap: 12px; padding: 10px 4px;
+            border-radius: 8px; transition: background 0.15s;
+        }
+        .notif-item:hover { background: #f8f8f8; }
+        .notif-item.priority { background: rgba(94,42,151,0.04); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-content { flex: 1; display: flex; flex-direction: column; height: 100%; overflow-y: auto; position: relative; z-index: 10; }
+        .content-wrapper { flex: 1; padding: 32px 40px 40px; max-width: 1280px; margin: 0 auto; width: 100%; }
+
+        /* Welcome Banner */
+        .welcome-banner { margin-bottom: 32px; }
+        .welcome-banner h2 { font-size: 2.25rem; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; letter-spacing: -0.025em; }
+        .welcome-banner p { color: var(--text-muted); font-size: 1rem; }
+        .phase-badge { text-align: right; }
+        .phase-label { font-size: 0.875rem; font-weight: 500; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; }
+        .phase-value { font-size: 1.125rem; font-weight: 700; color: var(--primary); }
+
+        /* Card Styles */
+        .card-custom {
+            background-color: var(--surface-light); border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04); padding: 24px;
+            height: 100%; display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .icon-circle {
+            width: 40px; height: 40px; border-radius: 50%;
+            background-color: rgba(94,42,151,0.1); display: flex;
+            align-items: center; justify-content: center; color: var(--primary);
+        }
+        .card-title { font-size: 1.125rem; font-weight: 700; color: var(--text-dark); margin-bottom: 4px; }
+        .card-subtitle { font-size: 0.875rem; color: var(--text-muted); }
+
+        /* Status badges */
+        .badge-draft { background-color: #fff7ed; color: #c2410c; font-size: 0.75rem; font-weight: 700; padding: 4px 8px; border-radius: 6px; border: 1px solid #fed7aa; white-space: nowrap; }
+        .badge-submitted { background-color: #eff6ff; color: #1d4ed8; font-size: 0.75rem; font-weight: 700; padding: 4px 8px; border-radius: 6px; border: 1px solid #bfdbfe; white-space: nowrap; }
+        .badge-evaluated { background-color: #f0fdf4; color: #15803d; font-size: 0.75rem; font-weight: 700; padding: 4px 8px; border-radius: 6px; border: 1px solid #bbf7d0; white-space: nowrap; }
+
+        /* Progress */
+        .progress-section { margin-top: 24px; }
+        .progress-label { font-size: 0.875rem; font-weight: 500; color: #475569; margin-bottom: 8px; }
+        .progress-percentage { font-weight: 700; color: var(--primary); }
+        .progress-bar-custom { height: 10px; background-color: #f1f5f9; border-radius: 999px; overflow: hidden; margin-bottom: 16px; }
+        .progress-fill { height: 100%; background-color: var(--primary); border-radius: 999px; width: 0%; box-shadow: 0 0 10px rgba(94,42,151,0.4); transition: width 1.5s cubic-bezier(0.4,0,0.2,1); }
+
+        .btn-primary-custom {
+            width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;
+            background-color: var(--primary); color: white; font-weight: 500; font-size: 0.875rem;
+            padding: 12px 16px; border-radius: 8px; border: none; cursor: pointer;
+            transition: all 0.2s; box-shadow: 0 4px 6px rgba(94,42,151,0.3); text-decoration: none;
+        }
+        .btn-primary-custom:hover { background-color: #7B3FB5; color: white; }
+
+        /* Team Card */
+        .team-card {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            border-radius: 16px; height: 100%; min-height: 260px;
+            position: relative; overflow: hidden; color: white;
+        }
+        .team-card-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(180deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 50%, transparent 100%);
+        }
+        .team-card::before {
+            content: ''; position: absolute; top: -40px; right: -40px;
+            width: 180px; height: 180px; border-radius: 50%;
+            background: rgba(94,42,151,0.2);
+        }
+        .team-card::after {
+            content: ''; position: absolute; bottom: -30px; left: -30px;
+            width: 120px; height: 120px; border-radius: 50%;
+            background: rgba(30,41,59,0.8);
+        }
+        .team-card-content {
+            position: relative; z-index: 1; padding: 28px;
+            height: 100%; display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .team-label { font-size: 0.7rem; font-weight: 700; letter-spacing: 2px; color: #93c5fd; text-transform: uppercase; margin-bottom: 4px; }
+        .team-name { font-size: 1.5rem; font-weight: 800; margin-bottom: 12px; }
+        .avatar-group { display: flex; margin-bottom: 8px; }
+        .team-avatar {
+            width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; font-size: 0.7rem; font-weight: 700; color: #fff;
+            margin-left: -8px; border: 2px solid #0f172a;
+        }
+        .team-avatar:first-child { margin-left: 0; }
+        .team-avatar-count {
+            width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; font-size: 0.65rem; font-weight: 700; color: #475569;
+            background: #fff; margin-left: -8px; border: 2px solid #0f172a;
+        }
+        .join-code-box {
+            background: rgba(255,255,255,0.1); backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.15); border-radius: 12px;
+            padding: 12px 16px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .join-code-value { font-size: 1.25rem; font-weight: 800; font-family: monospace; margin: 0; letter-spacing: 1px; }
+        .btn-copy {
+            background: #fff; color: var(--primary); border: none; padding: 6px 16px;
+            border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer;
+            display: flex; align-items: center; gap: 4px; transition: all 0.2s;
+        }
+        .btn-copy:hover { background: #f0f0f0; }
+        .awaiting-icon { font-size: 48px; color: #475569; }
+
+        /* Timeline */
+        .timeline-card { background-color: var(--surface-light); border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); padding: 24px; }
+        .timeline-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+        .timeline-title { font-size: 1.125rem; font-weight: 700; color: var(--text-dark); }
+        .timeline-container { position: relative; padding-left: 8px; }
+        .timeline-line { position: absolute; left: 27px; top: 41px; bottom: 0; width: 2px; background-color: #e2e8f0; height: 64%; }
+        .timeline-item { position: relative; display: flex; gap: 24px; padding-bottom: 32px; }
+        .timeline-item:last-child { padding-bottom: 0; }
+        .timeline-item-past { opacity: 0.6; }
+        .timeline-icon {
+            margin-top: 4px; position: relative; z-index: 10;
+            display: flex; align-items: center; justify-content: center;
+            width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+        }
+        .timeline-icon-past { background-color: #f1f5f9; border: 2px solid #cbd5e1; }
+        .timeline-icon-current { background-color: var(--primary); color: white; box-shadow: 0 4px 12px rgba(94,42,151,0.3); border: 4px solid rgba(94,42,151,0.1); }
+        .timeline-icon-future { background-color: white; border: 2px solid #e2e8f0; }
+        .timeline-content { flex: 1; padding: 12px; border-radius: 8px; transition: all 0.2s; }
+        .timeline-content:hover { background-color: #f8fafc; }
+        .timeline-content-current { background-color: rgba(94,42,151,0.05); border: 1px solid rgba(94,42,151,0.1); padding: 16px; border-radius: 12px; }
+        .timeline-event-title { font-weight: 700; color: var(--text-dark); margin-bottom: 4px; }
+        .timeline-event-title-current { color: var(--primary); }
+        .timeline-desc { font-size: 0.875rem; color: var(--text-muted); }
+        .timeline-date { font-size: 0.75rem; font-weight: 700; background-color: #f1f5f9; color: #64748b; padding: 4px 12px; border-radius: 999px; white-space: nowrap; }
+        .timeline-date-current { background-color: white; color: var(--primary); border: 1px solid rgba(94,42,151,0.2); }
+        .deadline-badge { font-size: 10px; font-weight: 700; color: #f97316; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 4px; }
+
+        /* Submissions list card */
+        .submissions-card {
+            background-color: var(--surface-light); border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04); display: flex;
+            flex-direction: column; height: 100%;
+        }
+        .submissions-header { padding: 20px; border-bottom: 1px solid #f1f5f9; }
+        .submissions-body { flex: 1; padding: 8px; overflow-y: auto; }
+        .submission-item {
+            display: flex; gap: 12px; padding: 12px; border-radius: 8px;
+            text-decoration: none; transition: all 0.2s; align-items: center;
+        }
+        .submission-item:hover { background-color: #f8fafc; }
+        .submission-icon {
+            width: 36px; height: 36px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+            background-color: rgba(94,42,151,0.1); color: var(--primary);
+        }
+        .submission-title { font-size: 0.875rem; font-weight: 600; color: #1e293b; margin: 0; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
+        .submission-date { font-size: 0.75rem; color: #94a3b8; margin: 0; }
+
+        /* Toast */
+        @keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(400px); opacity: 0; } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        @keyframes ripple { to { transform: scale(4); opacity: 0; } }
+
+        @media (max-width: 768px) {
+            .content-wrapper { padding: 24px; }
+            .welcome-banner h2 { font-size: 1.875rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        {% with active_page='dashboard' %}
+        {% include 'students/partials/sidebar.html' %}
+        {% endwith %}
+
+        <!-- Main Content -->
+        <main class="main-content">
+            {% include 'students/partials/header.html' %}
+
+            <div class="content-wrapper">
+                {% if messages %}
+                <div class="mb-3">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" style="border-radius: 10px; font-size: 0.875rem;">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Welcome Banner -->
+                <div class="row align-items-start align-items-md-center mb-4 welcome-banner">
+                    <div class="col-12 col-md-8">
+                        <h2>Welcome, {{ student.user.first_name|default:"Student" }}!</h2>
+                        <p>Let's continue your innovation journey towards becoming India's Future Tycoon.</p>
+                    </div>
+                    <div class="col-12 col-md-4 d-none d-md-block">
+                    </div>
+                </div>
+
+                <!-- Top Grid -->
+                <div class="row g-4 mb-4">
+                    <!-- Submission Card -->
+                    <div class="col-12 col-lg-6">
+                        <div class="card-custom">
+                            {% if latest_submission %}
+                            <div>
+                                <div class="d-flex justify-content-between align-items-start mb-4">
+                                    <div>
+                                        <div class="d-flex align-items-center gap-2 mb-1">
+                                            <h3 class="card-title mb-0">Idea Submission</h3>
+                                            {% if latest_submission.status == 'draft' %}
+                                                <span class="badge-draft">Draft Saved</span>
+                                            {% elif latest_submission.status == 'submitted' %}
+                                                <span class="badge-submitted">Submitted</span>
+                                            {% elif latest_submission.status == 'evaluated' %}
+                                                <span class="badge-evaluated">Evaluated</span>
+                                            {% else %}
+                                                <span class="badge-submitted">{{ latest_submission.get_status_display }}</span>
+                                            {% endif %}
+                                        </div>
+                                        <p class="card-subtitle mb-0">Last edited {{ latest_submission.updated_at|timesince }} ago</p>
+                                    </div>
+                                    <div class="icon-circle">
+                                        <span class="material-symbols-outlined">edit_document</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="progress-section">
+                                <div class="d-flex justify-content-between align-items-end mb-2">
+                                    <span class="progress-label">Submission Completeness</span>
+                                    <span class="progress-percentage">{{ progress }}%</span>
+                                </div>
+                                <div class="progress-bar-custom">
+                                    <div class="progress-fill" data-width="{{ progress }}"></div>
+                                </div>
+                                {% if latest_submission.status == 'draft' %}
+                                    {% if team_role == 'member' %}
+                                    <a href="{% url 'students:my_idea' %}" class="btn-primary-custom">
+                                        <span class="material-symbols-outlined" style="font-size: 20px;">visibility</span>
+                                        View Draft
+                                    </a>
+                                    {% else %}
+                                    <a href="{% url 'students:submit_idea' %}" class="btn-primary-custom">
+                                        <span class="material-symbols-outlined" style="font-size: 20px;">edit</span>
+                                        Resume Editing
+                                    </a>
+                                    {% endif %}
+                                {% else %}
+                                <a href="{% url 'students:my_idea' %}" class="btn-primary-custom">
+                                    <span class="material-symbols-outlined" style="font-size: 20px;">visibility</span>
+                                    View Submission
+                                </a>
+                                {% endif %}
+                            </div>
+                            {% else %}
+                            <div>
+                                <div class="d-flex justify-content-between align-items-start mb-4">
+                                    <div>
+                                        <h3 class="card-title mb-0">Submit Your Idea</h3>
+                                        <p class="card-subtitle mb-0">Share your innovation with the world</p>
+                                    </div>
+                                    <div class="icon-circle">
+                                        <span class="material-symbols-outlined">lightbulb</span>
+                                    </div>
+                                </div>
+                                <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 24px;">
+                                    You haven't submitted an idea yet. Start your journey by submitting your innovative business idea.
+                                </p>
+                            </div>
+                            <a href="{% url 'students:submit_idea' %}" class="btn-primary-custom">
+                                <span class="material-symbols-outlined" style="font-size: 20px;">rocket_launch</span>
+                                Get Started
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Team Card -->
+                    <div class="col-12 col-lg-6">
+                        {% if team %}
+                        <div class="team-card">
+                            <div class="team-card-overlay"></div>
+                            <div class="team-card-content">
+                                <div>
+                                    <p class="team-label">YOUR SQUAD</p>
+                                    <h3 class="team-name">{{ team.name }}</h3>
+                                    <div class="avatar-group">
+                                        {% for m in team_members %}
+                                        {% if m.student %}
+                                        <div class="team-avatar" style="background:{% cycle '#5E2A97' '#2563eb' '#16a34a' '#d97706' '#ef4444' %};">{{ m.student.user.first_name|make_list|first|upper }}</div>
+                                        {% endif %}
+                                        {% endfor %}
+                                        {% if team_members|length > 3 %}
+                                        <div class="team-avatar-count">+{{ team_members|length|add:"-3" }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="join-code-box">
+                                    <div>
+                                        <p style="font-size:0.7rem;color:#94a3b8;margin:0;">Join Code</p>
+                                        <p class="join-code-value">{{ team_code }}</p>
+                                    </div>
+                                    <button class="btn-copy" id="copyCodeBtn" onclick="copyJoinCode()">
+                                        <span class="material-symbols-outlined" style="font-size:16px;">content_copy</span> Copy
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="team-card">
+                            <div class="team-card-overlay"></div>
+                            <div class="team-card-content" style="justify-content:center;align-items:center;text-align:center;">
+                                <span class="material-symbols-outlined" style="font-size:48px;color:#475569;margin-bottom:8px;">group_add</span>
+                                <p style="font-size:1.125rem;font-weight:700;margin-bottom:4px;">Create Your Team</p>
+                                <p style="font-size:0.85rem;color:#94a3b8;margin-bottom:16px;">Form a team to collaborate on your idea</p>
+                                <a href="{% url 'students:team_page' %}" style="background:#fff;color:var(--primary);padding:8px 24px;border-radius:8px;font-weight:600;font-size:0.85rem;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
+                                    <span class="material-symbols-outlined" style="font-size:18px;">add</span> Create Team
+                                </a>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Bottom Grid -->
+                <div class="row g-4">
+                    <!-- Important Dates Timeline -->
+                    <div class="col-12">
+                        <div class="timeline-card">
+                            <div class="timeline-header">
+                                <h3 class="timeline-title mb-0">Important Dates</h3>
+                            </div>
+                            <div class="timeline-container">
+                                {% if phases %}
+                                <div class="timeline-line"></div>
+
+                                {% for phase in phases %}
+                                <div class="timeline-item {% if phase.status == 'completed' %}timeline-item-past{% endif %}">
+                                    {% if phase.status == 'completed' %}
+                                    <div class="timeline-icon timeline-icon-past">
+                                        <span class="material-symbols-outlined" style="font-size: 18px; color: #64748b;">check</span>
+                                    </div>
+                                    <div class="timeline-content w-100">
+                                        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
+                                            <div>
+                                                <p class="timeline-event-title mb-1">{{ phase.name }}</p>
+                                                <p class="timeline-desc mb-0">{{ phase.description|default:"Completed" }}</p>
+                                            </div>
+                                            <span class="timeline-date">{{ phase.end_date|date:"M d, Y" }}</span>
+                                        </div>
+                                    </div>
+                                    {% elif phase.status == 'active' %}
+                                    <div class="timeline-icon timeline-icon-current">
+                                        <span class="material-symbols-outlined" style="font-size: 18px;">edit</span>
+                                    </div>
+                                    <div class="timeline-content timeline-content-current w-100">
+                                        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
+                                            <div>
+                                                <p class="timeline-event-title timeline-event-title-current mb-1">{{ phase.name }}</p>
+                                                <p class="timeline-desc mb-0">{{ phase.description|default:"Currently active" }}</p>
+                                            </div>
+                                            <div class="d-flex flex-column align-items-end gap-1">
+                                                <span class="timeline-date timeline-date-current">{{ phase.end_date|date:"M d, Y" }}</span>
+                                                <span class="deadline-badge">UPCOMING</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% else %}
+                                    <div class="timeline-icon timeline-icon-future">
+                                        <span class="material-symbols-outlined" style="font-size: 18px; color: #94a3b8;">emoji_events</span>
+                                    </div>
+                                    <div class="timeline-content w-100">
+                                        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
+                                            <div>
+                                                <p class="timeline-event-title mb-1">{{ phase.name }}</p>
+                                                <p class="timeline-desc mb-0">{{ phase.description|default:"Coming soon" }}</p>
+                                            </div>
+                                            <span class="timeline-date">{{ phase.start_date|date:"M d, Y" }}</span>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                                {% else %}
+                                <div class="text-center py-4" style="color: var(--text-muted);">
+                                    <span class="material-symbols-outlined mb-2" style="font-size: 40px; color: #cbd5e1;">calendar_today</span>
+                                    <p class="mb-0">No phases announced yet.</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Achievements & Badges -->
+                <div class="row g-4" style="margin-top:0;">
+                    <div class="col-12">
+                        <div class="card-custom" style="padding:24px;">
+                            <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:20px;display:flex;align-items:center;gap:8px;">
+                                <span class="material-symbols-outlined" style="color:#f59e0b;">emoji_events</span>
+                                Your Journey & Badges
+                            </h3>
+                            <div style="display:flex;gap:16px;overflow-x:auto;padding-bottom:8px;">
+
+                                <!-- Quick Starter -->
+                                <div style="min-width:150px;text-align:center;padding:16px 12px;border-radius:16px;{% if team %}background:#fef9c3;border:2px solid #facc15;{% else %}background:#f8fafc;border:2px dashed #e2e8f0;opacity:0.5;{% endif %}">
+                                    <div style="width:48px;height:48px;border-radius:50%;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;{% if team %}background:#facc15;{% else %}background:#e2e8f0;{% endif %}">
+                                        <span class="material-symbols-outlined" style="font-size:24px;{% if team %}color:#854d0e;{% else %}color:#94a3b8;{% endif %}">rocket_launch</span>
+                                    </div>
+                                    <p style="font-weight:700;font-size:0.8rem;margin:0 0 4px;{% if team %}color:#854d0e;{% else %}color:#94a3b8;{% endif %}">Quick Starter</p>
+                                    <p style="font-size:0.65rem;color:#94a3b8;margin:0;line-height:1.4;">Signed up & created a team</p>
+                                </div>
+
+                                <!-- Team Builder -->
+                                <div style="min-width:150px;text-align:center;padding:16px 12px;border-radius:16px;{% if team and team_members|length >= 2 %}background:#f3e8ff;border:2px solid #a855f7;{% else %}background:#f8fafc;border:2px dashed #e2e8f0;opacity:0.5;{% endif %}">
+                                    <div style="width:48px;height:48px;border-radius:50%;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;{% if team and team_members|length >= 2 %}background:#a855f7;{% else %}background:#e2e8f0;{% endif %}">
+                                        <span class="material-symbols-outlined" style="font-size:24px;{% if team and team_members|length >= 2 %}color:#fff;{% else %}color:#94a3b8;{% endif %}">groups</span>
+                                    </div>
+                                    <p style="font-weight:700;font-size:0.8rem;margin:0 0 4px;{% if team and team_members|length >= 2 %}color:#7c3aed;{% else %}color:#94a3b8;{% endif %}">Team Builder</p>
+                                    <p style="font-size:0.65rem;color:#94a3b8;margin:0;line-height:1.4;">Built your team together</p>
+                                </div>
+
+                                <!-- Idea Spark -->
+                                <div style="min-width:150px;text-align:center;padding:16px 12px;border-radius:16px;{% if latest_submission and latest_submission.status != 'draft' %}background:#eff6ff;border:2px solid #3b82f6;{% else %}background:#f8fafc;border:2px dashed #e2e8f0;opacity:0.5;{% endif %}">
+                                    <div style="width:48px;height:48px;border-radius:50%;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;{% if latest_submission and latest_submission.status != 'draft' %}background:#3b82f6;{% else %}background:#e2e8f0;{% endif %}">
+                                        <span class="material-symbols-outlined" style="font-size:24px;{% if latest_submission and latest_submission.status != 'draft' %}color:#fff;{% else %}color:#94a3b8;{% endif %}">lightbulb</span>
+                                    </div>
+                                    <p style="font-weight:700;font-size:0.8rem;margin:0 0 4px;{% if latest_submission and latest_submission.status != 'draft' %}color:#1d4ed8;{% else %}color:#94a3b8;{% endif %}">Idea Spark</p>
+                                    <p style="font-size:0.65rem;color:#94a3b8;margin:0;line-height:1.4;">Submitted your idea</p>
+                                </div>
+
+                                <!-- Innovator (Top 400) -->
+                                <div style="min-width:150px;text-align:center;padding:16px 12px;border-radius:16px;{% if ai_rank and ai_rank <= 400 %}background:#fef2f2;border:2px solid #ef4444;{% else %}background:#f8fafc;border:2px dashed #e2e8f0;opacity:0.5;{% endif %}">
+                                    <div style="width:48px;height:48px;border-radius:50%;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;{% if ai_rank and ai_rank <= 400 %}background:#ef4444;{% else %}background:#e2e8f0;{% endif %}">
+                                        <span class="material-symbols-outlined" style="font-size:24px;{% if ai_rank and ai_rank <= 400 %}color:#fff;{% else %}color:#94a3b8;{% endif %}">star</span>
+                                    </div>
+                                    <p style="font-weight:700;font-size:0.8rem;margin:0 0 4px;{% if ai_rank and ai_rank <= 400 %}color:#dc2626;{% else %}color:#94a3b8;{% endif %}">Innovator</p>
+                                    <p style="font-size:0.65rem;color:#94a3b8;margin:0;line-height:1.4;">Top 400 selection</p>
+                                </div>
+
+                                <!-- Problem Solver (Top 100) -->
+                                <div style="min-width:150px;text-align:center;padding:16px 12px;border-radius:16px;{% if ai_rank and ai_rank <= 100 %}background:#f0fdf4;border:2px solid #22c55e;{% else %}background:#f8fafc;border:2px dashed #e2e8f0;opacity:0.5;{% endif %}">
+                                    <div style="width:48px;height:48px;border-radius:50%;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;{% if ai_rank and ai_rank <= 100 %}background:#22c55e;{% else %}background:#e2e8f0;{% endif %}">
+                                        <span class="material-symbols-outlined" style="font-size:24px;{% if ai_rank and ai_rank <= 100 %}color:#fff;{% else %}color:#94a3b8;{% endif %}">verified</span>
+                                    </div>
+                                    <p style="font-weight:700;font-size:0.8rem;margin:0 0 4px;{% if ai_rank and ai_rank <= 100 %}color:#16a34a;{% else %}color:#94a3b8;{% endif %}">Problem Solver</p>
+                                    <p style="font-size:0.65rem;color:#94a3b8;margin:0;line-height:1.4;">Top 100 finalist</p>
+                                </div>
+
+                                <!-- Pitch Star (Top 24) -->
+                                <div style="min-width:150px;text-align:center;padding:16px 12px;border-radius:16px;{% if ai_rank and ai_rank <= 24 %}background:linear-gradient(135deg,#fef3c7,#fce7f3,#ede9fe);border:2px solid #d946ef;{% else %}background:#f8fafc;border:2px dashed #e2e8f0;opacity:0.5;{% endif %}">
+                                    <div style="width:48px;height:48px;border-radius:50%;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;{% if ai_rank and ai_rank <= 24 %}background:linear-gradient(135deg,#f59e0b,#ec4899,#8b5cf6);{% else %}background:#e2e8f0;{% endif %}">
+                                        <span class="material-symbols-outlined" style="font-size:24px;{% if ai_rank and ai_rank <= 24 %}color:#fff;{% else %}color:#94a3b8;{% endif %}">emoji_events</span>
+                                    </div>
+                                    <p style="font-weight:700;font-size:0.8rem;margin:0 0 4px;{% if ai_rank and ai_rank <= 24 %}color:#d946ef;{% else %}color:#94a3b8;{% endif %}">Pitch Star</p>
+                                    <p style="font-size:0.65rem;color:#94a3b8;margin:0;line-height:1.4;">Top 24 in India!</p>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity (Dynamic) -->
+                <div class="row g-4" style="margin-top:0;">
+                    <div class="col-12">
+                        <div class="card-custom" style="padding:24px;">
+                            <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+                                <span class="material-symbols-outlined" style="color:var(--primary);">history</span>
+                                Recent Activity
+                            </h3>
+                            <div style="display:flex;flex-direction:column;gap:4px;">
+                                {% for notif in recent_activity %}
+                                <div style="display:flex;align-items:flex-start;gap:12px;padding:10px 12px;border-radius:10px;transition:background 0.15s;">
+                                    <div style="width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;{% if notif.notification_type == 'team' %}background:rgba(22,163,74,0.1);{% elif notif.notification_type == 'submission' %}background:rgba(94,42,151,0.1);{% elif notif.notification_type == 'announcement' %}background:rgba(59,130,246,0.1);{% else %}background:rgba(245,158,11,0.1);{% endif %}">
+                                        <span class="material-symbols-outlined" style="font-size:18px;{% if notif.notification_type == 'team' %}color:#16a34a;{% elif notif.notification_type == 'submission' %}color:var(--primary);{% elif notif.notification_type == 'announcement' %}color:#3b82f6;{% else %}color:#f59e0b;{% endif %}">{{ notif.icon }}</span>
+                                    </div>
+                                    <div>
+                                        <p style="font-weight:600;font-size:0.8125rem;margin:0;">{{ notif.title }}</p>
+                                        {% if notif.message %}<p style="font-size:0.75rem;color:#94a3b8;margin:0;">{{ notif.message|truncatewords:15 }}</p>{% endif %}
+                                        <p style="font-size:0.65rem;color:#cbd5e1;margin:2px 0 0;">{{ notif.created_at|timesince }} ago</p>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div style="text-align:center;padding:24px;color:#94a3b8;">
+                                    <span class="material-symbols-outlined" style="font-size:32px;color:#cbd5e1;">inbox</span>
+                                    <p style="margin:8px 0 0;font-size:0.8125rem;">No recent activity yet</p>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recommended Learning Videos -->
+                <div class="row g-4" style="margin-top:0;">
+                    <div class="col-12">
+                        <div class="card-custom" style="padding:24px;">
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                                <h3 style="font-size:1.1rem;font-weight:700;display:flex;align-items:center;gap:8px;margin:0;">
+                                    <span class="material-symbols-outlined" style="color:#ef4444;">play_circle</span>
+                                    Recommended Learning Videos
+                                </h3>
+                                <span style="font-size:0.7rem;background:#fef3c7;color:#d97706;padding:3px 10px;border-radius:999px;font-weight:600;">Required before submission</span>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-12 col-md-4">
+                                    <div style="border:1px solid #eee;border-radius:12px;overflow:hidden;transition:all 0.2s;">
+                                        <div style="background:#0f172a;height:140px;display:flex;align-items:center;justify-content:center;position:relative;cursor:pointer;" onclick="window.open('https://www.youtube.com/watch?v=example1','_blank')">
+                                            <span class="material-symbols-outlined" style="font-size:48px;color:rgba(255,255,255,0.8);">play_circle</span>
+                                            <span style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,0.7);color:#fff;font-size:0.65rem;padding:2px 6px;border-radius:4px;">12:34</span>
+                                        </div>
+                                        <div style="padding:12px;">
+                                            <p style="font-weight:600;font-size:0.8125rem;margin:0 0 4px;line-height:1.4;">How to Write a Winning Problem Statement</p>
+                                            <p style="font-size:0.7rem;color:#94a3b8;margin:0;">IFT Season 6 • Beginner</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <div style="border:1px solid #eee;border-radius:12px;overflow:hidden;transition:all 0.2s;">
+                                        <div style="background:#1e293b;height:140px;display:flex;align-items:center;justify-content:center;position:relative;cursor:pointer;" onclick="window.open('https://www.youtube.com/watch?v=example2','_blank')">
+                                            <span class="material-symbols-outlined" style="font-size:48px;color:rgba(255,255,255,0.8);">play_circle</span>
+                                            <span style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,0.7);color:#fff;font-size:0.65rem;padding:2px 6px;border-radius:4px;">08:45</span>
+                                        </div>
+                                        <div style="padding:12px;">
+                                            <p style="font-weight:600;font-size:0.8125rem;margin:0 0 4px;line-height:1.4;">Building a Strong Innovation Pitch</p>
+                                            <p style="font-size:0.7rem;color:#94a3b8;margin:0;">IFT Season 6 • Intermediate</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <div style="border:1px solid #eee;border-radius:12px;overflow:hidden;transition:all 0.2s;">
+                                        <div style="background:#312e81;height:140px;display:flex;align-items:center;justify-content:center;position:relative;cursor:pointer;" onclick="window.open('https://www.youtube.com/watch?v=example3','_blank')">
+                                            <span class="material-symbols-outlined" style="font-size:48px;color:rgba(255,255,255,0.8);">play_circle</span>
+                                            <span style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,0.7);color:#fff;font-size:0.65rem;padding:2px 6px;border-radius:4px;">15:20</span>
+                                        </div>
+                                        <div style="padding:12px;">
+                                            <p style="font-weight:600;font-size:0.8125rem;margin:0 0 4px;line-height:1.4;">Understanding the AI Evaluation Criteria</p>
+                                            <p style="font-size:0.7rem;color:#94a3b8;margin:0;">IFT Season 6 • Essential</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+    (function() {
+        function init() {
+            initSidebarToggle();
+            initProgressAnimation();
+            initFullscreen();
+            animateCardsOnLoad();
+            initTimelineAnimations();
+        }
+
+        // Sidebar toggle
+        function initSidebarToggle() {
+            const btn = document.getElementById('sidebarToggleBtn');
+            const sidebar = document.getElementById('studentAppSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+
+            if (btn && sidebar) {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (window.innerWidth >= 768) {
+                        sidebar.classList.toggle('collapsed');
+                    } else {
+                        sidebar.classList.toggle('mobile-open');
+                        overlay.classList.toggle('active');
+                    }
+                });
+            }
+
+            if (overlay) {
+                overlay.addEventListener('click', function() {
+                    sidebar.classList.remove('mobile-open');
+                    overlay.classList.remove('active');
+                });
+            }
+
+            document.addEventListener('click', function(e) {
+                if (sidebar && window.innerWidth < 768) {
+                    if (!e.target.closest('#studentAppSidebar') && !e.target.closest('#sidebarToggleBtn')) {
+                        sidebar.classList.remove('mobile-open');
+                        if (overlay) overlay.classList.remove('active');
+                    }
+                }
+            });
+        }
+
+        // Progress bar animation
+        function initProgressAnimation() {
+            const fills = document.querySelectorAll('.progress-fill');
+            fills.forEach(function(fill) {
+                const targetWidth = fill.getAttribute('data-width') || '0';
+                setTimeout(function() {
+                    fill.style.width = targetWidth + '%';
+                }, 500);
+            });
+        }
+
+        // Fullscreen
+        function initFullscreen() {
+            const btn = document.getElementById('fullscreenBtn');
+            if (!btn) return;
+            btn.addEventListener('click', function() {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                } else {
+                    document.exitFullscreen();
+                }
+            });
+            document.addEventListener('fullscreenchange', function() {
+                const icon = btn.querySelector('.material-symbols-outlined');
+                icon.textContent = document.fullscreenElement ? 'fullscreen_exit' : 'fullscreen';
+            });
+        }
+
+        // Card entrance animations
+        function animateCardsOnLoad() {
+            const cards = document.querySelectorAll('.card-custom, .score-card, .timeline-card, .submissions-card');
+            cards.forEach(function(card, index) {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(function() {
+                    card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 100 + (index * 100));
+            });
+        }
+
+        // Timeline hover
+        function initTimelineAnimations() {
+            document.querySelectorAll('.timeline-item').forEach(function(item) {
+                item.addEventListener('mouseenter', function() {
+                    var icon = this.querySelector('.timeline-icon');
+                    if (icon) { icon.style.transform = 'scale(1.1) rotate(5deg)'; icon.style.transition = 'transform 0.3s ease'; }
+                });
+                item.addEventListener('mouseleave', function() {
+                    var icon = this.querySelector('.timeline-icon');
+                    if (icon) { icon.style.transform = 'scale(1) rotate(0deg)'; }
+                });
+            });
+        }
+
+        // Toast system
+        window.showToast = function(message, type) {
+            type = type || 'info';
+            var existing = document.querySelector('.custom-toast');
+            if (existing) existing.remove();
+
+            var colors = { success: '#22c55e', error: '#ef4444', info: '#5E2A97', warning: '#DEDE50' };
+            var icons = { success: 'check_circle', error: 'error', info: 'info', warning: 'warning' };
+
+            var toast = document.createElement('div');
+            toast.className = 'custom-toast';
+            toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background-color:' + colors[type] + ';color:white;padding:16px 24px;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,0.2);z-index:9999;font-family:Poppins,sans-serif;font-size:0.875rem;font-weight:500;display:flex;align-items:center;gap:12px;animation:slideIn 0.3s ease;max-width:400px;';
+
+            var icon = document.createElement('span');
+            icon.className = 'material-symbols-outlined';
+            icon.style.fontSize = '20px';
+            icon.textContent = icons[type];
+
+            toast.appendChild(icon);
+            toast.appendChild(document.createTextNode(message));
+            document.body.appendChild(toast);
+
+            setTimeout(function() {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(function() { toast.remove(); }, 300);
+            }, 3000);
+        };
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            setTimeout(init, 100);
+        }
+    })();
+
+    // ── Header Dropdowns ──
+    function closeAllDropdowns() {
+        document.querySelectorAll('.header-dropdown').forEach(d => d.classList.remove('show'));
+    }
+
+    document.getElementById('profileBtn').addEventListener('click', function(e) {
+        e.stopPropagation();
+        const dd = document.getElementById('profileDropdown');
+        const isOpen = dd.classList.contains('show');
+        closeAllDropdowns();
+        if (!isOpen) dd.classList.add('show');
+    });
+
+    document.getElementById('helpBtn').addEventListener('click', function(e) {
+        e.stopPropagation();
+        const dd = document.getElementById('helpDropdown');
+        const isOpen = dd.classList.contains('show');
+        closeAllDropdowns();
+        if (!isOpen) dd.classList.add('show');
+    });
+
+    document.getElementById('notifBtn').addEventListener('click', function(e) {
+        e.stopPropagation();
+        const dd = document.getElementById('notifDropdown');
+        const isOpen = dd.classList.contains('show');
+        closeAllDropdowns();
+        if (!isOpen) dd.classList.add('show');
+    });
+
+    document.addEventListener('click', function() { closeAllDropdowns(); });
+    document.querySelectorAll('.header-dropdown').forEach(d => d.addEventListener('click', e => e.stopPropagation()));
+
+    // ── Copy Join Code ──
+    function copyJoinCode() {
+        const code = document.querySelector('.join-code-value');
+        if (!code) return;
+        navigator.clipboard.writeText(code.textContent.trim()).then(() => {
+            const btn = document.getElementById('copyCodeBtn');
+            btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:16px;color:#16a34a;">check</span> Copied!';
+            btn.style.background = '#f0fdf4';
+            setTimeout(() => {
+                btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:16px;">content_copy</span> Copy';
+                btn.style.background = '#fff';
+            }, 2000);
+        });
+    }
+    </script>
+</body>
+</html>

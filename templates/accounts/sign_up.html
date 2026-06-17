@@ -1,0 +1,165 @@
+{% extends "accounts/auth_base.html" %}
+
+{% block title %}Sign Up - IFT{% endblock %}
+
+{% block content %}
+<h1>Create your Account</h1>
+<p class="subtitle">Join India's Future Tycoon! Please enter your details</p>
+
+<form method="post" action="{% url 'accounts:sign_up' %}">
+    {% csrf_token %}
+
+    <!-- First Name -->
+    <div class="form-group">
+        <div class="icon">
+            <iconify-icon icon="f7:person"></iconify-icon>
+        </div>
+        <input type="text" class="form-control" id="first_name" name="first_name" placeholder="First Name" required value="{{ form.first_name.value|default:'' }}">
+        {% if form.first_name.errors %}<p class="field-error">{{ form.first_name.errors.0 }}</p>{% endif %}
+    </div>
+
+    <!-- Last Name -->
+    <div class="form-group">
+        <div class="icon">
+            <iconify-icon icon="f7:person"></iconify-icon>
+        </div>
+        <input type="text" class="form-control" id="last_name" name="last_name" placeholder="Last Name" required value="{{ form.last_name.value|default:'' }}">
+        {% if form.last_name.errors %}<p class="field-error">{{ form.last_name.errors.0 }}</p>{% endif %}
+    </div>
+
+    <!-- Email -->
+    <div class="form-group">
+        <div class="icon">
+            <iconify-icon icon="mage:email"></iconify-icon>
+        </div>
+        <input type="email" class="form-control" id="email" name="email" placeholder="Email" required value="{{ form.email.value|default:'' }}">
+        {% if form.email.errors %}<p class="field-error">{{ form.email.errors.0 }}</p>{% endif %}
+    </div>
+
+    <!-- Password -->
+    <div class="form-group">
+        <div class="password-wrapper">
+            <div class="icon">
+                <iconify-icon icon="solar:lock-password-outline"></iconify-icon>
+            </div>
+            <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+            <i class="ri-eye-line toggle-password" data-target="password"></i>
+        </div>
+        <p class="password-hint">Your password must have at least 8 characters</p>
+        {% if form.password.errors %}<p class="field-error">{{ form.password.errors.0 }}</p>{% endif %}
+    </div>
+
+    <!-- School (Searchable Dropdown) -->
+    <div class="form-group">
+        <div class="icon">
+            <iconify-icon icon="mdi:school-outline"></iconify-icon>
+        </div>
+        <div style="position:relative;width:100%;">
+            <input type="text" class="form-control" id="schoolSearch" placeholder="Search School..." autocomplete="off">
+            <input type="hidden" name="school" id="schoolId">
+            <div id="schoolDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #ddd;border-radius:8px;max-height:200px;overflow-y:auto;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,0.1);"></div>
+        </div>
+        {% if form.school.errors %}<p class="field-error">{{ form.school.errors.0 }}</p>{% endif %}
+    </div>
+
+    <!-- Grade -->
+    <div class="form-group">
+        <div class="icon">
+            <iconify-icon icon="mdi:google-classroom"></iconify-icon>
+        </div>
+        <select class="form-control" id="grade" name="grade" required>
+            <option value="" disabled selected>Select Grade</option>
+            {% for value, label in form.grade.field.choices %}
+            <option value="{{ value }}" {% if form.grade.value == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+        {% if form.grade.errors %}<p class="field-error">{{ form.grade.errors.0 }}</p>{% endif %}
+    </div>
+
+    <!-- Phone -->
+    <div class="form-group">
+        <div class="icon">
+            <iconify-icon icon="mdi:phone-outline"></iconify-icon>
+        </div>
+        <input type="text" class="form-control" id="phone" name="phone" placeholder="Phone Number (optional)" value="{{ form.phone.value|default:'' }}">
+    </div>
+
+    <!-- Terms & Conditions -->
+    <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="terms" name="terms" required>
+        <label class="form-check-label" for="terms">
+            By creating an account means you agree to the <a href="#">Terms & Conditions</a> and our <a href="#">Privacy Policy</a>
+        </label>
+    </div>
+    {% if form.terms.errors %}<p class="field-error" style="margin-top: -1rem; margin-bottom: 1rem;">{{ form.terms.errors.0 }}</p>{% endif %}
+
+    <!-- Sign Up Button -->
+    <button type="submit" class="btn-primary">Sign Up</button>
+</form>
+
+<!-- Divider -->
+<div class="divider">
+    <span>Or sign up with</span>
+</div>
+
+<!-- Social Login -->
+<div class="social-buttons">
+    <button type="button" class="btn-social">
+        <iconify-icon icon="ic:baseline-facebook" style="font-size: 20px; color: #1877F2;"></iconify-icon>
+        Facebook
+    </button>
+    <button type="button" class="btn-social">
+        <iconify-icon icon="flat-color-icons:google" style="font-size: 20px;"></iconify-icon>
+        Google
+    </button>
+</div>
+
+<!-- Sign In Link -->
+<div class="signin-link">
+    Already have an account? <a href="{% url 'accounts:sign_in' %}">Sign In</a>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let searchTimeout;
+const schoolSearch = document.getElementById('schoolSearch');
+const schoolDropdown = document.getElementById('schoolDropdown');
+const schoolId = document.getElementById('schoolId');
+
+schoolSearch.addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    const q = this.value.trim();
+    if (q.length < 2) { schoolDropdown.style.display = 'none'; return; }
+    searchTimeout = setTimeout(() => {
+        fetch('/accounts/api/schools/?q=' + encodeURIComponent(q))
+        .then(r => r.json())
+        .then(data => {
+            if (data.length === 0) {
+                schoolDropdown.innerHTML = '<div style="padding:12px;color:#999;font-size:0.85rem;">No schools found</div>';
+            } else {
+                schoolDropdown.innerHTML = data.map(s =>
+                    `<div class="school-option" data-id="${s.id}" data-name="${s.name}" style="padding:10px 14px;cursor:pointer;font-size:0.9rem;border-bottom:1px solid #f0f0f0;">${s.name}${s.city ? ' <span style="color:#999;font-size:0.8rem;">(' + s.city + ')</span>' : ''}</div>`
+                ).join('');
+            }
+            schoolDropdown.style.display = 'block';
+        });
+    }, 300);
+});
+
+schoolDropdown.addEventListener('click', function(e) {
+    const opt = e.target.closest('.school-option');
+    if (opt) {
+        schoolSearch.value = opt.dataset.name;
+        schoolId.value = opt.dataset.id;
+        schoolDropdown.style.display = 'none';
+    }
+});
+
+document.addEventListener('click', function(e) {
+    if (!schoolSearch.contains(e.target) && !schoolDropdown.contains(e.target)) {
+        schoolDropdown.style.display = 'none';
+    }
+});
+</script>
+{% endblock %}

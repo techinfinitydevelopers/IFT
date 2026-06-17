@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Student, IdeaSubmission, UploadedFile
+from .models import Student, IdeaSubmission, UploadedFile, TeamMember
 
 
 @admin.register(Student)
@@ -55,3 +55,10 @@ class UploadedFileAdmin(admin.ModelAdmin):
     search_fields = ('original_filename', 'submission__title')
     list_filter = ('file_type', 'uploaded_at')
     readonly_fields = ('uploaded_at', 'file_size')
+
+
+@admin.register(TeamMember)
+class TeamMemberAdmin(admin.ModelAdmin):
+    list_display = ('name', 'submission', 'role', 'grade', 'school_name')
+    search_fields = ('name', 'submission__title')
+    list_filter = ('role',)

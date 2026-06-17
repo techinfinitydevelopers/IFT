@@ -1,0 +1,1133 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>School Dashboard - IFT Platform</title>
+
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <style>
+        :root {
+            --primary: #5E2A97;
+            --secondary: #DEDE50;
+            --primary-light: #E8D4F0;
+            --background-light: #F7F7F7;
+            --surface-light: #FFFFFF;
+            --border-light: #EEEEEE;
+            --text-dark: #222222;
+            --text-muted: #666666;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            overflow: hidden;
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        .main-container { display: flex; height: 100vh; width: 100%; }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: 280px;
+            background: #FFFFFF;
+            border-right: 1px solid #EEEEEE;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: sticky;
+            top: 0;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .sidebar.collapsed { width: 80px; }
+        .sidebar.collapsed .sidebar-title,
+        .sidebar.collapsed .sidebar-subtitle,
+        .sidebar.collapsed .nav-text,
+        .sidebar.collapsed .user-info { opacity: 0; width: 0; overflow: hidden; white-space: nowrap; }
+        .sidebar.collapsed .logo-img { width: 50px; height: 50px; margin: 0 auto; background-position: center; }
+        .sidebar.collapsed .nav-item { justify-content: center; padding-left: 1.7rem; }
+        .sidebar.collapsed .nav-item .material-symbols-outlined { margin: 0; }
+        .sidebar.collapsed .user-avatar { margin: 0 auto; }
+        .sidebar.collapsed .logout-btn { display: none; }
+        .sidebar.collapsed .user-profile { justify-content: center; }
+
+        .sidebar-header { border-bottom: 1px solid #F7F7F7; }
+
+        .logo-img {
+            width: 250px; height: 50px;
+            background-size: contain; background-position: left center;
+            background-repeat: no-repeat; flex-shrink: 0;
+        }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.75rem 1rem; border-radius: 0.5rem;
+            text-decoration: none; color: #222222;
+            transition: all 0.2s ease; cursor: pointer;
+            margin-bottom: 0.25rem;
+        }
+        .nav-item:hover { background: #F7F7F7; color: #222222; }
+        .nav-item .material-symbols-outlined { font-size: 24px; color: #666666; transition: all 0.2s ease; }
+        .nav-item.active { background: rgba(94, 42, 151, 0.1); color: #5E2A97; }
+        .nav-item.active .material-symbols-outlined { color: #5E2A97; font-variation-settings: 'FILL' 1; }
+        .nav-text { font-size: 0.875rem; font-weight: 500; }
+
+        .sidebar-footer { border-top: 1px solid #EEEEEE; margin-top: auto; }
+
+        .user-profile {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.75rem; border-radius: 0.5rem;
+            transition: all 0.2s ease; cursor: pointer;
+        }
+        .user-profile:hover { background: #F7F7F7; }
+
+        .user-avatar {
+            width: 2.5rem; height: 2.5rem; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            background: var(--primary); color: white;
+            font-size: 0.875rem; font-weight: 700; flex-shrink: 0;
+        }
+
+        .user-info { flex: 1; }
+        .user-name-text { font-size: 0.875rem; font-weight: 700; color: #222222; margin: 0; line-height: 1.2; }
+        .user-role { font-size: 0.75rem; color: #666666; margin: 0; line-height: 1.2; }
+
+        .logout-btn {
+            background: none; border: none; color: #666666;
+            cursor: pointer; padding: 0.5rem; border-radius: 0.375rem;
+            transition: all 0.2s ease; display: flex; align-items: center; justify-content: center;
+        }
+        .logout-btn:hover { background: rgba(94, 42, 151, 0.1); color: #5E2A97; }
+        .logout-btn .material-symbols-outlined { font-size: 20px; }
+
+        /* Mobile sidebar */
+        .sidebar-overlay {
+            display: none; position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; background: rgba(0,0,0,0.5);
+            z-index: 998; opacity: 0; transition: opacity 0.3s ease;
+        }
+        .sidebar-overlay.active { display: block; opacity: 1; }
+
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; left: -280px; z-index: 999; transition: left 0.3s ease; }
+            .sidebar.mobile-open { left: 0; }
+            .sidebar.collapsed { left: -80px; }
+            .sidebar.collapsed.mobile-open { left: 0; }
+        }
+
+        /* ===== HEADER ===== */
+        .top-header {
+            height: 64px; background: #FFFFFF;
+            border-bottom: 1px solid #EEEEEE;
+            display: flex; align-items: center;
+            padding: 12px 2rem; position: sticky;
+            top: 0; z-index: 100;
+        }
+
+        .header-icon-btn {
+            width: 2.5rem; height: 2.5rem; border-radius: 0.5rem;
+            border: none; background: #F7F7F7; color: #666666;
+            cursor: pointer; display: flex; align-items: center;
+            justify-content: center; transition: all 0.2s ease;
+        }
+        .header-icon-btn:hover { background: #EEEEEE; color: #5E2A97; }
+        .header-icon-btn .material-symbols-outlined { font-size: 22px; }
+
+        .header-avatar {
+            width: 2.5rem; height: 2.5rem; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            background: var(--primary); color: white;
+            font-size: 0.75rem; font-weight: 700;
+            border: 2px solid #5E2A97; cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .header-avatar:hover { transform: scale(1.05); box-shadow: 0 0 0 4px rgba(94, 42, 151, 0.1); }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            flex: 1; display: flex; flex-direction: column;
+            height: 100%; overflow-y: auto; position: relative; z-index: 10;
+        }
+
+        .content-wrapper { flex: 1; padding: 24px; max-width: 100%; margin: 0 auto; width: 100%; }
+
+        /* Page Header */
+        .page-header { margin-bottom: 28px; }
+        .page-header h1 { font-size: 1.75rem; font-weight: 700; color: var(--text-dark); margin-bottom: 4px; }
+        .page-header p { font-size: 0.875rem; color: var(--text-muted); margin: 0; }
+
+        .phase-badge {
+            background: rgba(94, 42, 151, 0.1); border: 1px solid rgba(94, 42, 151, 0.2);
+            padding: 6px 16px; border-radius: 999px;
+            display: inline-flex; align-items: center; gap: 8px;
+        }
+        .phase-badge-dot {
+            width: 8px; height: 8px; background: var(--primary);
+            border-radius: 50%; animation: pulse-dot 2s ease-in-out infinite;
+        }
+        @keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; transform: scale(1.2); } }
+        .phase-badge-text { font-size: 0.75rem; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.05em; }
+
+        /* KPI Cards */
+        .kpi-card {
+            background: var(--surface-light); border-radius: 12px;
+            padding: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+            border: 1px solid var(--border-light); height: 100%;
+        }
+        .kpi-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .kpi-label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+        .kpi-icon {
+            width: 36px; height: 36px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .kpi-icon .material-symbols-outlined { font-size: 20px; }
+        .kpi-value { font-size: 2rem; font-weight: 700; color: var(--text-dark); margin-bottom: 4px; }
+        .kpi-value-unit { font-size: 1.125rem; font-weight: 500; color: var(--text-muted); }
+        .kpi-sub { font-size: 0.75rem; color: var(--text-muted); margin: 0; }
+
+        /* Section Card */
+        .section-card {
+            background: var(--surface-light); border-radius: 12px;
+            padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+            border: 1px solid var(--border-light); margin-bottom: 24px; height: 100%;
+        }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .section-title { font-size: 1rem; font-weight: 700; color: var(--text-dark); margin: 0; }
+        .section-link {
+            font-size: 0.8125rem; font-weight: 600; color: var(--primary);
+            text-decoration: none; display: flex; align-items: center; gap: 4px;
+        }
+        .section-link:hover { text-decoration: underline; }
+
+        /* Phase Progress */
+        .phase-progress { display: flex; gap: 0; margin-bottom: 8px; }
+        .phase-step { flex: 1; text-align: center; position: relative; margin-right: 4px; }
+        .phase-step:last-child { margin-right: 0; }
+        .phase-step-bar { height: 6px; border-radius: 3px; margin-bottom: 10px; }
+        .phase-step-bar.completed { background: #22c55e; }
+        .phase-step-bar.bar-active { background: var(--primary); animation: pulse-bar 2s infinite; }
+        .phase-step-bar.upcoming { background: #e2e8f0; }
+        @keyframes pulse-bar { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+        .phase-step-label { font-size: 0.6875rem; font-weight: 600; color: var(--text-muted); }
+        .phase-step.step-active .phase-step-label { color: var(--primary); font-weight: 700; }
+        .phase-step.step-completed .phase-step-label { color: #22c55e; }
+        .phase-step-days { font-size: 0.625rem; color: var(--text-muted); margin-top: 2px; }
+
+        /* Quick Stats Row */
+        .quick-stat { text-align: center; padding: 16px 12px; border-right: 1px solid var(--border-light); }
+        .quick-stat:last-child { border-right: none; }
+        .quick-stat-value { font-size: 1.5rem; font-weight: 700; color: var(--text-dark); }
+        .quick-stat-label { font-size: 0.6875rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+
+        /* Chart Bars */
+        .chart-container {
+            display: flex; align-items: flex-end; justify-content: space-between;
+            height: 140px; padding: 0 8px; margin-bottom: 12px;
+        }
+        .chart-bar-group { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .chart-bar { width: 32px; border-radius: 4px 4px 0 0; transition: all 0.3s; position: relative; }
+        .chart-bar:hover { opacity: 0.8; }
+        .chart-bar-label { font-size: 0.625rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+
+        /* Leaderboard Table */
+        .leaderboard-table { width: 100%; font-size: 0.8125rem; }
+        .leaderboard-table th {
+            padding: 10px 8px; font-size: 0.6875rem; font-weight: 700;
+            color: var(--text-muted); text-transform: uppercase;
+            letter-spacing: 0.05em; border-bottom: 1px solid var(--border-light);
+        }
+        .leaderboard-table td { padding: 12px 8px; vertical-align: middle; border-bottom: 1px solid #f8f9fa; }
+        .leaderboard-table tbody tr:hover { background: #f8fafc; }
+
+        .rank-badge {
+            width: 24px; height: 24px; border-radius: 6px;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 0.6875rem; font-weight: 700;
+        }
+        .rank-1 { background: #fef3c7; color: #d97706; }
+        .rank-2 { background: #e2e8f0; color: #64748b; }
+        .rank-3 { background: #fed7aa; color: #c2410c; }
+        .rank-default { background: #f1f5f9; color: #94a3b8; }
+
+        .score-badge {
+            font-size: 0.75rem; font-weight: 700; padding: 3px 10px;
+            border-radius: 6px; background: rgba(94, 42, 151, 0.1); color: var(--primary);
+        }
+
+        .initials-avatar {
+            width: 28px; height: 28px; border-radius: 50%;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 0.625rem; font-weight: 700; color: white; flex-shrink: 0;
+        }
+
+        /* Activity Feed */
+        .feed-item {
+            display: flex; align-items: flex-start; gap: 12px;
+            padding: 14px; border-radius: 8px; background: #f8fafc;
+            border-left: 3px solid transparent; transition: all 0.2s; margin-bottom: 10px;
+        }
+        .feed-item:last-child { margin-bottom: 0; }
+        .feed-item:hover { background: #f1f5f9; transform: translateX(4px); }
+
+        .feed-icon {
+            width: 32px; height: 32px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .feed-icon .material-symbols-outlined { font-size: 16px; }
+        .feed-icon-success { background: #dcfce7; color: #16a34a; }
+        .feed-icon-warning { background: #fef3c7; color: #d97706; }
+        .feed-icon-info { background: rgba(94, 42, 151, 0.1); color: var(--primary); }
+        .feed-icon-blue { background: #dbeafe; color: #2563eb; }
+
+        .feed-item:has(.feed-icon-success) { border-left-color: #16a34a; }
+        .feed-item:has(.feed-icon-warning) { border-left-color: #d97706; }
+        .feed-item:has(.feed-icon-info) { border-left-color: var(--primary); }
+        .feed-item:has(.feed-icon-blue) { border-left-color: #2563eb; }
+
+        .feed-title { font-size: 0.8125rem; font-weight: 600; color: var(--text-dark); margin: 0 0 2px 0; }
+        .feed-meta { font-size: 0.6875rem; color: var(--text-muted); margin: 0; }
+
+        /* Announcement Card */
+        .ann-item {
+            padding: 14px; border-radius: 8px; background: #f8fafc;
+            margin-bottom: 10px; transition: all 0.2s;
+        }
+        .ann-item:last-child { margin-bottom: 0; }
+        .ann-item:hover { background: #f1f5f9; }
+
+        /* ===== PROFILE COMPLETION FORM (pending state) ===== */
+        .pending-container { max-width: 900px; margin: 2rem auto; padding: 0 1.5rem; }
+
+        .card-form {
+            background: #FFFFFF; border-radius: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: hidden;
+        }
+        .card-header-section { padding: 2rem; border-bottom: 1px solid var(--border-light); }
+        .card-header-section h1 {
+            font-size: 1.75rem; font-weight: 700; color: var(--text-dark);
+            display: flex; align-items: center; gap: 0.75rem; margin: 0 0 0.5rem 0;
+        }
+        .card-header-section p { font-size: 0.938rem; color: var(--text-muted); margin: 0; }
+
+        .form-section { padding: 2rem; border-bottom: 1px solid var(--border-light); }
+        .form-section:last-of-type { border-bottom: none; }
+        .form-section-title {
+            font-size: 1.125rem; font-weight: 600; color: #1F2937;
+            display: flex; align-items: center; gap: 0.5rem; margin: 0 0 1.5rem 0;
+        }
+        .form-section-title .material-symbols-outlined { font-size: 1.5rem; color: var(--primary); }
+
+        .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+        .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        .form-group.full-width { grid-column: 1 / -1; }
+        .form-label { font-size: 0.938rem; font-weight: 500; color: #374151; }
+        .required { color: #EF4444; font-weight: 600; }
+
+        .form-input {
+            width: 100%; padding: 0.75rem 1rem;
+            border: 1px solid #D1D5DB; border-radius: 0.5rem;
+            background-color: #ffffff; font-size: 1rem;
+            font-family: 'Poppins', sans-serif; color: #1F2937;
+            outline: none; transition: all 0.3s ease;
+        }
+        .form-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(94, 42, 151, 0.1); }
+        .form-input::placeholder { color: #9CA3AF; }
+
+        .form-actions {
+            padding: 1.5rem 2rem; display: flex; justify-content: flex-end; gap: 1rem;
+            border-top: 1px solid var(--border-light); background: #FAFAFA;
+            border-radius: 0 0 1rem 1rem;
+        }
+        .btn-submit {
+            padding: 0.75rem 2rem; border: none; border-radius: 0.5rem;
+            background: var(--primary); color: #ffffff;
+            font-family: 'Poppins', sans-serif; font-size: 0.938rem;
+            font-weight: 600; cursor: pointer; transition: all 0.2s ease;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .btn-submit:hover { background: #4A1F7A; box-shadow: 0 4px 12px rgba(94, 42, 151, 0.3); }
+
+        /* Dropdown panels */
+        .dropdown-panel {
+            position: fixed; top: 70px; right: 20px;
+            background: white; border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15); z-index: 9999;
+            overflow: hidden; display: none; opacity: 0;
+            transform: translateY(-10px); transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .dropdown-panel.active { display: block !important; opacity: 1 !important; transform: translateY(0) !important; }
+
+        @media (max-width: 768px) {
+            .content-wrapper { padding: 16px; }
+            .page-header h1 { font-size: 1.5rem; }
+            .kpi-value { font-size: 1.5rem; }
+            .chart-container { height: 100px; }
+            .chart-bar { width: 24px; }
+            .form-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+
+<body>
+
+{% if is_pending %}
+{# =============== PENDING: Profile Completion Form =============== #}
+<div style="font-family:'Poppins',sans-serif; background:var(--background-light); min-height:100vh;">
+    <!-- Top Bar -->
+    <div style="background:#FFFFFF; border-bottom:1px solid var(--border-light); padding:1rem 2rem; display:flex; align-items:center; justify-content:space-between;">
+        <div class="logo-img" style="background-image: url('{% static 'images/IFT_logo.png' %}');"></div>
+        <div style="display:flex; align-items:center; gap:1rem;">
+            <span style="font-size:0.875rem; font-weight:600; color:var(--text-dark);">{{ school.name }}</span>
+            <a href="{% url 'accounts:sign_out' %}" style="font-size:0.875rem; font-weight:500; color:#EF4444; text-decoration:none; display:flex; align-items:center; gap:4px;">
+                <span class="material-symbols-outlined" style="font-size:18px;">logout</span> Logout
+            </a>
+        </div>
+    </div>
+
+    <div class="pending-container">
+        <div class="card-form" style="margin-top:2rem;">
+            <div class="card-header-section">
+                <h1>
+                    <span class="material-symbols-outlined" style="color:var(--primary);">edit_note</span>
+                    Complete Your Profile
+                </h1>
+                <p>Please fill in the remaining details to activate your school account.</p>
+            </div>
+
+            <form method="POST" id="schoolProfileForm" novalidate>
+                {% csrf_token %}
+
+                <!-- Section A - School Information -->
+                <div class="form-section">
+                    <h2 class="form-section-title">
+                        <span class="material-symbols-outlined">apartment</span>
+                        A. School Information
+                    </h2>
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label class="form-label">School Name</label>
+                            <input type="text" class="form-input" value="{{ school.name }}" readonly style="background:#F7F7F7;" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Branch</label>
+                            <input type="text" name="branch" class="form-input" placeholder="e.g. Main Branch, Sector 12" value="{{ school.branch }}" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Board <span class="required">*</span></label>
+                            <select name="board" class="form-input" required>
+                                <option value="">Select Board</option>
+                                <option value="CBSE" {% if school.board == 'CBSE' %}selected{% endif %}>CBSE</option>
+                                <option value="ICSE" {% if school.board == 'ICSE' %}selected{% endif %}>ICSE</option>
+                                <option value="SSC" {% if school.board == 'SSC' %}selected{% endif %}>SSC</option>
+                                <option value="IB" {% if school.board == 'IB' %}selected{% endif %}>IB</option>
+                                <option value="IGCSE" {% if school.board == 'IGCSE' %}selected{% endif %}>IGCSE</option>
+                                <option value="Other" {% if school.board == 'Other' %}selected{% endif %}>Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Affiliation Number</label>
+                            <input type="text" name="affiliation_number" class="form-input" placeholder="Board affiliation number" value="{{ school.affiliation_number }}" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">School Type</label>
+                            <select name="school_type" class="form-input">
+                                <option value="">Select Type</option>
+                                <option value="private" {% if school.school_type == 'private' %}selected{% endif %}>Private</option>
+                                <option value="government" {% if school.school_type == 'government' %}selected{% endif %}>Government</option>
+                                <option value="aided" {% if school.school_type == 'aided' %}selected{% endif %}>Aided</option>
+                                <option value="other" {% if school.school_type == 'other' %}selected{% endif %}>Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Medium of Instruction</label>
+                            <input type="text" name="medium" class="form-input" placeholder="e.g. English, Hindi, Bilingual" value="{{ school.medium }}" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Established Year</label>
+                            <input type="number" name="established_year" class="form-input" placeholder="e.g. 1995" min="1800" max="2026" value="{{ school.established_year|default_if_none:'' }}" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Total Students (approx.)</label>
+                            <input type="number" name="total_students" class="form-input" placeholder="e.g. 1200" min="1" value="{{ school.total_students|default_if_none:'' }}" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section B - Location -->
+                <div class="form-section">
+                    <h2 class="form-section-title">
+                        <span class="material-symbols-outlined">location_on</span>
+                        B. Location
+                    </h2>
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label class="form-label">Address <span class="required">*</span></label>
+                            <input type="text" name="address" class="form-input" placeholder="Full street address" value="{{ school.address }}" required />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">City</label>
+                            <input type="text" class="form-input" value="{{ school.city }}" readonly style="background:#F7F7F7;" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">State</label>
+                            <input type="text" class="form-input" value="{{ school.state }}" readonly style="background:#F7F7F7;" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Pin Code <span class="required">*</span></label>
+                            <input type="text" name="pin_code" class="form-input" placeholder="6-digit pin code" maxlength="6" value="{{ school.pin_code }}" required />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Country</label>
+                            <input type="text" name="country" class="form-input" value="{{ school.country|default:'India' }}" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section C - Contact & Principal -->
+                <div class="form-section">
+                    <h2 class="form-section-title">
+                        <span class="material-symbols-outlined">contact_phone</span>
+                        C. Contact & Principal
+                    </h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Principal Name <span class="required">*</span></label>
+                            <input type="text" name="principal_name" class="form-input" placeholder="Full name" value="{{ school.principal_name }}" required />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Principal Email <span class="required">*</span></label>
+                            <input type="email" name="principal_email" class="form-input" placeholder="principal@school.edu" value="{{ school.principal_email }}" required />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">School Phone</label>
+                            <input type="tel" class="form-input" value="{{ school.contact_phone }}" readonly style="background:#F7F7F7;" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">School Email</label>
+                            <input type="email" class="form-input" value="{{ school.contact_email }}" readonly style="background:#F7F7F7;" />
+                        </div>
+                        <div class="form-group full-width">
+                            <label class="form-label">Website</label>
+                            <input type="url" name="website" class="form-input" placeholder="https://www.school.edu" value="{{ school.website }}" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit">
+                        <span class="material-symbols-outlined" style="font-size:20px;">check_circle</span>
+                        Complete Profile
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% else %}
+{# =============== ACTIVE: Full Dashboard =============== #}
+
+<div class="main-container">
+    <!-- Sidebar Overlay (mobile) -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="schoolAppSidebar">
+        <div class="sidebar-header p-3 pb-1">
+            <div class="d-flex align-items-center">
+                <div class="logo-img" style='background-image: url("{% static "images/IFT_logo.png" %}");'></div>
+            </div>
+        </div>
+        <nav class="flex-grow-1 px-3 d-flex flex-column gap-2 mt-3" style="overflow-y: auto;">
+            <a class="nav-item active" href="{% url 'students:school_dashboard' %}">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span class="nav-text">Dashboard</span>
+            </a>
+            <a class="nav-item" href="{% url 'students:school_students' %}">
+                <span class="material-symbols-outlined">school</span>
+                <span class="nav-text">Students</span>
+            </a>
+            <a class="nav-item" href="{% url 'students:school_teams' %}">
+                <span class="material-symbols-outlined">groups</span>
+                <span class="nav-text">Teams</span>
+            </a>
+            <a class="nav-item" href="{% url 'students:school_submissions' %}">
+                <span class="material-symbols-outlined">assignment</span>
+                <span class="nav-text">Submissions</span>
+            </a>
+            <a class="nav-item" href="{% url 'students:school_results' %}">
+                <span class="material-symbols-outlined">leaderboard</span>
+                <span class="nav-text">Results</span>
+            </a>
+            <a class="nav-item" href="{% url 'students:school_halloffame' %}">
+                <span class="material-symbols-outlined">emoji_events</span>
+                <span class="nav-text">Hall of Fame</span>
+            </a>
+            <a class="nav-item" href="{% url 'students:school_reports' %}">
+                <span class="material-symbols-outlined">analytics</span>
+                <span class="nav-text">Reports</span>
+            </a>
+            <a class="nav-item" href="{% url 'students:school_faq' %}">
+                <span class="material-symbols-outlined">help</span>
+                <span class="nav-text">FAQ</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer p-3 mt-auto">
+            <div class="user-profile">
+                <div class="user-avatar">
+                    {{ school.name|make_list|first|upper }}
+                </div>
+                <div class="user-info">
+                    <p class="user-name-text">{{ school.name|truncatechars:20 }}</p>
+                    <p class="user-role">School Admin</p>
+                </div>
+                <a href="{% url 'accounts:sign_out' %}" class="logout-btn" title="Logout">
+                    <span class="material-symbols-outlined">logout</span>
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <header class="top-header">
+            <button class="header-icon-btn" id="sidebarToggleBtn" style="margin-right:16px;">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+            <div class="d-flex align-items-center gap-3 ms-auto">
+                <button class="header-icon-btn" id="fullscreenBtn" title="Toggle Fullscreen">
+                    <span class="material-symbols-outlined">fullscreen</span>
+                </button>
+                <button class="header-icon-btn" id="notificationBtn" title="Notifications" style="position:relative;">
+                    <span class="material-symbols-outlined">notifications</span>
+                </button>
+                <div class="header-avatar" id="profileAvatarBtn" style="cursor:pointer;">{{ school.name|make_list|first|upper }}</div>
+            </div>
+        </header>
+
+        <!-- Notification Panel -->
+        <div class="dropdown-panel" id="notificationPanel" style="width:360px; max-height:500px;">
+            <div style="padding:16px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="margin:0; font-size:1rem; font-weight:700; color:#0f172a;">Notifications</h3>
+                <button id="closeNotifPanel" style="background:none; border:none; cursor:pointer; color:#94a3b8;">
+                    <span class="material-symbols-outlined" style="font-size:20px;">close</span>
+                </button>
+            </div>
+            <div style="max-height:400px; overflow-y:auto; padding:8px;">
+                {% for ann in announcements %}
+                <div style="padding:12px; border-radius:8px; margin-bottom:4px; background:{% if forloop.first %}rgba(94,42,151,0.05){% else %}transparent{% endif %};">
+                    <div style="display:flex; gap:12px;">
+                        <div style="width:32px; height:32px; border-radius:50%; background:rgba(94,42,151,0.1); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <span class="material-symbols-outlined" style="font-size:16px; color:var(--primary);">campaign</span>
+                        </div>
+                        <div style="flex:1;">
+                            <p style="margin:0; font-size:0.875rem; font-weight:600; color:#1e293b;">{{ ann.title }}</p>
+                            {% if ann.subtitle %}<p style="margin:4px 0 0; font-size:0.75rem; color:#64748b;">{{ ann.subtitle }}</p>{% endif %}
+                            <p style="margin:4px 0 0; font-size:0.625rem; color:#94a3b8;">{{ ann.created_at|timesince }} ago</p>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <p style="padding:16px; text-align:center; color:var(--text-muted); font-size:0.875rem;">No notifications</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Help Panel -->
+        <div class="dropdown-panel" id="helpModal" style="width:320px;">
+            <div style="padding:16px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="margin:0; font-size:1rem; font-weight:700; color:#0f172a;">Help & Support</h3>
+                <button id="closeHelpModal" style="background:none; border:none; cursor:pointer; color:#94a3b8;">
+                    <span class="material-symbols-outlined" style="font-size:20px;">close</span>
+                </button>
+            </div>
+            <div style="padding:16px;">
+                <a href="mailto:support@ift.in" style="display:flex; align-items:center; gap:12px; padding:12px; border-radius:8px; text-decoration:none; color:#0f172a;">
+                    <span class="material-symbols-outlined" style="color:var(--primary);">support_agent</span>
+                    <span style="font-weight:500; font-size:0.875rem;">Contact Support</span>
+                </a>
+                <a href="mailto:feedback@ift.in" style="display:flex; align-items:center; gap:12px; padding:12px; border-radius:8px; text-decoration:none; color:#0f172a;">
+                    <span class="material-symbols-outlined" style="color:var(--primary);">feedback</span>
+                    <span style="font-weight:500; font-size:0.875rem;">Send Feedback</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Profile Dropdown -->
+        <div class="dropdown-panel" id="profileDropdown" style="width:280px;">
+            <div style="padding:16px; border-bottom:1px solid #f1f5f9;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <div style="width:48px; height:48px; border-radius:50%; background:var(--primary); display:flex; align-items:center; justify-content:center; color:white; font-weight:700; border:2px solid var(--primary);">
+                        {{ school.name|make_list|first|upper }}
+                    </div>
+                    <div style="flex:1; overflow:hidden;">
+                        <p style="margin:0; font-size:0.875rem; font-weight:700; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ school.name }}</p>
+                        <p style="margin:4px 0 0; font-size:0.75rem; color:#64748b;">School Admin</p>
+                        <p style="margin:2px 0 0; font-size:0.625rem; color:#94a3b8;">{{ school.contact_email }}</p>
+                    </div>
+                </div>
+            </div>
+            <div style="padding:8px;">
+                <a href="{% url 'students:school_profile' %}" style="display:flex; align-items:center; gap:12px; padding:12px; border-radius:8px; text-decoration:none; color:#0f172a;">
+                    <span class="material-symbols-outlined" style="color:var(--primary); font-size:20px;">person</span>
+                    <span style="font-weight:500; font-size:0.875rem;">My Profile</span>
+                </a>
+                <div style="height:1px; background:#f1f5f9; margin:8px 0;"></div>
+                <a href="{% url 'accounts:sign_out' %}" style="display:flex; align-items:center; gap:12px; padding:12px; border-radius:8px; text-decoration:none; color:#ef4444;">
+                    <span class="material-symbols-outlined" style="color:#ef4444; font-size:20px;">logout</span>
+                    <span style="font-weight:600; font-size:0.875rem;">Logout</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content-wrapper">
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="row align-items-center">
+                    <div class="col-12 col-md-6">
+                        <h1>Welcome, {{ school.principal_name|default:school.name }}</h1>
+                        <p>IFT Competition Overview for <span style="font-weight:600; color:var(--primary);">{{ school.name }}</span></p>
+                    </div>
+                    <div class="col-12 col-md-6 d-flex justify-content-md-end align-items-center gap-3 mt-3 mt-md-0">
+                        {% for phase in phases %}
+                            {% if phase.status == 'active' %}
+                            <div class="phase-badge">
+                                <span class="phase-badge-dot"></span>
+                                <span class="phase-badge-text">{{ phase.name }}</span>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPI Grid -->
+            <div class="row g-3 mb-4">
+                <div class="col-6 col-lg-3">
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <span class="kpi-label">Students Enrolled</span>
+                            <div class="kpi-icon" style="background:rgba(94,42,151,0.1);">
+                                <span class="material-symbols-outlined" style="color:var(--primary);">school</span>
+                            </div>
+                        </div>
+                        <div class="kpi-value">{{ student_count }}</div>
+                        <p class="kpi-sub">registered on IFT</p>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <span class="kpi-label">Teams Formed</span>
+                            <div class="kpi-icon" style="background:rgba(37,99,235,0.1);">
+                                <span class="material-symbols-outlined" style="color:#2563eb;">groups</span>
+                            </div>
+                        </div>
+                        <div class="kpi-value">{{ teams_count }}</div>
+                        <p class="kpi-sub">active teams</p>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <span class="kpi-label">Ideas Submitted</span>
+                            <div class="kpi-icon" style="background:rgba(22,163,74,0.1);">
+                                <span class="material-symbols-outlined" style="color:#16a34a;">lightbulb</span>
+                            </div>
+                        </div>
+                        <div class="kpi-value">{{ ideas_count }}</div>
+                        <p class="kpi-sub">submissions received</p>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <span class="kpi-label">Avg Score</span>
+                            <div class="kpi-icon" style="background:rgba(245,158,11,0.1);">
+                                <span class="material-symbols-outlined" style="color:#f59e0b;">star</span>
+                            </div>
+                        </div>
+                        <div class="kpi-value">{{ avg_score }}<span class="kpi-value-unit">/100</span></div>
+                        <p class="kpi-sub">AI evaluation avg</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Competition Progress -->
+            {% if phases %}
+            <div class="section-card" style="height:auto;">
+                <div class="section-header">
+                    <h3 class="section-title">Competition Progress</h3>
+                    <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">IFT 2026 Season</span>
+                </div>
+                <div class="phase-progress">
+                    {% for phase in phases %}
+                    <div class="phase-step {% if phase.status == 'completed' %}step-completed{% elif phase.status == 'active' %}step-active{% endif %}">
+                        <div class="phase-step-bar {% if phase.status == 'completed' %}completed{% elif phase.status == 'active' %}bar-active{% else %}upcoming{% endif %}"></div>
+                        <div class="phase-step-label">{{ phase.name }}</div>
+                        <div class="phase-step-days">
+                            {% if phase.status == 'completed' %}Completed
+                            {% elif phase.status == 'active' %}{{ phase.days_remaining }} days left
+                            {% else %}Starts {{ phase.start_date|date:"M d" }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <!-- Quick Stats Row -->
+                <div class="row g-0 mt-4" style="background:#f8fafc; border-radius:10px; border:1px solid var(--border-light);">
+                    <div class="col-3">
+                        <div class="quick-stat">
+                            <div class="quick-stat-value" style="color:#22c55e;">
+                                {% if student_count > 0 %}{% widthratio ideas_count student_count 100 %}%{% else %}0%{% endif %}
+                            </div>
+                            <div class="quick-stat-label">Submission Rate</div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="quick-stat">
+                            <div class="quick-stat-value">{{ avg_score }}</div>
+                            <div class="quick-stat-label">Avg Score</div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="quick-stat">
+                            <div class="quick-stat-value" style="color:var(--primary);">{{ student_count }}</div>
+                            <div class="quick-stat-label">Total Students</div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="quick-stat">
+                            <div class="quick-stat-value" style="color:#f59e0b;">{{ teams_count }}</div>
+                            <div class="quick-stat-label">Total Teams</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="row g-4 mb-4">
+                <!-- Grade-wise Participation -->
+                <div class="col-12 col-lg-5">
+                    <div class="section-card">
+                        <div class="section-header">
+                            <h3 class="section-title">Grade-wise Participation</h3>
+                        </div>
+                        {% if grade_data %}
+                        <div class="chart-container" id="gradeChart">
+                            {% for g in grade_data %}
+                            <div class="chart-bar-group">
+                                <div class="chart-bar" data-count="{{ g.count }}" data-max="{{ grade_max }}" style="height: {% widthratio g.count grade_max 100 %}%; background: var(--primary); opacity: 0.{{ forloop.counter|add:"3" }};"></div>
+                                <span class="chart-bar-label">{{ g.grade }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="d-flex justify-content-between" style="font-size:0.6875rem; color:var(--text-muted); padding:0 8px;">
+                            {% for g in grade_data %}
+                            <span>{{ g.count }} students</span>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div style="text-align:center; padding:40px 0; color:var(--text-muted);">
+                            <span class="material-symbols-outlined" style="font-size:48px; opacity:0.3;">bar_chart</span>
+                            <p style="margin-top:8px; font-size:0.875rem;">No students enrolled yet</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Top 5 Ideas Leaderboard -->
+                <div class="col-12 col-lg-7">
+                    <div class="section-card">
+                        <div class="section-header">
+                            <h3 class="section-title">Top 5 Ideas</h3>
+                        </div>
+                        {% if top_ideas %}
+                        <table class="leaderboard-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Idea</th>
+                                    <th>Student</th>
+                                    <th style="text-align:right;">Score</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ev in top_ideas %}
+                                <tr>
+                                    <td>
+                                        <span class="rank-badge {% if forloop.counter == 1 %}rank-1{% elif forloop.counter == 2 %}rank-2{% elif forloop.counter == 3 %}rank-3{% else %}rank-default{% endif %}">
+                                            {{ forloop.counter }}
+                                        </span>
+                                    </td>
+                                    <td style="font-weight:600;">{{ ev.submission.title|default:"Untitled Idea"|truncatechars:40 }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="initials-avatar" style="background:{% cycle '#7c3aed' '#2563eb' '#059669' '#d97706' '#dc2626' %};">
+                                                {{ ev.submission.student.user.first_name|truncatechars:1|upper }}{{ ev.submission.student.user.last_name|truncatechars:1|upper }}
+                                            </div>
+                                            <span>{{ ev.submission.student.user.get_full_name|truncatechars:18 }}</span>
+                                        </div>
+                                    </td>
+                                    <td style="text-align:right;"><span class="score-badge">{{ ev.final_score }}</span></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% else %}
+                        <div style="text-align:center; padding:40px 0; color:var(--text-muted);">
+                            <span class="material-symbols-outlined" style="font-size:48px; opacity:0.3;">emoji_events</span>
+                            <p style="margin-top:8px; font-size:0.875rem;">No evaluated ideas yet</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity + Announcements -->
+            <div class="row g-4 mb-4">
+                <div class="col-12 col-lg-8">
+                    <div class="section-card" style="height:auto;">
+                        <div class="section-header">
+                            <h3 class="section-title">Recent Activity</h3>
+                        </div>
+                        {% if recent %}
+                        <div class="row g-4">
+                            <div class="col-12 col-lg-6">
+                                {% for sub in recent %}
+                                {% if forloop.counter <= 3 %}
+                                <div class="feed-item">
+                                    <div class="feed-icon {% if sub.status == 'submitted' %}feed-icon-success{% elif sub.status == 'evaluated' %}feed-icon-blue{% elif sub.status == 'draft' %}feed-icon-warning{% else %}feed-icon-info{% endif %}">
+                                        <span class="material-symbols-outlined">
+                                            {% if sub.status == 'submitted' %}check_circle{% elif sub.status == 'evaluated' %}smart_toy{% elif sub.status == 'draft' %}edit_note{% else %}assignment{% endif %}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <p class="feed-title">{{ sub.student.user.get_full_name }} - {{ sub.title|default:"Untitled"|truncatechars:30 }}</p>
+                                        <p class="feed-meta">Status: {{ sub.get_status_display }}</p>
+                                        <p class="feed-meta" style="margin-top:2px; color:#94a3b8;">{{ sub.created_at|timesince }} ago</p>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+                            <div class="col-12 col-lg-6">
+                                {% for sub in recent %}
+                                {% if forloop.counter > 3 %}
+                                <div class="feed-item">
+                                    <div class="feed-icon {% if sub.status == 'submitted' %}feed-icon-success{% elif sub.status == 'evaluated' %}feed-icon-blue{% elif sub.status == 'draft' %}feed-icon-warning{% else %}feed-icon-info{% endif %}">
+                                        <span class="material-symbols-outlined">
+                                            {% if sub.status == 'submitted' %}check_circle{% elif sub.status == 'evaluated' %}smart_toy{% elif sub.status == 'draft' %}edit_note{% else %}assignment{% endif %}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <p class="feed-title">{{ sub.student.user.get_full_name }} - {{ sub.title|default:"Untitled"|truncatechars:30 }}</p>
+                                        <p class="feed-meta">Status: {{ sub.get_status_display }}</p>
+                                        <p class="feed-meta" style="margin-top:2px; color:#94a3b8;">{{ sub.created_at|timesince }} ago</p>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% else %}
+                        <div style="text-align:center; padding:40px 0; color:var(--text-muted);">
+                            <span class="material-symbols-outlined" style="font-size:48px; opacity:0.3;">history</span>
+                            <p style="margin-top:8px; font-size:0.875rem;">No recent activity</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="col-12 col-lg-4">
+                    <div class="section-card" style="height:auto;">
+                        <div class="section-header">
+                            <h3 class="section-title">Announcements</h3>
+                        </div>
+                        {% if announcements %}
+                        {% for ann in announcements %}
+                        <div class="ann-item">
+                            <div style="display:flex; align-items:flex-start; gap:12px;">
+                                <div style="width:32px; height:32px; border-radius:50%; background:rgba(94,42,151,0.1); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                    <span class="material-symbols-outlined" style="font-size:16px; color:var(--primary);">campaign</span>
+                                </div>
+                                <div style="flex:1;">
+                                    <p style="font-weight:600; font-size:0.8125rem; margin:0 0 2px;">{{ ann.title }}</p>
+                                    {% if ann.subtitle %}<p style="font-size:0.75rem; color:var(--text-muted); margin:0 0 4px;">{{ ann.subtitle }}</p>{% endif %}
+                                    <p style="font-size:0.625rem; color:#94a3b8; margin:0;">{{ ann.created_at|timesince }} ago</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% else %}
+                        <div style="text-align:center; padding:40px 0; color:var(--text-muted);">
+                            <span class="material-symbols-outlined" style="font-size:48px; opacity:0.3;">campaign</span>
+                            <p style="margin-top:8px; font-size:0.875rem;">No announcements</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /content-wrapper -->
+    </main>
+</div><!-- /main-container -->
+
+{% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+(function() {
+    // ===== Profile Completion Form (pending state) =====
+    const form = document.getElementById('schoolProfileForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const btn = form.querySelector('.btn-submit');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="material-symbols-outlined">hourglass_empty</span> Saving...';
+
+            const formData = new FormData(form);
+
+            fetch(window.location.href, {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-CSRFToken': formData.get('csrfmiddlewaretoken') }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    setTimeout(() => { window.location.reload(); }, 1500);
+                } else {
+                    showToast(data.message || 'Something went wrong', 'error');
+                    btn.disabled = false;
+                    btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:20px;">check_circle</span> Complete Profile';
+                }
+            })
+            .catch(err => {
+                showToast('Network error. Please try again.', 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:20px;">check_circle</span> Complete Profile';
+            });
+        });
+    }
+
+    function showToast(msg, type) {
+        let toast = document.getElementById('schoolToast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'schoolToast';
+            toast.style.cssText = 'position:fixed;top:24px;right:24px;z-index:9999;padding:16px 24px;border-radius:12px;font-family:Poppins,sans-serif;font-size:0.9rem;font-weight:600;color:#fff;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,0.15);transform:translateX(120%);transition:transform 0.4s ease;max-width:450px;';
+            document.body.appendChild(toast);
+        }
+        toast.style.background = type === 'success' ? '#10B981' : '#EF4444';
+        const icon = type === 'success' ? 'check_circle' : 'error';
+        toast.innerHTML = '<span class="material-symbols-outlined" style="font-size:20px;">' + icon + '</span>' + msg;
+        setTimeout(() => { toast.style.transform = 'translateX(0)'; }, 50);
+        setTimeout(() => { toast.style.transform = 'translateX(120%)'; }, 4000);
+    }
+
+    // ===== Dashboard Interactivity =====
+    const sidebar = document.getElementById('schoolAppSidebar');
+    const sidebarToggle = document.getElementById('sidebarToggleBtn');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+    if (sidebarToggle && sidebar) {
+        sidebarToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (window.innerWidth >= 768) {
+                sidebar.classList.toggle('collapsed');
+            } else {
+                sidebar.classList.toggle('mobile-open');
+                if (sidebarOverlay) sidebarOverlay.classList.toggle('active');
+            }
+        });
+    }
+
+    if (sidebarOverlay) {
+        sidebarOverlay.addEventListener('click', function() {
+            if (sidebar) sidebar.classList.remove('mobile-open');
+            sidebarOverlay.classList.remove('active');
+        });
+    }
+
+    // Close sidebar on outside click (mobile)
+    document.addEventListener('click', function(e) {
+        if (sidebar && window.innerWidth < 768) {
+            if (!e.target.closest('#schoolAppSidebar') && !e.target.closest('#sidebarToggleBtn')) {
+                sidebar.classList.remove('mobile-open');
+                if (sidebarOverlay) sidebarOverlay.classList.remove('active');
+            }
+        }
+    });
+
+    // Dropdown panels
+    function setupPanel(btnId, panelId, closeBtnId) {
+        const btn = document.getElementById(btnId);
+        const panel = document.getElementById(panelId);
+        const closeBtn = closeBtnId ? document.getElementById(closeBtnId) : null;
+        if (!btn || !panel) return;
+
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            // Close other panels
+            document.querySelectorAll('.dropdown-panel').forEach(p => {
+                if (p !== panel) p.classList.remove('active');
+            });
+            panel.classList.toggle('active');
+        });
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function() { panel.classList.remove('active'); });
+        }
+
+        document.addEventListener('click', function(e) {
+            if (!panel.contains(e.target) && !btn.contains(e.target)) {
+                panel.classList.remove('active');
+            }
+        });
+    }
+
+    setupPanel('notificationBtn', 'notificationPanel', 'closeNotifPanel');
+    setupPanel('helpBtn', 'helpModal', 'closeHelpModal');
+    setupPanel('profileAvatarBtn', 'profileDropdown', null);
+
+    // Fullscreen
+    const fsBtn = document.getElementById('fullscreenBtn');
+    if (fsBtn) {
+        fsBtn.addEventListener('click', function() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        });
+        document.addEventListener('fullscreenchange', function() {
+            const icon = fsBtn.querySelector('.material-symbols-outlined');
+            if (icon) icon.textContent = document.fullscreenElement ? 'fullscreen_exit' : 'fullscreen';
+        });
+    }
+})();
+</script>
+
+</body>
+</html>

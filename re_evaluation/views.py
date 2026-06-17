@@ -133,6 +133,7 @@ def reeval_list(request):
         'evaluated': submissions.filter(is_evaluated=True).count(),
         'with_mentor': MentorScore.objects.count(),
         'pending_count': pending_count,
+        'total_count': submissions.count(),
         'stats': stats,
         'param_stats': param_stats,
     }
@@ -366,11 +367,15 @@ def reeval_batch_evaluate(request):
                 'task_id': tid,
             }, status=409)
 
-    pending = LightSubmission.objects.filter(is_evaluated=False)
+    force_all = request.POST.get('force_all', 'false') == 'true'
+    if force_all:
+        pending = LightSubmission.objects.all()
+    else:
+        pending = LightSubmission.objects.filter(is_evaluated=False)
     pending_ids = list(pending.values_list('pk', flat=True))
 
     if not pending_ids:
-        return JsonResponse({'error': 'No pending ideas to evaluate.'}, status=400)
+        return JsonResponse({'error': 'No ideas to evaluate.'}, status=400)
 
     # Number of parallel workers (5 ideas evaluate simultaneously)
     parallel_count = 5

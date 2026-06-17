@@ -1,0 +1,1093 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="icon" type="image/png" href="{% static 'images/IFT_logo.png' %}">
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Create Content | Super Admin | IFT Platform</title>
+
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <style>
+        :root {
+            --primary: #5E2A97;
+            --secondary: #DEDE50;
+            --primary-light: #E8D4F0;
+            --background-light: #F7F7F7;
+            --surface-light: #FFFFFF;
+            --border-light: #EEEEEE;
+            --text-dark: #222222;
+            --text-muted: #666666;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            overflow: hidden;
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+        .main-container { display: flex; height: 100vh; width: 100%; }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            width: 280px;
+            background: #FFFFFF;
+            border-right: 1px solid #EEEEEE;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: sticky;
+            top: 0;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s ease;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .sidebar.collapsed { width: 80px; }
+        .sidebar.collapsed .sidebar-title,
+        .sidebar.collapsed .sidebar-subtitle,
+        .sidebar.collapsed .nav-text,
+        .sidebar.collapsed .user-info { opacity: 0; width: 0; overflow: hidden; white-space: nowrap; }
+        .sidebar.collapsed .logo-img { width: 50px; height: 50px; margin: 0 auto; background-position: center; }
+        .sidebar.collapsed .nav-item { justify-content: center; padding-left: 1.7rem; }
+        .sidebar.collapsed .nav-item .material-symbols-outlined { margin: 0; }
+        .sidebar.collapsed .user-avatar { margin: 0 auto; }
+        .sidebar.collapsed .logout-btn { display: none; }
+        .sidebar.collapsed .user-profile { justify-content: center; }
+        .sidebar.collapsed .notification-badge { display: none; }
+
+        .sidebar-header { border-bottom: 1px solid #F7F7F7; }
+
+        .logo-img {
+            width: 250px; height: 50px;
+            background-size: contain; background-position: left center;
+            background-repeat: no-repeat; flex-shrink: 0;
+        }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.75rem 1rem; border-radius: 0.5rem;
+            text-decoration: none; color: #222222;
+            transition: all 0.2s ease; cursor: pointer; margin-bottom: 0.25rem;
+        }
+        .nav-item:hover { background: #F7F7F7; color: #222222; }
+        .nav-item .material-symbols-outlined { font-size: 24px; color: #666666; transition: all 0.2s ease; }
+        .nav-item.nav-item-active { background: rgba(94, 42, 151, 0.1); color: #5E2A97; padding-left: calc(1rem - 4px); }
+        .nav-item.nav-item-active .material-symbols-outlined { color: #5E2A97; font-variation-settings: 'FILL' 1; }
+        .nav-text { font-size: 0.875rem; font-weight: 500; }
+
+        .nav-dropdown { position: relative; }
+        .nav-dropdown-toggle { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+        .nav-dropdown-icon { font-size: 18px !important; transition: transform 0.2s ease; }
+        .nav-dropdown.open .nav-dropdown-icon { transform: rotate(180deg); }
+        .nav-dropdown-menu { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; padding-left: 2.5rem; }
+        .nav-dropdown.open .nav-dropdown-menu { max-height: 400px; margin-top: 0.25rem; }
+
+        .nav-dropdown-item {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.625rem 1rem; border-radius: 0.5rem;
+            text-decoration: none; color: #666666; font-size: 0.875rem;
+            font-weight: 500; transition: all 0.2s ease; margin-bottom: 0.25rem;
+        }
+        .nav-dropdown-item:hover { background: #F7F7F7; color: #5E2A97; }
+        .nav-dropdown-item.active { background: rgba(94, 42, 151, 0.1); color: #5E2A97; }
+
+        .sidebar.collapsed .nav-dropdown-toggle { justify-content: center; }
+        .sidebar.collapsed .nav-dropdown-icon { display: none; }
+        .sidebar.collapsed .nav-dropdown-menu { padding-left: 0rem; }
+        .sidebar.collapsed .nav-dropdown-item { padding-left: 0.6rem; }
+
+        .sidebar-footer { border-top: 1px solid #EEEEEE; margin-top: auto; }
+
+        .user-profile {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.75rem; border-radius: 0.5rem;
+            transition: all 0.2s ease; cursor: pointer;
+        }
+        .user-profile:hover { background: #F7F7F7; }
+        .user-avatar { width: 2.5rem; height: 2.5rem; border-radius: 50%; overflow: hidden; flex-shrink: 0; border: 2px solid #EEEEEE; }
+        .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .user-info { flex: 1; }
+        .user-name { font-size: 0.875rem; font-weight: 700; color: #222222; margin: 0 0 0.125rem 0; line-height: 1.2; }
+        .user-role { font-size: 0.75rem; color: #666666; margin: 0; line-height: 1.2; }
+        .logout-btn {
+            background: none; border: none; color: #666666; cursor: pointer;
+            padding: 0.5rem; border-radius: 0.375rem; transition: all 0.2s ease;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .logout-btn:hover { background: rgba(94, 42, 151, 0.1); color: #5E2A97; }
+        .logout-btn .material-symbols-outlined { font-size: 20px; }
+
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; left: -280px; z-index: 999; transition: left 0.3s ease; }
+            .sidebar.mobile-open { left: 0; }
+            .sidebar.collapsed { left: -80px; }
+            .sidebar.collapsed.mobile-open { left: 0; }
+        }
+
+        /* ── Header ── */
+        .top-header {
+            height: 70px; min-height: 70px; flex-shrink: 0;
+            background: #FFFFFF; border-bottom: 1px solid #EEEEEE;
+            display: flex; align-items: center; padding: 0 1.5rem;
+            position: sticky; top: 0; z-index: 100; font-family: 'Poppins', sans-serif;
+        }
+        .header-icon-btn {
+            width: 2.5rem; height: 2.5rem; border-radius: 0.5rem; border: none;
+            background: #F7F7F7; color: #666666; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;
+        }
+        .header-icon-btn:hover { background: #EEEEEE; color: #5E2A97; }
+        .header-icon-btn .material-symbols-outlined { font-size: 22px; }
+        .header-avatar {
+            width: 2.5rem; height: 2.5rem; border-radius: 50%;
+            background-size: cover; background-position: center; background-repeat: no-repeat;
+            border: 2px solid #5E2A97; cursor: pointer; transition: all 0.2s ease;
+        }
+        .header-avatar:hover { transform: scale(1.05); box-shadow: 0 0 0 4px rgba(94, 42, 151, 0.1); }
+        #profileDropdown.active { display: block !important; opacity: 1 !important; transform: translateY(0) !important; }
+
+        /* ── Main Content ── */
+        .main-content { flex: 1; display: flex; flex-direction: column; height: 100%; overflow-y: auto; position: relative; z-index: 10; }
+
+        .content-wrapper {
+            flex: 1;
+            padding: 32px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Page Header */
+        .page-header {
+            margin-bottom: 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .page-header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 6px;
+        }
+
+        .breadcrumb {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            background: none;
+            padding: 0; margin: 0;
+        }
+
+        .breadcrumb-item a { color: var(--text-muted); text-decoration: none; }
+        .breadcrumb-item a:hover { color: var(--primary); }
+        .breadcrumb-item.active { color: var(--text-dark); }
+
+        /* Cards */
+        .form-card {
+            background: var(--surface-light);
+            border-radius: 12px;
+            padding: 28px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+            border: 1px solid var(--border-light);
+            margin-bottom: 20px;
+        }
+
+        .form-card-title {
+            font-size: 0.8125rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-card-title .material-symbols-outlined {
+            font-size: 18px;
+            color: var(--primary);
+        }
+
+        /* Form Controls */
+        .field-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .field-hint {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-family: 'Poppins', sans-serif;
+            background: #f8fafc;
+            color: var(--text-dark);
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(94,42,151,0.1);
+            background: #fff;
+        }
+
+        .form-input::placeholder { color: #aaa; }
+
+        textarea.form-input {
+            resize: vertical;
+            min-height: 180px;
+            line-height: 1.6;
+        }
+
+        select.form-input { cursor: pointer; }
+
+        /* Content Type Selector */
+        .type-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .type-option {
+            border: 2px solid var(--border-light);
+            border-radius: 10px;
+            padding: 14px 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #f8fafc;
+        }
+
+        .type-option:hover { border-color: var(--primary); background: rgba(94,42,151,0.03); }
+
+        .type-option.selected {
+            border-color: var(--primary);
+            background: rgba(94,42,151,0.06);
+        }
+
+        .type-option input[type="radio"] { display: none; }
+
+        .type-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .type-icon.announcement { background: rgba(59,130,246,0.1); color: #3b82f6; }
+        .type-icon.faq          { background: rgba(245,158,11,0.1); color: #f59e0b; }
+
+        .type-label { font-size: 0.875rem; font-weight: 600; color: var(--text-dark); margin: 0; }
+        .type-desc  { font-size: 0.75rem; color: var(--text-muted); margin: 0; }
+
+        /* Toolbar */
+        .editor-toolbar {
+            display: flex;
+            gap: 4px;
+            padding: 8px 10px;
+            background: #f8fafc;
+            border: 1px solid var(--border-light);
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .editor-toolbar button {
+            width: 32px;
+            height: 32px;
+            border: 1px solid var(--border-light);
+            background: #fff;
+            border-radius: 6px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.8125rem;
+            font-weight: 700;
+            cursor: pointer;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .editor-toolbar button:hover { border-color: var(--primary); color: var(--primary); }
+
+        .editor-toolbar .divider {
+            width: 1px;
+            background: var(--border-light);
+            margin: 4px 4px;
+        }
+
+        textarea#contentBody {
+            border-radius: 0 0 8px 8px;
+            min-height: 260px;
+        }
+
+        /* Status Selector */
+        .status-options {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .status-chip {
+            padding: 7px 16px;
+            border-radius: 8px;
+            border: 2px solid var(--border-light);
+            font-size: 0.8125rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #f8fafc;
+        }
+
+        .status-chip input[type="radio"] { display: none; }
+        .status-chip:hover { border-color: var(--primary); }
+
+        .status-chip.selected-draft     { border-color: #64748b; background: #f1f5f9; color: #64748b; }
+        .status-chip.selected-published { border-color: #16a34a; background: #dcfce7; color: #16a34a; }
+        .status-chip.selected-scheduled { border-color: #d97706; background: #fef3c7; color: #d97706; }
+
+        #scheduleFields { display: none; margin-top: 14px; }
+
+        /* Action Buttons */
+        .btn-primary-custom {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 11px 24px;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary-custom:hover { background: #4a1f7a; }
+
+        .btn-outline-custom {
+            background: #fff;
+            color: var(--text-dark);
+            border: 1px solid var(--border-light);
+            padding: 11px 20px;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-outline-custom:hover { border-color: var(--primary); color: var(--primary); }
+
+        .btn-danger-outline {
+            background: #fff;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+            padding: 11px 20px;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-danger-outline:hover { background: #fee2e2; }
+
+        /* Sticky footer bar */
+        .action-bar {
+            position: sticky;
+            bottom: 0;
+            background: #fff;
+            border-top: 1px solid var(--border-light);
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            z-index: 50;
+        }
+
+        /* Toast */
+        .toast-container {
+            position: fixed; bottom: 80px; right: 24px;
+            z-index: 2000; display: flex; flex-direction: column; gap: 8px;
+        }
+
+        .toast {
+            background: #1e293b; color: #fff;
+            padding: 12px 18px; border-radius: 10px;
+            font-size: 0.8125rem; font-weight: 500;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+            display: flex; align-items: center; gap: 10px;
+            animation: toastIn 0.3s ease;
+        }
+
+        .toast.success { background: #166534; }
+        .toast.warning { background: #92400e; }
+
+        @keyframes toastIn {
+            from { transform: translateX(80px); opacity: 0; }
+            to   { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Char counter */
+        .char-counter {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-align: right;
+            margin-top: 4px;
+        }
+
+        .char-counter.warn { color: #d97706; }
+        .char-counter.over { color: #dc2626; }
+
+        @media (max-width: 768px) {
+            .content-wrapper { padding: 16px; }
+            .type-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+
+<body>
+<div class="main-container">
+
+    <!-- ══ SIDEBAR ══ -->
+    <aside class="sidebar d-md-flex flex-column" id="superAdminAppSidebar">
+        <div class="sidebar-header p-3 pb-1">
+            <div class="d-flex align-items-center">
+                <div class="logo-img" style="background-image: url('{% static 'images/IFT_logo.png' %}');"></div>
+            </div>
+        </div>
+        <nav class="flex-grow-1 px-3 d-flex flex-column gap-2 mt-3">
+            <a class="nav-item" href="{% url 'admins:dashboard' %}">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span class="nav-text">Dashboard</span>
+            </a>
+
+            <div class="nav-dropdown">
+                <div class="nav-item nav-dropdown-toggle" id="userManagementToggle">
+                    <div style="display:flex;align-items:center;gap:0.75rem;">
+                        <span class="material-symbols-outlined">manage_accounts</span>
+                        <span class="nav-text">User Management</span>
+                    </div>
+                    <span class="material-symbols-outlined nav-dropdown-icon">expand_more</span>
+                </div>
+                <div class="nav-dropdown-menu">
+                    <a class="nav-dropdown-item" href="{% url 'admins:onboard_student' %}">
+                        <span class="material-symbols-outlined">person_add</span>
+                        <span class="nav-text">Onboard Student</span>
+                    </a>
+                    <a class="nav-dropdown-item" href="{% url 'admins:students_list' %}">
+                        <span class="material-symbols-outlined">school</span>
+                        <span class="nav-text">Students</span>
+                    </a>
+                    <a class="nav-dropdown-item" href="{% url 'admins:onboard_school' %}">
+                        <span class="material-symbols-outlined">add_business</span>
+                        <span class="nav-text">Onboard School</span>
+                    </a>
+                    <a class="nav-dropdown-item" href="{% url 'admins:schools_list' %}">
+                        <span class="material-symbols-outlined">apartment</span>
+                        <span class="nav-text">Schools</span>
+                    </a>
+                    <a class="nav-dropdown-item" href="{% url 'admins:onboard_evaluator' %}">
+                        <span class="material-symbols-outlined">person_add</span>
+                        <span class="nav-text">Onboard Evaluator</span>
+                    </a>
+                    <a class="nav-dropdown-item" href="{% url 'admins:evaluators_list' %}">
+                        <span class="material-symbols-outlined">groups</span>
+                        <span class="nav-text">Evaluators</span>
+                    </a>
+                </div>
+            </div>
+
+            <a class="nav-item" href="{% url 'admins:evaluator_management' %}">
+                <span class="material-symbols-outlined">supervisor_account</span>
+                <span class="nav-text">Evaluator Management</span>
+            </a>
+
+            <a class="nav-item" href="{% url 'admins:all_submissions' %}">
+                <span class="material-symbols-outlined">assignment</span>
+                <span class="nav-text">Submissions</span>
+            </a>
+
+            <a class="nav-item" href="{% url 'admins:rankings' %}">
+                <span class="material-symbols-outlined">leaderboard</span>
+                <span class="nav-text">Rankings</span>
+            </a>
+
+            <a class="nav-item" href="{% url 'admins:schedule' %}">
+                <span class="material-symbols-outlined">event_note</span>
+                <span class="nav-text">Schedule</span>
+            </a>
+
+            <a class="nav-item nav-item-active" href="{% url 'admins:content_list' %}">
+                <span class="material-symbols-outlined">article</span>
+                <span class="nav-text">Content</span>
+            </a>
+
+            <a class="nav-item" href="{% url 'admins:reports' %}">
+                <span class="material-symbols-outlined">analytics</span>
+                <span class="nav-text">Reports</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer p-3 mt-auto">
+            <div class="user-profile">
+                <div class="user-avatar">
+                    <img alt="Admin" src="https://ui-avatars.com/api/?name={{ request.user.get_full_name|default:request.user.username }}&background=5E2A97&color=fff" />
+                </div>
+                <div class="user-info flex-grow-1">
+                    <p class="user-name">{{ request.user.get_full_name|default:request.user.username }}</p>
+                    <p class="user-role">Super Administrator</p>
+                </div>
+                <a href="{% url 'accounts:sign_out' %}" class="logout-btn" title="Logout">
+                    <span class="material-symbols-outlined">logout</span>
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ══ MAIN CONTENT ══ -->
+    <main class="main-content">
+
+        <!-- ── Header ── -->
+        <header class="top-header">
+            <button class="header-icon-btn" id="sidebarToggleBtn" style="margin-right:16px;">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+            <div class="d-flex align-items-center gap-2 ms-auto">
+                <button class="header-icon-btn" id="notifBtn">
+                    <span class="material-symbols-outlined">notifications</span>
+                </button>
+                <div class="header-avatar" style="background-image: url('https://ui-avatars.com/api/?name={{ request.user.get_full_name|default:request.user.username }}&background=5E2A97&color=fff');" id="profileAvatarBtn"></div>
+            </div>
+        </header>
+
+        <!-- Profile Dropdown -->
+        <div id="profileDropdown" style="position:fixed;top:70px;right:20px;width:280px;background:white;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.15);z-index:9999;overflow:hidden;display:none;opacity:0;transform:translateY(-10px);transition:opacity 0.3s ease,transform 0.3s ease;">
+            <div style="padding:16px;border-bottom:1px solid #f1f5f9;">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <div style="width:48px;height:48px;border-radius:50%;background-image:url('https://ui-avatars.com/api/?name={{ request.user.get_full_name|default:request.user.username }}&background=5E2A97&color=fff');background-size:cover;border:2px solid #5E2A97;"></div>
+                    <div>
+                        <p style="margin:0;font-size:0.875rem;font-weight:700;color:#0f172a;">{{ request.user.get_full_name|default:request.user.username }}</p>
+                        <p style="margin:4px 0 0;font-size:0.75rem;color:#64748b;">Super Admin</p>
+                        <p style="margin:2px 0 0;font-size:0.625rem;color:#94a3b8;">{{ request.user.email }}</p>
+                    </div>
+                </div>
+            </div>
+            <div style="padding:8px;">
+                <a href="{% url 'accounts:sign_out' %}" style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:8px;text-decoration:none;color:#ef4444;">
+                    <span class="material-symbols-outlined" style="color:#ef4444;font-size:20px;">logout</span>
+                    <span style="font-weight:600;font-size:0.875rem;">Logout</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="content-wrapper">
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div>
+                    <h1>Create Content</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'admins:dashboard' %}">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'admins:content_list' %}">Content</a></li>
+                            <li class="breadcrumb-item active">Create</li>
+                        </ol>
+                    </nav>
+                </div>
+                <a href="{% url 'admins:content_list' %}" class="btn-outline-custom">
+                    <span class="material-symbols-outlined" style="font-size:16px;">arrow_back</span>
+                    Back to Content
+                </a>
+            </div>
+
+            <div class="row g-4">
+
+                <!-- Left Column: Main Form -->
+                <div class="col-lg-8">
+
+                    <!-- Content Type -->
+                    <div class="form-card">
+                        <div class="form-card-title">
+                            <span class="material-symbols-outlined">category</span>
+                            Content Type
+                        </div>
+                        <div class="type-grid" id="typeGrid">
+                            <label class="type-option selected" onclick="selectType('announcement', this)">
+                                <input type="radio" name="contentType" value="announcement" checked />
+                                <div class="type-icon announcement">
+                                    <span class="material-symbols-outlined" style="font-size:20px;">campaign</span>
+                                </div>
+                                <div>
+                                    <p class="type-label">Announcement</p>
+                                    <p class="type-desc">News & updates for all users</p>
+                                </div>
+                            </label>
+                            <label class="type-option" onclick="selectType('faq', this)">
+                                <input type="radio" name="contentType" value="faq" />
+                                <div class="type-icon faq">
+                                    <span class="material-symbols-outlined" style="font-size:20px;">help</span>
+                                </div>
+                                <div>
+                                    <p class="type-label">FAQ</p>
+                                    <p class="type-desc">Common questions & answers</p>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Basic Info -->
+                    <div class="form-card">
+                        <div class="form-card-title">
+                            <span class="material-symbols-outlined">info</span>
+                            Basic Information
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="field-label" for="contentTitle" id="titleLabel">Title <span style="color:#ef4444;">*</span></label>
+                            <input type="text" id="contentTitle" class="form-input"
+                                   placeholder="Enter a clear, descriptive title..."
+                                   maxlength="120" oninput="updateCharCount('contentTitle', 'titleCount', 120)" />
+                            <div class="d-flex justify-content-between align-items-center">
+                                <p class="field-hint">Keep it concise — ideally under 80 characters.</p>
+                                <span class="char-counter" id="titleCount">0 / 120</span>
+                            </div>
+                        </div>
+
+                        <div class="mb-0">
+                            <label class="field-label" for="contentSubtitle" id="subtitleLabel">Subtitle / Short Description</label>
+                            <input type="text" id="contentSubtitle" class="form-input"
+                                   placeholder="Optional one-line summary..." maxlength="200"
+                                   oninput="updateCharCount('contentSubtitle', 'subtitleCount', 200)" />
+                            <div class="d-flex justify-content-end">
+                                <span class="char-counter" id="subtitleCount">0 / 200</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Content Body -->
+                    <div class="form-card">
+                        <div class="form-card-title">
+                            <span class="material-symbols-outlined">article</span>
+                            <span id="bodyCardTitle">Content Body</span>
+                        </div>
+
+                        <div class="editor-toolbar">
+                            <button type="button" title="Bold" onclick="insertMd('**', '**')"><b>B</b></button>
+                            <button type="button" title="Italic" onclick="insertMd('_', '_')"><i>I</i></button>
+                            <div class="divider"></div>
+                            <button type="button" title="Heading" onclick="insertMd('## ', '')">
+                                <span class="material-symbols-outlined" style="font-size:15px;">title</span>
+                            </button>
+                            <button type="button" title="Bullet list" onclick="insertMd('\n- ', '')">
+                                <span class="material-symbols-outlined" style="font-size:15px;">format_list_bulleted</span>
+                            </button>
+                            <button type="button" title="Link" onclick="insertMd('[', '](url)')">
+                                <span class="material-symbols-outlined" style="font-size:15px;">link</span>
+                            </button>
+                        </div>
+                        <textarea id="contentBody" class="form-input"
+                                  placeholder="Write the full content here. You can use Markdown for formatting..."
+                                  oninput="updateCharCount('contentBody', 'bodyCount', 5000)"
+                                  maxlength="5000"></textarea>
+                        <div class="d-flex justify-content-end">
+                            <span class="char-counter" id="bodyCount">0 / 5000</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Right Column: Settings -->
+                <div class="col-lg-4">
+
+                    <!-- Publish Settings -->
+                    <div class="form-card">
+                        <div class="form-card-title">
+                            <span class="material-symbols-outlined">settings</span>
+                            Publish Settings
+                        </div>
+
+                        <label class="field-label">Status</label>
+                        <div class="status-options" id="statusOptions">
+                            <label class="status-chip selected-draft" id="chip-draft" onclick="selectStatus('draft', this)">
+                                <input type="radio" name="status" value="draft" checked />
+                                <span class="material-symbols-outlined" style="font-size:15px;">draft</span> Draft
+                            </label>
+                            <label class="status-chip" id="chip-published" onclick="selectStatus('published', this)">
+                                <input type="radio" name="status" value="published" />
+                                <span class="material-symbols-outlined" style="font-size:15px;">check_circle</span> Published
+                            </label>
+                            <label class="status-chip" id="chip-scheduled" onclick="selectStatus('scheduled', this)">
+                                <input type="radio" name="status" value="scheduled" />
+                                <span class="material-symbols-outlined" style="font-size:15px;">schedule</span> Scheduled
+                            </label>
+                        </div>
+
+                        <div id="scheduleFields">
+                            <label class="field-label mt-3" for="scheduleDate">Publish Date & Time</label>
+                            <input type="datetime-local" id="scheduleDate" class="form-input" />
+                            <p class="field-hint">Content will go live automatically at this time.</p>
+                        </div>
+                    </div>
+
+                    <!-- Visibility -->
+                    <div class="form-card">
+                        <div class="form-card-title">
+                            <span class="material-symbols-outlined">visibility</span>
+                            Visibility
+                        </div>
+                        <label class="field-label" for="visibilitySelect">Visible To</label>
+                        <select id="visibilitySelect" class="form-input">
+                            <option value="all">All Users</option>
+                            <option value="students">Students Only</option>
+                            <option value="evaluators">Evaluators Only</option>
+                            <option value="schools">Schools Only</option>
+                            <option value="admins">Admins Only</option>
+                        </select>
+                        <p class="field-hint mt-2">Controls who can see this content on the platform.</p>
+                    </div>
+
+                    <!-- Author Details -->
+                    <div class="form-card">
+                        <div class="form-card-title">
+                            <span class="material-symbols-outlined">person</span>
+                            Author Details
+                        </div>
+                        <div class="mb-3">
+                            <label class="field-label" for="authorName">Author Name</label>
+                            <input type="text" id="authorName" class="form-input" value="{{ request.user.get_full_name|default:request.user.username }}" />
+                        </div>
+                        <div class="mb-0">
+                            <label class="field-label" for="contentTags">Tags <span style="font-weight:400; color:var(--text-muted);">(comma separated)</span></label>
+                            <input type="text" id="contentTags" class="form-input" placeholder="e.g. season4, registration, important" />
+                        </div>
+                    </div>
+
+                    <!-- Preview Summary -->
+                    <div class="form-card" style="background: rgba(94,42,151,0.03); border-color: rgba(94,42,151,0.15);">
+                        <div class="form-card-title">
+                            <span class="material-symbols-outlined">preview</span>
+                            Preview Summary
+                        </div>
+                        <div style="font-size:0.8125rem;">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span style="color:var(--text-muted);">Type</span>
+                                <strong id="previewType">Announcement</strong>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span style="color:var(--text-muted);">Status</span>
+                                <strong id="previewStatus">Draft</strong>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span style="color:var(--text-muted);">Visible To</span>
+                                <strong id="previewVisibility">All Users</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div><!-- /content-wrapper -->
+
+        <!-- Sticky Action Bar -->
+        <div class="action-bar">
+            <button class="btn-danger-outline" onclick="discardContent()">
+                <span class="material-symbols-outlined" style="font-size:16px;">close</span>
+                Discard
+            </button>
+            <div class="d-flex gap-2">
+                <button class="btn-outline-custom" onclick="saveContent('draft')">
+                    <span class="material-symbols-outlined" style="font-size:16px;">save</span>
+                    Save as Draft
+                </button>
+                <button class="btn-primary-custom" onclick="publishContent()">
+                    <span class="material-symbols-outlined" style="font-size:16px;">publish</span>
+                    Publish
+                </button>
+            </div>
+        </div>
+
+    </main><!-- /main-content -->
+</div><!-- /main-container -->
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// ── Content Type ───────────────────────────────────────────────────────────────
+const typeLabelMap = {
+    announcement: 'Announcement',
+    faq:          'FAQ'
+};
+
+let currentType = 'announcement';
+
+function selectType(type, el) {
+    document.querySelectorAll('.type-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    currentType = type;
+    document.getElementById('previewType').textContent = typeLabelMap[type];
+
+    // Update labels for FAQ vs Announcement
+    const titleLabel = document.getElementById('titleLabel');
+    const subtitleLabel = document.getElementById('subtitleLabel');
+    const bodyCardTitle = document.getElementById('bodyCardTitle');
+    const titleInput = document.getElementById('contentTitle');
+    const subtitleInput = document.getElementById('contentSubtitle');
+    const bodyInput = document.getElementById('contentBody');
+
+    if (type === 'faq') {
+        titleLabel.innerHTML = 'Question <span style="color:#ef4444;">*</span>';
+        subtitleLabel.textContent = 'Short Context';
+        bodyCardTitle.textContent = 'Answer';
+        titleInput.placeholder = 'Enter the frequently asked question...';
+        subtitleInput.placeholder = 'Optional short context for the question...';
+        bodyInput.placeholder = 'Write the detailed answer here. You can use Markdown for formatting...';
+    } else {
+        titleLabel.innerHTML = 'Title <span style="color:#ef4444;">*</span>';
+        subtitleLabel.textContent = 'Subtitle / Short Description';
+        bodyCardTitle.textContent = 'Content Body';
+        titleInput.placeholder = 'Enter a clear, descriptive title...';
+        subtitleInput.placeholder = 'Optional one-line summary...';
+        bodyInput.placeholder = 'Write the full content here. You can use Markdown for formatting...';
+    }
+}
+
+// ── Status ─────────────────────────────────────────────────────────────────────
+let currentStatus = 'draft';
+
+function selectStatus(status, el) {
+    document.querySelectorAll('.status-chip').forEach(c => {
+        c.className = 'status-chip';
+    });
+    if (status === 'draft')      el.classList.add('selected-draft');
+    if (status === 'published')  el.classList.add('selected-published');
+    if (status === 'scheduled')  el.classList.add('selected-scheduled');
+
+    currentStatus = status;
+    document.getElementById('previewStatus').textContent = status.charAt(0).toUpperCase() + status.slice(1);
+    document.getElementById('scheduleFields').style.display = status === 'scheduled' ? 'block' : 'none';
+}
+
+// ── Visibility Preview ─────────────────────────────────────────────────────────
+document.addEventListener('change', (e) => {
+    if (e.target.id === 'visibilitySelect') {
+        const map = { all: 'All Users', students: 'Students Only', evaluators: 'Evaluators Only', schools: 'Schools Only', admins: 'Admins Only' };
+        document.getElementById('previewVisibility').textContent = map[e.target.value] || 'All Users';
+    }
+});
+
+// ── Char Counter ───────────────────────────────────────────────────────────────
+function updateCharCount(fieldId, counterId, max) {
+    const len = document.getElementById(fieldId).value.length;
+    const el  = document.getElementById(counterId);
+    el.textContent = `${len} / ${max}`;
+    el.className = 'char-counter' + (len > max * 0.9 ? ' warn' : '') + (len >= max ? ' over' : '');
+}
+
+// ── Markdown Toolbar ───────────────────────────────────────────────────────────
+function insertMd(before, after) {
+    const ta  = document.getElementById('contentBody');
+    const s   = ta.selectionStart;
+    const e   = ta.selectionEnd;
+    const sel = ta.value.substring(s, e);
+    ta.value  = ta.value.substring(0, s) + before + sel + after + ta.value.substring(e);
+    ta.selectionStart = s + before.length;
+    ta.selectionEnd   = s + before.length + sel.length;
+    ta.focus();
+    updateCharCount('contentBody', 'bodyCount', 5000);
+}
+
+// ── Validate ───────────────────────────────────────────────────────────────────
+function validate() {
+    const title = document.getElementById('contentTitle').value.trim();
+    const body  = document.getElementById('contentBody').value.trim();
+
+    if (!title) { showToast('Title is required.', 'warning'); return false; }
+    if (!body)  { showToast('Content body cannot be empty.', 'warning'); return false; }
+
+    if (currentStatus === 'scheduled') {
+        const dt = document.getElementById('scheduleDate').value;
+        if (!dt) { showToast('Please set a schedule date & time.', 'warning'); return false; }
+        if (new Date(dt) <= new Date()) { showToast('Scheduled time must be in the future.', 'warning'); return false; }
+    }
+
+    return true;
+}
+
+// ── Build Payload ──────────────────────────────────────────────────────────────
+function buildPayload(status) {
+    const payload = {
+        content_type: currentType,
+        title: document.getElementById('contentTitle').value.trim(),
+        subtitle: document.getElementById('contentSubtitle').value.trim(),
+        body: document.getElementById('contentBody').value.trim(),
+        status: status,
+        visibility: document.getElementById('visibilitySelect').value,
+        tags: document.getElementById('contentTags').value.trim(),
+        author_name: document.getElementById('authorName').value.trim()
+    };
+    if (status === 'scheduled') {
+        payload.scheduled_at = document.getElementById('scheduleDate').value;
+    }
+    return payload;
+}
+
+// ── Save / Publish ─────────────────────────────────────────────────────────────
+function saveContent(status) {
+    if (!document.getElementById('contentTitle').value.trim()) {
+        showToast('Title is required before saving.', 'warning');
+        return;
+    }
+    submitContent(status || 'draft');
+}
+
+function publishContent() {
+    if (!validate()) return;
+    const status = currentStatus === 'scheduled' ? 'scheduled' : 'published';
+    submitContent(status);
+}
+
+function submitContent(status) {
+    const payload = buildPayload(status);
+    const csrfToken = '{{ csrf_token }}';
+
+    fetch('{% url "admins:content_create" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            const label = status === 'scheduled' ? 'scheduled' : status === 'published' ? 'published' : 'saved as draft';
+            showToast(`Content ${label} successfully!`, 'success');
+            setTimeout(() => window.location.href = '{% url "admins:content_list" %}', 1800);
+        } else {
+            showToast(data.error || 'Something went wrong.', 'warning');
+        }
+    })
+    .catch(() => {
+        showToast('Network error. Please try again.', 'warning');
+    });
+}
+
+function discardContent() {
+    if (confirm('Discard this content? All unsaved changes will be lost.')) {
+        window.location.href = '{% url "admins:content_list" %}';
+    }
+}
+
+// ── Toast ──────────────────────────────────────────────────────────────────────
+function showToast(msg, type = 'info') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    const icons = { success: 'check_circle', warning: 'warning', info: 'info' };
+    toast.className = `toast ${type === 'success' ? 'success' : type === 'warning' ? 'warning' : ''}`;
+    toast.innerHTML = `<span class="material-symbols-outlined" style="font-size:18px;">${icons[type]||'info'}</span> ${msg}`;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 3500);
+}
+
+// ── Sidebar & Header ───────────────────────────────────────────────────────────
+(function () {
+    const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
+    const sidebar = document.getElementById('superAdminAppSidebar');
+    if (sidebarToggleBtn && sidebar) {
+        sidebarToggleBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            if (window.innerWidth >= 768) {
+                sidebar.classList.toggle('collapsed');
+            } else {
+                sidebar.classList.toggle('mobile-open');
+            }
+        });
+        document.addEventListener('click', function (e) {
+            if (window.innerWidth < 768 && !e.target.closest('#superAdminAppSidebar') && !e.target.closest('#sidebarToggleBtn')) {
+                sidebar.classList.remove('mobile-open');
+            }
+        });
+    }
+
+    const toggle = document.getElementById('userManagementToggle');
+    const dropdown = document.querySelector('.nav-dropdown');
+    if (toggle && dropdown) {
+        toggle.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            dropdown.classList.toggle('open');
+        });
+    }
+
+    const profileBtn = document.getElementById('profileAvatarBtn');
+    const profileDropdown = document.getElementById('profileDropdown');
+    if (profileBtn && profileDropdown) {
+        profileBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            profileDropdown.classList.toggle('active');
+        });
+        document.addEventListener('click', function (e) {
+            if (!profileDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
+                profileDropdown.classList.remove('active');
+            }
+        });
+    }
+})();
+</script>
+</body>
+</html>

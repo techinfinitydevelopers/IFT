@@ -71,10 +71,10 @@ SCORING RUBRIC (Rate each 0-10):
    KEYWORDS: step-by-step, prototype ready, tested, pilot, resources listed, team skills, timeline, actionable
 
 3. FEASIBILITY (0-10)
-   High (8-10): Resources realistically available. Plan is practical with clear milestones. Challenges acknowledged with mitigation strategies.
-   Moderate (4-7): Plan is partially realistic. Some resources available. Challenges mentioned but solutions vague.
-   Low (0-3): Plan seems unrealistic. Resources unavailable. No awareness of real constraints.
-   KEYWORDS: budget, cost-effective, available tools, realistic timeline, already have, partnership, phased approach
+   High (8-10): Clearly identifies required and available resources with awareness of gaps. Explains how missing resources will be obtained. Phased execution thinking with realistic constraints acknowledged. Solution can begin with simple, low-cost steps. Small-scale testing possible.
+   Moderate (4-7): Resources listed but acquisition pathway unclear. Some realism present but optimistic assumptions remain. Logical steps exist but with large jumps in execution. Dependencies underexplored.
+   Low (0-3): Assumes resources will automatically appear. Ignores major constraints. Build steps unrealistic for capability. Heavy dependence on unknown external support. No awareness of operational complexity.
+   KEYWORDS: resource listing, gaps acknowledged, phased approach, realistic for age, dependencies, testing pathway, practical constraints
 
 4. IMPACT (0-10)
    High (8-10): Widespread customer base. Solution is critical for users. Removes pains AND adds new benefits over alternatives. Shows scale of impact.
@@ -273,7 +273,7 @@ def run_coherence_checks(questions, client):
         response = client.generate_completion(
             system_prompt="You are a strict logical consistency checker. Return ONLY valid JSON.",
             user_prompt=prompt,
-            model="anthropic/claude-3.5-sonnet",
+            model="anthropic/claude-sonnet-4",
             max_tokens=1200
         )
 
@@ -514,7 +514,7 @@ Return JSON:
         response = client.generate_completion(
             system_prompt="You are a strict file relevance checker. Describe EXACTLY what you see. Be skeptical. Return ONLY valid JSON.",
             user_prompt=prompt,
-            model="anthropic/claude-3.5-sonnet",
+            model="anthropic/claude-sonnet-4",
             max_tokens=1000,
             images=image_paths if image_paths else None
         )
@@ -628,7 +628,7 @@ def evaluate_idea(submission: IdeaSubmission, force_reevaluate=False) -> AIEvalu
         return client.generate_completion(
             system_prompt="You are an expert idea evaluator. Return ONLY valid JSON, no other text.",
             user_prompt=prompt,
-            model="anthropic/claude-3.5-sonnet",
+            model="anthropic/claude-sonnet-4",
             max_tokens=2000
         )
 
@@ -824,7 +824,7 @@ def evaluate_idea(submission: IdeaSubmission, force_reevaluate=False) -> AIEvalu
 
         # Metadata
         confidence_level=eval_data.get('confidence', 'medium'),
-        model_used=response.get('model', 'anthropic/claude-3.5-sonnet'),
+        model_used=response.get('model', 'anthropic/claude-sonnet-4'),
         tokens_used=response.get('tokens', 0),
         processing_time=response.get('time', 0),
         raw_response=response.get('raw_response', ''),

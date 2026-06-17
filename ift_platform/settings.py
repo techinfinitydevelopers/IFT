@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # IFT Platform Apps
+    'accounts',
     'students',
     'admins',
     'ai_assistant',
@@ -78,6 +79,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'accounts.context_processors.user_role',
             ],
         },
     },
@@ -146,4 +148,14 @@ OPENROUTER_API_KEY = os.getenv('OPENROUTER_API_KEY', '')
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Authentication
+LOGIN_URL = 'accounts:sign_in'
+LOGIN_REDIRECT_URL = 'accounts:role_redirect'
+LOGOUT_REDIRECT_URL = 'accounts:sign_in'
+
+# Email (console for development)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@ift.in')
+SITE_URL = os.getenv('SITE_URL', 'http://localhost:8002')
 # admin_dashboard_fix

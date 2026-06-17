@@ -364,7 +364,7 @@ function pollStatus(taskId, btn) {
 
     const interval = setInterval(() => {
         elapsed += 3;
-        fetch('/jury/re-evaluation/eval-status/' + taskId + '/')
+        fetch('/super-admin/re-evaluation/eval-status/' + taskId + '/')
         .then(r => r.json())
         .then(data => {
             if (data.status === 'running') {

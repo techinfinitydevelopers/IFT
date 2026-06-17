@@ -1,0 +1,1186 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Submissions | Super Admin | ENpower IFT</title>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+
+    <!-- Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <style>
+        :root {
+            --primary: #5E2A97;
+            --secondary: #DEDE50;
+            --primary-light: #E8D4F0;
+            --background-light: #F7F7F7;
+            --surface-light: #FFFFFF;
+            --border-light: #EEEEEE;
+            --text-dark: #222222;
+            --text-muted: #666666;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            overflow: hidden;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Layout */
+        .main-container { display: flex; height: 100vh; width: 100%; }
+        .main-content { flex: 1; display: flex; flex-direction: column; height: 100%; overflow-y: auto; position: relative; z-index: 10; }
+        .content-wrapper { flex: 1; padding: 32px; max-width: 100%; margin: 0 auto; width: 100%; }
+        #sidebar-container { flex-shrink: 0; }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            width: 280px; background: #FFFFFF; border-right: 1px solid #EEEEEE;
+            height: 100vh; display: flex; flex-direction: column;
+            position: sticky; top: 0; font-family: 'Poppins', sans-serif; transition: all 0.3s ease;
+            overflow-y: auto; overflow-x: hidden;
+        }
+        .sidebar.collapsed { width: 80px; }
+        .sidebar.collapsed .sidebar-title, .sidebar.collapsed .sidebar-subtitle,
+        .sidebar.collapsed .nav-text, .sidebar.collapsed .user-info { opacity: 0; width: 0; overflow: hidden; white-space: nowrap; }
+        .sidebar.collapsed .logo-img { width: 50px; height: 50px; margin: 0 auto; background-position: center; }
+        .sidebar.collapsed .nav-item { justify-content: center; padding-left: 1.7rem; }
+        .sidebar.collapsed .nav-item .material-symbols-outlined { margin: 0; }
+        .sidebar.collapsed .user-avatar { margin: 0 auto; }
+        .sidebar.collapsed .logout-btn { display: none; }
+        .sidebar.collapsed .user-profile { justify-content: center; }
+        .sidebar.collapsed .notification-badge { display: none; }
+
+        .sidebar-header { border-bottom: 1px solid #F7F7F7; }
+        .logo-img {
+            width: 250px; height: 50px; background-size: contain;
+            background-position: left center; background-repeat: no-repeat; flex-shrink: 0;
+        }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.75rem 1rem; border-radius: 0.5rem;
+            text-decoration: none; color: #222222;
+            transition: all 0.2s ease; cursor: pointer; margin-bottom: 0.25rem;
+        }
+        .nav-item:hover { background: #F7F7F7; color: #222222; }
+        .nav-item .material-symbols-outlined { font-size: 24px; color: #666666; transition: all 0.2s ease; }
+        .nav-item.nav-item-active { background: rgba(94, 42, 151, 0.1); color: #5E2A97; padding-left: calc(1rem - 4px); }
+        .nav-item.nav-item-active .material-symbols-outlined { color: #5E2A97; font-variation-settings: 'FILL' 1; }
+        .nav-text { font-size: 0.875rem; font-weight: 500; }
+
+        .nav-dropdown { position: relative; }
+        .nav-dropdown-toggle { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+        .nav-dropdown-icon { font-size: 18px !important; transition: transform 0.2s ease; }
+        .nav-dropdown.open .nav-dropdown-icon { transform: rotate(180deg); }
+        .nav-dropdown-menu { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; padding-left: 2.5rem; }
+        .nav-dropdown.open .nav-dropdown-menu { max-height: 400px; margin-top: 0.25rem; }
+        .nav-dropdown-item {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.625rem 1rem; border-radius: 0.5rem;
+            text-decoration: none; color: #666666; font-size: 0.875rem;
+            font-weight: 500; transition: all 0.2s ease; margin-bottom: 0.25rem;
+        }
+        .nav-dropdown-item:hover { background: #F7F7F7; color: #5E2A97; }
+        .nav-dropdown-item.active { background: rgba(94, 42, 151, 0.1); color: #5E2A97; }
+
+        .sidebar.collapsed .nav-dropdown-toggle { justify-content: center; }
+        .sidebar.collapsed .nav-dropdown-icon { display: none; }
+        .sidebar.collapsed .nav-dropdown-menu { padding-left: 0rem; }
+        .sidebar.collapsed .nav-dropdown-item { padding-left: 0.6rem; }
+
+        .sidebar-footer { border-top: 1px solid #EEEEEE; margin-top: auto; }
+        .user-profile {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.75rem; border-radius: 0.5rem; transition: all 0.2s ease; cursor: pointer;
+        }
+        .user-profile:hover { background: #F7F7F7; }
+        .user-avatar { width: 2.5rem; height: 2.5rem; border-radius: 50%; overflow: hidden; flex-shrink: 0; border: 2px solid #EEEEEE; }
+        .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .user-info { flex: 1; }
+        .user-name { font-size: 0.875rem; font-weight: 700; color: #222222; margin: 0 0 0.125rem 0; line-height: 1.2; }
+        .user-role { font-size: 0.75rem; color: #666666; margin: 0; line-height: 1.2; }
+        .logout-btn {
+            background: none; border: none; color: #666666; cursor: pointer;
+            padding: 0.5rem; border-radius: 0.375rem; transition: all 0.2s ease;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .logout-btn:hover { background: rgba(94, 42, 151, 0.1); color: #5E2A97; }
+        .logout-btn .material-symbols-outlined { font-size: 20px; }
+
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; left: -280px; z-index: 999; transition: left 0.3s ease; }
+            .sidebar.mobile-open { left: 0; }
+        }
+
+        /* ── Header ── */
+        .top-header {
+            height: 70px; min-height: 70px; flex-shrink: 0;
+            background: #FFFFFF; border-bottom: 1px solid #EEEEEE;
+            display: flex; align-items: center; padding: 0 1.5rem;
+            position: sticky; top: 0; z-index: 100;
+        }
+        .header-icon-btn {
+            width: 2.5rem; height: 2.5rem; border-radius: 0.5rem; border: none;
+            background: #F7F7F7; color: #666666; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;
+        }
+        .header-icon-btn:hover { background: #EEEEEE; color: #5E2A97; }
+        .header-icon-btn .material-symbols-outlined { font-size: 22px; }
+        .header-avatar {
+            width: 2.5rem; height: 2.5rem; border-radius: 50%;
+            background-size: cover; background-position: center; background-repeat: no-repeat;
+            border: 2px solid #5E2A97; cursor: pointer; transition: all 0.2s ease;
+        }
+        .header-avatar:hover { transform: scale(1.05); box-shadow: 0 0 0 4px rgba(94, 42, 151, 0.1); }
+
+        /* Page Header */
+        .page-header { margin-bottom: 32px; }
+        .page-header h1 { font-size: 1.875rem; font-weight: 700; color: var(--text-dark); margin-bottom: 8px; }
+        .breadcrumb { font-size: 0.875rem; color: var(--text-muted); background: none; padding: 0; margin: 0; }
+        .breadcrumb-item a { color: var(--text-muted); text-decoration: none; }
+        .breadcrumb-item a:hover { color: var(--primary); }
+        .breadcrumb-item.active { color: var(--text-dark); }
+
+        /* Stats Cards */
+        .stat-card {
+            background: var(--surface-light); border-radius: 12px; padding: 24px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04); border: 1px solid var(--border-light);
+            display: flex; align-items: center; gap: 16px;
+        }
+        .stat-icon {
+            width: 48px; height: 48px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .stat-icon.purple { background: rgba(94, 42, 151, 0.1); color: var(--primary); }
+        .stat-icon.amber { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+        .stat-icon.blue { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+        .stat-icon.green { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
+        .stat-icon.orange { background: rgba(249, 115, 22, 0.1); color: #f97316; }
+        .stat-icon.red { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+        .stat-label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin: 0; }
+        .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--text-dark); margin: 0; }
+        .stat-trend { font-size: 0.75rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; display: inline-flex; align-items: center; gap: 2px; }
+        .stat-trend.positive { background: #dcfce7; color: #16a34a; }
+        .stat-trend.neutral { background: #fef3c7; color: #d97706; }
+
+        /* Pipeline Bar */
+        .pipeline-bar {
+            background: var(--surface-light); border-radius: 12px; padding: 20px 24px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04); border: 1px solid var(--border-light); margin-bottom: 24px;
+        }
+        .pipeline-label { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+        .pipeline-track { display: flex; height: 32px; border-radius: 8px; overflow: hidden; margin-bottom: 12px; }
+        .pipeline-segment {
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.6875rem; font-weight: 700; color: #fff;
+            transition: all 0.3s ease; cursor: pointer; position: relative;
+        }
+        .pipeline-segment:hover { filter: brightness(1.1); }
+        .pipeline-segment.draft { background: #94a3b8; }
+        .pipeline-segment.submitted { background: #3b82f6; }
+        .pipeline-segment.under-review { background: #8b5cf6; }
+        .pipeline-segment.evaluated { background: #22c55e; }
+        .pipeline-segment.top-400 { background: var(--primary); }
+        .pipeline-legend { display: flex; flex-wrap: wrap; gap: 16px; }
+        .pipeline-legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--text-muted); cursor: pointer; }
+        .pipeline-legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+        .pipeline-legend-dot.draft { background: #94a3b8; }
+        .pipeline-legend-dot.submitted { background: #3b82f6; }
+        .pipeline-legend-dot.under-review { background: #8b5cf6; }
+        .pipeline-legend-dot.evaluated { background: #22c55e; }
+        .pipeline-legend-dot.top-400 { background: var(--primary); }
+        .pipeline-legend-count { font-weight: 700; color: var(--text-dark); }
+
+        /* Main Card */
+        .main-card {
+            background: var(--surface-light); border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04); border: 1px solid var(--border-light); overflow: hidden;
+        }
+        .main-card-header { padding: 24px; border-bottom: 1px solid var(--border-light); }
+
+        /* Search & Filter */
+        .search-input { position: relative; }
+        .search-input .material-symbols-outlined { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 20px; }
+        .search-input input {
+            width: 100%; padding: 10px 12px 10px 44px; border: 1px solid var(--border-light);
+            border-radius: 8px; font-size: 0.875rem; background: #f8fafc; font-family: 'Poppins', sans-serif;
+        }
+        .search-input input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(94, 42, 151, 0.1); }
+        .filter-select {
+            width: auto; font-size: 0.875rem; padding: 10px 12px; border: 1px solid var(--border-light);
+            border-radius: 8px; background: #f8fafc; font-family: 'Poppins', sans-serif; cursor: pointer;
+        }
+        .filter-select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(94, 42, 151, 0.1); }
+
+        /* Table */
+        .custom-table { width: 100%; font-size: 0.875rem; }
+        .custom-table thead { background: #f8fafc; }
+        .custom-table th {
+            padding: 16px 20px; font-size: 0.75rem; font-weight: 700; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.05em; text-align: left;
+            border-bottom: 1px solid var(--border-light); white-space: nowrap;
+        }
+        .custom-table th.sortable { cursor: pointer; user-select: none; }
+        .custom-table th.sortable:hover { color: var(--primary); }
+        .custom-table td { padding: 16px 20px; vertical-align: middle; border-bottom: 1px solid #f8f9fa; }
+        .custom-table tbody tr { transition: background 0.2s; cursor: pointer; }
+        .custom-table tbody tr:hover { background: rgba(94, 42, 151, 0.03); }
+
+        /* Table Cell Elements */
+        .submission-id { font-size: 0.75rem; font-weight: 700; color: var(--primary); font-family: monospace; }
+        .idea-title { font-weight: 600; color: var(--text-dark); margin: 0; font-size: 0.875rem; }
+        .idea-category { font-size: 0.6875rem; color: var(--text-muted); margin: 0; }
+        .team-name { font-weight: 600; color: var(--text-dark); margin: 0; font-size: 0.8125rem; }
+        .school-name { font-size: 0.6875rem; color: var(--text-muted); margin: 0; }
+
+        .badge-status { font-size: 0.6875rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
+        .badge-status.draft { background: #e2e8f0; color: #475569; }
+        .badge-status.submitted { background: #dbeafe; color: #1d4ed8; }
+        .badge-status.under_review { background: #ede9fe; color: #7c3aed; }
+        .badge-status.evaluated { background: #d1fae5; color: #065f46; }
+        .badge-status.selected { background: rgba(94, 42, 151, 0.1); color: var(--primary); }
+        .badge-status.rejected { background: #fee2e2; color: #991b1b; }
+
+        .score-display { display: flex; align-items: center; gap: 8px; }
+        .score-bar { flex: 1; height: 6px; background: #f1f5f9; border-radius: 999px; overflow: hidden; min-width: 60px; }
+        .score-fill { height: 100%; border-radius: 999px; transition: width 0.3s ease; }
+        .score-fill.high { background: #22c55e; }
+        .score-fill.medium { background: #f59e0b; }
+        .score-fill.low { background: #ef4444; }
+        .score-fill.none { background: #cbd5e1; }
+        .score-value { font-size: 0.8125rem; font-weight: 700; min-width: 36px; text-align: right; }
+        .score-value.high { color: #16a34a; }
+        .score-value.medium { color: #d97706; }
+        .score-value.low { color: #ef4444; }
+        .score-value.none { color: #94a3b8; }
+
+        /* Buttons */
+        .btn-primary-custom {
+            background: var(--primary); color: white; font-weight: 600; padding: 10px 20px;
+            border-radius: 8px; border: none; display: flex; align-items: center; gap: 8px;
+            cursor: pointer; transition: all 0.2s; font-family: 'Poppins', sans-serif;
+            font-size: 0.875rem; box-shadow: 0 4px 6px rgba(94, 42, 151, 0.3);
+        }
+        .btn-primary-custom:hover { background: #7B3FB5; }
+        .btn-secondary-custom {
+            background: white; color: var(--text-dark); font-weight: 600; padding: 10px 20px;
+            border-radius: 8px; border: 1px solid var(--border-light); display: flex; align-items: center;
+            gap: 8px; cursor: pointer; transition: all 0.2s; font-family: 'Poppins', sans-serif; font-size: 0.875rem;
+        }
+        .btn-secondary-custom:hover { background: #f8fafc; }
+        .btn-icon-action {
+            width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border-light);
+            background: white; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s; color: var(--text-muted);
+        }
+        .btn-icon-action:hover { background: rgba(94, 42, 151, 0.1); color: var(--primary); border-color: var(--primary); }
+        .btn-icon-action .material-symbols-outlined { font-size: 18px; }
+
+        /* Pagination */
+        .pagination-custom { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-top: 1px solid var(--border-light); }
+        .pagination-info { font-size: 0.875rem; color: var(--text-muted); }
+        .pagination-controls { display: flex; align-items: center; gap: 8px; }
+        .page-btn {
+            width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border-light);
+            background: white; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s; font-size: 0.8125rem; font-weight: 600;
+            text-decoration: none; color: var(--text-dark);
+        }
+        .page-btn:hover { background: #f8fafc; }
+        .page-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .page-btn:disabled, .page-btn.disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
+
+        /* Details Sidebar */
+        .details-sidebar {
+            position: fixed; top: 0; right: -520px; width: 520px; height: 100vh;
+            background: var(--surface-light); box-shadow: -4px 0 24px rgba(0, 0, 0, 0.1);
+            z-index: 1000; transition: right 0.3s ease; display: flex; flex-direction: column;
+        }
+        .details-sidebar.open { right: 0; }
+        .details-sidebar-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5); z-index: 999; display: none; opacity: 0; transition: opacity 0.3s ease;
+        }
+        .details-sidebar-overlay.show { display: block; opacity: 1; }
+        .details-sidebar-header {
+            padding: 24px; border-bottom: 1px solid var(--border-light);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .details-sidebar-header h2 { font-size: 1.125rem; font-weight: 700; margin: 0; }
+        .details-sidebar-close {
+            width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border-light);
+            background: white; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s; color: var(--text-muted);
+        }
+        .details-sidebar-close:hover { background: #f8fafc; color: var(--text-dark); }
+        .details-sidebar-content { flex: 1; overflow-y: auto; padding: 24px; }
+        .detail-section { margin-bottom: 28px; }
+        .detail-section-title {
+            font-size: 0.75rem; font-weight: 700; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .detail-section-title .material-symbols-outlined { font-size: 18px; color: var(--primary); }
+        .detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .detail-item { padding: 12px; background: #f8fafc; border-radius: 8px; }
+        .detail-item.full { grid-column: 1 / -1; }
+        .detail-item-label { font-size: 0.6875rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+        .detail-item-value { font-size: 0.875rem; font-weight: 600; color: var(--text-dark); }
+        .idea-detail-card { padding: 20px; background: rgba(94, 42, 151, 0.04); border-radius: 12px; border: 1px solid rgba(94, 42, 151, 0.1); }
+        .idea-detail-card h4 { font-size: 1rem; font-weight: 700; margin: 0 0 6px 0; }
+        .idea-detail-card .idea-pitch { font-size: 0.875rem; color: var(--text-muted); line-height: 1.6; margin: 0 0 12px 0; }
+        .idea-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+        .idea-tag { font-size: 0.625rem; font-weight: 700; padding: 3px 10px; background: #e2e8f0; color: var(--text-dark); border-radius: 4px; }
+        .score-breakdown { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .score-param { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #f8fafc; border-radius: 6px; }
+        .score-param-name { font-size: 0.75rem; color: var(--text-muted); }
+        .score-param-value { font-size: 0.8125rem; font-weight: 700; }
+        .score-param-bar { flex: 1; height: 4px; background: #e2e8f0; border-radius: 999px; margin: 0 10px; overflow: hidden; }
+        .score-param-bar-fill { height: 100%; border-radius: 999px; }
+
+        .team-member-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #f1f5f9; }
+        .team-member-row:last-child { border-bottom: none; }
+        .team-member-avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.625rem; font-weight: 700; }
+        .team-member-info { flex: 1; }
+        .team-member-name { font-size: 0.8125rem; font-weight: 600; margin: 0; }
+        .team-member-role { font-size: 0.6875rem; color: var(--text-muted); }
+
+        .attachment-list { display: flex; flex-direction: column; gap: 8px; }
+        .attachment-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: #f8fafc; border-radius: 8px; border: 1px solid var(--border-light); }
+        .attachment-icon { width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .attachment-icon.image { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+        .attachment-icon.video { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+        .attachment-icon.document { background: rgba(249, 115, 22, 0.1); color: #f97316; }
+        .attachment-info { flex: 1; }
+        .attachment-name { font-size: 0.8125rem; font-weight: 600; margin: 0; }
+        .attachment-size { font-size: 0.6875rem; color: var(--text-muted); }
+
+        .details-sidebar-footer {
+            padding: 16px 24px; border-top: 1px solid var(--border-light); display: flex; gap: 12px;
+        }
+        .details-sidebar-footer .btn-primary-custom,
+        .details-sidebar-footer .btn-secondary-custom { flex: 1; justify-content: center; padding: 10px 16px; font-size: 0.8125rem; }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .custom-table { font-size: 0.8125rem; }
+            .custom-table th, .custom-table td { padding: 12px 14px; }
+        }
+        @media (max-width: 768px) {
+            .content-wrapper { padding: 16px; }
+            .details-sidebar { width: 100%; right: -100%; }
+            .detail-grid { grid-template-columns: 1fr; }
+            .score-breakdown { grid-template-columns: 1fr; }
+            .pagination-custom { flex-direction: column; gap: 12px; text-align: center; }
+            .top-header { padding: 0 1rem; }
+        }
+
+        /* Toast animation */
+        @keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(400px); opacity: 0; } }
+
+        /* Loading skeleton */
+        .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px; }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    </style>
+</head>
+
+<body>
+<div class="main-container">
+
+    <!-- ══ SIDEBAR ══ -->
+    <aside class="sidebar d-md-flex flex-column" id="superAdminAppSidebar">
+        <div class="sidebar-header p-3 pb-1">
+            <div class="d-flex align-items-center">
+                <div class="logo-img" style="background-image: url('{% static 'images/IFT_logo.png' %}');"></div>
+            </div>
+        </div>
+        <nav class="flex-grow-1 px-3 d-flex flex-column gap-2 mt-3">
+            <a class="nav-item" href="{% url 'admins:dashboard' %}">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span class="nav-text">Dashboard</span>
+            </a>
+
+            <div class="nav-dropdown">
+                <div class="nav-item nav-dropdown-toggle" id="userManagementToggle">
+                    <div style="display:flex;align-items:center;gap:0.75rem;">
+                        <span class="material-symbols-outlined">manage_accounts</span>
+                        <span class="nav-text">User Management</span>
+                    </div>
+                    <span class="material-symbols-outlined nav-dropdown-icon">expand_more</span>
+                </div>
+                <div class="nav-dropdown-menu">
+                    <a class="nav-dropdown-item" href="{% url 'admins:onboard_student' %}">
+                        <span class="material-symbols-outlined">person_add</span>
+                        <span class="nav-text">Onboard Student</span>
+                    </a>
+                    <a class="nav-dropdown-item" href="{% url 'admins:students_list' %}">
+                        <span class="material-symbols-outlined">school</span>
+                        <span class="nav-text">Students</span>
+                    </a>
+                    <a class="nav-dropdown-item" href="{% url 'admins:onboard_school' %}">
+                        <span class="material-symbols-outlined">add_business</span>
+                        <span class="nav-text">Onboard School</span>
+                    </a>
+                    <a class="nav-dropdown-item" href="{% url 'admins:schools_list' %}">
+                        <span class="material-symbols-outlined">apartment</span>
+                        <span class="nav-text">Schools</span>
+                    </a>
+                    <a class="nav-dropdown-item" href="{% url 'admins:onboard_evaluator' %}">
+                        <span class="material-symbols-outlined">person_add</span>
+                        <span class="nav-text">Onboard Evaluator</span>
+                    </a>
+                    <a class="nav-dropdown-item" href="{% url 'admins:evaluators_list' %}">
+                        <span class="material-symbols-outlined">groups</span>
+                        <span class="nav-text">Evaluators</span>
+                    </a>
+                </div>
+            </div>
+
+            <a class="nav-item" href="{% url 'admins:evaluator_management' %}">
+                <span class="material-symbols-outlined">supervisor_account</span>
+                <span class="nav-text">Evaluator Management</span>
+            </a>
+
+            <a class="nav-item nav-item-active" href="{% url 'admins:all_submissions' %}">
+                <span class="material-symbols-outlined">assignment</span>
+                <span class="nav-text">Submissions</span>
+            </a>
+
+            <a class="nav-item" href="{% url 'admins:rankings' %}">
+                <span class="material-symbols-outlined">leaderboard</span>
+                <span class="nav-text">Rankings</span>
+            </a>
+
+            <a class="nav-item" href="{% url 'admins:schedule' %}">
+                <span class="material-symbols-outlined">event_note</span>
+                <span class="nav-text">Schedule</span>
+            </a>
+
+            <a class="nav-item" href="{% url 'admins:content_list' %}">
+                <span class="material-symbols-outlined">article</span>
+                <span class="nav-text">Content</span>
+            </a>
+
+            <a class="nav-item" href="{% url 'admins:reports' %}">
+                <span class="material-symbols-outlined">analytics</span>
+                <span class="nav-text">Reports</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer p-3 mt-auto">
+            <div class="user-profile">
+                <div class="user-avatar">
+                    <img alt="Admin" src="https://ui-avatars.com/api/?name={{ request.user.get_full_name|default:request.user.username }}&background=5E2A97&color=fff" />
+                </div>
+                <div class="user-info flex-grow-1">
+                    <p class="user-name">{{ request.user.get_full_name|default:request.user.username }}</p>
+                    <p class="user-role">Super Administrator</p>
+                </div>
+                <a href="{% url 'accounts:sign_out' %}" class="logout-btn" title="Logout">
+                    <span class="material-symbols-outlined">logout</span>
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ══ MAIN CONTENT ══ -->
+    <main class="main-content">
+
+        <!-- ── Header ── -->
+        <header class="top-header">
+            <button class="header-icon-btn" id="sidebarToggleBtn" style="margin-right:16px;">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+            <div class="d-flex align-items-center gap-2 ms-auto">
+                <button class="header-icon-btn" id="notifBtn">
+                    <span class="material-symbols-outlined">notifications</span>
+                </button>
+                <div class="header-avatar" style="background-image: url('https://ui-avatars.com/api/?name={{ request.user.get_full_name|default:request.user.username }}&background=5E2A97&color=fff');" id="profileAvatarBtn"></div>
+            </div>
+        </header>
+
+        <!-- Profile Dropdown -->
+        <div id="profileDropdown" style="position:fixed;top:70px;right:20px;width:280px;background:white;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.15);z-index:9999;overflow:hidden;display:none;opacity:0;transform:translateY(-10px);transition:opacity 0.3s ease,transform 0.3s ease;">
+            <div style="padding:16px;border-bottom:1px solid #f1f5f9;">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <div style="width:48px;height:48px;border-radius:50%;background-image:url('https://ui-avatars.com/api/?name={{ request.user.get_full_name|default:request.user.username }}&background=5E2A97&color=fff');background-size:cover;border:2px solid #5E2A97;"></div>
+                    <div>
+                        <p style="margin:0;font-size:0.875rem;font-weight:700;color:#0f172a;">{{ request.user.get_full_name|default:request.user.username }}</p>
+                        <p style="margin:4px 0 0;font-size:0.75rem;color:#64748b;">Super Admin</p>
+                        <p style="margin:2px 0 0;font-size:0.625rem;color:#94a3b8;">{{ request.user.email }}</p>
+                    </div>
+                </div>
+            </div>
+            <div style="padding:8px;">
+                <a href="{% url 'accounts:sign_out' %}" style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:8px;text-decoration:none;color:#ef4444;">
+                    <span class="material-symbols-outlined" style="color:#ef4444;font-size:20px;">logout</span>
+                    <span style="font-weight:600;font-size:0.875rem;">Logout</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="content-wrapper">
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="row align-items-center">
+                    <div class="col-12 col-md-6">
+                        <h1>Submissions</h1>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="{% url 'admins:dashboard' %}">Admin</a></li>
+                                <li class="breadcrumb-item active">Submissions</li>
+                            </ol>
+                        </nav>
+                    </div>
+                    <div class="col-12 col-md-6 d-flex justify-content-md-end align-items-center gap-3 mt-3 mt-md-0">
+                        <button class="btn-secondary-custom" id="exportBtn">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">file_download</span>
+                            Export CSV
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="row g-4 mb-4">
+                <div class="col-6 col-lg-2">
+                    <div class="stat-card">
+                        <div class="stat-icon purple">
+                            <span class="material-symbols-outlined">description</span>
+                        </div>
+                        <div>
+                            <p class="stat-label">Total</p>
+                            <h3 class="stat-value">{{ stats.total }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <div class="stat-card">
+                        <div class="stat-icon amber">
+                            <span class="material-symbols-outlined">edit_note</span>
+                        </div>
+                        <div>
+                            <p class="stat-label">Draft</p>
+                            <h3 class="stat-value" style="color: #94a3b8;">{{ stats.draft|default:"0" }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <div class="stat-card">
+                        <div class="stat-icon blue">
+                            <span class="material-symbols-outlined">send</span>
+                        </div>
+                        <div>
+                            <p class="stat-label">Submitted</p>
+                            <h3 class="stat-value" style="color: #3b82f6;">{{ stats.submitted }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <div class="stat-card">
+                        <div class="stat-icon orange">
+                            <span class="material-symbols-outlined">smart_toy</span>
+                        </div>
+                        <div>
+                            <p class="stat-label">Under Review</p>
+                            <h3 class="stat-value" style="color: #f59e0b;">{{ stats.under_review }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <div class="stat-card">
+                        <div class="stat-icon green">
+                            <span class="material-symbols-outlined">check_circle</span>
+                        </div>
+                        <div>
+                            <p class="stat-label">Evaluated</p>
+                            <h3 class="stat-value" style="color: #22c55e;">{{ stats.evaluated }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <div class="stat-card">
+                        <div class="stat-icon red">
+                            <span class="material-symbols-outlined">star</span>
+                        </div>
+                        <div>
+                            <p class="stat-label">Top 400</p>
+                            <h3 class="stat-value" style="color: var(--primary);">{{ stats.top_400 }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pipeline Bar -->
+            {% with total=stats.total %}
+            <div class="pipeline-bar">
+                <p class="pipeline-label">Submission Pipeline</p>
+                <div class="pipeline-track">
+                    {% if stats.draft|default:"0" != "0" %}
+                    <div class="pipeline-segment draft" style="width: {% widthratio stats.draft|default:"0" total 100 %}%;" title="Draft: {{ stats.draft|default:'0' }}">{{ stats.draft|default:"0" }}</div>
+                    {% endif %}
+                    {% if stats.submitted %}
+                    <div class="pipeline-segment submitted" style="width: {% widthratio stats.submitted total 100 %}%;" title="Submitted: {{ stats.submitted }}">{{ stats.submitted }}</div>
+                    {% endif %}
+                    {% if stats.under_review %}
+                    <div class="pipeline-segment under-review" style="width: {% widthratio stats.under_review total 100 %}%;" title="Under Review: {{ stats.under_review }}">{{ stats.under_review }}</div>
+                    {% endif %}
+                    {% if stats.evaluated %}
+                    <div class="pipeline-segment evaluated" style="width: {% widthratio stats.evaluated total 100 %}%;" title="Evaluated: {{ stats.evaluated }}">{{ stats.evaluated }}</div>
+                    {% endif %}
+                    {% if stats.top_400 %}
+                    <div class="pipeline-segment top-400" style="width: {% widthratio stats.top_400 total 100 %}%;" title="Top 400: {{ stats.top_400 }}">{{ stats.top_400 }}</div>
+                    {% endif %}
+                </div>
+                <div class="pipeline-legend">
+                    <div class="pipeline-legend-item" data-status="draft">
+                        <span class="pipeline-legend-dot draft"></span>
+                        Draft <span class="pipeline-legend-count">{{ stats.draft|default:"0" }}</span>
+                    </div>
+                    <div class="pipeline-legend-item" data-status="submitted">
+                        <span class="pipeline-legend-dot submitted"></span>
+                        Submitted <span class="pipeline-legend-count">{{ stats.submitted }}</span>
+                    </div>
+                    <div class="pipeline-legend-item" data-status="under_review">
+                        <span class="pipeline-legend-dot under-review"></span>
+                        Under Review <span class="pipeline-legend-count">{{ stats.under_review }}</span>
+                    </div>
+                    <div class="pipeline-legend-item" data-status="evaluated">
+                        <span class="pipeline-legend-dot evaluated"></span>
+                        Evaluated <span class="pipeline-legend-count">{{ stats.evaluated }}</span>
+                    </div>
+                    <div class="pipeline-legend-item" data-status="top_400">
+                        <span class="pipeline-legend-dot top-400"></span>
+                        Top 400 <span class="pipeline-legend-count">{{ stats.top_400 }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endwith %}
+
+            <!-- Main Data Card -->
+            <div class="main-card">
+                <!-- Search & Filters -->
+                <div class="main-card-header">
+                    <form method="get" id="filterForm">
+                        <div class="row align-items-center g-3">
+                            <div class="col-12 col-md-4">
+                                <div class="search-input">
+                                    <span class="material-symbols-outlined">search</span>
+                                    <input type="text" name="search" id="searchInput" placeholder="Search by idea, student, school..." value="{{ search_query }}">
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-8 d-flex align-items-center gap-3 justify-content-md-end flex-wrap">
+                                <select class="filter-select" name="status" id="statusFilter" onchange="document.getElementById('filterForm').submit();">
+                                    <option value="">All Status</option>
+                                    <option value="draft" {% if selected_status == 'draft' %}selected{% endif %}>Draft</option>
+                                    <option value="submitted" {% if selected_status == 'submitted' %}selected{% endif %}>Submitted</option>
+                                    <option value="under_review" {% if selected_status == 'under_review' %}selected{% endif %}>Under Review</option>
+                                    <option value="evaluated" {% if selected_status == 'evaluated' %}selected{% endif %}>Evaluated</option>
+                                </select>
+                                <select class="filter-select" name="category" id="categoryFilter" onchange="document.getElementById('filterForm').submit();">
+                                    <option value="">All Categories</option>
+                                    <option value="healthtech" {% if selected_category == 'healthtech' %}selected{% endif %}>HealthTech</option>
+                                    <option value="edtech" {% if selected_category == 'edtech' %}selected{% endif %}>EdTech</option>
+                                    <option value="agritech" {% if selected_category == 'agritech' %}selected{% endif %}>AgriTech</option>
+                                    <option value="sustainability" {% if selected_category == 'sustainability' %}selected{% endif %}>Sustainability</option>
+                                    <option value="fintech" {% if selected_category == 'fintech' %}selected{% endif %}>FinTech</option>
+                                    <option value="social_impact" {% if selected_category == 'social_impact' %}selected{% endif %}>Social Impact</option>
+                                    <option value="technology" {% if selected_category == 'technology' %}selected{% endif %}>Technology</option>
+                                    <option value="other" {% if selected_category == 'other' %}selected{% endif %}>Other</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Table -->
+                <div class="table-responsive">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th class="sortable">Idea <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">unfold_more</span></th>
+                                <th class="sortable">Team <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">unfold_more</span></th>
+                                <th>Members</th>
+                                <th class="sortable">Status <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">unfold_more</span></th>
+                                <th class="sortable">AI Score <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">unfold_more</span></th>
+                                <th class="sortable">Evaluator <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">unfold_more</span></th>
+                                <th class="sortable">Date <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">unfold_more</span></th>
+                                <th style="width: 50px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="submissionsBody">
+                            {% for row in rows %}
+                            <tr data-id="{{ row.id }}" data-status="{{ row.status }}" onclick="openDetailsSidebar({{ row.id }})">
+                                <td><span class="submission-id">SUB-{{ row.id }}</span></td>
+                                <td>
+                                    <p class="idea-title">{{ row.title }}</p>
+                                    <p class="idea-category">{{ row.category }}</p>
+                                </td>
+                                <td>
+                                    <p class="team-name">{{ row.student_name }}</p>
+                                    <p class="school-name">{{ row.school_name }}</p>
+                                </td>
+                                <td>
+                                    <div style="display:flex;gap:0;">
+                                        {% for member in row.members %}
+                                        <div style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;color:#fff;margin-left:{% if not forloop.first %}-8px{% else %}0{% endif %};border:2px solid #fff;background:{{ member.color }};">{{ member.initials }}</div>
+                                        {% empty %}
+                                        <div style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;color:#fff;background:var(--primary);border:2px solid #fff;">{{ row.student_name|make_list|first|upper }}</div>
+                                        {% endfor %}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-start;">
+                                        <span class="badge-status {{ row.status }}">
+                                            {% if row.is_top_400 %}Top 400{% else %}{{ row.status_label }}{% endif %}
+                                        </span>
+                                        {% if row.is_shortlisted %}
+                                        <span style="display:inline-flex;align-items:center;gap:3px;font-size:0.6rem;padding:2px 6px;border-radius:999px;background:#fef3c7;color:#d97706;font-weight:600;">
+                                            <span class="material-symbols-outlined" style="font-size:10px;">star</span>
+                                            Shortlisted
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if row.ai_score != None %}
+                                    <div class="score-display">
+                                        <div class="score-bar">
+                                            <div class="score-fill {% if row.ai_score >= 70 %}high{% elif row.ai_score >= 50 %}medium{% else %}low{% endif %}" style="width: {% widthratio row.ai_score 100 100 %}%;"></div>
+                                        </div>
+                                        <span class="score-value {% if row.ai_score >= 70 %}high{% elif row.ai_score >= 50 %}medium{% else %}low{% endif %}">{{ row.ai_score }}</span>
+                                    </div>
+                                    {% else %}
+                                    <div class="score-display">
+                                        <div class="score-bar"><div class="score-fill none" style="width: 0%;"></div></div>
+                                        <span class="score-value none">&mdash;</span>
+                                    </div>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if row.evaluator_score != None %}
+                                    <div class="score-display">
+                                        <div class="score-bar">
+                                            <div class="score-fill {% if row.evaluator_score >= 70 %}high{% elif row.evaluator_score >= 50 %}medium{% else %}low{% endif %}" style="width: {% widthratio row.evaluator_score 100 100 %}%;"></div>
+                                        </div>
+                                        <span class="score-value {% if row.evaluator_score >= 70 %}high{% elif row.evaluator_score >= 50 %}medium{% else %}low{% endif %}">{{ row.evaluator_score }}/100</span>
+                                    </div>
+                                    {% else %}
+                                    <div class="score-display">
+                                        <div class="score-bar"><div class="score-fill none" style="width: 0%;"></div></div>
+                                        <span class="score-value none">&mdash;</span>
+                                    </div>
+                                    {% endif %}
+                                </td>
+                                <td style="font-size: 0.8125rem; color: var(--text-muted);">{{ row.submitted_at }}</td>
+                                <td>
+                                    <a href="{% url 'admins:submission_detail' row.id %}" class="btn-icon-action" onclick="event.stopPropagation();" title="View Details">
+                                        <span class="material-symbols-outlined">visibility</span>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="8" style="text-align:center; padding:48px 20px; color:var(--text-muted);">
+                                    <span class="material-symbols-outlined" style="font-size:48px; color:#cbd5e1; display:block; margin-bottom:12px;">inbox</span>
+                                    No submissions found matching your filters.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                {% if page_obj.paginator.num_pages > 1 %}
+                <div class="pagination-custom">
+                    <span class="pagination-info">
+                        Showing <strong>{{ page_obj.start_index }}–{{ page_obj.end_index }}</strong> of <strong>{{ page_obj.paginator.count }}</strong> submissions
+                    </span>
+                    <div class="pagination-controls">
+                        {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" class="page-btn">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">chevron_left</span>
+                        </a>
+                        {% else %}
+                        <span class="page-btn disabled">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">chevron_left</span>
+                        </span>
+                        {% endif %}
+
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if num == page_obj.number %}
+                                <span class="page-btn active">{{ num }}</span>
+                            {% elif num == 1 or num == page_obj.paginator.num_pages or num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+                                <a href="?page={{ num }}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" class="page-btn">{{ num }}</a>
+                            {% elif num == page_obj.number|add:"-3" or num == page_obj.number|add:"3" %}
+                                <span style="color: var(--text-muted);">...</span>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" class="page-btn">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">chevron_right</span>
+                        </a>
+                        {% else %}
+                        <span class="page-btn disabled">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">chevron_right</span>
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Details Sidebar -->
+<div class="details-sidebar-overlay" id="detailsOverlay"></div>
+<div class="details-sidebar" id="detailsSidebar">
+    <div class="details-sidebar-header">
+        <h2>Submission Details</h2>
+        <button class="details-sidebar-close" id="closeSidebar">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+    </div>
+    <div class="details-sidebar-content" id="detailsContent">
+        <!-- Loading state -->
+        <div id="sidebarLoading" style="display:none; text-align:center; padding:40px;">
+            <div class="skeleton" style="width:100%; height:120px; margin-bottom:16px;"></div>
+            <div class="skeleton" style="width:80%; height:16px; margin-bottom:12px;"></div>
+            <div class="skeleton" style="width:60%; height:16px;"></div>
+        </div>
+
+        <!-- Idea Section -->
+        <div class="detail-section" id="sidebarIdeaSection">
+            <div class="detail-section-title">
+                <span class="material-symbols-outlined">lightbulb</span>
+                Idea
+            </div>
+            <div class="idea-detail-card">
+                <h4 id="detailIdeaTitle">--</h4>
+                <p class="idea-pitch" id="detailIdeaPitch">--</p>
+                <div class="idea-tags" id="detailIdeaTags"></div>
+            </div>
+        </div>
+
+        <!-- Status & Scores -->
+        <div class="detail-section">
+            <div class="detail-section-title">
+                <span class="material-symbols-outlined">analytics</span>
+                Scores & Status
+            </div>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <div class="detail-item-label">Status</div>
+                    <div class="detail-item-value"><span class="badge-status" id="detailStatus">--</span></div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-item-label">Final Score</div>
+                    <div class="detail-item-value" id="detailFinalScore">--</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-item-label">AI Score</div>
+                    <div class="detail-item-value" id="detailAIScore">--</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-item-label">Rank</div>
+                    <div class="detail-item-value" id="detailRank">--</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-item-label">Submission ID</div>
+                    <div class="detail-item-value" id="detailSubId" style="font-family: monospace; color: var(--primary);">--</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-item-label">Submitted On</div>
+                    <div class="detail-item-value" id="detailDate">--</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Score Breakdown -->
+        <div class="detail-section" id="scoreBreakdownSection">
+            <div class="detail-section-title">
+                <span class="material-symbols-outlined">scoreboard</span>
+                AI Score Breakdown (10 Parameters)
+            </div>
+            <div class="score-breakdown" id="detailScoreBreakdown">
+                <!-- Filled by JS -->
+            </div>
+        </div>
+
+        <!-- Student Section -->
+        <div class="detail-section">
+            <div class="detail-section-title">
+                <span class="material-symbols-outlined">person</span>
+                Student Info
+            </div>
+            <div class="detail-grid">
+                <div class="detail-item full">
+                    <div class="detail-item-label">Student</div>
+                    <div class="detail-item-value" id="detailStudentName">--</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-item-label">Student ID</div>
+                    <div class="detail-item-value" id="detailStudentId">--</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-item-label">School</div>
+                    <div class="detail-item-value" id="detailSchool">--</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-item-label">Grade</div>
+                    <div class="detail-item-value" id="detailGrade">--</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attachments -->
+        <div class="detail-section" id="attachmentsSection" style="display:none;">
+            <div class="detail-section-title">
+                <span class="material-symbols-outlined">attach_file</span>
+                Attachments
+            </div>
+            <div class="attachment-list" id="detailAttachments"></div>
+        </div>
+    </div>
+
+    <!-- Footer Actions -->
+    <div class="details-sidebar-footer">
+        <button class="btn-secondary-custom" onclick="closeSidebarFn()">
+            <span class="material-symbols-outlined" style="font-size: 16px;">close</span>
+            Close
+        </button>
+        <button class="btn-primary-custom" id="sidebarViewFull">
+            <span class="material-symbols-outlined" style="font-size: 16px;">rate_review</span>
+            View Full Details
+        </button>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+(function() {
+    // ── Sidebar Toggle ──
+    const sidebar = document.getElementById('superAdminAppSidebar');
+    const toggleBtn = document.getElementById('sidebarToggleBtn');
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', function() {
+            if (window.innerWidth <= 768) {
+                sidebar.classList.toggle('mobile-open');
+            } else {
+                sidebar.classList.toggle('collapsed');
+            }
+        });
+    }
+
+    // ── User Management Dropdown ──
+    const umToggle = document.getElementById('userManagementToggle');
+    if (umToggle) {
+        umToggle.addEventListener('click', function() {
+            this.closest('.nav-dropdown').classList.toggle('open');
+        });
+    }
+
+    // ── Profile Dropdown ──
+    const profileBtn = document.getElementById('profileAvatarBtn');
+    const profileDrop = document.getElementById('profileDropdown');
+    if (profileBtn && profileDrop) {
+        profileBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const isVisible = profileDrop.style.display === 'block';
+            profileDrop.style.display = isVisible ? 'none' : 'block';
+            if (!isVisible) {
+                setTimeout(() => { profileDrop.style.opacity = '1'; profileDrop.style.transform = 'translateY(0)'; }, 10);
+            } else {
+                profileDrop.style.opacity = '0'; profileDrop.style.transform = 'translateY(-10px)';
+            }
+        });
+        document.addEventListener('click', function() {
+            profileDrop.style.display = 'none'; profileDrop.style.opacity = '0'; profileDrop.style.transform = 'translateY(-10px)';
+        });
+    }
+
+    // ── Search form submit on Enter ──
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('filterForm').submit();
+            }
+        });
+    }
+
+    // ── Pipeline legend click → filter ──
+    document.querySelectorAll('.pipeline-legend-item').forEach(function(item) {
+        item.addEventListener('click', function() {
+            const status = this.getAttribute('data-status');
+            const statusSelect = document.getElementById('statusFilter');
+            if (statusSelect) {
+                statusSelect.value = status;
+                document.getElementById('filterForm').submit();
+            }
+        });
+    });
+
+    // ── Export CSV ──
+    const exportBtn = document.getElementById('exportBtn');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', function() {
+            showToast('Exporting submissions to CSV...', 'info');
+        });
+    }
+
+    // ── Toast ──
+    window.showToast = function(message, type) {
+        type = type || 'info';
+        const existing = document.querySelector('.toast-notification');
+        if (existing) existing.remove();
+        const toast = document.createElement('div');
+        toast.className = 'toast-notification';
+        const colors = { success: '#22c55e', error: '#ef4444', info: '#5E2A97', warning: '#f97316' };
+        const icons = { success: 'check_circle', error: 'error', info: 'info', warning: 'warning' };
+        toast.style.cssText = 'position:fixed;bottom:2rem;right:2rem;background:' + colors[type] + ';color:white;padding:1rem 1.5rem;border-radius:0.75rem;box-shadow:0 10px 25px rgba(0,0,0,0.2);z-index:9999;display:flex;align-items:center;gap:0.75rem;font-size:0.875rem;font-weight:500;font-family:Poppins,sans-serif;animation:slideIn 0.3s ease;max-width:400px;';
+        toast.innerHTML = '<span class="material-symbols-outlined" style="font-size:20px;">' + icons[type] + '</span><span>' + message + '</span>';
+        document.body.appendChild(toast);
+        setTimeout(function() { toast.style.animation = 'slideOut 0.3s ease'; setTimeout(function() { toast.remove(); }, 300); }, 3000);
+    };
+})();
+
+// ── Details Sidebar ──
+const detailsSidebar = document.getElementById('detailsSidebar');
+const detailsOverlay = document.getElementById('detailsOverlay');
+
+function openDetailsSidebar(submissionId) {
+    detailsSidebar.classList.add('open');
+    detailsOverlay.classList.add('show');
+    document.getElementById('sidebarLoading').style.display = 'block';
+    document.getElementById('sidebarIdeaSection').style.display = 'none';
+
+    // Fetch submission details via AJAX
+    fetch('{% url "admins:submission_preview_json" 0 %}'.replace('/0/', '/' + submissionId + '/'))
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+            document.getElementById('sidebarLoading').style.display = 'none';
+            document.getElementById('sidebarIdeaSection').style.display = 'block';
+
+            // Idea
+            document.getElementById('detailIdeaTitle').textContent = d.title || 'Untitled';
+            document.getElementById('detailIdeaPitch').textContent = d.q3 || d.q2 || 'No description available.';
+            var tagsEl = document.getElementById('detailIdeaTags');
+            tagsEl.innerHTML = '';
+            if (d.category) {
+                var tag = document.createElement('span');
+                tag.className = 'idea-tag';
+                tag.textContent = d.category;
+                tagsEl.appendChild(tag);
+            }
+
+            // Status
+            var statusEl = document.getElementById('detailStatus');
+            statusEl.textContent = d.is_top_400 ? 'Top 400' : d.status_label;
+            statusEl.className = 'badge-status ' + d.status;
+
+            // Scores
+            var scoreColor = d.final_score >= 35 ? '#16a34a' : d.final_score >= 25 ? '#d97706' : '#ef4444';
+            document.getElementById('detailFinalScore').innerHTML = d.final_score != null ? '<span style="font-size:1.25rem;color:' + scoreColor + ';">' + d.final_score + ' / 50</span>' : '<span style="color:#94a3b8;">--</span>';
+            document.getElementById('detailAIScore').textContent = d.final_score != null ? d.final_score + ' / 50' : '--';
+            document.getElementById('detailRank').textContent = d.rank || '--';
+            document.getElementById('detailSubId').textContent = d.id;
+            document.getElementById('detailDate').textContent = d.submitted_at || '--';
+
+            // Student info
+            document.getElementById('detailStudentName').textContent = d.student_name || '--';
+            document.getElementById('detailStudentId').textContent = d.student_id || '--';
+            document.getElementById('detailSchool').textContent = d.school_name || '--';
+            document.getElementById('detailGrade').textContent = d.grade || '--';
+
+            // Score Breakdown
+            var breakdownEl = document.getElementById('detailScoreBreakdown');
+            var params = [
+                { name: 'Uniqueness', val: d.uniqueness_score },
+                { name: 'Implementation', val: d.ease_score },
+                { name: 'Feasibility', val: d.feasibility_score },
+                { name: 'Impact', val: d.impact_score },
+                { name: 'Sustainability', val: d.sustainability_score },
+                { name: 'Clarity', val: d.clarity_score },
+                { name: 'Empathy', val: d.empathy_score },
+                { name: 'Creativity', val: d.creativity_score },
+                { name: 'Flex Thinking', val: d.flex_thinking_score },
+                { name: 'Communication', val: d.communication_score }
+            ];
+            breakdownEl.innerHTML = '';
+            var hasScores = false;
+            params.forEach(function(p) {
+                if (p.val != null) hasScores = true;
+                var c = p.val >= 4 ? '#16a34a' : p.val >= 3 ? '#d97706' : p.val != null ? '#ef4444' : '#94a3b8';
+                var pct = p.val != null ? (p.val / 5 * 100) : 0;
+                breakdownEl.innerHTML += '<div class="score-param"><span class="score-param-name">' + p.name + '</span><div class="score-param-bar"><div class="score-param-bar-fill" style="width:' + pct + '%;background:' + c + ';"></div></div><span class="score-param-value" style="color:' + c + ';">' + (p.val != null ? p.val : '--') + '</span></div>';
+            });
+            document.getElementById('scoreBreakdownSection').style.display = hasScores ? 'block' : 'none';
+
+            // Attachments
+            var attachSection = document.getElementById('attachmentsSection');
+            var attachList = document.getElementById('detailAttachments');
+            if (d.uploaded_files && d.uploaded_files.length > 0) {
+                attachSection.style.display = 'block';
+                attachList.innerHTML = '';
+                d.uploaded_files.forEach(function(f) {
+                    var iconClass = f.file_type === 'image' ? 'image' : f.file_type === 'video' ? 'video' : 'document';
+                    var iconName = f.file_type === 'image' ? 'image' : f.file_type === 'video' ? 'videocam' : 'description';
+                    attachList.innerHTML += '<div class="attachment-item"><div class="attachment-icon ' + iconClass + '"><span class="material-symbols-outlined">' + iconName + '</span></div><div class="attachment-info"><p class="attachment-name">' + (f.original_filename || 'File') + '</p><span class="attachment-size">' + (f.file_size ? (f.file_size / 1048576).toFixed(1) + ' MB' : '') + '</span></div></div>';
+                });
+            } else {
+                attachSection.style.display = 'none';
+            }
+
+            // View Full button
+            document.getElementById('sidebarViewFull').onclick = function() {
+                window.location.href = '{% url "admins:submission_detail" 0 %}'.replace('/0/', '/' + submissionId + '/');
+            };
+        })
+        .catch(function(err) {
+            document.getElementById('sidebarLoading').style.display = 'none';
+            document.getElementById('sidebarIdeaSection').style.display = 'block';
+            document.getElementById('detailIdeaTitle').textContent = 'Error loading details';
+            console.error('Failed to load submission:', err);
+        });
+}
+
+function closeSidebarFn() {
+    detailsSidebar.classList.remove('open');
+    detailsOverlay.classList.remove('show');
+}
+
+document.getElementById('closeSidebar').addEventListener('click', closeSidebarFn);
+detailsOverlay.addEventListener('click', closeSidebarFn);
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeSidebarFn(); });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1075 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Evaluator Management | Super Admin | IFT Platform</title>
+
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <style>
+        :root {
+            --primary: #5E2A97;
+            --secondary: #DEDE50;
+            --primary-light: #E8D4F0;
+            --background-light: #F7F7F7;
+            --surface-light: #FFFFFF;
+            --border-light: #EEEEEE;
+            --text-dark: #222222;
+            --text-muted: #666666;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            overflow: hidden;
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        .main-container { display: flex; height: 100vh; width: 100%; }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px; background: #FFFFFF; border-right: 1px solid #EEEEEE;
+            height: 100vh; display: flex; flex-direction: column; position: sticky;
+            top: 0; font-family: 'Poppins', sans-serif; transition: all 0.3s ease;
+            overflow-y: auto; overflow-x: hidden;
+        }
+        .sidebar.collapsed { width: 80px; }
+        .sidebar.collapsed .sidebar-title, .sidebar.collapsed .sidebar-subtitle,
+        .sidebar.collapsed .nav-text, .sidebar.collapsed .user-info { opacity: 0; width: 0; overflow: hidden; white-space: nowrap; }
+        .sidebar.collapsed .logo-img { width: 50px; height: 50px; margin: 0 auto; background-position: center; }
+        .sidebar.collapsed .nav-item { justify-content: center; padding-left: 1.7rem; }
+        .sidebar.collapsed .nav-item .material-symbols-outlined { margin: 0; }
+        .sidebar.collapsed .user-avatar { margin: 0 auto; }
+        .sidebar.collapsed .logout-btn { display: none; }
+        .sidebar.collapsed .user-profile { justify-content: center; }
+        .sidebar.collapsed .notification-badge { display: none; }
+
+        .sidebar-header { border-bottom: 1px solid #F7F7F7; }
+        .logo-img {
+            width: 250px; height: 50px; background-size: contain;
+            background-position: left center; background-repeat: no-repeat; flex-shrink: 0;
+        }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.75rem 1rem; border-radius: 0.5rem;
+            text-decoration: none; color: #222222;
+            transition: all 0.2s ease; cursor: pointer; margin-bottom: 0.25rem;
+        }
+        .nav-item:hover { background: #F7F7F7; color: #222222; }
+        .nav-item .material-symbols-outlined { font-size: 24px; color: #666666; transition: all 0.2s ease; }
+        .nav-item.nav-item-active { background: rgba(94, 42, 151, 0.1); color: #5E2A97; padding-left: calc(1rem - 4px); }
+        .nav-item.nav-item-active .material-symbols-outlined { color: #5E2A97; font-variation-settings: 'FILL' 1; }
+        .nav-text { font-size: 0.875rem; font-weight: 500; }
+
+        .nav-dropdown { position: relative; }
+        .nav-dropdown-toggle { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+        .nav-dropdown-icon { font-size: 18px !important; transition: transform 0.2s ease; }
+        .nav-dropdown.open .nav-dropdown-icon { transform: rotate(180deg); }
+        .nav-dropdown-menu { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; padding-left: 2.5rem; }
+        .nav-dropdown.open .nav-dropdown-menu { max-height: 400px; margin-top: 0.25rem; }
+
+        .nav-dropdown-item {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.625rem 1rem; border-radius: 0.5rem;
+            text-decoration: none; color: #666666; font-size: 0.875rem;
+            font-weight: 500; transition: all 0.2s ease; margin-bottom: 0.25rem;
+        }
+        .nav-dropdown-item:hover { background: #F7F7F7; color: #5E2A97; }
+        .nav-dropdown-item.active { background: rgba(94, 42, 151, 0.1); color: #5E2A97; }
+
+        .sidebar.collapsed .nav-dropdown-toggle { justify-content: center; }
+        .sidebar.collapsed .nav-dropdown-icon { display: none; }
+        .sidebar.collapsed .nav-dropdown-menu { padding-left: 0rem; }
+        .sidebar.collapsed .nav-dropdown-item { padding-left: 0.6rem; }
+
+        .sidebar-footer { border-top: 1px solid #EEEEEE; margin-top: auto; }
+        .user-profile {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.75rem; border-radius: 0.5rem; transition: all 0.2s ease; cursor: pointer;
+        }
+        .user-profile:hover { background: #F7F7F7; }
+        .user-avatar { width: 2.5rem; height: 2.5rem; border-radius: 50%; overflow: hidden; flex-shrink: 0; border: 2px solid #EEEEEE; }
+        .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .user-info { flex: 1; }
+        .user-name { font-size: 0.875rem; font-weight: 700; color: #222222; margin: 0 0 0.125rem 0; line-height: 1.2; }
+        .user-role { font-size: 0.75rem; color: #666666; margin: 0; line-height: 1.2; }
+        .logout-btn {
+            background: none; border: none; color: #666666; cursor: pointer;
+            padding: 0.5rem; border-radius: 0.375rem; transition: all 0.2s ease;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .logout-btn:hover { background: rgba(94, 42, 151, 0.1); color: #5E2A97; }
+        .logout-btn .material-symbols-outlined { font-size: 20px; }
+
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; left: -280px; z-index: 999; transition: left 0.3s ease; }
+            .sidebar.mobile-open { left: 0; }
+            .sidebar.collapsed { left: -80px; }
+            .sidebar.collapsed.mobile-open { left: 0; }
+        }
+
+        /* Header */
+        .top-header {
+            height: 70px; min-height: 70px; flex-shrink: 0;
+            background: #FFFFFF; border-bottom: 1px solid #EEEEEE;
+            display: flex; align-items: center; padding: 0 1.5rem;
+            position: sticky; top: 0; z-index: 100; font-family: 'Poppins', sans-serif;
+        }
+        .header-icon-btn {
+            width: 2.5rem; height: 2.5rem; border-radius: 0.5rem; border: none;
+            background: #F7F7F7; color: #666666; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;
+        }
+        .header-icon-btn:hover { background: #EEEEEE; color: #5E2A97; }
+        .header-icon-btn .material-symbols-outlined { font-size: 22px; }
+        .header-avatar {
+            width: 2.5rem; height: 2.5rem; border-radius: 50%;
+            background-size: cover; background-position: center; background-repeat: no-repeat;
+            border: 2px solid #5E2A97; cursor: pointer; transition: all 0.2s ease;
+        }
+        .header-avatar:hover { transform: scale(1.05); box-shadow: 0 0 0 4px rgba(94, 42, 151, 0.1); }
+
+        /* Main Content */
+        .main-content { flex: 1; display: flex; flex-direction: column; height: 100%; overflow-y: auto; position: relative; z-index: 10; }
+        .content-wrapper { flex: 1; padding: 32px; max-width: 100%; margin: 0 auto; width: 100%; }
+
+        /* Page Header */
+        .page-header { margin-bottom: 32px; }
+        .page-header h1 { font-size: 1.875rem; font-weight: 700; color: var(--text-dark); margin-bottom: 8px; }
+        .breadcrumb { font-size: 0.875rem; color: var(--text-muted); background: none; padding: 0; margin: 0; }
+        .breadcrumb-item a { color: var(--text-muted); text-decoration: none; }
+        .breadcrumb-item a:hover { color: var(--primary); }
+        .breadcrumb-item.active { color: var(--text-dark); }
+
+        /* Stat Cards */
+        .stat-card {
+            background: var(--surface-light); border-radius: 12px; padding: 24px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04); border: 1px solid var(--border-light);
+            display: flex; align-items: center; gap: 16px;
+        }
+        .stat-icon {
+            width: 48px; height: 48px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .stat-icon.purple { background: rgba(94, 42, 151, 0.1); color: var(--primary); }
+        .stat-icon.green { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
+        .stat-icon.red { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+        .stat-icon.gray { background: rgba(148, 163, 184, 0.1); color: #94a3b8; }
+        .stat-icon.blue { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+        .stat-icon.amber { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+        .stat-label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin: 0; }
+        .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--text-dark); margin: 0; }
+
+        /* Main Card */
+        .main-card {
+            background: var(--surface-light); border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04); border: 1px solid var(--border-light); overflow: hidden;
+        }
+        .main-card-header { padding: 24px; border-bottom: 1px solid var(--border-light); }
+
+        /* Search & Filter */
+        .search-input { position: relative; }
+        .search-input .material-symbols-outlined {
+            position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+            color: var(--text-muted); font-size: 20px;
+        }
+        .search-input input {
+            width: 100%; padding: 10px 12px 10px 44px; border: 1px solid var(--border-light);
+            border-radius: 8px; font-size: 0.875rem; background: #f8fafc; font-family: 'Poppins', sans-serif;
+        }
+        .search-input input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(94, 42, 151, 0.1); }
+        .filter-select {
+            width: auto; font-size: 0.875rem; padding: 10px 12px; border: 1px solid var(--border-light);
+            border-radius: 8px; background: #f8fafc; font-family: 'Poppins', sans-serif; cursor: pointer;
+        }
+        .filter-select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(94, 42, 151, 0.1); }
+
+        /* Table */
+        .custom-table { width: 100%; font-size: 0.875rem; }
+        .custom-table thead { background: #f8fafc; }
+        .custom-table th {
+            padding: 16px 18px; font-size: 0.75rem; font-weight: 700; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.05em; text-align: left;
+            border-bottom: 1px solid var(--border-light); white-space: nowrap;
+        }
+        .custom-table td { padding: 16px 18px; vertical-align: middle; border-bottom: 1px solid #f8f9fa; }
+        .custom-table tbody tr { transition: background 0.2s; }
+        .custom-table tbody tr:hover { background: rgba(94, 42, 151, 0.03); }
+
+        /* Evaluator Profile */
+        .evaluator-profile { display: flex; align-items: center; gap: 12px; }
+        .evaluator-avatar {
+            width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; font-size: 0.75rem; font-weight: 700; color: #fff; flex-shrink: 0;
+        }
+        .evaluator-name { font-weight: 600; color: var(--text-dark); margin: 0; font-size: 0.8125rem; }
+        .evaluator-org { font-size: 0.6875rem; color: var(--text-muted); margin: 0; }
+
+        /* Expertise Tags */
+        .expertise-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+        .expertise-tag {
+            font-size: 0.625rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+            background: rgba(94, 42, 151, 0.08); color: var(--primary); white-space: nowrap;
+        }
+
+        /* Status Badge */
+        .badge-status { font-size: 0.6875rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
+        .badge-status.active { background: #d1fae5; color: #065f46; }
+        .badge-status.inactive { background: #fee2e2; color: #dc2626; }
+
+        /* Capacity Bar */
+        .capacity-bar-wrapper { display: flex; align-items: center; gap: 8px; }
+        .capacity-bar { flex: 1; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; min-width: 70px; }
+        .capacity-fill { height: 100%; border-radius: 4px; transition: width 0.3s ease; }
+        .capacity-fill.optimal { background: #22c55e; }
+        .capacity-fill.moderate { background: #f59e0b; }
+        .capacity-fill.overloaded { background: #ef4444; }
+        .capacity-fill.idle { background: #cbd5e1; }
+        .capacity-text { font-size: 0.75rem; font-weight: 700; min-width: 40px; text-align: right; white-space: nowrap; }
+        .capacity-text.optimal { color: #16a34a; }
+        .capacity-text.moderate { color: #d97706; }
+        .capacity-text.overloaded { color: #ef4444; }
+        .capacity-text.idle { color: #94a3b8; }
+
+        /* Action Buttons */
+        .btn-primary-custom {
+            background: var(--primary); color: white; font-weight: 600; padding: 10px 20px;
+            border-radius: 8px; border: none; display: flex; align-items: center; gap: 8px;
+            cursor: pointer; transition: all 0.2s; font-family: 'Poppins', sans-serif;
+            font-size: 0.875rem; box-shadow: 0 4px 6px rgba(94, 42, 151, 0.3);
+        }
+        .btn-primary-custom:hover { background: #7B3FB5; }
+        .btn-secondary-custom {
+            background: white; color: var(--text-dark); font-weight: 600; padding: 10px 20px;
+            border-radius: 8px; border: 1px solid var(--border-light); display: flex; align-items: center;
+            gap: 8px; cursor: pointer; transition: all 0.2s; font-family: 'Poppins', sans-serif; font-size: 0.875rem;
+        }
+        .btn-secondary-custom:hover { background: #f8fafc; }
+
+        .btn-icon-action {
+            width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border-light);
+            background: white; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s; color: var(--text-muted);
+        }
+        .btn-icon-action:hover { background: rgba(94, 42, 151, 0.1); color: var(--primary); border-color: var(--primary); }
+        .btn-icon-action .material-symbols-outlined { font-size: 18px; }
+
+        .quick-actions { display: flex; gap: 4px; }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5); z-index: 2000; display: none;
+            align-items: center; justify-content: center;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-box {
+            background: var(--surface-light); border-radius: 16px; width: 600px; max-width: 95vw;
+            max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+        .modal-header {
+            padding: 24px; border-bottom: 1px solid var(--border-light);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .modal-header h2 { font-size: 1.125rem; font-weight: 700; margin: 0; }
+        .modal-close {
+            width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border-light);
+            background: white; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: var(--text-muted); transition: all 0.2s;
+        }
+        .modal-close:hover { background: #f8fafc; color: var(--text-dark); }
+        .modal-body { flex: 1; overflow-y: auto; padding: 24px; }
+        .modal-footer {
+            padding: 16px 24px; border-top: 1px solid var(--border-light);
+            display: flex; justify-content: flex-end; gap: 12px;
+        }
+
+        /* Modal Idea Row */
+        .modal-idea-row {
+            display: flex; align-items: center; gap: 12px; padding: 12px;
+            border-radius: 8px; border: 1px solid var(--border-light); margin-bottom: 8px;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .modal-idea-row:hover { background: #f8fafc; border-color: var(--primary); }
+        .modal-idea-row.selected { background: rgba(94, 42, 151, 0.05); border-color: var(--primary); }
+        .modal-idea-checkbox {
+            width: 18px; height: 18px; border: 2px solid var(--border-light); border-radius: 4px;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s;
+        }
+        .modal-idea-row.selected .modal-idea-checkbox { background: var(--primary); border-color: var(--primary); }
+        .modal-idea-row.selected .modal-idea-checkbox::after { content: '\2713'; color: #fff; font-size: 12px; font-weight: 700; }
+        .modal-idea-info { flex: 1; min-width: 0; }
+        .modal-idea-title { font-size: 0.8125rem; font-weight: 600; color: var(--text-dark); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .modal-idea-meta { font-size: 0.6875rem; color: var(--text-muted); margin: 2px 0 0 0; }
+        .modal-idea-score { font-size: 0.8125rem; font-weight: 700; color: var(--primary); white-space: nowrap; }
+        .modal-idea-rank { font-size: 0.6875rem; font-weight: 600; color: var(--text-muted); white-space: nowrap; margin-left: 8px; }
+
+        /* Toast */
+        .toast-container {
+            position: fixed; top: 24px; right: 24px; z-index: 9999;
+            display: flex; flex-direction: column; gap: 8px;
+        }
+        .toast-item {
+            background: #0f172a; color: #fff; padding: 14px 20px; border-radius: 10px;
+            font-size: 0.875rem; font-weight: 500; display: flex; align-items: center; gap: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: toastIn 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+        }
+        .toast-item.success { border-left: 4px solid #22c55e; }
+        .toast-item.error { border-left: 4px solid #ef4444; }
+        @keyframes toastIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .custom-table th, .custom-table td { padding: 12px 14px; }
+        }
+        @media (max-width: 768px) {
+            .content-wrapper { padding: 16px; }
+        }
+    </style>
+</head>
+
+<body>
+<div class="main-container">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar d-md-flex flex-column" id="superAdminAppSidebar">
+        <div class="sidebar-header p-3 pb-1">
+            <div class="d-flex align-items-center">
+                <div class="logo-img" style="background-image: url('{% static 'images/IFT_logo.png' %}');"></div>
+            </div>
+        </div>
+        <nav class="flex-grow-1 px-3 d-flex flex-column gap-2 mt-3">
+            <a class="nav-item" href="{% url 'admins:dashboard' %}">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span class="nav-text">Dashboard</span>
+            </a>
+
+            <div class="nav-dropdown">
+                <div class="nav-item nav-dropdown-toggle" id="userManagementToggle">
+                    <div style="display:flex;align-items:center;gap:0.75rem;">
+                        <span class="material-symbols-outlined">manage_accounts</span>
+                        <span class="nav-text">User Management</span>
+                    </div>
+                    <span class="material-symbols-outlined nav-dropdown-icon">expand_more</span>
+                </div>
+                <div class="nav-dropdown-menu">
+                    <a class="nav-dropdown-item" href="{% url 'admins:onboard_student' %}">
+                        <span class="material-symbols-outlined">person_add</span>
+                        <span class="nav-text">Onboard Student</span>
+                    </a>
+                    <a class="nav-dropdown-item" href="{% url 'admins:students_list' %}">
+                        <span class="material-symbols-outlined">school</span>
+                        <span class="nav-text">Students</span>
+                    </a>
+                    <a class="nav-dropdown-item" href="{% url 'admins:onboard_school' %}">
+                        <span class="material-symbols-outlined">add_business</span>
+                        <span class="nav-text">Onboard School</span>
+                    </a>
+                    <a class="nav-dropdown-item" href="{% url 'admins:schools_list' %}">
+                        <span class="material-symbols-outlined">apartment</span>
+                        <span class="nav-text">Schools</span>
+                    </a>
+                    <a class="nav-dropdown-item" href="{% url 'admins:onboard_evaluator' %}">
+                        <span class="material-symbols-outlined">person_add</span>
+                        <span class="nav-text">Onboard Evaluator</span>
+                    </a>
+                    <a class="nav-dropdown-item" href="{% url 'admins:evaluators_list' %}">
+                        <span class="material-symbols-outlined">groups</span>
+                        <span class="nav-text">Evaluators</span>
+                    </a>
+                </div>
+            </div>
+
+            <a class="nav-item nav-item-active" href="{% url 'admins:evaluator_management' %}">
+                <span class="material-symbols-outlined">supervisor_account</span>
+                <span class="nav-text">Evaluator Management</span>
+            </a>
+
+            <a class="nav-item" href="{% url 'admins:all_submissions' %}">
+                <span class="material-symbols-outlined">assignment</span>
+                <span class="nav-text">Submissions</span>
+            </a>
+
+            <a class="nav-item" href="{% url 'admins:rankings' %}">
+                <span class="material-symbols-outlined">leaderboard</span>
+                <span class="nav-text">Rankings</span>
+            </a>
+
+            <a class="nav-item" href="{% url 'admins:schedule' %}">
+                <span class="material-symbols-outlined">event_note</span>
+                <span class="nav-text">Schedule</span>
+            </a>
+
+            <a class="nav-item" href="{% url 'admins:content_list' %}">
+                <span class="material-symbols-outlined">article</span>
+                <span class="nav-text">Content</span>
+            </a>
+
+            <a class="nav-item" href="{% url 'admins:reports' %}">
+                <span class="material-symbols-outlined">analytics</span>
+                <span class="nav-text">Reports</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer p-3 mt-auto">
+            <div class="user-profile">
+                <div class="user-avatar">
+                    <img alt="Admin" src="https://ui-avatars.com/api/?name={{ request.user.get_full_name|default:request.user.username }}&background=5E2A97&color=fff" />
+                </div>
+                <div class="user-info flex-grow-1">
+                    <p class="user-name">{{ request.user.get_full_name|default:request.user.username }}</p>
+                    <p class="user-role">Super Administrator</p>
+                </div>
+                <a href="{% url 'accounts:sign_out' %}" class="logout-btn" title="Logout">
+                    <span class="material-symbols-outlined">logout</span>
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+        <!-- Header -->
+        <header class="top-header">
+            <button class="header-icon-btn" id="sidebarToggleBtn" style="margin-right:16px;">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+            <div class="d-flex align-items-center gap-2 ms-auto">
+                <button class="header-icon-btn" id="notifBtn">
+                    <span class="material-symbols-outlined">notifications</span>
+                </button>
+                <div class="header-avatar" style="background-image: url('https://ui-avatars.com/api/?name={{ request.user.get_full_name|default:request.user.username }}&background=5E2A97&color=fff');" id="profileAvatarBtn"></div>
+            </div>
+        </header>
+
+        <div class="content-wrapper">
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="row align-items-center">
+                    <div class="col-12 col-md-6">
+                        <h1>Evaluator Management</h1>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="{% url 'admins:dashboard' %}">Dashboard</a></li>
+                                <li class="breadcrumb-item active">Evaluator Management</li>
+                            </ol>
+                        </nav>
+                    </div>
+                    <div class="col-12 col-md-6 d-flex justify-content-md-end align-items-center gap-3 mt-3 mt-md-0">
+                        <button class="btn-primary-custom" id="autoDistributeBtn">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">auto_fix_high</span>
+                            Auto Distribute
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="row g-4 mb-4">
+                <div class="col-6 col-lg-2">
+                    <div class="stat-card">
+                        <div class="stat-icon purple">
+                            <span class="material-symbols-outlined">supervisor_account</span>
+                        </div>
+                        <div>
+                            <p class="stat-label">Total Evaluators</p>
+                            <h3 class="stat-value">{{ total_evaluators }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <div class="stat-card">
+                        <div class="stat-icon green">
+                            <span class="material-symbols-outlined">check_circle</span>
+                        </div>
+                        <div>
+                            <p class="stat-label">Active Members</p>
+                            <h3 class="stat-value">{{ active_evaluators }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <div class="stat-card">
+                        <div class="stat-icon red">
+                            <span class="material-symbols-outlined">warning</span>
+                        </div>
+                        <div>
+                            <p class="stat-label">Overloaded</p>
+                            <h3 class="stat-value">{{ overloaded }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <div class="stat-card">
+                        <div class="stat-icon gray">
+                            <span class="material-symbols-outlined">pause_circle</span>
+                        </div>
+                        <div>
+                            <p class="stat-label">Idle</p>
+                            <h3 class="stat-value">{{ idle }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <div class="stat-card">
+                        <div class="stat-icon blue">
+                            <span class="material-symbols-outlined">lightbulb</span>
+                        </div>
+                        <div>
+                            <p class="stat-label">Total Assigned</p>
+                            <h3 class="stat-value">{{ total_assigned }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <div class="stat-card">
+                        <div class="stat-icon amber">
+                            <span class="material-symbols-outlined">pending_actions</span>
+                        </div>
+                        <div>
+                            <p class="stat-label">Unassigned Ideas</p>
+                            <h3 class="stat-value">{{ unassigned_count }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <!-- Shortlisted stat removed -->
+            </div>
+
+            <!-- Main Card -->
+            <div class="main-card">
+                <div class="main-card-header">
+                    <div class="row g-3 align-items-center">
+                        <div class="col-12 col-md-4">
+                            <div class="search-input">
+                                <span class="material-symbols-outlined">search</span>
+                                <input type="text" id="searchInput" placeholder="Search evaluators..." />
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3 col-lg-2">
+                            <select class="filter-select w-100" id="statusFilter">
+                                <option value="all">All Status</option>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                        </div>
+                        <div class="col-6 col-md-3 col-lg-2">
+                            <select class="filter-select w-100" id="workloadFilter">
+                                <option value="all">All Workload</option>
+                                <option value="optimal">Optimal</option>
+                                <option value="moderate">Moderate</option>
+                                <option value="overloaded">Overloaded</option>
+                                <option value="idle">Idle</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Evaluator</th>
+                                <th>Expertise</th>
+                                <th>Status</th>
+                                <th>Assigned</th>
+                                <th>Evaluated</th>
+                                <th>Pending</th>
+                                <th>Capacity</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="evaluatorTableBody">
+                            {% for evaluator in evaluators %}
+                            <tr class="evaluator-row"
+                                data-name="{{ evaluator.name|lower }}"
+                                data-status="{{ evaluator.status|lower }}"
+                                data-workload="{{ evaluator.workload_level|lower }}">
+                                <td>
+                                    <div class="evaluator-profile">
+                                        <div class="evaluator-avatar" style="background: {{ evaluator.avatar_color|default:'#5E2A97' }};">
+                                            {{ evaluator.initials }}
+                                        </div>
+                                        <div>
+                                            <p class="evaluator-name">{{ evaluator.name }}</p>
+                                            <p class="evaluator-org">{{ evaluator.organization }}</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="expertise-tags">
+                                        {% for tag in evaluator.expertise_list %}
+                                        <span class="expertise-tag">{{ tag }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge-status {{ evaluator.status|lower }}">{{ evaluator.status }}</span>
+                                </td>
+                                <td style="font-weight:600;">{{ evaluator.assigned_count }}</td>
+                                <td style="font-weight:600;">{{ evaluator.evaluated_count }}</td>
+                                <td style="font-weight:600;">{{ evaluator.pending_count }}</td>
+                                <td>
+                                    <div class="capacity-bar-wrapper">
+                                        <div class="capacity-bar">
+                                            <div class="capacity-fill {{ evaluator.workload_level|lower }}" style="width: {{ evaluator.capacity_percent }}%;"></div>
+                                        </div>
+                                        <span class="capacity-text {{ evaluator.workload_level|lower }}">{{ evaluator.capacity_percent }}%</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="quick-actions">
+                                        <button class="btn-icon-action" title="Assign Ideas"
+                                                onclick="openAssignModal({{ evaluator.id }}, '{{ evaluator.name|escapejs }}')">
+                                            <span class="material-symbols-outlined">assignment_add</span>
+                                        </button>
+                                        <button class="btn-icon-action" title="View Assigned Ideas"
+                                                onclick="openDetailSidebar({{ evaluator.id }})">
+                                            <span class="material-symbols-outlined">visibility</span>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="8" style="text-align:center; padding:40px; color:var(--text-muted);">
+                                    <span class="material-symbols-outlined" style="font-size:48px; display:block; margin-bottom:8px; opacity:0.3;">supervisor_account</span>
+                                    No evaluators found.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+<!-- Detail Sidebar -->
+<div class="detail-overlay" id="detailOverlay" onclick="closeDetailSidebar()" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:998;"></div>
+<div id="detailSidebar" style="position:fixed;top:0;right:-520px;width:520px;height:100vh;background:#fff;z-index:999;box-shadow:-4px 0 24px rgba(0,0,0,0.1);transition:right 0.3s ease;display:flex;flex-direction:column;">
+    <div style="padding:20px 24px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;">
+        <h3 style="margin:0;font-size:1.1rem;font-weight:700;" id="detailName">Evaluator</h3>
+        <button onclick="closeDetailSidebar()" style="background:none;border:none;cursor:pointer;padding:4px;">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+    </div>
+    <div style="padding:24px;overflow-y:auto;flex:1;" id="detailContent">
+        <p style="color:#999;text-align:center;">Loading...</p>
+    </div>
+</div>
+
+<!-- Assign Ideas Modal -->
+<div class="modal-overlay" id="assignModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h2>Assign Ideas to <span id="assignEvaluatorName"></span></h2>
+            <button class="modal-close" onclick="closeAssignModal()">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div style="padding: 16px 24px 0;">
+            <div class="search-input">
+                <span class="material-symbols-outlined">search</span>
+                <input type="text" id="modalSearchInput" placeholder="Search ideas..." />
+            </div>
+        </div>
+        <div class="modal-body" id="modalIdeasList">
+            <div style="text-align:center; padding:40px; color:var(--text-muted);">Loading ideas...</div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary-custom" onclick="closeAssignModal()">Cancel</button>
+            <button class="btn-primary-custom" id="assignSelectedBtn" onclick="assignSelected()">
+                <span class="material-symbols-outlined" style="font-size:18px;">assignment_turned_in</span>
+                Assign Selected (<span id="selectedCount">0</span>)
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Sidebar toggle
+    const sidebar = document.getElementById('superAdminAppSidebar');
+    const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
+    if (sidebarToggleBtn) {
+        sidebarToggleBtn.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                sidebar.classList.toggle('mobile-open');
+            } else {
+                sidebar.classList.toggle('collapsed');
+            }
+        });
+    }
+
+    // User Management dropdown
+    const umToggle = document.getElementById('userManagementToggle');
+    if (umToggle) {
+        umToggle.addEventListener('click', () => {
+            umToggle.closest('.nav-dropdown').classList.toggle('open');
+        });
+    }
+
+    // Search & Filter
+    const searchInput = document.getElementById('searchInput');
+    const statusFilter = document.getElementById('statusFilter');
+    const workloadFilter = document.getElementById('workloadFilter');
+
+    function filterTable() {
+        const query = searchInput.value.toLowerCase();
+        const status = statusFilter.value;
+        const workload = workloadFilter.value;
+        const rows = document.querySelectorAll('.evaluator-row');
+
+        rows.forEach(row => {
+            const name = row.dataset.name || '';
+            const rowStatus = row.dataset.status || '';
+            const rowWorkload = row.dataset.workload || '';
+
+            const matchSearch = !query || name.includes(query);
+            const matchStatus = status === 'all' || rowStatus === status;
+            const matchWorkload = workload === 'all' || rowWorkload === workload;
+
+            row.style.display = (matchSearch && matchStatus && matchWorkload) ? '' : 'none';
+        });
+    }
+
+    searchInput.addEventListener('input', filterTable);
+    statusFilter.addEventListener('change', filterTable);
+    workloadFilter.addEventListener('change', filterTable);
+
+    // Assign Modal
+    let currentEvaluatorId = null;
+    let selectedIdeas = new Set();
+
+    function openAssignModal(evaluatorId, evaluatorName) {
+        currentEvaluatorId = evaluatorId;
+        selectedIdeas.clear();
+        document.getElementById('selectedCount').textContent = '0';
+        document.getElementById('assignEvaluatorName').textContent = evaluatorName;
+        document.getElementById('assignModal').classList.add('show');
+        document.getElementById('modalSearchInput').value = '';
+        fetchUnassignedIdeas(evaluatorId);
+    }
+
+    function closeAssignModal() {
+        document.getElementById('assignModal').classList.remove('show');
+        currentEvaluatorId = null;
+        selectedIdeas.clear();
+    }
+
+    function fetchUnassignedIdeas(evaluatorId) {
+        const listEl = document.getElementById('modalIdeasList');
+        listEl.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);">Loading ideas...</div>';
+
+        fetch(`/super-admin/evaluator-management/unassigned-ideas/?evaluator_id=${evaluatorId}`)
+            .then(r => r.json())
+            .then(data => {
+                if (!data || data.length === 0) {
+                    listEl.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);">No unassigned ideas available.</div>';
+                    return;
+                }
+                let html = '';
+                data.forEach(idea => {
+                    html += `
+                        <div class="modal-idea-row" data-id="${idea.id}" data-title="${(idea.title || '').toLowerCase()}" onclick="toggleIdea(this, ${idea.id})">
+                            <div class="modal-idea-checkbox"></div>
+                            <div class="modal-idea-info">
+                                <p class="modal-idea-title">${idea.title}</p>
+                                <p class="modal-idea-meta">${idea.student} &middot; ${idea.school}</p>
+                            </div>
+                            <span class="modal-idea-score">${idea.ai_score || 'N/A'}</span>
+                            <span class="modal-idea-rank">#${idea.rank || '-'}</span>
+                        </div>`;
+                });
+                listEl.innerHTML = html;
+            })
+            .catch(() => {
+                listEl.innerHTML = '<div style="text-align:center;padding:40px;color:#ef4444;">Failed to load ideas.</div>';
+            });
+    }
+
+    function toggleIdea(el, ideaId) {
+        el.classList.toggle('selected');
+        if (selectedIdeas.has(ideaId)) {
+            selectedIdeas.delete(ideaId);
+        } else {
+            selectedIdeas.add(ideaId);
+        }
+        document.getElementById('selectedCount').textContent = selectedIdeas.size;
+    }
+
+    // Modal search
+    document.getElementById('modalSearchInput').addEventListener('input', function() {
+        const q = this.value.toLowerCase();
+        document.querySelectorAll('.modal-idea-row').forEach(row => {
+            const title = row.dataset.title || '';
+            row.style.display = !q || title.includes(q) ? '' : 'none';
+        });
+    });
+
+    // Assign selected ideas
+    function assignSelected() {
+        if (selectedIdeas.size === 0) {
+            showToast('Please select at least one idea.', 'error');
+            return;
+        }
+
+        fetch('/super-admin/evaluator-management/assign/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken(),
+            },
+            body: JSON.stringify({
+                evaluator_id: currentEvaluatorId,
+                submission_ids: Array.from(selectedIdeas),
+            }),
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                showToast(`${selectedIdeas.size} idea(s) assigned successfully.`, 'success');
+                closeAssignModal();
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                showToast(data.message || data.error || 'Assignment failed.', 'error');
+            }
+        })
+        .catch(() => {
+            showToast('Network error. Please try again.', 'error');
+        });
+    }
+
+    // Auto Distribute
+    document.getElementById('autoDistributeBtn').addEventListener('click', function() {
+        if (!confirm('Auto distribute all unassigned ideas across active evaluators? This will balance workload automatically.')) return;
+
+        fetch('/super-admin/evaluator-management/bulk-assign/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken(),
+            },
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                showToast(data.message || 'Ideas distributed successfully.', 'success');
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                showToast(data.error || 'Distribution failed.', 'error');
+            }
+        })
+        .catch(() => {
+            showToast('Network error. Please try again.', 'error');
+        });
+    });
+
+    // Toast
+    function showToast(message, type) {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `toast-item ${type || 'success'}`;
+        toast.innerHTML = `<span class="material-symbols-outlined" style="font-size:20px;">${type === 'error' ? 'error' : 'check_circle'}</span>${message}`;
+        container.appendChild(toast);
+        setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateX(40px)'; toast.style.transition = 'all 0.3s ease'; }, 3000);
+        setTimeout(() => toast.remove(), 3300);
+    }
+
+    // CSRF Token
+    function getCsrfToken() {
+        const cookie = document.cookie.split(';').find(c => c.trim().startsWith('csrftoken='));
+        return cookie ? cookie.split('=')[1] : '';
+    }
+
+    // === Detail Sidebar ===
+    function openDetailSidebar(evaluatorId) {
+        document.getElementById('detailOverlay').style.display = 'block';
+        document.getElementById('detailSidebar').style.right = '0';
+        document.getElementById('detailContent').innerHTML = '<p style="color:#999;text-align:center;padding:40px;">Loading...</p>';
+
+        fetch(`/super-admin/evaluator-management/detail/${evaluatorId}/`)
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('detailName').textContent = data.name;
+                let html = '';
+                // Profile
+                html += `<div style="margin-bottom:24px;">
+                    <p style="font-size:0.85rem;color:#666;">${data.email}</p>
+                    <p style="font-size:0.85rem;color:#666;">${data.organization}${data.expertise ? ' &middot; ' + data.expertise : ''}</p>
+                    ${data.phone ? '<p style="font-size:0.85rem;color:#666;">' + data.phone + '</p>' : ''}
+                </div>`;
+                // Stats
+                html += `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:24px;">
+                    <div style="background:#f0fdf4;padding:12px;border-radius:8px;text-align:center;">
+                        <div style="font-size:1.25rem;font-weight:700;color:#16a34a;">${data.total}</div>
+                        <div style="font-size:0.7rem;color:#666;text-transform:uppercase;">Assigned</div>
+                    </div>
+                    <div style="background:#f0f9ff;padding:12px;border-radius:8px;text-align:center;">
+                        <div style="font-size:1.25rem;font-weight:700;color:#2563eb;">${data.evaluated}</div>
+                        <div style="font-size:0.7rem;color:#666;text-transform:uppercase;">Evaluated</div>
+                    </div>
+                    <div style="background:#fffbeb;padding:12px;border-radius:8px;text-align:center;">
+                        <div style="font-size:1.25rem;font-weight:700;color:#d97706;">${data.pending}</div>
+                        <div style="font-size:0.7rem;color:#666;text-transform:uppercase;">Pending</div>
+                    </div>
+                </div>`;
+                // Ideas list
+                html += '<h4 style="font-size:0.8rem;text-transform:uppercase;color:#666;margin-bottom:12px;font-weight:700;">Assigned Ideas</h4>';
+                if (data.ideas.length === 0) {
+                    html += '<p style="color:#999;text-align:center;padding:20px;">No ideas assigned yet.</p>';
+                } else {
+                    data.ideas.forEach(idea => {
+                        const statusColor = idea.status === 'evaluated' ? '#16a34a' : (idea.status === 'in_progress' ? '#d97706' : '#3b82f6');
+                        const statusBg = idea.status === 'evaluated' ? '#f0fdf4' : (idea.status === 'in_progress' ? '#fffbeb' : '#eff6ff');
+                        let scoreHtml = '';
+                        if (idea.status === 'evaluated' && idea.score != null) {
+                            const shortlistedBadge = idea.is_shortlisted ? `<span style="display:inline-flex;align-items:center;gap:3px;font-size:0.65rem;padding:2px 8px;border-radius:999px;background:#fef3c7;color:#d97706;font-weight:600;"><span class="material-symbols-outlined" style="font-size:12px;">star</span>Shortlisted</span>` : '';
+                            scoreHtml = `<div style="margin-top:8px;display:flex;align-items:center;gap:8px;">
+                                <span style="font-size:1.1rem;font-weight:800;color:#5E2A97;">${idea.score}/100</span>
+                                ${shortlistedBadge}
+                            </div>`;
+                            if (idea.parameter_scores && Object.keys(idea.parameter_scores).length > 0) {
+                                scoreHtml += '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-top:8px;">';
+                                for (const [param, val] of Object.entries(idea.parameter_scores)) {
+                                    const label = param.replace(/_/g, ' ');
+                                    scoreHtml += `<div style="background:#f8fafc;padding:4px;border-radius:6px;text-align:center;">
+                                        <p style="font-size:0.55rem;color:#94a3b8;text-transform:uppercase;margin:0;">${label}</p>
+                                        <p style="font-size:0.85rem;font-weight:700;color:#5E2A97;margin:0;">${val}/10</p>
+                                    </div>`;
+                                }
+                                scoreHtml += '</div>';
+                            }
+                        }
+                        html += `<div style="padding:12px;border:1px solid #eee;border-radius:8px;margin-bottom:8px;${idea.status === 'evaluated' ? 'border-left:3px solid #16a34a;' : ''}">
+                            <div style="display:flex;justify-content:space-between;align-items:start;">
+                                <div>
+                                    <p style="font-weight:600;font-size:0.875rem;margin:0 0 4px;">${idea.title}</p>
+                                    <p style="font-size:0.75rem;color:#666;margin:0;">${idea.student} &middot; AI: ${idea.ai_score || 'N/A'}</p>
+                                </div>
+                                <span style="font-size:0.7rem;padding:3px 8px;border-radius:999px;background:${statusBg};color:${statusColor};font-weight:600;text-transform:capitalize;">${idea.status.replace('_', ' ')}</span>
+                            </div>
+                            ${scoreHtml}
+                            ${idea.notes ? '<p style="font-size:0.7rem;color:#666;margin:6px 0 0;font-style:italic;">"' + idea.notes + '"</p>' : ''}
+                            <p style="font-size:0.7rem;color:#999;margin:6px 0 0;">Assigned: ${idea.assigned_on}</p>
+                        </div>`;
+                    });
+                }
+
+                // === Detail Sections ===
+                function detailRow(label, value) {
+                    if (!value) return '';
+                    return `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f5f5f5;">
+                        <span style="font-size:0.75rem;color:#666;font-weight:500;">${label}</span>
+                        <span style="font-size:0.75rem;color:#222;font-weight:600;text-align:right;max-width:60%;word-break:break-word;">${value}</span>
+                    </div>`;
+                }
+                function detailSection(icon, title, rows) {
+                    const content = rows.join('');
+                    if (!content) return '';
+                    return `<div style="margin-top:20px;">
+                        <h4 style="font-size:0.75rem;text-transform:uppercase;color:#666;margin-bottom:8px;font-weight:700;display:flex;align-items:center;gap:6px;">
+                            <span class="material-symbols-outlined" style="font-size:16px;">${icon}</span>${title}
+                        </h4>
+                        <div style="background:#fafafa;border-radius:8px;padding:8px 12px;">${content}</div>
+                    </div>`;
+                }
+
+                // Personal
+                html += detailSection('person', 'Personal', [
+                    detailRow('Gender', data.gender),
+                    detailRow('Nationality', data.nationality),
+                    detailRow('City', data.city),
+                    detailRow('State', data.state),
+                ]);
+
+                // Professional
+                html += detailSection('business_center', 'Professional', [
+                    detailRow('Designation', data.designation),
+                    detailRow('Organization', data.organization),
+                    detailRow('Industry', data.industry),
+                    detailRow('Experience', data.experience),
+                    detailRow('Qualification', data.qualification),
+                    detailRow('LinkedIn', data.linkedin_url ? `<a href="${data.linkedin_url}" target="_blank" style="color:#5E2A97;">${data.linkedin_url}</a>` : ''),
+                    detailRow('Bio', data.bio),
+                ]);
+
+                // Expertise
+                html += detailSection('psychology', 'Expertise', [
+                    detailRow('Primary', data.expertise),
+                    detailRow('Secondary', data.secondary_expertise),
+                    detailRow('Role', data.jury_role),
+                    detailRow('Season', data.evaluation_season),
+                    detailRow('Max Ideas/Week', data.max_ideas_per_week),
+                    detailRow('Previous Exp', data.previous_jury_exp),
+                ]);
+
+                // Contact
+                html += detailSection('contact_phone', 'Contact', [
+                    detailRow('Email', data.email),
+                    detailRow('Alt Email', data.alternate_email),
+                    detailRow('Phone', data.phone),
+                    detailRow('Alt Phone', data.alternate_phone),
+                    detailRow('Address', data.address),
+                    detailRow('PIN Code', data.pin_code),
+                    detailRow('Preferred', data.preferred_contact),
+                ]);
+
+                // Availability
+                html += detailSection('schedule', 'Availability', [
+                    detailRow('From', data.available_from),
+                    detailRow('To', data.available_to),
+                    detailRow('Time', data.preferred_time),
+                    detailRow('Mode', data.evaluation_mode),
+                    detailRow('Mentor', data.willing_to_mentor),
+                    detailRow('Bootcamp', data.willing_to_bootcamp),
+                    detailRow('Notes', data.additional_notes),
+                ]);
+
+                document.getElementById('detailContent').innerHTML = html;
+            })
+            .catch(() => {
+                document.getElementById('detailContent').innerHTML = '<p style="color:#ef4444;text-align:center;padding:40px;">Failed to load details.</p>';
+            });
+    }
+
+    function closeDetailSidebar() {
+        document.getElementById('detailOverlay').style.display = 'none';
+        document.getElementById('detailSidebar').style.right = '-520px';
+    }
+
+    // Close modal on overlay click
+    document.getElementById('assignModal').addEventListener('click', function(e) {
+        if (e.target === this) closeAssignModal();
+    });
+
+    // Close modal on Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeAssignModal();
+    });
+</script>
+</body>
+</html>

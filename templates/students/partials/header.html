@@ -1,0 +1,85 @@
+<header class="top-header">
+    <button class="header-icon-btn" id="sidebarToggleBtn" style="margin-right: 16px;">
+        <span class="material-symbols-outlined">menu</span>
+    </button>
+    <div class="d-flex align-items-center gap-3 ms-auto" style="position:relative;">
+        <button class="header-icon-btn" id="fullscreenBtn" title="Toggle Fullscreen">
+            <span class="material-symbols-outlined">fullscreen</span>
+        </button>
+        <button class="header-icon-btn" id="notifBtn" title="Notifications" style="position:relative;">
+            <span class="material-symbols-outlined">notifications</span>
+            <span style="position:absolute;top:4px;right:4px;width:8px;height:8px;background:#ef4444;border-radius:50%;border:2px solid #fff;"></span>
+        </button>
+        <button class="header-icon-btn" id="helpBtn" title="Help & Support">
+            <span class="material-symbols-outlined">help_outline</span>
+        </button>
+        <div class="header-avatar" id="profileBtn" style="cursor:pointer;">{{ request.user.first_name|first|upper }}</div>
+    </div>
+
+    <!-- Profile Dropdown -->
+    <div class="header-dropdown" id="profileDropdown">
+        <div style="display:flex;align-items:center;gap:12px;padding-bottom:16px;border-bottom:1px solid #f0f0f0;margin-bottom:12px;">
+            <div style="width:48px;height:48px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1.1rem;border:2px solid #E8D4F0;">{{ request.user.first_name|first|upper }}</div>
+            <div>
+                <p style="font-weight:700;font-size:0.9375rem;margin:0;">{{ request.user.get_full_name }}</p>
+                <p style="font-size:0.8rem;color:var(--text-muted);margin:0;">Student</p>
+                <p style="font-size:0.75rem;color:var(--text-muted);margin:0;">{{ request.user.email }}</p>
+            </div>
+        </div>
+        <a href="{% url 'students:student_profile' %}" class="dropdown-link"><span class="material-symbols-outlined" style="font-size:20px;color:var(--text-muted);">person</span> My Profile</a>
+        <a href="#" class="dropdown-link"><span class="material-symbols-outlined" style="font-size:20px;color:var(--text-muted);">group</span> My Team</a>
+        <a href="{% url 'accounts:sign_out' %}" class="dropdown-link" style="color:#ef4444;"><span class="material-symbols-outlined" style="font-size:20px;color:#ef4444;">logout</span> Logout</a>
+    </div>
+
+    <!-- Help & Support Dropdown -->
+    <div class="header-dropdown" id="helpDropdown">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:1px solid #f0f0f0;margin-bottom:12px;">
+            <h4 style="font-size:1rem;font-weight:700;margin:0;">Help & Support</h4>
+            <button onclick="closeAllDropdowns()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);"><span class="material-symbols-outlined" style="font-size:20px;">close</span></button>
+        </div>
+        <a href="#" class="dropdown-link"><span class="material-symbols-outlined" style="font-size:20px;color:var(--primary);">quiz</span> FAQ</a>
+        <a href="#" class="dropdown-link"><span class="material-symbols-outlined" style="font-size:20px;color:var(--primary);">support_agent</span> Contact Support</a>
+        <a href="#" class="dropdown-link"><span class="material-symbols-outlined" style="font-size:20px;color:var(--primary);">feedback</span> Send Feedback</a>
+    </div>
+
+    <!-- Notifications Dropdown -->
+    <div class="header-dropdown notif-dropdown" id="notifDropdown">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:1px solid #f0f0f0;margin-bottom:12px;">
+            <h4 style="font-size:1rem;font-weight:700;margin:0;">Notifications</h4>
+            <button onclick="closeAllDropdowns()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);"><span class="material-symbols-outlined" style="font-size:20px;">close</span></button>
+        </div>
+        <div class="notif-item">
+            <div style="width:36px;height:36px;border-radius:50%;background:#dcfce7;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <span class="material-symbols-outlined" style="font-size:18px;color:#16a34a;">group_add</span>
+            </div>
+            <div>
+                <p style="font-weight:600;font-size:0.875rem;margin:0;">New Teammate Joined</p>
+                <p style="font-size:0.8rem;color:var(--text-muted);margin:0;">Priya Singh has joined your team</p>
+                <p style="font-size:0.7rem;color:#94a3b8;margin:2px 0 0;">2 hours ago</p>
+            </div>
+        </div>
+        <div class="notif-item priority">
+            <div style="width:36px;height:36px;border-radius:50%;background:#fef3c7;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <span class="material-symbols-outlined" style="font-size:18px;color:#d97706;">priority_high</span>
+            </div>
+            <div>
+                <p style="font-weight:600;font-size:0.875rem;margin:0;">Deadline Approaching</p>
+                <p style="font-size:0.8rem;color:var(--text-muted);margin:0;">Submission due in 5 days</p>
+                <p style="font-size:0.7rem;color:#94a3b8;margin:2px 0 0;">1 day ago</p>
+            </div>
+        </div>
+        <div class="notif-item">
+            <div style="width:36px;height:36px;border-radius:50%;background:#E8D4F0;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <span class="material-symbols-outlined" style="font-size:18px;color:var(--primary);">campaign</span>
+            </div>
+            <div>
+                <p style="font-weight:600;font-size:0.875rem;margin:0;">Webinar Alert</p>
+                <p style="font-size:0.8rem;color:var(--text-muted);margin:0;">Workshop starting tomorrow at 4 PM</p>
+                <p style="font-size:0.7rem;color:#94a3b8;margin:2px 0 0;">2 days ago</p>
+            </div>
+        </div>
+        <div style="text-align:center;padding-top:12px;border-top:1px solid #f0f0f0;margin-top:8px;">
+            <a href="#" style="color:var(--primary);font-size:0.85rem;font-weight:600;text-decoration:none;">View All Notifications</a>
+        </div>
+    </div>
+</header>

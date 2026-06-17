@@ -1,0 +1,723 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Submissions — IFT Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        :root{--primary:#5E2A97;--primary-light:#E8D4F0;--bg:#F7F7F7;--surface:#FFFFFF;--border:#EEEEEE;--dark:#222222;--muted:#666666;}
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--dark);overflow:hidden;}
+        .main-container{display:flex;height:100vh;width:100%;}
+        .main-content{flex:1;display:flex;flex-direction:column;height:100%;overflow-y:auto;}
+
+        /* Sidebar */
+        .sidebar{width:280px;background:#fff;border-right:1px solid var(--border);height:100vh;display:flex;flex-direction:column;position:sticky;top:0;transition:all .3s;flex-shrink:0;}
+        .sidebar.collapsed{width:80px;}
+        .sidebar.collapsed .nav-text,.sidebar.collapsed .user-info{opacity:0;width:0;overflow:hidden;white-space:nowrap;}
+        .sidebar.collapsed .logo-img{width:50px;height:50px;margin:0 auto;background-position:center;}
+        .sidebar.collapsed .nav-item{justify-content:center;padding-left:1.7rem;}
+        .sidebar.collapsed .logout-btn{display:none;}
+        .sidebar.collapsed .user-profile{justify-content:center;}
+        .sidebar-header{border-bottom:1px solid #f7f7f7;}
+        .logo-img{width:250px;height:50px;background-size:contain;background-position:left center;background-repeat:no-repeat;flex-shrink:0;}
+        .nav-item{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;border-radius:.5rem;text-decoration:none;color:var(--dark);transition:all .2s;margin-bottom:.25rem;}
+        .nav-item:hover{background:#f7f7f7;}
+        .nav-item .material-symbols-outlined{font-size:24px;color:var(--muted);}
+        .nav-item.active{background:rgba(94,42,151,.1);color:var(--primary);}
+        .nav-item.active .material-symbols-outlined{color:var(--primary);font-variation-settings:'FILL' 1;}
+        .nav-text{font-size:.875rem;font-weight:500;}
+        .sidebar-footer{border-top:1px solid var(--border);margin-top:auto;}
+        .user-profile{display:flex;align-items:center;gap:.75rem;padding:.75rem;border-radius:.5rem;}
+        .user-profile:hover{background:#f7f7f7;}
+        .user-avatar{width:2.5rem;height:2.5rem;border-radius:50%;overflow:hidden;flex-shrink:0;border:2px solid var(--border);}
+        .user-avatar img{width:100%;height:100%;object-fit:cover;}
+        .user-name{font-size:.875rem;font-weight:700;margin:0;}
+        .user-role{font-size:.75rem;color:var(--muted);margin:0;}
+        .logout-btn{background:none;border:none;color:var(--muted);cursor:pointer;padding:.5rem;border-radius:.375rem;display:flex;align-items:center;}
+        .logout-btn:hover{background:rgba(94,42,151,.1);color:var(--primary);}
+        .nav-dropdown-menu{max-height:0;overflow:hidden;transition:max-height .3s;padding-left:2.5rem;}
+        .nav-dropdown.open .nav-dropdown-menu{max-height:200px;margin-top:.25rem;}
+        .nav-dropdown-icon{font-size:18px!important;transition:transform .2s;}
+        .nav-dropdown.open .nav-dropdown-icon{transform:rotate(180deg);}
+        .nav-dropdown-item{display:flex;align-items:center;gap:.75rem;padding:.625rem 1rem;border-radius:.5rem;text-decoration:none;color:var(--muted);font-size:.875rem;font-weight:500;transition:all .2s;margin-bottom:.25rem;}
+        .nav-dropdown-item:hover{background:#f7f7f7;color:var(--primary);}
+
+        /* Header */
+        .top-header{height:70px;min-height:70px;flex-shrink:0;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 1.5rem;position:sticky;top:0;z-index:100;}
+        .header-icon-btn{width:2.5rem;height:2.5rem;border-radius:.5rem;border:none;background:#f7f7f7;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;}
+        .header-icon-btn:hover{background:var(--border);color:var(--primary);}
+        .header-avatar{width:2.5rem;height:2.5rem;border-radius:50%;background-size:cover;background-position:center;border:2px solid var(--primary);cursor:pointer;}
+
+        /* Content */
+        .content-wrapper{flex:1;padding:28px 32px;}
+
+        /* Page header */
+        .page-title{font-size:1.875rem;font-weight:700;margin-bottom:4px;}
+        .page-sub{font-size:.875rem;color:var(--muted);}
+
+        /* Stats */
+        .stat-card{background:#fff;border-radius:12px;padding:20px;border:1px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,.04);}
+        .stat-label{font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+        .stat-value{font-size:1.75rem;font-weight:700;color:var(--dark);}
+        .stat-badge{font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:4px;}
+
+        /* Pipeline */
+        .pipeline-bar{display:flex;height:8px;border-radius:999px;overflow:hidden;margin:12px 0 8px;}
+        .pipeline-seg{height:100%;transition:width .5s;}
+        .pipeline-legend{display:flex;flex-wrap:wrap;gap:12px;}
+        .legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+        .legend-label{font-size:.75rem;color:var(--muted);}
+        .legend-val{font-size:.75rem;font-weight:700;color:var(--dark);}
+
+        /* Filters */
+        .filter-bar{background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:20px;}
+        .search-input{flex:1;min-width:180px;display:flex;align-items:center;gap:8px;background:#f7f7f7;border:1px solid var(--border);border-radius:8px;padding:8px 12px;}
+        .search-input input{border:none;background:transparent;outline:none;font-size:.875rem;width:100%;font-family:'Poppins',sans-serif;}
+        .filter-select{background:#f7f7f7;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:.8rem;font-family:'Poppins',sans-serif;outline:none;color:var(--dark);}
+
+        /* Table */
+        .table-card{background:#fff;border-radius:12px;border:1px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,.04);overflow:hidden;}
+        .table-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border);}
+        .table-title{font-size:1rem;font-weight:700;}
+        .custom-table{width:100%;font-size:.8rem;border-collapse:collapse;}
+        .custom-table th{padding:10px 12px;font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;text-align:left;background:#fafafa;border-bottom:1px solid var(--border);white-space:nowrap;}
+        .custom-table td{padding:14px 12px;vertical-align:middle;border-bottom:1px solid #f5f5f5;}
+        .custom-table tbody tr:hover{background:#fafcff;}
+        .custom-table tbody tr:last-child td{border-bottom:none;}
+
+        /* Badges */
+        .badge{font-size:.7rem;font-weight:700;padding:3px 10px;border-radius:6px;white-space:nowrap;}
+        .badge-submitted{background:#dbeafe;color:#1d4ed8;}
+        .badge-evaluated{background:#dcfce7;color:#15803d;}
+        .badge-under_review{background:#fef3c7;color:#b45309;}
+        .badge-draft{background:#f1f5f9;color:#475569;}
+        .badge-top400{background:rgba(94,42,151,.12);color:#5E2A97;}
+        .badge-incoherent{background:#fee2e2;color:#dc2626;}
+
+        /* Score bar */
+        .score-bar-wrap{display:flex;align-items:center;gap:8px;}
+        .score-bar{height:5px;background:#f1f5f9;border-radius:999px;overflow:hidden;width:60px;}
+        .score-fill{height:100%;background:var(--primary);border-radius:999px;}
+        .score-val{font-size:.8rem;font-weight:700;color:var(--dark);min-width:28px;}
+
+        /* Action btn */
+        .btn-view{width:30px;height:30px;border-radius:8px;border:none;background:rgba(94,42,151,.08);color:var(--primary);cursor:pointer;display:flex;align-items:center;justify-content:center;}
+        .btn-view:hover{background:rgba(94,42,151,.18);}
+
+        /* Export btn */
+        .btn-export{display:flex;align-items:center;gap:6px;padding:8px 16px;background:var(--primary);border:none;border-radius:8px;color:#fff;font-size:.8rem;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;text-decoration:none;}
+        .btn-export:hover{background:#7B3FB5;color:#fff;}
+
+        /* Slide-in Preview Drawer */
+        .drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:500;opacity:0;pointer-events:none;transition:opacity .25s;}
+        .drawer-overlay.open{opacity:1;pointer-events:all;}
+        .preview-drawer{position:fixed;right:-440px;top:0;bottom:0;width:420px;background:#f7f7f7;z-index:501;box-shadow:-4px 0 24px rgba(0,0,0,0.15);transition:right .3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overflow:hidden;}
+        .preview-drawer.open{right:0;}
+
+        /* Drawer header bar */
+        .drawer-topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#f0f0f0;border-bottom:1px solid #e0e0e0;flex-shrink:0;}
+        .drawer-topbar-title{font-size:.8rem;font-weight:700;color:#444;}
+        .drawer-close{width:28px;height:28px;border-radius:6px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#666;}
+        .drawer-close:hover{background:#e0e0e0;}
+
+        .drawer-body{flex:1;overflow-y:auto;padding:12px;}
+        .drawer-footer{padding:12px;background:#f0f0f0;border-top:1px solid #e0e0e0;flex-shrink:0;}
+
+        /* Drawer cards */
+        .dc{background:#fff;border-radius:10px;padding:14px;margin-bottom:10px;border:1px solid #ebebeb;}
+        .dc-title{font-size:.65rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;}
+
+        /* Idea card */
+        .idea-title-d{font-size:.95rem;font-weight:700;color:var(--dark);margin-bottom:6px;line-height:1.4;}
+        .idea-summary-d{font-size:.78rem;color:#555;line-height:1.6;margin-bottom:10px;}
+        .tag-pill{display:inline-block;background:#eee;color:#555;font-size:.68rem;font-weight:600;padding:2px 9px;border-radius:999px;margin-right:4px;margin-bottom:4px;}
+        .tag-pill.status{background:rgba(94,42,151,.12);color:var(--primary);}
+
+        /* Scores grid */
+        .scores-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+        .score-cell{background:#f8fafc;border-radius:8px;padding:10px 12px;}
+        .score-cell-label{font-size:.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+        .score-cell-val{font-size:1.25rem;font-weight:900;color:var(--dark);line-height:1;}
+        .score-cell-val span{font-size:.75rem;font-weight:500;color:var(--muted);}
+        .score-cell-val.highlight{color:var(--primary);}
+        .score-cell-small{font-size:.8rem;font-weight:700;color:var(--dark);}
+
+        /* Params grid */
+        .params-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+        .param-cell{display:flex;align-items:center;justify-content:space-between;background:#f8fafc;border-radius:6px;padding:7px 10px;}
+        .param-cell-name{font-size:.72rem;color:#444;font-weight:500;}
+        .param-cell-score{font-size:.85rem;font-weight:800;}
+        .param-cell-score.high{color:#16a34a;}
+        .param-cell-score.medium{color:#d97706;}
+        .param-cell-score.low{color:#dc2626;}
+
+        /* Team / member row */
+        .member-row-d{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f5f5f5;}
+        .member-row-d:last-child{border-bottom:none;}
+        .member-av{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:#fff;flex-shrink:0;}
+        .member-name-d{font-size:.82rem;font-weight:600;color:var(--dark);margin:0;}
+        .member-role-d{font-size:.72rem;color:var(--muted);margin:0;}
+
+        /* Attachment row */
+        .attach-row-d{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f5f5f5;}
+        .attach-row-d:last-child{border-bottom:none;}
+        .attach-ic{width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+        .attach-ic.img{background:rgba(59,130,246,.1);color:#3b82f6;}
+        .attach-ic.vid{background:rgba(239,68,68,.1);color:#ef4444;}
+        .attach-ic.doc{background:rgba(245,158,11,.1);color:#f59e0b;}
+
+        /* Footer btn */
+        .btn-view-full{width:100%;padding:11px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-size:.8rem;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:7px;}
+        .btn-view-full:hover{background:#4a1f7a;color:#fff;}
+
+        /* Loading */
+        .drawer-loading{display:flex;align-items:center;justify-content:center;height:200px;flex-direction:column;gap:12px;color:var(--muted);font-size:.8rem;}
+        .spinner{width:28px;height:28px;border:3px solid #e2e8f0;border-top:3px solid var(--primary);border-radius:50%;animation:spin .7s linear infinite;}
+        @keyframes spin{to{transform:rotate(360deg);}}
+
+        /* Pagination */
+        .pagination-wrap{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-top:1px solid var(--border);font-size:.8rem;color:var(--muted);}
+        .page-btns{display:flex;gap:6px;}
+        .page-btn{padding:6px 12px;border-radius:6px;border:1px solid var(--border);background:#fff;font-size:.8rem;cursor:pointer;font-family:'Poppins',sans-serif;color:var(--dark);text-decoration:none;}
+        .page-btn:hover{background:#f7f7f7;}
+        .page-btn.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+        .page-btn:disabled{opacity:.4;cursor:not-allowed;}
+
+        /* Empty state */
+        .empty-state{text-align:center;padding:60px 20px;color:var(--muted);}
+        .empty-state .material-symbols-outlined{font-size:48px;margin-bottom:12px;opacity:.3;}
+
+        @media(max-width:768px){
+            .sidebar{position:fixed;left:-280px;z-index:999;}
+            .sidebar.mobile-open{left:0;}
+            .content-wrapper{padding:16px;}
+        }
+    </style>
+</head>
+<body>
+<div class="main-container">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar d-md-flex flex-column" id="superAdminAppSidebar">
+        <div class="sidebar-header p-3 pb-1">
+            <div class="logo-img" style="background-image:url('{% static 'images/IFT_logo.png' %}');"></div>
+        </div>
+        <nav class="flex-grow-1 px-3 d-flex flex-column gap-1 mt-3">
+            <a class="nav-item" href="{% url 'admins:dashboard' %}">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span class="nav-text">Dashboard</span>
+            </a>
+            <div class="nav-dropdown">
+                <div class="nav-item d-flex justify-content-between align-items-center" id="userMgmtToggle" style="cursor:pointer;">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="material-symbols-outlined">manage_accounts</span>
+                        <span class="nav-text">User Management</span>
+                    </div>
+                    <span class="material-symbols-outlined nav-dropdown-icon">expand_more</span>
+                </div>
+                <div class="nav-dropdown-menu">
+                    <a class="nav-dropdown-item" href="#"><span class="material-symbols-outlined">person_add</span>Onboard Student</a>
+                    <a class="nav-dropdown-item" href="#"><span class="material-symbols-outlined">school</span>Students</a>
+                    <a class="nav-dropdown-item" href="#"><span class="material-symbols-outlined">gavel</span>Jury</a>
+                </div>
+            </div>
+            <a class="nav-item" href="#">
+                <span class="material-symbols-outlined">quiz</span>
+                <span class="nav-text">Questionnaire</span>
+            </a>
+            <a class="nav-item active" href="{% url 'admins:all_submissions' %}">
+                <span class="material-symbols-outlined">assignment</span>
+                <span class="nav-text">Submissions</span>
+            </a>
+            <a class="nav-item" href="{% url 'admins:rankings' %}">
+                <span class="material-symbols-outlined">leaderboard</span>
+                <span class="nav-text">Rankings</span>
+            </a>
+            <a class="nav-item" href="#">
+                <span class="material-symbols-outlined">analytics</span>
+                <span class="nav-text">Reports</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer p-3">
+            <div class="user-profile">
+                <div class="user-avatar">
+                    <img alt="Admin" src="https://ui-avatars.com/api/?name={{ request.user.get_full_name|default:request.user.username }}&background=5E2A97&color=fff" />
+                </div>
+                <div class="user-info flex-grow-1">
+                    <p class="user-name">{{ request.user.get_full_name|default:request.user.username }}</p>
+                    <p class="user-role">Super Administrator</p>
+                </div>
+                <a href="{% url 'accounts:sign_out' %}" class="logout-btn">
+                    <span class="material-symbols-outlined" style="font-size:20px;">logout</span>
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main-content">
+        <header class="top-header">
+            <button class="header-icon-btn" id="sidebarToggleBtn" style="margin-right:16px;">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+            <div class="d-flex align-items-center gap-2 ms-auto">
+                <a href="{% url 'admins:export_top_400' %}" class="header-icon-btn" title="Export Top 400">
+                    <span class="material-symbols-outlined">download</span>
+                </a>
+                <div class="header-avatar" style="background-image:url('https://ui-avatars.com/api/?name={{ request.user.get_full_name|default:request.user.username }}&background=5E2A97&color=fff');"></div>
+            </div>
+        </header>
+
+        <div class="content-wrapper">
+            <!-- Page Header -->
+            <div class="d-flex justify-content-between align-items-start mb-4">
+                <div>
+                    <h1 class="page-title">Submissions</h1>
+                    <p class="page-sub">All idea submissions across IFT</p>
+                </div>
+                <a href="{% url 'admins:export_top_400' %}" class="btn-export">
+                    <span class="material-symbols-outlined" style="font-size:16px;">download</span>
+                    Export Top 400
+                </a>
+            </div>
+
+            <!-- Stats -->
+            <div class="row g-3 mb-4">
+                <div class="col-6 col-lg-2">
+                    <div class="stat-card">
+                        <div class="stat-label">Total</div>
+                        <div class="stat-value">{{ stats.total }}</div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <div class="stat-card">
+                        <div class="stat-label">Submitted</div>
+                        <div class="stat-value">{{ stats.submitted }}</div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <div class="stat-card">
+                        <div class="stat-label">Under Review</div>
+                        <div class="stat-value">{{ stats.under_review }}</div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <div class="stat-card">
+                        <div class="stat-label">Evaluated</div>
+                        <div class="stat-value">{{ stats.evaluated }}</div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <div class="stat-card">
+                        <div class="stat-label">Top 400</div>
+                        <div class="stat-value" style="color:var(--primary);">{{ stats.top_400 }}</div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <div class="stat-card">
+                        <div class="stat-label">Avg Score</div>
+                        <div class="stat-value">{{ stats.avg_score }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pipeline -->
+            {% if stats.total > 0 %}
+            <div class="stat-card mb-4 p-3">
+                <div style="font-size:.8rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;">Submission Pipeline</div>
+                <div class="pipeline-bar">
+                    <div class="pipeline-seg" style="width:{% widthratio stats.submitted stats.total 100 %}%;background:#3b82f6;"></div>
+                    <div class="pipeline-seg" style="width:{% widthratio stats.under_review stats.total 100 %}%;background:#f59e0b;"></div>
+                    <div class="pipeline-seg" style="width:{% widthratio stats.evaluated stats.total 100 %}%;background:#10b981;"></div>
+                    <div class="pipeline-seg" style="width:{% widthratio stats.top_400 stats.total 100 %}%;background:var(--primary);"></div>
+                </div>
+                <div class="pipeline-legend">
+                    <div class="d-flex align-items-center gap-2"><div class="legend-dot" style="background:#3b82f6;"></div><span class="legend-label">Submitted</span><span class="legend-val">{{ stats.submitted }}</span></div>
+                    <div class="d-flex align-items-center gap-2"><div class="legend-dot" style="background:#f59e0b;"></div><span class="legend-label">Under Review</span><span class="legend-val">{{ stats.under_review }}</span></div>
+                    <div class="d-flex align-items-center gap-2"><div class="legend-dot" style="background:#10b981;"></div><span class="legend-label">Evaluated</span><span class="legend-val">{{ stats.evaluated }}</span></div>
+                    <div class="d-flex align-items-center gap-2"><div class="legend-dot" style="background:var(--primary);"></div><span class="legend-label">Top 400</span><span class="legend-val">{{ stats.top_400 }}</span></div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Filters -->
+            <form method="get">
+                <div class="filter-bar">
+                    <div class="search-input">
+                        <span class="material-symbols-outlined" style="font-size:18px;color:var(--muted);">search</span>
+                        <input type="text" name="search" value="{{ search_query }}" placeholder="Search idea, student, school…" />
+                    </div>
+                    <select name="status" class="filter-select" onchange="this.form.submit()">
+                        <option value="">All Status</option>
+                        <option value="submitted" {% if selected_status == 'submitted' %}selected{% endif %}>Submitted</option>
+                        <option value="under_review" {% if selected_status == 'under_review' %}selected{% endif %}>Under Review</option>
+                        <option value="evaluated" {% if selected_status == 'evaluated' %}selected{% endif %}>Evaluated</option>
+                        <option value="draft" {% if selected_status == 'draft' %}selected{% endif %}>Draft</option>
+                    </select>
+                    <select name="category" class="filter-select" onchange="this.form.submit()">
+                        <option value="">All Categories</option>
+                        <option value="edtech" {% if selected_category == 'edtech' %}selected{% endif %}>EdTech</option>
+                        <option value="health" {% if selected_category == 'health' %}selected{% endif %}>HealthTech</option>
+                        <option value="fintech" {% if selected_category == 'fintech' %}selected{% endif %}>FinTech</option>
+                        <option value="sustainability" {% if selected_category == 'sustainability' %}selected{% endif %}>Sustainability</option>
+                        <option value="agriculture" {% if selected_category == 'agriculture' %}selected{% endif %}>AgriTech</option>
+                        <option value="social_impact" {% if selected_category == 'social_impact' %}selected{% endif %}>Social Impact</option>
+                        <option value="other" {% if selected_category == 'other' %}selected{% endif %}>Other</option>
+                    </select>
+                    <button type="submit" style="padding:8px 16px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-size:.8rem;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;">Search</button>
+                    {% if search_query or selected_status or selected_category %}
+                    <a href="{% url 'admins:all_submissions' %}" style="padding:8px 14px;background:#f7f7f7;border:1px solid var(--border);border-radius:8px;font-size:.8rem;font-weight:500;text-decoration:none;color:var(--dark);">Clear</a>
+                    {% endif %}
+                </div>
+            </form>
+
+            <!-- Table -->
+            <div class="table-card">
+                <div class="table-header">
+                    <span class="table-title">
+                        All Submissions
+                        {% if page_obj %}
+                        <span style="font-size:.8rem;font-weight:500;color:var(--muted);margin-left:8px;">{{ page_obj.paginator.count }} total</span>
+                        {% endif %}
+                    </span>
+                    <a href="{% url 'admins:rankings' %}" style="font-size:.8rem;font-weight:600;color:var(--primary);text-decoration:none;display:flex;align-items:center;gap:4px;">
+                        View Rankings <span class="material-symbols-outlined" style="font-size:14px;">arrow_forward</span>
+                    </a>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th style="width:40px;">#</th>
+                                <th>Idea</th>
+                                <th>Student</th>
+                                <th>School</th>
+                                <th>Status</th>
+                                <th>AI Score</th>
+                                <th>Top 400</th>
+                                <th>Date</th>
+                                <th style="width:50px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if rows %}
+                                {% for row in rows %}
+                                <tr>
+                                    <td style="color:var(--muted);font-size:.75rem;">{{ row.id }}</td>
+                                    <td>
+                                        <div style="font-weight:600;color:var(--dark);max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ row.title }}</div>
+                                        <div style="font-size:.7rem;margin-top:3px;">
+                                            <span style="background:rgba(94,42,151,.08);color:var(--primary);padding:1px 8px;border-radius:4px;font-weight:600;">{{ row.category }}</span>
+                                        </div>
+                                    </td>
+                                    <td style="font-weight:500;">{{ row.student_name }}</td>
+                                    <td style="color:var(--muted);font-size:.78rem;">{{ row.school_name|default:"—" }}</td>
+                                    <td>
+                                        <span class="badge badge-{{ row.status }}">{{ row.status_label }}</span>
+                                    </td>
+                                    <td>
+                                        {% if row.ai_score is not None %}
+                                        <div class="score-bar-wrap">
+                                            <div class="score-bar"><div class="score-fill" style="width:{% widthratio row.ai_score 100 100 %}%;"></div></div>
+                                            <span class="score-val">{{ row.ai_score }}</span>
+                                        </div>
+                                        {% else %}
+                                        <span style="color:var(--muted);font-size:.75rem;">Not evaluated</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if row.is_top_400 %}
+                                        <span class="badge badge-top400">✓ Top 400{% if row.rank %} #{{ row.rank }}{% endif %}</span>
+                                        {% else %}
+                                        <span style="color:var(--muted);font-size:.75rem;">—</span>
+                                        {% endif %}
+                                    </td>
+                                    <td style="color:var(--muted);font-size:.75rem;white-space:nowrap;">{{ row.submitted_at }}</td>
+                                    <td>
+                                        <button class="btn-view"
+                                            data-id="{{ row.id }}"
+                                            data-title="{{ row.title|escapejs }}"
+                                            data-student="{{ row.student_name|escapejs }}"
+                                            data-school="{{ row.school_name|default:'—'|escapejs }}"
+                                            data-status="{{ row.status_label|escapejs }}"
+                                            data-status-key="{{ row.status }}"
+                                            data-score="{{ row.ai_score|default:'' }}"
+                                            data-category="{{ row.category|escapejs }}"
+                                            data-date="{{ row.submitted_at|escapejs }}"
+                                            data-top400="{{ row.is_top_400|yesno:'true,false' }}"
+                                            data-rank="{{ row.rank|default:'' }}"
+                                            data-url="{% url 'admins:submission_detail' row.id %}"
+                                            onclick="openPreview(this)" title="Quick Preview">
+                                            <span class="material-symbols-outlined" style="font-size:16px;">visibility</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr><td colspan="9">
+                                    <div class="empty-state">
+                                        <div><span class="material-symbols-outlined">inbox</span></div>
+                                        <div style="font-weight:600;margin-bottom:4px;">No submissions found</div>
+                                        <div style="font-size:.8rem;">Try changing your filters</div>
+                                    </div>
+                                </td></tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                {% if page_obj.has_other_pages %}
+                <div class="pagination-wrap">
+                    <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                    <div class="page-btns">
+                        {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}" class="page-btn">Previous</a>
+                        {% endif %}
+                        {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}" class="page-btn">Next</a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Preview Drawer -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closePreview()"></div>
+<div class="preview-drawer" id="previewDrawer">
+    <div class="drawer-topbar">
+        <span class="drawer-topbar-title">Submission Details</span>
+        <button class="drawer-close" onclick="closePreview()">
+            <span class="material-symbols-outlined" style="font-size:18px;">close</span>
+        </button>
+    </div>
+    <div class="drawer-body" id="drawerBody">
+        <div class="drawer-loading"><div class="spinner"></div>Loading…</div>
+    </div>
+    <div class="drawer-footer">
+        <a id="drawerViewBtn" href="#" class="btn-view-full">
+            <span class="material-symbols-outlined" style="font-size:15px;">open_in_full</span>
+            View Full Submission
+        </a>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+(function(){
+    // Sidebar toggle
+    const btn = document.getElementById('sidebarToggleBtn');
+    const sb = document.getElementById('superAdminAppSidebar');
+    if(btn && sb){
+        btn.addEventListener('click', function(){
+            if(window.innerWidth >= 768){ sb.classList.toggle('collapsed'); }
+            else { sb.classList.toggle('mobile-open'); }
+        });
+        document.addEventListener('click', function(e){
+            if(window.innerWidth < 768 && !e.target.closest('#superAdminAppSidebar') && !e.target.closest('#sidebarToggleBtn'))
+                sb.classList.remove('mobile-open');
+        });
+    }
+    // Dropdown
+    const toggle = document.getElementById('userMgmtToggle');
+    const dd = document.querySelector('.nav-dropdown');
+    if(toggle && dd){ toggle.addEventListener('click', function(){ dd.classList.toggle('open'); }); }
+})();
+
+// ── Preview Drawer ──────────────────────────────────────────────
+const STATUS_COLORS = {
+    submitted:    {bg:'#dbeafe',color:'#1d4ed8'},
+    under_review: {bg:'#fef3c7',color:'#b45309'},
+    evaluated:    {bg:'#dcfce7',color:'#15803d'},
+    reviewed:     {bg:'#dcfce7',color:'#15803d'},
+    draft:        {bg:'#f1f5f9',color:'#475569'},
+};
+
+function sc(s){ return s>=7?'high':s>=5?'medium':'low'; }
+
+function paramCell(name, score){
+    if(score===null||score===undefined) return `<div class="param-cell"><span class="param-cell-name">${name}</span><span class="param-cell-score" style="color:#ccc;">—</span></div>`;
+    return `<div class="param-cell"><span class="param-cell-name">${name}</span><span class="param-cell-score ${sc(score)}">${score}<span style="font-size:.6rem;font-weight:500;color:#999;">/10</span></span></div>`;
+}
+
+function avatarColor(i){ return ['#5E2A97','#3b82f6','#22c55e','#f59e0b','#ef4444'][i%5]; }
+
+function renderDrawer(d){
+    const stc = STATUS_COLORS[d.status] || {bg:'#f1f5f9',color:'#475569'};
+    const hasEval = d.final_score !== null && d.final_score !== undefined;
+    let html = '';
+
+    // ── 1. Idea card ──
+    html += `<div class="dc">
+        <div class="idea-title-d">${d.title}</div>`;
+    if(d.ai_summary){
+        html += `<div class="idea-summary-d">${d.ai_summary}</div>`;
+    }
+    html += `<div>
+        <span class="tag-pill status">${d.status_label}</span>
+        <span class="tag-pill">${d.category}</span>
+    </div>
+    </div>`;
+
+    // ── 2. Scores & Status ──
+    html += `<div class="dc">
+        <div class="dc-title">Scores &amp; Status</div>
+        <div class="scores-grid">
+            <div class="score-cell">
+                <div class="score-cell-label">Status</div>
+                <div class="score-cell-small">
+                    <span style="background:${stc.bg};color:${stc.color};font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:4px;">${d.status_label}</span>
+                    ${d.is_top_400?'<div style="font-size:.7rem;color:#16a34a;font-weight:700;margin-top:4px;">★ Top 400</div>':''}
+                </div>
+            </div>
+            <div class="score-cell">
+                <div class="score-cell-label">Final Score</div>
+                <div class="score-cell-val highlight">${hasEval?d.final_score:'—'}<span> / 100</span></div>
+            </div>
+            <div class="score-cell">
+                <div class="score-cell-label">AI Score</div>
+                <div class="score-cell-val">${hasEval?d.final_score:'—'}<span> / 100</span></div>
+            </div>
+            <div class="score-cell">
+                <div class="score-cell-label">Rank</div>
+                <div class="score-cell-val">${d.rank?'#'+d.rank:'<span style="font-size:.8rem;">TBD</span>'}</div>
+            </div>
+            <div class="score-cell">
+                <div class="score-cell-label">Submission No.</div>
+                <div class="score-cell-small" style="font-size:.82rem;">SUB ${String(d.id).padStart(4,'0')}</div>
+            </div>
+            <div class="score-cell">
+                <div class="score-cell-label">Submitted On</div>
+                <div class="score-cell-small" style="font-size:.78rem;">${d.submitted_at}</div>
+            </div>
+        </div>
+    </div>`;
+
+    // ── 3. AI Score Breakdown ──
+    html += `<div class="dc">
+        <div class="dc-title">AI Score Breakdown (10 Parameters)</div>
+        <div class="params-grid">
+            ${paramCell('Uniqueness',     d.uniqueness_score)}
+            ${paramCell('Implementation', d.ease_score)}
+            ${paramCell('Sustainability', d.sustainability_score)}
+            ${paramCell('Impact',         d.impact_score)}
+            ${paramCell('Feasibility',    d.feasibility_score)}
+            ${paramCell('Clarity',        d.clarity_score)}
+            ${paramCell('Empathy',        d.empathy_score)}
+            ${paramCell('Creativity',     d.creativity_score)}
+            ${paramCell('Flex Thinking',  d.flex_thinking_score)}
+            ${paramCell('Communication',  d.communication_score)}
+        </div>
+        ${!hasEval?'<div style="text-align:center;color:var(--muted);font-size:.78rem;padding:8px 0;">Not yet evaluated</div>':''}
+    </div>`;
+
+    // ── 4. Team Members ──
+    const leaderInitials = d.student_name.split(' ').map(w=>w[0]||'').join('').slice(0,2).toUpperCase();
+    html += `<div class="dc">
+        <div class="dc-title">Team</div>
+        <div class="member-row-d">
+            <div class="member-av" style="background:${avatarColor(0)};">${leaderInitials}</div>
+            <div style="flex:1;">
+                <p class="member-name-d">${d.student_name}</p>
+                <p class="member-role-d">Team Leader · Grade ${d.grade} · ${d.school_name}</p>
+            </div>
+            <span style="font-size:.65rem;background:#dcfce7;color:#16a34a;padding:2px 8px;border-radius:999px;font-weight:700;">Leader</span>
+        </div>`;
+    if(d.team_members && d.team_members.length){
+        d.team_members.forEach((m, i) => {
+            const ini = m.name.split(' ').map(w=>w[0]||'').join('').slice(0,2).toUpperCase();
+            html += `<div class="member-row-d">
+                <div class="member-av" style="background:${avatarColor(i+1)};">${ini}</div>
+                <div style="flex:1;">
+                    <p class="member-name-d">${m.name}</p>
+                    <p class="member-role-d">${m.role_label}${m.grade?' · Grade '+m.grade:''}${m.school_name?' · '+m.school_name:''}</p>
+                </div>
+            </div>`;
+        });
+    }
+    html += `</div>`;
+
+    // ── 5. Attachments ──
+    if(d.files && d.files.length){
+        html += `<div class="dc">
+            <div class="dc-title">Attachments (${d.files.length})</div>`;
+        d.files.forEach(f => {
+            const icon = f.file_type==='image'?'image':f.file_type==='video'?'videocam':'description';
+            const cls  = f.file_type==='image'?'img':f.file_type==='video'?'vid':'doc';
+            const size = f.file_size ? (f.file_size/1024/1024).toFixed(1)+' MB' : '';
+            html += `<div class="attach-row-d">
+                <div class="attach-ic ${cls}"><span class="material-symbols-outlined" style="font-size:16px;">${icon}</span></div>
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${f.original_filename}</div>
+                    <div style="font-size:.7rem;color:var(--muted);">${size?size+' · ':''}${f.file_type}</div>
+                </div>
+                ${f.url ? `<a href="${f.url}" download title="Download" style="color:#aaa;display:flex;align-items:center;"><span class="material-symbols-outlined" style="font-size:16px;">download</span></a>` : ''}
+            </div>`;
+        });
+        html += `</div>`;
+    }
+
+    // ── 6. Jury Assignment ──
+    if(d.jury_assignments && d.jury_assignments.length){
+        html += `<div class="dc">
+            <div class="dc-title">Jury Assignment</div>`;
+        d.jury_assignments.forEach(j => {
+            html += `<div style="padding:10px 0;border-bottom:1px solid #f5f5f5;">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+                    <div class="member-av" style="background:#5E2A97;font-size:.75rem;">${j.jury_name.split(' ').map(w=>w[0]||'').join('').slice(0,2).toUpperCase()}</div>
+                    <div style="flex:1;">
+                        <p class="member-name-d">${j.jury_name}</p>
+                        <p class="member-role-d">${j.jury_org||''}</p>
+                    </div>
+                    ${j.jury_score!==null&&j.jury_score!==undefined ? `<span style="font-size:.85rem;font-weight:800;color:var(--primary);">${j.jury_score}<span style="font-size:.6rem;color:#999;">/100</span></span>` : ''}
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+                    ${j.assigned_on?`<div><div style="font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;">Assigned On</div><div style="font-size:.78rem;font-weight:600;">${j.assigned_on}</div></div>`:''}
+                    ${j.evaluated_on?`<div><div style="font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;">Evaluated On</div><div style="font-size:.78rem;font-weight:600;">${j.evaluated_on}</div></div>`:''}
+                </div>
+                ${j.notes?`<div style="font-size:.75rem;color:#555;margin-top:6px;line-height:1.5;background:#fffbeb;border-radius:6px;padding:6px 8px;">"${j.notes}"</div>`:''}
+            </div>`;
+        });
+        html += `</div>`;
+    } else {
+        html += `<div class="dc">
+            <div class="dc-title">Jury Assignment</div>
+            <div style="font-size:.8rem;color:var(--muted);text-align:center;padding:10px 0;">No jury assigned yet</div>
+        </div>`;
+    }
+
+    document.getElementById('drawerBody').innerHTML = html;
+}
+
+function openPreview(btn) {
+    const d = btn.dataset;
+    document.getElementById('drawerBody').innerHTML = '<div class="drawer-loading"><div class="spinner"></div>Loading…</div>';
+    document.getElementById('drawerViewBtn').href = d.url;
+    document.getElementById('drawerOverlay').classList.add('open');
+    document.getElementById('previewDrawer').classList.add('open');
+
+    fetch(`/super-admin/submission/${d.id}/preview.json`)
+        .then(r => r.json())
+        .then(data => renderDrawer(data))
+        .catch(() => {
+            document.getElementById('drawerBody').innerHTML = '<div class="drawer-loading" style="color:#dc2626;">Failed to load data.</div>';
+        });
+}
+
+function closePreview() {
+    document.getElementById('drawerOverlay').classList.remove('open');
+    document.getElementById('previewDrawer').classList.remove('open');
+}
+
+document.addEventListener('keydown', e => { if(e.key==='Escape') closePreview(); });
+</script>
+</body>
+</html>

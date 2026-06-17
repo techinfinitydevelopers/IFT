@@ -1,0 +1,1483 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>{{ submission.title|default:"View Submission" }} | Super Admin | IFT Platform</title>
+
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <style>
+        :root {
+            --primary: #5E2A97;
+            --primary-light: #E8D4F0;
+            --background-light: #F7F7F7;
+            --surface-light: #FFFFFF;
+            --border-light: #EEEEEE;
+            --text-dark: #222222;
+            --text-muted: #666666;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            overflow: hidden;
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+        .main-container { display: flex; height: 100vh; width: 100%; }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            width: 280px; background: #FFFFFF;
+            border-right: 1px solid #EEEEEE;
+            height: 100vh; display: flex; flex-direction: column;
+            position: sticky; top: 0;
+            font-family: 'Poppins', sans-serif; transition: all 0.3s ease;
+            flex-shrink: 0;
+            overflow-y: auto; overflow-x: hidden;
+        }
+        .sidebar.collapsed { width: 80px; }
+        .sidebar.collapsed .sidebar-title,
+        .sidebar.collapsed .nav-text,
+        .sidebar.collapsed .user-info { opacity: 0; width: 0; overflow: hidden; white-space: nowrap; }
+        .sidebar.collapsed .logo-img { width: 50px; height: 50px; margin: 0 auto; background-position: center; }
+        .sidebar.collapsed .nav-item { justify-content: center; padding-left: 1.7rem; }
+        .sidebar.collapsed .nav-item .material-symbols-outlined { margin: 0; }
+        .sidebar.collapsed .user-avatar { margin: 0 auto; }
+        .sidebar.collapsed .logout-btn { display: none; }
+        .sidebar.collapsed .user-profile { justify-content: center; }
+        .sidebar.collapsed .notification-badge { display: none; }
+        .sidebar.collapsed .nav-dropdown-icon { display: none; }
+        .sidebar.collapsed .nav-dropdown-menu { padding-left: 0; }
+
+        .sidebar-header { border-bottom: 1px solid #F7F7F7; }
+        .logo-img {
+            width: 250px; height: 50px;
+            background-size: contain; background-position: left center;
+            background-repeat: no-repeat; flex-shrink: 0;
+        }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.75rem 1rem; border-radius: 0.5rem;
+            text-decoration: none; color: #222222;
+            transition: all 0.2s ease; cursor: pointer; margin-bottom: 0.25rem;
+        }
+        .nav-item:hover { background: #F7F7F7; color: #222222; }
+        .nav-item .material-symbols-outlined { font-size: 24px; color: #666666; transition: all 0.2s ease; }
+        .nav-item.nav-item-active { background: rgba(94,42,151,0.1); color: #5E2A97; padding-left: calc(1rem - 4px); border-left: 4px solid #5E2A97; }
+        .nav-item.nav-item-active .material-symbols-outlined { color: #5E2A97; font-variation-settings: 'FILL' 1; }
+        .nav-text { font-size: 0.875rem; font-weight: 500; }
+
+        .nav-dropdown { position: relative; }
+        .nav-dropdown-toggle { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+        .nav-dropdown-icon { font-size: 18px !important; transition: transform 0.2s ease; }
+        .nav-dropdown.open .nav-dropdown-icon { transform: rotate(180deg); }
+        .nav-dropdown-menu { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; padding-left: 2.5rem; }
+        .nav-dropdown.open .nav-dropdown-menu { max-height: 400px; margin-top: 0.25rem; }
+        .nav-dropdown-item {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.625rem 1rem; border-radius: 0.5rem;
+            text-decoration: none; color: #666666; font-size: 0.875rem;
+            font-weight: 500; transition: all 0.2s ease; margin-bottom: 0.25rem;
+        }
+        .nav-dropdown-item:hover { background: #F7F7F7; color: #5E2A97; }
+
+        .sidebar-footer { border-top: 1px solid #EEEEEE; margin-top: auto; }
+        .user-profile {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.75rem; border-radius: 0.5rem;
+            transition: all 0.2s ease; cursor: pointer;
+        }
+        .user-profile:hover { background: #F7F7F7; }
+        .user-avatar { width: 2.5rem; height: 2.5rem; border-radius: 50%; overflow: hidden; flex-shrink: 0; border: 2px solid #EEEEEE; }
+        .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .user-info { flex: 1; }
+        .user-name { font-size: 0.875rem; font-weight: 700; color: #222222; margin: 0 0 0.125rem 0; line-height: 1.2; }
+        .user-role { font-size: 0.75rem; color: #666666; margin: 0; line-height: 1.2; }
+        .logout-btn {
+            background: none; border: none; color: #666666; cursor: pointer;
+            padding: 0.5rem; border-radius: 0.375rem; transition: all 0.2s ease;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .logout-btn:hover { background: rgba(94,42,151,0.1); color: #5E2A97; }
+        .logout-btn .material-symbols-outlined { font-size: 20px; }
+
+        /* ── Header ── */
+        .top-header {
+            height: 70px; min-height: 70px; flex-shrink: 0;
+            background: #FFFFFF; border-bottom: 1px solid #EEEEEE;
+            display: flex; align-items: center; padding: 0 1.5rem;
+            position: sticky; top: 0; z-index: 100;
+        }
+        .header-icon-btn {
+            width: 2.5rem; height: 2.5rem; border-radius: 0.5rem; border: none;
+            background: #F7F7F7; color: #666666; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;
+        }
+        .header-icon-btn:hover { background: #EEEEEE; color: #5E2A97; }
+        .header-icon-btn .material-symbols-outlined { font-size: 22px; }
+        .header-avatar {
+            width: 2.5rem; height: 2.5rem; border-radius: 50%;
+            background-size: cover; background-position: center;
+            border: 2px solid #5E2A97; cursor: pointer; transition: all 0.2s ease;
+        }
+        .header-avatar:hover { transform: scale(1.05); box-shadow: 0 0 0 4px rgba(94,42,151,0.1); }
+
+        /* ── Main Content ── */
+        .main-content { flex: 1; display: flex; flex-direction: column; height: 100%; overflow-y: auto; }
+
+        .content-wrapper {
+            flex: 1; padding: 32px;
+            max-width: 1400px; margin: 0 auto; width: 100%;
+        }
+
+        /* Page Header */
+        .page-header {
+            margin-bottom: 24px;
+            display: flex; justify-content: space-between;
+            align-items: flex-start; flex-wrap: wrap; gap: 16px;
+        }
+        .page-header h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 6px; }
+
+        .breadcrumb {
+            font-size: 0.875rem; color: var(--text-muted);
+            background: none; padding: 0; margin: 0;
+        }
+        .breadcrumb-item a { color: var(--text-muted); text-decoration: none; }
+        .breadcrumb-item a:hover { color: var(--primary); }
+        .breadcrumb-item.active { color: var(--text-dark); }
+
+        /* Status badges */
+        .badge-status {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 4px 12px; border-radius: 9999px;
+            font-size: 0.75rem; font-weight: 700;
+        }
+        .badge-status .dot { width: 6px; height: 6px; border-radius: 50%; }
+        .badge-selected   { background: rgba(94,42,151,0.1); color: var(--primary); }
+        .badge-selected .dot { background: var(--primary); }
+        .badge-evaluated  { background: #dcfce7; color: #16a34a; }
+        .badge-evaluated .dot { background: #16a34a; }
+        .badge-ai-review  { background: #ede9fe; color: #7c3aed; }
+        .badge-ai-review .dot { background: #7c3aed; }
+        .badge-submitted  { background: #dbeafe; color: #2563eb; }
+        .badge-submitted .dot { background: #2563eb; }
+        .badge-draft      { background: #f1f5f9; color: #64748b; }
+        .badge-draft .dot { background: #64748b; }
+        .badge-disqualified { background: #fee2e2; color: #dc2626; }
+        .badge-disqualified .dot { background: #dc2626; }
+
+        /* Buttons */
+        .btn-primary-custom {
+            background: var(--primary); color: #fff; border: none;
+            padding: 10px 20px; border-radius: 8px;
+            font-size: 0.875rem; font-weight: 600;
+            font-family: 'Poppins', sans-serif; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s;
+            text-decoration: none;
+        }
+        .btn-primary-custom:hover { background: #4a1f7a; color: #fff; }
+        .btn-outline-custom {
+            background: #fff; color: var(--text-dark);
+            border: 1px solid var(--border-light); padding: 10px 18px;
+            border-radius: 8px; font-size: 0.875rem; font-weight: 500;
+            font-family: 'Poppins', sans-serif; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s;
+            text-decoration: none;
+        }
+        .btn-outline-custom:hover { border-color: var(--primary); color: var(--primary); }
+
+        /* Cards */
+        .info-card {
+            background: var(--surface-light);
+            border-radius: 12px; padding: 24px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+            border: 1px solid var(--border-light);
+            margin-bottom: 20px;
+        }
+        .card-title {
+            font-size: 0.75rem; font-weight: 700;
+            color: var(--text-muted); text-transform: uppercase;
+            letter-spacing: 0.06em; margin-bottom: 18px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .card-title .material-symbols-outlined { font-size: 17px; color: var(--primary); }
+
+        /* Idea sections */
+        .idea-hero { margin-bottom: 20px; }
+        .idea-hero h2 { font-size: 1.375rem; font-weight: 700; margin-bottom: 8px; }
+        .idea-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+        .idea-tag {
+            background: rgba(94,42,151,0.08); color: var(--primary);
+            font-size: 0.75rem; font-weight: 600;
+            padding: 3px 10px; border-radius: 9999px;
+        }
+        .idea-section-label {
+            font-size: 0.75rem; font-weight: 700; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;
+        }
+        .idea-section-body {
+            font-size: 0.875rem; line-height: 1.7; color: var(--text-dark);
+            background: #f8fafc; border-radius: 8px; padding: 14px 16px;
+            margin-bottom: 16px;
+        }
+        .idea-section-body.mb-0 { margin-bottom: 0; }
+
+        /* Score Card */
+        .score-card {
+            background: linear-gradient(135deg, var(--primary) 0%, #4a1f7a 100%);
+            border-radius: 12px; padding: 24px; margin-bottom: 20px; color: #fff;
+        }
+        .score-card .score-main { text-align: center; margin-bottom: 20px; }
+        .score-card .score-number { font-size: 3rem; font-weight: 900; line-height: 1; }
+        .score-card .score-denom { font-size: 1.25rem; opacity: 0.7; }
+        .score-card .score-label {
+            font-size: 0.75rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.8; margin-top: 6px;
+        }
+        .score-sub-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 12px; padding-top: 16px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+        .score-sub-item { text-align: center; }
+        .score-sub-value { font-size: 1.25rem; font-weight: 700; }
+        .score-sub-label { font-size: 0.6875rem; opacity: 0.75; text-transform: uppercase; letter-spacing: 0.05em; }
+
+        /* AI Param Breakdown */
+        .param-row {
+            display: flex; align-items: center;
+            justify-content: space-between;
+            gap: 12px; margin-bottom: 12px;
+        }
+        .param-row:last-child { margin-bottom: 0; }
+        .param-name { font-size: 0.8125rem; font-weight: 500; color: var(--text-dark); min-width: 110px; flex-shrink: 0; }
+        .param-bar-wrap { flex: 1; }
+        .param-bar { height: 6px; background: #f1f5f9; border-radius: 9999px; overflow: hidden; }
+        .param-fill { height: 100%; border-radius: 9999px; transition: width 0.6s ease; }
+        .param-fill.high   { background: #22c55e; }
+        .param-fill.medium { background: #f59e0b; }
+        .param-fill.low    { background: #ef4444; }
+        .param-score { font-size: 0.8125rem; font-weight: 700; min-width: 32px; text-align: right; }
+        .param-score.high   { color: #16a34a; }
+        .param-score.medium { color: #d97706; }
+        .param-score.low    { color: #dc2626; }
+
+        /* Q&A Accordion */
+        .qa-q-btn {
+            width: 100%; background: none; border: none;
+            display: flex; align-items: flex-start; justify-content: space-between;
+            gap: 12px; padding: 16px 20px; font-family: 'Poppins', sans-serif;
+            font-size: 0.875rem; font-weight: 600; color: var(--text-dark);
+            cursor: pointer; text-align: left; transition: background 0.15s;
+        }
+        .qa-q-btn:hover { background: #f8fafc; }
+        .qa-q-btn[aria-expanded="true"] { background: rgba(94,42,151,0.04); }
+        .qa-chevron { font-size: 20px !important; color: var(--text-muted); flex-shrink: 0; transition: transform 0.25s; }
+        .qa-q-btn[aria-expanded="true"] .qa-chevron { transform: rotate(180deg); }
+        .qa-ans {
+            padding: 0 20px 16px 20px; font-size: 0.875rem;
+            color: var(--text-muted); line-height: 1.7;
+            background: #fafbff; border-top: 1px solid var(--border-light);
+        }
+        .qa-item-wrap { border-bottom: 1px solid var(--border-light); }
+        .qa-item-wrap:last-child { border-bottom: none; }
+        .qa-q-num { color: var(--primary); font-weight: 800; flex-shrink: 0; margin-right: 4px; }
+
+        /* AI Eval Terminal */
+        .ai-terminal-box-v3 {
+            background: #0d0d0d; border: 1px solid #333; border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 12px; color: #ccc; margin-top: 14px; display: none; overflow: hidden;
+        }
+        .ai-terminal-box-v3.active { display: block; }
+        .ai-prog { height: 3px; background: #222; position: relative; overflow: hidden; }
+        .ai-prog-bar { height: 100%; background: #22c55e; width: 0%; transition: width 0.2s ease; }
+        .ai-prog-buf { position: absolute; top:0; left:0; height:100%; width:100%;
+            background: linear-gradient(90deg,transparent,rgba(34,197,94,0.3),transparent);
+            animation: buf 1s infinite; }
+        @keyframes buf { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
+        .ai-term-body { padding: 12px; max-height: 260px; overflow-y: auto; }
+        .ai-ln { display:flex; gap:8px; margin-bottom:3px; line-height:1.5; }
+        .ai-ln .p { color:#22c55e; flex-shrink:0; }
+        .ai-ln .t { color:#888; }
+        .ai-ln .s { color:#22c55e; font-weight:bold; margin-left:auto; }
+        .ai-ln .w { color:#fff; }
+        .ai-ln .st { color:#f59e0b; margin-left:auto; font-size:11px; }
+        .ai-div { border:none; border-top:1px solid #333; margin:8px 0; }
+        .ai-sp { display:inline-block; width:10px; height:10px; border:2px solid #333;
+            border-top-color:#22c55e; border-radius:50%; animation:spin2 0.6s linear infinite; margin-right:6px; }
+        @keyframes spin2 { to{transform:rotate(360deg)} }
+        .ai-done-btn2 { background:#1a1a1a; border:1px solid #333; color:#ccc; padding:6px 16px;
+            border-radius:4px; font-family:inherit; font-size:11px; cursor:pointer;
+            margin-top:10px; display:none; }
+        .ai-done-btn2.show { display:inline-block; }
+        .ai-done-btn2:hover { background:#222; }
+
+        /* Eval Results Card */
+        .eval-results-card { border:1px solid rgba(94,42,151,0.2); border-radius:10px; overflow:hidden; margin-bottom:14px; }
+        .eval-results-header { background:rgba(94,42,151,0.06); padding:14px 18px; border-bottom:1px solid rgba(94,42,151,0.1); }
+        .eval-param-box { background:#f8fafc; border:1px solid #eef2f7; border-radius:8px; padding:10px 14px; }
+        .eval-param-label { font-weight:700; font-size:0.8rem; color:var(--primary); display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; }
+        .eval-param-score { background:var(--primary); color:white; padding:1px 7px; border-radius:4px; font-size:0.72rem; }
+        .eval-param-just { font-size:0.78rem; color:var(--text-muted); line-height:1.4; }
+        .coherence-row { display:flex; justify-content:space-between; align-items:center; padding:6px 10px; border-radius:6px; margin-bottom:4px; font-size:0.8rem; }
+        .c-pass { background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; }
+        .c-fail { background:#fef2f2; border:1px solid #fecaca; color:#991b1b; }
+
+        /* Timeline */
+        .timeline { position: relative; padding-left: 28px; }
+        .timeline::before {
+            content: ''; position: absolute;
+            left: 7px; top: 10px; bottom: 10px;
+            width: 2px; background: var(--border-light);
+        }
+        .timeline-item { position: relative; margin-bottom: 20px; }
+        .timeline-item:last-child { margin-bottom: 0; }
+        .timeline-dot {
+            position: absolute; left: -27px; top: 3px;
+            width: 14px; height: 14px; border-radius: 50%;
+            border: 2px solid #fff; box-shadow: 0 0 0 2px var(--border-light);
+        }
+        .timeline-dot.done    { background: #22c55e; box-shadow: 0 0 0 2px #dcfce7; }
+        .timeline-dot.current { background: var(--primary); box-shadow: 0 0 0 2px var(--primary-light); }
+        .timeline-dot.pending { background: #e2e8f0; }
+        .timeline-label { font-size: 0.875rem; font-weight: 600; color: var(--text-dark); }
+        .timeline-meta  { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+
+        /* Attachments */
+        .attachment-row {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 0; border-bottom: 1px solid #f8f9fa; min-width: 0;
+        }
+        .attachment-row:last-child { border-bottom: none; }
+        .attach-icon {
+            width: 36px; height: 36px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .attach-icon.img  { background: rgba(59,130,246,0.1); color: #3b82f6; }
+        .attach-icon.vid  { background: rgba(239,68,68,0.1); color: #ef4444; }
+        .attach-icon.doc  { background: rgba(245,158,11,0.1); color: #f59e0b; }
+        .attach-icon .material-symbols-outlined { font-size: 18px; }
+        .attach-name { font-size: 0.875rem; font-weight: 600; color: var(--text-dark); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+        .attach-meta { font-size: 0.75rem; color: var(--text-muted); margin: 0; }
+        .btn-dl {
+            width: 30px; height: 30px; border-radius: 6px;
+            border: 1px solid var(--border-light); background: #fff;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: var(--text-muted); transition: all 0.2s;
+            margin-left: auto; flex-shrink: 0; text-decoration: none;
+        }
+        .btn-dl:hover { border-color: var(--primary); color: var(--primary); }
+        .btn-dl .material-symbols-outlined { font-size: 16px; }
+
+        /* Admin Actions */
+        .admin-actions-card {
+            background: var(--surface-light); border-radius: 12px; padding: 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+            border: 1px solid var(--border-light); margin-bottom: 20px;
+        }
+        .admin-action-btn {
+            width: 100%; padding: 10px 16px;
+            border-radius: 8px; font-family: 'Poppins', sans-serif;
+            font-size: 0.8125rem; font-weight: 600; cursor: pointer;
+            display: flex; align-items: center; gap: 10px;
+            border: 1px solid var(--border-light); background: #fff;
+            color: var(--text-dark); margin-bottom: 8px; transition: all 0.2s;
+        }
+        .admin-action-btn:last-child { margin-bottom: 0; }
+        .admin-action-btn:hover { border-color: var(--primary); color: var(--primary); background: rgba(94,42,151,0.03); }
+        .admin-action-btn .material-symbols-outlined { font-size: 18px; color: var(--text-muted); }
+        .admin-action-btn:hover .material-symbols-outlined { color: var(--primary); }
+        .admin-action-btn.danger { color: #dc2626; border-color: #fecaca; }
+        .admin-action-btn.danger:hover { background: #fee2e2; border-color: #fca5a5; }
+        .admin-action-btn.danger .material-symbols-outlined { color: #ef4444; }
+
+        /* Coherence alert */
+        .alert-incoherent {
+            background: #fff7ed; border: 1px solid #fed7aa;
+            border-radius: 8px; padding: 12px 16px; margin-bottom: 16px;
+            font-size: 0.875rem; color: #9a3412;
+        }
+        .alert-disqualified {
+            background: #fef2f2; border: 1px solid #fecaca;
+            border-radius: 8px; padding: 12px 16px; margin-bottom: 16px;
+            font-size: 0.875rem; color: #991b1b;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.5); z-index: 1100;
+            align-items: center; justify-content: center;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-box {
+            background: #fff; border-radius: 14px;
+            padding: 28px; width: 400px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        }
+        .modal-box h3 { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
+        .modal-box p  { font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 18px; }
+
+        .status-option-btn {
+            width: 100%; padding: 12px 16px;
+            border: 2px solid var(--border-light); border-radius: 8px;
+            background: #f8fafc; font-family: 'Poppins', sans-serif;
+            font-size: 0.875rem; font-weight: 600; cursor: pointer;
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 8px; transition: all 0.2s; color: var(--text-dark);
+        }
+        .status-option-btn:last-child { margin-bottom: 0; }
+        .status-option-btn:hover { border-color: var(--primary); background: rgba(94,42,151,0.04); color: var(--primary); }
+        .status-option-btn.selected { border-color: var(--primary); background: rgba(94,42,151,0.08); color: var(--primary); }
+
+        /* Toast */
+        .toast-container {
+            position: fixed; bottom: 24px; right: 24px;
+            z-index: 2000; display: flex; flex-direction: column; gap: 8px;
+        }
+        .toast {
+            background: #1e293b; color: #fff;
+            padding: 12px 18px; border-radius: 10px;
+            font-size: 0.8125rem; font-weight: 500;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+            display: flex; align-items: center; gap: 10px;
+            animation: toastIn 0.3s ease;
+        }
+        .toast.success { background: #166534; }
+        .toast.warning { background: #92400e; }
+        .toast.danger  { background: #991b1b; }
+        @keyframes toastIn {
+            from { transform: translateX(80px); opacity: 0; }
+            to   { transform: translateX(0); opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .content-wrapper { padding: 16px; }
+            .sidebar { position: fixed; left: -280px; z-index: 999; transition: left 0.3s ease; }
+            .sidebar.mobile-open { left: 0; }
+        }
+    </style>
+</head>
+
+<body>
+<div class="main-container">
+
+    <!-- ══ SIDEBAR ══ -->
+    <aside class="sidebar d-md-flex flex-column" id="superAdminAppSidebar">
+        <div class="sidebar-header p-3 pb-1">
+            <div class="d-flex align-items-center">
+                <div class="logo-img" style="background-image: url('{% static 'images/IFT_logo.png' %}');"></div>
+            </div>
+        </div>
+        <nav class="flex-grow-1 px-3 d-flex flex-column gap-2 mt-3">
+            <a class="nav-item" href="{% url 'admins:dashboard' %}">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span class="nav-text">Dashboard</span>
+            </a>
+
+            <div class="nav-dropdown">
+                <div class="nav-item nav-dropdown-toggle" id="userManagementToggle">
+                    <div style="display:flex;align-items:center;gap:0.75rem;">
+                        <span class="material-symbols-outlined">manage_accounts</span>
+                        <span class="nav-text">User Management</span>
+                    </div>
+                    <span class="material-symbols-outlined nav-dropdown-icon">expand_more</span>
+                </div>
+                <div class="nav-dropdown-menu">
+                    <a class="nav-dropdown-item" href="#">
+                        <span class="material-symbols-outlined">person_add</span>
+                        <span class="nav-text">Onboard Student</span>
+                    </a>
+                    <a class="nav-dropdown-item" href="#">
+                        <span class="material-symbols-outlined">school</span>
+                        <span class="nav-text">Students</span>
+                    </a>
+                    <a class="nav-dropdown-item" href="{% url 'admins:onboard_school' %}">
+                        <span class="material-symbols-outlined">add_business</span>
+                        <span class="nav-text">Onboard School</span>
+                    </a>
+                    <a class="nav-dropdown-item" href="{% url 'admins:schools_list' %}">
+                        <span class="material-symbols-outlined">apartment</span>
+                        <span class="nav-text">Schools</span>
+                    </a>
+                    <a class="nav-dropdown-item" href="{% url 'admins:onboard_evaluator' %}">
+                        <span class="material-symbols-outlined">person_add</span>
+                        <span class="nav-text">Onboard Evaluator</span>
+                    </a>
+                    <a class="nav-dropdown-item" href="{% url 'admins:evaluators_list' %}">
+                        <span class="material-symbols-outlined">groups</span>
+                        <span class="nav-text">Evaluators</span>
+                    </a>
+                </div>
+            </div>
+
+            <a class="nav-item" href="{% url 'admins:evaluator_management' %}">
+                <span class="material-symbols-outlined">supervisor_account</span>
+                <span class="nav-text">Evaluator Management</span>
+            </a>
+
+            <a class="nav-item nav-item-active" href="{% url 'admins:all_submissions' %}">
+                <span class="material-symbols-outlined">assignment</span>
+                <span class="nav-text">Submissions</span>
+            </a>
+
+            <a class="nav-item" href="{% url 'admins:rankings' %}">
+                <span class="material-symbols-outlined">leaderboard</span>
+                <span class="nav-text">Rankings</span>
+            </a>
+
+            <a class="nav-item" href="{% url 'admins:schedule' %}">
+                <span class="material-symbols-outlined">event_note</span>
+                <span class="nav-text">Schedule</span>
+            </a>
+
+            <a class="nav-item" href="{% url 'admins:content_list' %}">
+                <span class="material-symbols-outlined">article</span>
+                <span class="nav-text">Content</span>
+            </a>
+
+            <a class="nav-item" href="{% url 'admins:reports' %}">
+                <span class="material-symbols-outlined">analytics</span>
+                <span class="nav-text">Reports</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer p-3 mt-auto">
+            <div class="user-profile">
+                <div class="user-avatar">
+                    <img alt="Admin" src="https://ui-avatars.com/api/?name={{ request.user.get_full_name|default:request.user.username }}&background=5E2A97&color=fff" />
+                </div>
+                <div class="user-info flex-grow-1">
+                    <p class="user-name">{{ request.user.get_full_name|default:request.user.username }}</p>
+                    <p class="user-role">Super Administrator</p>
+                </div>
+                <a href="{% url 'accounts:sign_out' %}" class="logout-btn" title="Logout">
+                    <span class="material-symbols-outlined">logout</span>
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ══ MAIN CONTENT ══ -->
+    <main class="main-content">
+
+        <!-- Header -->
+        <header class="top-header">
+            <button class="header-icon-btn" id="sidebarToggleBtn" style="margin-right:16px;">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+            <div class="d-flex align-items-center gap-2 ms-auto">
+                <button class="header-icon-btn">
+                    <span class="material-symbols-outlined">notifications</span>
+                </button>
+                <div class="header-avatar"
+                     style="background-image: url('https://ui-avatars.com/api/?name={{ request.user.get_full_name|default:request.user.username }}&background=5E2A97&color=fff');"
+                     id="profileAvatarBtn"></div>
+            </div>
+        </header>
+
+        <!-- Profile Dropdown -->
+        <div id="profileDropdown" style="position:fixed;top:70px;right:20px;width:280px;background:white;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.15);z-index:9999;overflow:hidden;display:none;">
+            <div style="padding:16px;border-bottom:1px solid #f1f5f9;">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <div style="width:48px;height:48px;border-radius:50%;background-image:url('https://ui-avatars.com/api/?name={{ request.user.get_full_name|default:request.user.username }}&background=5E2A97&color=fff');background-size:cover;border:2px solid #5E2A97;"></div>
+                    <div>
+                        <p style="margin:0;font-size:0.875rem;font-weight:700;">{{ request.user.get_full_name|default:request.user.username }}</p>
+                        <p style="margin:4px 0 0;font-size:0.75rem;color:#64748b;">Super Admin</p>
+                        <p style="margin:2px 0 0;font-size:0.625rem;color:#94a3b8;">{{ request.user.email }}</p>
+                    </div>
+                </div>
+            </div>
+            <div style="padding:8px;">
+                <a href="{% url 'accounts:sign_out' %}" style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:8px;text-decoration:none;color:#ef4444;">
+                    <span class="material-symbols-outlined" style="color:#ef4444;font-size:20px;">logout</span>
+                    <span style="font-weight:600;font-size:0.875rem;">Logout</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="content-wrapper">
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div>
+                    <div class="d-flex align-items-center gap-3 mb-1 flex-wrap">
+                        <h1>{{ submission.title|default:q3|truncatechars:70 }}</h1>
+                        {% if is_disqualified %}
+                            <span class="badge-status badge-disqualified"><span class="dot"></span> Disqualified</span>
+                        {% elif is_top_400 %}
+                            <span class="badge-status badge-selected"><span class="dot"></span> Top 400</span>
+                        {% elif submission.status == 'evaluated' or submission.status == 'reviewed' %}
+                            <span class="badge-status badge-evaluated"><span class="dot"></span> {{ status_label }}</span>
+                        {% elif submission.status == 'under_review' %}
+                            <span class="badge-status badge-ai-review"><span class="dot"></span> Under Review</span>
+                        {% elif submission.status == 'submitted' %}
+                            <span class="badge-status badge-submitted"><span class="dot"></span> Submitted</span>
+                        {% else %}
+                            <span class="badge-status badge-draft"><span class="dot"></span> {{ status_label }}</span>
+                        {% endif %}
+                    </div>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'admins:dashboard' %}">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'admins:all_submissions' %}">Submissions</a></li>
+                            <li class="breadcrumb-item active">SUB-{{ submission.id|stringformat:"04d" }}</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div class="d-flex gap-2 flex-wrap">
+                    <button class="btn-outline-custom" onclick="openChangeStatus()">
+                        <span class="material-symbols-outlined" style="font-size:16px;">swap_horiz</span>
+                        Change Status
+                    </button>
+                    <a href="{% url 'admins:all_submissions' %}" class="btn-outline-custom">
+                        <span class="material-symbols-outlined" style="font-size:16px;">arrow_back</span>
+                        Back
+                    </a>
+                </div>
+            </div>
+
+            {% if is_disqualified %}
+            <div class="alert-disqualified d-flex align-items-center gap-2 mb-4">
+                <span class="material-symbols-outlined" style="font-size:18px;">block</span>
+                <strong>Disqualified</strong> — This submission has been disqualified ({{ coherence_failures }} coherence failure{{ coherence_failures|pluralize }}).
+            </div>
+            {% elif not is_coherent %}
+            <div class="alert-incoherent d-flex align-items-center gap-2 mb-4">
+                <span class="material-symbols-outlined" style="font-size:18px;">warning</span>
+                <strong>Coherence Issue</strong> — This submission has {{ coherence_failures }} coherence failure{{ coherence_failures|pluralize }}. Review before finalising.
+            </div>
+            {% endif %}
+
+            <div class="row g-4">
+
+                <!-- ── Left Column ── -->
+                <div class="col-lg-8">
+
+                    <!-- Q&A Accordion -->
+                    <div class="info-card" style="padding:0;overflow:hidden;">
+                        <div style="padding:16px 24px;border-bottom:1px solid var(--border-light);display:flex;align-items:center;gap:10px;">
+                            <div class="idea-hero" style="margin-bottom:0;">
+                                <h2 style="font-size:1rem;margin-bottom:4px;">{{ submission.title|default:q3|truncatechars:100 }}</h2>
+                                <div class="idea-meta" style="margin-bottom:0;">
+                                    <span class="idea-tag">{{ category_label }}</span>
+                                    <span class="idea-tag">SUB-{{ submission.id|stringformat:"04d" }}</span>
+                                    <span class="idea-tag">{{ submitted_date }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="padding:12px 20px 8px;border-bottom:1px solid var(--border-light);background:#fafbff;">
+                            <div class="card-title" style="margin-bottom:0;">
+                                <span class="material-symbols-outlined">quiz</span>
+                                Questionnaire — 12 Questions
+                            </div>
+                        </div>
+                        <div class="accordion" id="qaAccordion">
+
+                            <div class="qa-item-wrap">
+                                <button class="qa-q-btn" type="button" data-bs-toggle="collapse" data-bs-target="#q1p" aria-expanded="true">
+                                    <span><span class="qa-q-num">Q1.</span> Who are you trying to help? Describe the person or group and their daily struggle.</span>
+                                    <span class="material-symbols-outlined qa-chevron">keyboard_arrow_down</span>
+                                </button>
+                                <div id="q1p" class="collapse show" data-bs-parent="#qaAccordion">
+                                    <div class="qa-ans">{{ q1|default:"Not provided." }}</div>
+                                </div>
+                            </div>
+
+                            <div class="qa-item-wrap">
+                                <button class="qa-q-btn" type="button" data-bs-toggle="collapse" data-bs-target="#q2p" aria-expanded="false">
+                                    <span><span class="qa-q-num">Q2.</span> What exact problem are they facing? When, where, and why does this problem matter?</span>
+                                    <span class="material-symbols-outlined qa-chevron">keyboard_arrow_down</span>
+                                </button>
+                                <div id="q2p" class="collapse" data-bs-parent="#qaAccordion">
+                                    <div class="qa-ans">{{ q2|default:"Not provided." }}</div>
+                                </div>
+                            </div>
+
+                            <div class="qa-item-wrap">
+                                <button class="qa-q-btn" type="button" data-bs-toggle="collapse" data-bs-target="#q3p" aria-expanded="false">
+                                    <span><span class="qa-q-num">Q3.</span> What is your solution? Describe exactly what you're building or doing to solve the problem.</span>
+                                    <span class="material-symbols-outlined qa-chevron">keyboard_arrow_down</span>
+                                </button>
+                                <div id="q3p" class="collapse" data-bs-parent="#qaAccordion">
+                                    <div class="qa-ans">{{ q3|default:"Not provided." }}</div>
+                                </div>
+                            </div>
+
+                            <div class="qa-item-wrap">
+                                <button class="qa-q-btn" type="button" data-bs-toggle="collapse" data-bs-target="#q4p" aria-expanded="false">
+                                    <span><span class="qa-q-num">Q4.</span> What is unique or different about your solution compared to other ideas or approaches?</span>
+                                    <span class="material-symbols-outlined qa-chevron">keyboard_arrow_down</span>
+                                </button>
+                                <div id="q4p" class="collapse" data-bs-parent="#qaAccordion">
+                                    <div class="qa-ans">{{ q4|default:"Not provided." }}</div>
+                                </div>
+                            </div>
+
+                            <div class="qa-item-wrap">
+                                <button class="qa-q-btn" type="button" data-bs-toggle="collapse" data-bs-target="#q5p" aria-expanded="false">
+                                    <span><span class="qa-q-num">Q5.</span> How will you implement it? Describe the steps, technology, materials, or partnerships needed.</span>
+                                    <span class="material-symbols-outlined qa-chevron">keyboard_arrow_down</span>
+                                </button>
+                                <div id="q5p" class="collapse" data-bs-parent="#qaAccordion">
+                                    <div class="qa-ans">{{ q5|default:"Not provided." }}</div>
+                                </div>
+                            </div>
+
+                            <div class="qa-item-wrap">
+                                <button class="qa-q-btn" type="button" data-bs-toggle="collapse" data-bs-target="#q6p" aria-expanded="false">
+                                    <span><span class="qa-q-num">Q6.</span> What resources, technology, funding, or support will you need to build this?</span>
+                                    <span class="material-symbols-outlined qa-chevron">keyboard_arrow_down</span>
+                                </button>
+                                <div id="q6p" class="collapse" data-bs-parent="#qaAccordion">
+                                    <div class="qa-ans">{{ q6|default:"Not provided." }}</div>
+                                </div>
+                            </div>
+
+                            <div class="qa-item-wrap">
+                                <button class="qa-q-btn" type="button" data-bs-toggle="collapse" data-bs-target="#q7p" aria-expanded="false">
+                                    <span><span class="qa-q-num">Q7.</span> What positive change will your solution create? Who will benefit and how will their lives change?</span>
+                                    <span class="material-symbols-outlined qa-chevron">keyboard_arrow_down</span>
+                                </button>
+                                <div id="q7p" class="collapse" data-bs-parent="#qaAccordion">
+                                    <div class="qa-ans">{{ q7|default:"Not provided." }}</div>
+                                </div>
+                            </div>
+
+                            <div class="qa-item-wrap">
+                                <button class="qa-q-btn" type="button" data-bs-toggle="collapse" data-bs-target="#q8p" aria-expanded="false">
+                                    <span><span class="qa-q-num">Q8.</span> What are the biggest challenges or risks you foresee? How do you plan to overcome them?</span>
+                                    <span class="material-symbols-outlined qa-chevron">keyboard_arrow_down</span>
+                                </button>
+                                <div id="q8p" class="collapse" data-bs-parent="#qaAccordion">
+                                    <div class="qa-ans">{{ q8|default:"Not provided." }}</div>
+                                </div>
+                            </div>
+
+                            <div class="qa-item-wrap">
+                                <button class="qa-q-btn" type="button" data-bs-toggle="collapse" data-bs-target="#q9p" aria-expanded="false">
+                                    <span><span class="qa-q-num">Q9.</span> Why is your team best suited to execute this idea? What skills and experiences do you bring?</span>
+                                    <span class="material-symbols-outlined qa-chevron">keyboard_arrow_down</span>
+                                </button>
+                                <div id="q9p" class="collapse" data-bs-parent="#qaAccordion">
+                                    <div class="qa-ans">{{ q9|default:"Not provided." }}</div>
+                                </div>
+                            </div>
+
+                            <div class="qa-item-wrap">
+                                <button class="qa-q-btn" type="button" data-bs-toggle="collapse" data-bs-target="#q10p" aria-expanded="false">
+                                    <span><span class="qa-q-num">Q10.</span> Have you tested your idea or received any feedback? What did you learn from it?</span>
+                                    <span class="material-symbols-outlined qa-chevron">keyboard_arrow_down</span>
+                                </button>
+                                <div id="q10p" class="collapse" data-bs-parent="#qaAccordion">
+                                    <div class="qa-ans">{{ q10|default:"Not provided." }}</div>
+                                </div>
+                            </div>
+
+                            <div class="qa-item-wrap">
+                                <button class="qa-q-btn" type="button" data-bs-toggle="collapse" data-bs-target="#q11p" aria-expanded="false">
+                                    <span><span class="qa-q-num">Q11.</span> What is the most creative or innovative element of your solution?</span>
+                                    <span class="material-symbols-outlined qa-chevron">keyboard_arrow_down</span>
+                                </button>
+                                <div id="q11p" class="collapse" data-bs-parent="#qaAccordion">
+                                    <div class="qa-ans">{{ q11|default:"Not provided." }}</div>
+                                </div>
+                            </div>
+
+                            <div class="qa-item-wrap">
+                                <button class="qa-q-btn" type="button" data-bs-toggle="collapse" data-bs-target="#q12p" aria-expanded="false">
+                                    <span><span class="qa-q-num">Q12.</span> Give us your 60-second pitch. Why should your idea be selected for Top 400?</span>
+                                    <span class="material-symbols-outlined qa-chevron">keyboard_arrow_down</span>
+                                </button>
+                                <div id="q12p" class="collapse" data-bs-parent="#qaAccordion">
+                                    <div class="qa-ans">{{ q12|default:"Not provided." }}</div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- AI Summary -->
+                    {% if ai_summary %}
+                    <div class="info-card">
+                        <div class="card-title">
+                            <span class="material-symbols-outlined">smart_toy</span>
+                            AI Summary
+                        </div>
+                        <div class="idea-section-body mb-0" style="background:#f5f0ff; border-left: 3px solid var(--primary);">
+                            {{ ai_summary_text }}
+                        </div>
+                        {% if attachment_mismatch %}
+                        <div class="mt-3" style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:12px 16px;font-size:0.8125rem;color:#9a3412;">
+                            <strong>Content Mismatch Detected</strong> — Severity: {{ mismatch_severity }}
+                            {% if mismatch_penalty %} · Penalty: -{{ mismatch_penalty }} points{% endif %}
+                            {% if mismatch_reasons %}
+                            <ul class="mt-1 mb-0 ps-3">{% for r in mismatch_reasons %}<li>{{ r }}</li>{% endfor %}</ul>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Student -->
+                    <div class="info-card">
+                        <div class="card-title">
+                            <span class="material-symbols-outlined">person</span>
+                            Student Information
+                        </div>
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <div style="width:48px;height:48px;border-radius:12px;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.125rem;font-weight:700;flex-shrink:0;">
+                                {{ student_name|slice:":1"|upper }}
+                            </div>
+                            <div>
+                                <p style="margin:0;font-size:0.9375rem;font-weight:700;">{{ student_name }}</p>
+                                <p style="margin:2px 0 0;font-size:0.8125rem;color:var(--text-muted);">{{ school_name }} · Grade {{ grade }}</p>
+                            </div>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <div style="font-size:0.75rem;color:var(--text-muted);">Submitted</div>
+                                <div style="font-size:0.875rem;font-weight:600;">{{ submitted_date }}</div>
+                            </div>
+                            <div class="col-6">
+                                <div style="font-size:0.75rem;color:var(--text-muted);">Status</div>
+                                <div style="font-size:0.875rem;font-weight:600;">{{ status_label }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI Evaluation -->
+                    <div class="info-card">
+                        <div class="card-title">
+                            <span class="material-symbols-outlined">smart_toy</span>
+                            AI Evaluation
+                        </div>
+
+                        {% if ai_evaluation %}
+                        <!-- Existing Evaluation Results -->
+                        <div class="eval-results-card mb-3">
+                            <div class="eval-results-header d-flex align-items-center justify-content-between">
+                                <div style="font-size:0.875rem;font-weight:700;color:var(--text-dark);display:flex;align-items:center;gap:8px;">
+                                    <span class="material-symbols-outlined" style="font-size:18px;color:var(--primary);">auto_awesome</span>
+                                    AI Evaluation Results
+                                </div>
+                                <div style="font-size:1.25rem;font-weight:900;color:var(--primary);">
+                                    {{ final_score }}<span style="font-size:0.875rem;font-weight:500;color:var(--text-muted);">/100</span>
+                                </div>
+                            </div>
+                            <div style="padding:16px;">
+                                {% if is_disqualified %}
+                                <div style="background:#fee2e2;border:1px solid #ef4444;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:0.8125rem;color:#991b1b;">
+                                    <strong>DISQUALIFIED:</strong> Failed {{ coherence_failures }}/10 coherence checks. All scores set to 0.
+                                </div>
+                                {% endif %}
+                                {% if attachment_mismatch %}
+                                <div style="background:{% if mismatch_penalty >= 5 %}#fef2f2{% elif mismatch_penalty >= 3 %}#fffbeb{% else %}#fff7ed{% endif %};border:1px solid {% if mismatch_penalty >= 5 %}#ef4444{% elif mismatch_penalty >= 3 %}#f59e0b{% else %}#fb923c{% endif %};border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:0.8125rem;">
+                                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                                        <strong style="color:{% if mismatch_penalty >= 5 %}#dc2626{% elif mismatch_penalty >= 3 %}#d97706{% else %}#ea580c{% endif %};">
+                                            {% if mismatch_penalty >= 5 %}Content Mismatch (Severe){% elif mismatch_penalty >= 3 %}No Attachments{% else %}Content Mismatch (Minor){% endif %}
+                                        </strong>
+                                        <span style="background:{% if mismatch_penalty >= 5 %}#dc2626{% elif mismatch_penalty >= 3 %}#d97706{% else %}#ea580c{% endif %};color:white;padding:2px 8px;border-radius:4px;font-size:0.72rem;font-weight:700;">-{{ mismatch_penalty }} marks</span>
+                                    </div>
+                                    {% if mismatch_reasons %}
+                                    <ul style="margin:0;padding-left:1.2rem;font-size:0.78rem;color:#78350f;line-height:1.5;">
+                                        {% for r in mismatch_reasons %}<li>{{ r }}</li>{% endfor %}
+                                    </ul>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+
+                                <div style="font-size:0.7rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Idea Parameters</div>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6"><div class="eval-param-box"><div class="eval-param-label">Uniqueness <span class="eval-param-score">{{ un_score }}/10</span></div><div class="eval-param-just">{{ un_just }}</div></div></div>
+                                    <div class="col-6"><div class="eval-param-box"><div class="eval-param-label">Ease <span class="eval-param-score">{{ ease_score }}/10</span></div><div class="eval-param-just">{{ ease_just }}</div></div></div>
+                                    <div class="col-6"><div class="eval-param-box"><div class="eval-param-label">Feasibility <span class="eval-param-score">{{ feas_score }}/10</span></div><div class="eval-param-just">{{ feas_just }}</div></div></div>
+                                    <div class="col-6"><div class="eval-param-box"><div class="eval-param-label">Impact <span class="eval-param-score">{{ impact_score }}/10</span></div><div class="eval-param-just">{{ impact_just }}</div></div></div>
+                                    <div class="col-6"><div class="eval-param-box"><div class="eval-param-label">Sustainability <span class="eval-param-score">{{ sust_score }}/10</span></div><div class="eval-param-just">{{ sust_just }}</div></div></div>
+                                </div>
+
+                                <div style="font-size:0.7rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Team Parameters</div>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6"><div class="eval-param-box"><div class="eval-param-label">Clarity <span class="eval-param-score">{{ clarity_score }}/10</span></div><div class="eval-param-just">{{ clarity_just }}</div></div></div>
+                                    <div class="col-6"><div class="eval-param-box"><div class="eval-param-label">Empathy <span class="eval-param-score">{{ empathy_score }}/10</span></div><div class="eval-param-just">{{ empathy_just }}</div></div></div>
+                                    <div class="col-6"><div class="eval-param-box"><div class="eval-param-label">Creativity <span class="eval-param-score">{{ creativity_score }}/10</span></div><div class="eval-param-just">{{ creativity_just }}</div></div></div>
+                                    <div class="col-6"><div class="eval-param-box"><div class="eval-param-label">Communication <span class="eval-param-score">{{ comm_score }}/10</span></div><div class="eval-param-just">{{ comm_just }}</div></div></div>
+                                    <div class="col-6"><div class="eval-param-box"><div class="eval-param-label">Flex Thinking <span class="eval-param-score">{{ flex_score }}/10</span></div><div class="eval-param-just">{{ flex_just }}</div></div></div>
+                                </div>
+
+                                {% if coherence_checks %}
+                                <div style="font-size:0.7rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Coherence Checks ({{ coherence_failures }}/10 failed)</div>
+                                {% for check in coherence_checks %}
+                                <div class="coherence-row {% if check.passed %}c-pass{% else %}c-fail{% endif %}">
+                                    <span>{{ check.name }}</span>
+                                    <span>{% if check.passed %}PASS{% else %}FAIL (-1){% endif %}</span>
+                                </div>
+                                {% endfor %}
+                                {% endif %}
+
+                                {% if attachment_file_analyses %}
+                                <div style="font-size:0.7rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin:12px 0 8px;">Attachment Analysis</div>
+                                {% for fi in attachment_file_analyses %}
+                                <div style="padding:8px 12px;border-radius:8px;margin-bottom:6px;font-size:0.8125rem;
+                                    {% if fi.file_type == 'video' and not fi.video_verified %}background:#eff6ff;border:1px solid #93c5fd;
+                                    {% elif fi.is_relevant %}background:#f0fdf4;border:1px solid #86efac;
+                                    {% else %}background:#fef2f2;border:1px solid #f87171;{% endif %}">
+                                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                                        <span style="font-weight:700;font-size:0.8rem;">{% if fi.file_type == 'image' %}IMG{% elif fi.file_type == 'video' %}VID{% else %}DOC{% endif %} {{ fi.filename }}</span>
+                                        <span style="padding:1px 8px;border-radius:20px;font-size:0.68rem;font-weight:700;color:#fff;
+                                            {% if fi.file_type == 'video' and not fi.video_verified %}background:#1e40af;
+                                            {% elif fi.is_relevant %}background:#166534;
+                                            {% else %}background:#dc2626;{% endif %}">
+                                            {% if fi.file_type == 'video' and not fi.video_verified %}UNVERIFIED{% elif fi.is_relevant %}RELEVANT{% else %}IRRELEVANT{% endif %}
+                                        </span>
+                                    </div>
+                                    <p style="margin:0;font-size:0.78rem;line-height:1.4;opacity:0.8;">{{ fi.summary }}</p>
+                                </div>
+                                {% endfor %}
+                                {% endif %}
+
+                                <div style="background:rgba(94,42,151,0.06);border-radius:8px;padding:12px 14px;margin-top:10px;">
+                                    <div style="font-size:0.72rem;font-weight:700;color:var(--primary);margin-bottom:4px;">AI SUMMARY</div>
+                                    <p style="margin:0;font-size:0.8125rem;line-height:1.5;color:var(--text-dark);">{{ ai_summary_text }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Evaluate / Re-Evaluate Button + Terminal -->
+                        <button type="button" id="evalBtn" onclick="startEvalV3({% if ai_evaluation %}true{% else %}false{% endif %})"
+                            style="width:100%;padding:12px 18px;background:linear-gradient(135deg,var(--primary) 0%,#7B3FB5 100%);color:#fff;border:none;border-radius:8px;font-family:'Poppins',sans-serif;font-size:0.875rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 12px rgba(94,42,151,0.3);transition:all 0.2s;">
+                            <span class="material-symbols-outlined" style="font-size:20px;">auto_awesome</span>
+                            {% if ai_evaluation %}Re-Evaluate with AI{% else %}Run AI Evaluation{% endif %}
+                        </button>
+                        <div class="ai-terminal-box-v3" id="aiTerminalV3">
+                            <div class="ai-prog"><div class="ai-prog-bar" id="progBarV3"></div><div class="ai-prog-buf" id="progBufV3"></div></div>
+                            <div class="ai-term-body" id="termBodyV3"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- ── Right Column ── -->
+                <div class="col-lg-4">
+
+                    <!-- Score Summary -->
+                    <div class="score-card">
+                        <div class="score-main">
+                            <div class="score-number">{{ final_score }} <span class="score-denom">/ 100</span></div>
+                            <div class="score-label">AI Score</div>
+                        </div>
+                        <div class="score-sub-grid">
+                            <div class="score-sub-item">
+                                <div class="score-sub-value">
+                                    {% if rank %}#{{ rank }}{% else %}TBD{% endif %}
+                                </div>
+                                <div class="score-sub-label">Rank</div>
+                            </div>
+                            <div class="score-sub-item">
+                                <div class="score-sub-value">
+                                    {% if is_top_400 %}Yes{% else %}No{% endif %}
+                                </div>
+                                <div class="score-sub-label">Top 400</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI Score Breakdown -->
+                    {% if ai_evaluation %}
+                    <div class="info-card">
+                        <div class="card-title">
+                            <span class="material-symbols-outlined">smart_toy</span>
+                            AI Score Breakdown
+                        </div>
+
+                        <div style="font-size:0.7rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px;">Idea Parameters</div>
+
+                        <div class="param-row">
+                            <span class="param-name">Uniqueness</span>
+                            <div class="param-bar-wrap"><div class="param-bar"><div class="param-fill {% if un_score >= 7 %}high{% elif un_score >= 5 %}medium{% else %}low{% endif %}" style="width:{{ un_score }}0%;"></div></div></div>
+                            <span class="param-score {% if un_score >= 7 %}high{% elif un_score >= 5 %}medium{% else %}low{% endif %}">{{ un_score }}</span>
+                        </div>
+                        <div class="param-row">
+                            <span class="param-name">Implementation</span>
+                            <div class="param-bar-wrap"><div class="param-bar"><div class="param-fill {% if ease_score >= 7 %}high{% elif ease_score >= 5 %}medium{% else %}low{% endif %}" style="width:{{ ease_score }}0%;"></div></div></div>
+                            <span class="param-score {% if ease_score >= 7 %}high{% elif ease_score >= 5 %}medium{% else %}low{% endif %}">{{ ease_score }}</span>
+                        </div>
+                        <div class="param-row">
+                            <span class="param-name">Feasibility</span>
+                            <div class="param-bar-wrap"><div class="param-bar"><div class="param-fill {% if feas_score >= 7 %}high{% elif feas_score >= 5 %}medium{% else %}low{% endif %}" style="width:{{ feas_score }}0%;"></div></div></div>
+                            <span class="param-score {% if feas_score >= 7 %}high{% elif feas_score >= 5 %}medium{% else %}low{% endif %}">{{ feas_score }}</span>
+                        </div>
+                        <div class="param-row">
+                            <span class="param-name">Impact</span>
+                            <div class="param-bar-wrap"><div class="param-bar"><div class="param-fill {% if impact_score >= 7 %}high{% elif impact_score >= 5 %}medium{% else %}low{% endif %}" style="width:{{ impact_score }}0%;"></div></div></div>
+                            <span class="param-score {% if impact_score >= 7 %}high{% elif impact_score >= 5 %}medium{% else %}low{% endif %}">{{ impact_score }}</span>
+                        </div>
+                        <div class="param-row">
+                            <span class="param-name">Sustainability</span>
+                            <div class="param-bar-wrap"><div class="param-bar"><div class="param-fill {% if sust_score >= 7 %}high{% elif sust_score >= 5 %}medium{% else %}low{% endif %}" style="width:{{ sust_score }}0%;"></div></div></div>
+                            <span class="param-score {% if sust_score >= 7 %}high{% elif sust_score >= 5 %}medium{% else %}low{% endif %}">{{ sust_score }}</span>
+                        </div>
+
+                        <div style="font-size:0.7rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin:14px 0 10px;">Team Parameters</div>
+
+                        <div class="param-row">
+                            <span class="param-name">Clarity</span>
+                            <div class="param-bar-wrap"><div class="param-bar"><div class="param-fill {% if clarity_score >= 7 %}high{% elif clarity_score >= 5 %}medium{% else %}low{% endif %}" style="width:{{ clarity_score }}0%;"></div></div></div>
+                            <span class="param-score {% if clarity_score >= 7 %}high{% elif clarity_score >= 5 %}medium{% else %}low{% endif %}">{{ clarity_score }}</span>
+                        </div>
+                        <div class="param-row">
+                            <span class="param-name">Empathy</span>
+                            <div class="param-bar-wrap"><div class="param-bar"><div class="param-fill {% if empathy_score >= 7 %}high{% elif empathy_score >= 5 %}medium{% else %}low{% endif %}" style="width:{{ empathy_score }}0%;"></div></div></div>
+                            <span class="param-score {% if empathy_score >= 7 %}high{% elif empathy_score >= 5 %}medium{% else %}low{% endif %}">{{ empathy_score }}</span>
+                        </div>
+                        <div class="param-row">
+                            <span class="param-name">Creativity</span>
+                            <div class="param-bar-wrap"><div class="param-bar"><div class="param-fill {% if creativity_score >= 7 %}high{% elif creativity_score >= 5 %}medium{% else %}low{% endif %}" style="width:{{ creativity_score }}0%;"></div></div></div>
+                            <span class="param-score {% if creativity_score >= 7 %}high{% elif creativity_score >= 5 %}medium{% else %}low{% endif %}">{{ creativity_score }}</span>
+                        </div>
+                        <div class="param-row">
+                            <span class="param-name">Communication</span>
+                            <div class="param-bar-wrap"><div class="param-bar"><div class="param-fill {% if comm_score >= 7 %}high{% elif comm_score >= 5 %}medium{% else %}low{% endif %}" style="width:{{ comm_score }}0%;"></div></div></div>
+                            <span class="param-score {% if comm_score >= 7 %}high{% elif comm_score >= 5 %}medium{% else %}low{% endif %}">{{ comm_score }}</span>
+                        </div>
+                        <div class="param-row">
+                            <span class="param-name">Flex Thinking</span>
+                            <div class="param-bar-wrap"><div class="param-bar"><div class="param-fill {% if flex_score >= 7 %}high{% elif flex_score >= 5 %}medium{% else %}low{% endif %}" style="width:{{ flex_score }}0%;"></div></div></div>
+                            <span class="param-score {% if flex_score >= 7 %}high{% elif flex_score >= 5 %}medium{% else %}low{% endif %}">{{ flex_score }}</span>
+                        </div>
+
+                    </div>
+                    {% else %}
+                    <div class="info-card" style="text-align:center;padding:32px;">
+                        <span class="material-symbols-outlined" style="font-size:36px;color:#cbd5e1;">smart_toy</span>
+                        <p style="margin-top:12px;color:var(--text-muted);font-size:0.875rem;">AI evaluation not yet processed.</p>
+                    </div>
+                    {% endif %}
+
+                    <!-- Attachments (Right Column) -->
+                    <div class="info-card">
+                        <div class="card-title">
+                            <span class="material-symbols-outlined">attach_file</span>
+                            Attachments ({{ uploaded_files|length }})
+                        </div>
+                        {% if uploaded_files %}
+                            {% for file in uploaded_files %}
+                            <div class="attachment-row">
+                                <div class="attach-icon {% if file.file_type == 'image' %}img{% elif file.file_type == 'video' %}vid{% else %}doc{% endif %}">
+                                    <span class="material-symbols-outlined">
+                                        {% if file.file_type == 'image' %}image{% elif file.file_type == 'video' %}videocam{% else %}description{% endif %}
+                                    </span>
+                                </div>
+                                <div class="flex-grow-1" style="min-width:0;">
+                                    <p class="attach-name">{{ file.original_filename }}</p>
+                                    <p class="attach-meta">
+                                        {% if file.file_size %}{{ file.file_size|filesizeformat }} · {% endif %}
+                                        {{ file.file_type|capfirst }}
+                                        {% if file.uploaded_at %} · {{ file.uploaded_at|date:"M d, Y" }}{% endif %}
+                                    </p>
+                                </div>
+                                <a href="{{ file.file.url }}" class="btn-dl" download title="Download">
+                                    <span class="material-symbols-outlined">download</span>
+                                </a>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p style="color:var(--text-muted);font-size:0.875rem;text-align:center;padding:20px 0;">No attachments uploaded.</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Timeline -->
+                    <div class="info-card">
+                        <div class="card-title">
+                            <span class="material-symbols-outlined">timeline</span>
+                            Submission Timeline
+                        </div>
+                        <div class="timeline">
+                            <div class="timeline-item">
+                                <div class="timeline-dot done"></div>
+                                <div class="timeline-label">Submitted</div>
+                                <div class="timeline-meta">{{ submitted_date }} · {{ student_name }}</div>
+                            </div>
+                            <div class="timeline-item">
+                                {% if ai_evaluation %}
+                                    <div class="timeline-dot done"></div>
+                                    <div class="timeline-label">AI Evaluation</div>
+                                    <div class="timeline-meta">Score: {{ final_score|floatformat:1 }}/100</div>
+                                {% else %}
+                                    <div class="timeline-dot pending"></div>
+                                    <div class="timeline-label" style="color:var(--text-muted);">AI Evaluation</div>
+                                    <div class="timeline-meta">Pending</div>
+                                {% endif %}
+                            </div>
+                            <div class="timeline-item">
+                                {% if submission.status == 'evaluated' or submission.status == 'reviewed' %}
+                                    <div class="timeline-dot {% if is_top_400 %}current{% else %}done{% endif %}"></div>
+                                    <div class="timeline-label" {% if is_top_400 %}style="color:var(--primary);"{% endif %}>
+                                        {% if is_top_400 %}Selected — Top 400{% else %}Evaluated{% endif %}
+                                    </div>
+                                    <div class="timeline-meta">{{ status_label }}</div>
+                                {% else %}
+                                    <div class="timeline-dot pending"></div>
+                                    <div class="timeline-label" style="color:var(--text-muted);">Final Decision</div>
+                                    <div class="timeline-meta">Pending</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Evaluator Scores -->
+                    {% if evaluator_assignments %}
+                    <div style="background:#fff;border-radius:16px;padding:24px;box-shadow:0 2px 12px rgba(0,0,0,0.04);border:1px solid #eee;margin-bottom:16px;">
+                        <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+                            <span class="material-symbols-outlined" style="color:var(--primary);">rate_review</span>
+                            Evaluator Scores
+                        </h3>
+                        {% for ea in evaluator_assignments %}
+                        <div style="padding:16px;border:1px solid #f0f0f0;border-radius:12px;margin-bottom:12px;{% if ea.status == 'evaluated' %}border-left:4px solid #16a34a;{% else %}border-left:4px solid #d97706;{% endif %}">
+                            <!-- Evaluator Header -->
+                            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+                                <div>
+                                    <p style="font-weight:700;font-size:0.9rem;margin:0;">{{ ea.evaluator.get_full_name }}</p>
+                                    <p style="font-size:0.7rem;color:#94a3b8;margin:2px 0 0;">{{ ea.evaluator.email }}</p>
+                                </div>
+                                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+                                    {% if ea.status == 'evaluated' %}
+                                    <span style="font-size:1.25rem;font-weight:800;color:var(--primary);">{{ ea.score }}/100</span>
+                                    <div style="display:flex;gap:4px;">
+                                        <span style="font-size:0.65rem;padding:2px 8px;border-radius:999px;background:#dcfce7;color:#16a34a;font-weight:600;">Evaluated</span>
+                                        {% if ea.is_shortlisted %}
+                                        <span style="display:inline-flex;align-items:center;gap:2px;font-size:0.65rem;padding:2px 8px;border-radius:999px;background:#fef3c7;color:#d97706;font-weight:600;">
+                                            <span class="material-symbols-outlined" style="font-size:11px;">star</span>Shortlisted
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                    {% else %}
+                                    <span style="font-size:0.65rem;padding:2px 8px;border-radius:999px;background:#fef3c7;color:#d97706;font-weight:600;">{{ ea.get_status_display }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <!-- Parameter Scores -->
+                            {% if ea.status == 'evaluated' and ea.parameter_scores %}
+                            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-bottom:10px;">
+                                {% for param, score in ea.parameter_scores.items %}
+                                <div style="background:#f8fafc;padding:6px 12px;border-radius:8px;display:flex;justify-content:space-between;align-items:center;">
+                                    <span style="font-size:0.7rem;color:#64748b;text-transform:capitalize;">{{ param|cut:"_" }}</span>
+                                    <span style="font-size:0.8rem;font-weight:700;color:var(--primary);">{{ score }}/10</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            {% if ea.notes %}<p style="font-size:0.8rem;color:#666;margin:0 0 6px;font-style:italic;">"{{ ea.notes }}"</p>{% endif %}
+                            {% if ea.evaluated_on %}<p style="font-size:0.65rem;color:#94a3b8;margin:0;">Evaluated {{ ea.evaluated_on|timesince }} ago</p>{% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Admin Actions -->
+                    <div class="admin-actions-card">
+                        <div class="card-title">
+                            <span class="material-symbols-outlined">admin_panel_settings</span>
+                            Admin Actions
+                        </div>
+                        <button class="admin-action-btn" onclick="openChangeStatus()">
+                            <span class="material-symbols-outlined">swap_horiz</span>
+                            Change Status
+                        </button>
+                        <a href="{% url 'admins:evaluate_submission' submission.id %}" class="admin-action-btn" style="text-decoration:none;">
+                            <span class="material-symbols-outlined">refresh</span>
+                            Re-Evaluate with AI
+                        </a>
+                        <button class="admin-action-btn danger" onclick="showToast('Flagging is not yet implemented.', 'warning')">
+                            <span class="material-symbols-outlined">flag</span>
+                            Flag for Review
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+<!-- Change Status Modal -->
+<div class="modal-overlay" id="changeStatusModal">
+    <div class="modal-box">
+        <h3>Change Submission Status</h3>
+        <p>Select the new status for SUB-{{ submission.id|stringformat:"04d" }}.</p>
+        <div id="statusOptionsList">
+            <button class="status-option-btn {% if submission.status == 'submitted' %}selected{% endif %}" onclick="applyStatus('submitted', 'Submitted')">
+                <span class="material-symbols-outlined" style="font-size:18px;color:#2563eb;">send</span> Submitted
+            </button>
+            <button class="status-option-btn {% if submission.status == 'under_review' %}selected{% endif %}" onclick="applyStatus('under_review', 'Under Review')">
+                <span class="material-symbols-outlined" style="font-size:18px;color:#7c3aed;">smart_toy</span> Under Review
+            </button>
+            <button class="status-option-btn {% if submission.status == 'reviewed' %}selected{% endif %}" onclick="applyStatus('reviewed', 'Reviewed')">
+                <span class="material-symbols-outlined" style="font-size:18px;color:#16a34a;">check_circle</span> Reviewed
+            </button>
+            <button class="status-option-btn {% if submission.status == 'evaluated' %}selected{% endif %}" onclick="applyStatus('evaluated', 'Evaluated')">
+                <span class="material-symbols-outlined" style="font-size:18px;color:#16a34a;">verified</span> Evaluated
+            </button>
+        </div>
+        <div class="d-flex gap-2 justify-content-end mt-3">
+            <button type="button" class="btn-outline-custom" onclick="closeModal('changeStatusModal')">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+// Sidebar toggle
+document.getElementById('sidebarToggleBtn')?.addEventListener('click', () => {
+    document.getElementById('superAdminAppSidebar').classList.toggle('collapsed');
+});
+
+// Profile dropdown
+document.getElementById('profileAvatarBtn')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const dd = document.getElementById('profileDropdown');
+    dd.style.display = dd.style.display === 'block' ? 'none' : 'block';
+});
+document.addEventListener('click', () => {
+    const dd = document.getElementById('profileDropdown');
+    if (dd) dd.style.display = 'none';
+});
+
+// Nav dropdown
+document.getElementById('userManagementToggle')?.addEventListener('click', () => {
+    document.getElementById('userManagementToggle').closest('.nav-dropdown').classList.toggle('open');
+});
+
+// Modal helpers
+function openChangeStatus() {
+    document.getElementById('changeStatusModal').classList.add('show');
+}
+function closeModal(id) {
+    document.getElementById(id).classList.remove('show');
+}
+
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) overlay.classList.remove('show');
+    });
+});
+
+// Apply status via AJAX
+function applyStatus(status, label) {
+    fetch('/super-admin/submission/{{ submission.id }}/update-status/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+        body: JSON.stringify({ status })
+    }).then(r => {
+        if (r.ok) {
+            closeModal('changeStatusModal');
+            showToast(`Status changed to "${label}".`, 'success');
+            setTimeout(() => location.reload(), 1200);
+        } else {
+            showToast('Failed to update status.', 'danger');
+        }
+    }).catch(() => showToast('Failed to update status.', 'danger'));
+}
+
+// ── AI Evaluation Terminal ───────────────────────────────────────
+const EVAL_URL_V3 = "{% url 'admins:evaluate_submission_async' submission.id %}";
+const PARAMS_V3 = [
+    { key: 'uniqueness', name: 'Uniqueness' },
+    { key: 'ease_of_implementation', name: 'Ease of Implementation' },
+    { key: 'feasibility', name: 'Feasibility' },
+    { key: 'impactful', name: 'Impact' },
+    { key: 'sustainable', name: 'Sustainability' },
+    { key: 'conceptual_clarity', name: 'Conceptual Clarity' },
+    { key: 'empathy', name: 'Empathy' },
+    { key: 'creativity', name: 'Creativity' },
+    { key: 'communication', name: 'Communication' },
+    { key: 'flexible_thinking', name: 'Flexible Thinking' }
+];
+const STATUS_TXT = ['Processing...','Thinking...','Analyzing...','Computing...','Evaluating...'];
+
+function getCookieV3(name) {
+    let v = null;
+    document.cookie.split(';').forEach(c => {
+        c = c.trim();
+        if (c.startsWith(name + '=')) v = decodeURIComponent(c.substring(name.length + 1));
+    });
+    return v;
+}
+
+function setProgV3(pct) { document.getElementById('progBarV3').style.width = pct + '%'; }
+function hideProgBuf() { document.getElementById('progBufV3').style.display = 'none'; }
+
+function addLn(html) {
+    const b = document.getElementById('termBodyV3');
+    b.innerHTML += html;
+    b.scrollTop = b.scrollHeight;
+}
+function updLn(id, html) { const el = document.getElementById(id); if (el) el.innerHTML = html; }
+
+function startEvalV3(isReEval) {
+    const btn = document.getElementById('evalBtn');
+    const term = document.getElementById('aiTerminalV3');
+    const body = document.getElementById('termBodyV3');
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">autorenew</span> Evaluating...';
+    term.classList.add('active');
+    setProgV3(0);
+    body.innerHTML = '';
+
+    const steps = [
+        { text: 'Connecting to AI...', p: 2 },
+        { text: 'Sending submission data...', p: 5 },
+        { text: 'Scoring 10 parameters...', p: 10 },
+        { text: 'Running coherence checks...', p: 18 },
+        { text: 'Analyzing attachments...', p: 25 },
+        { text: 'Evaluating uniqueness & creativity...', p: 32 },
+        { text: 'Checking feasibility & impact...', p: 40 },
+        { text: 'Assessing team parameters...', p: 48 },
+        { text: 'Cross-checking consistency...', p: 55 },
+        { text: 'Computing final scores...', p: 62 },
+        { text: 'Almost done...', p: 70 },
+    ];
+
+    let si = 0, apiDone = false;
+
+    function nextStep() {
+        if (apiDone || si >= steps.length) return;
+        const s = steps[si];
+        body.innerHTML = `<div class="ai-ln"><span class="ai-sp"></span><span class="t">${s.text}</span></div>`;
+        setProgV3(s.p);
+        si++;
+        if (!apiDone && si < steps.length) setTimeout(nextStep, 2500);
+    }
+    nextStep();
+
+    const fd = new FormData();
+    if (isReEval) fd.append('force', '1');
+
+    fetch(EVAL_URL_V3, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCookieV3('csrftoken') },
+        body: fd
+    })
+    .then(r => r.json())
+    .then(data => {
+        apiDone = true;
+        if (data.success) {
+            setProgV3(15);
+            body.innerHTML = `<div class="ai-ln"><span class="p">✓</span><span class="t">Ready</span></div>`;
+            addLn('<hr class="ai-div">');
+            showResultsV3(data);
+        } else {
+            hideProgBuf();
+            body.innerHTML = `<div class="ai-ln"><span style="color:#ef4444;">Error: ${data.error || 'Failed'}</span></div>`;
+            addLn('<button class="ai-done-btn2 show" onclick="closeTermV3()">Close</button>');
+        }
+    })
+    .catch(err => {
+        apiDone = true;
+        hideProgBuf();
+        body.innerHTML = `<div class="ai-ln"><span style="color:#ef4444;">Error: ${err}</span></div>`;
+        addLn('<button class="ai-done-btn2 show" onclick="closeTermV3()">Close</button>');
+    });
+}
+
+function showResultsV3(data) {
+    PARAMS_V3.forEach((p, i) => {
+        addLn(`<div class="ai-ln" id="pvl-${i}"><span class="p">○</span><span class="t">${p.name}</span><span class="st">Pending</span></div>`);
+    });
+    let i = 0;
+    function next() {
+        if (i >= PARAMS_V3.length) { showFinalV3(data); return; }
+        const p = PARAMS_V3[i];
+        const score = data.scores[p.key].score;
+        updLn(`pvl-${i}`, `<span class="ai-sp"></span><span class="t">${p.name}</span><span class="st">${STATUS_TXT[i % 5]}</span>`);
+        setProgV3(20 + (i / PARAMS_V3.length) * 70);
+        setTimeout(() => {
+            updLn(`pvl-${i}`, `<span class="p">✓</span><span class="t">${p.name}</span><span class="s">${score}/10</span>`);
+            i++;
+            setTimeout(next, 60);
+        }, 120);
+    }
+    next();
+}
+
+function showFinalV3(data) {
+    hideProgBuf();
+    setProgV3(100);
+    addLn('<hr class="ai-div">');
+
+    if (data.coherence && data.coherence.checks) {
+        addLn('<div class="ai-ln"><span class="w" style="font-size:11px;text-transform:uppercase;color:#7c3aed;">Coherence Checks</span></div>');
+        data.coherence.checks.forEach(c => {
+            const ic = c.passed ? '<span style="color:#22c55e;">✓</span>' : '<span style="color:#ef4444;">✗</span>';
+            addLn(`<div class="ai-ln"><span class="t" style="padding-left:8px;">${c.name}</span>${ic}</div>`);
+        });
+        if (data.coherence.failures > 5)
+            addLn(`<div class="ai-ln"><span style="color:#ef4444;font-weight:bold;">DISQUALIFIED (${data.coherence.failures}/10 failed)</span></div>`);
+        else if (data.coherence.failures > 0)
+            addLn(`<div class="ai-ln"><span style="color:#f59e0b;">${data.coherence.failures} failure(s), -1 penalty each</span></div>`);
+        addLn('<hr class="ai-div">');
+    }
+
+    if (data.mismatch && data.mismatch.has_mismatch) {
+        const sev = data.mismatch.severity === 'severe' ? 'SEVERE MISMATCH' : (data.mismatch.severity === 'missing' ? 'NO ATTACHMENTS' : 'MINOR MISMATCH');
+        const col = data.mismatch.penalty >= 5 ? '#ef4444' : (data.mismatch.penalty >= 3 ? '#f59e0b' : '#fb923c');
+        addLn(`<div class="ai-ln"><span style="color:${col};">${sev}: -${data.mismatch.penalty} marks</span></div>`);
+        (data.mismatch.reasons || []).forEach(r => addLn(`<div class="ai-ln"><span class="t" style="padding-left:16px;font-size:11px;">• ${r}</span></div>`));
+        addLn('<hr class="ai-div">');
+    }
+
+    if (data.attachment_summaries && data.attachment_summaries.file_analyses && data.attachment_summaries.file_analyses.length) {
+        addLn('<div class="ai-ln"><span class="w" style="font-size:11px;text-transform:uppercase;color:#7c3aed;">Attachment Analysis</span></div>');
+        data.attachment_summaries.file_analyses.forEach(f => {
+            const ic = f.file_type === 'image' ? 'IMG' : (f.file_type === 'document' ? 'DOC' : 'VID');
+            const rel = (f.file_type === 'video' && !f.video_verified) ? '<span style="color:#3b82f6;">○</span>' : (f.is_relevant ? '<span style="color:#22c55e;">✓</span>' : '<span style="color:#ef4444;">✗</span>');
+            addLn(`<div class="ai-ln"><span class="t" style="padding-left:8px;">${ic} ${f.filename}</span>${rel}</div>`);
+            addLn(`<div class="ai-ln"><span class="t" style="padding-left:24px;font-size:11px;color:#999;">${f.summary}</span></div>`);
+        });
+        addLn('<hr class="ai-div">');
+    }
+
+    addLn(`<div class="ai-ln"><span class="w">Total Score: <span class="s">${data.final_score}/100</span></span></div>`);
+    if (data.rank) addLn(`<div class="ai-ln"><span class="w">Rank: #${data.rank}</span></div>`);
+    const qualified = data.rank && data.rank <= 400;
+    addLn(`<div class="ai-ln"><span style="color:${qualified ? '#22c55e' : '#f59e0b'};">${qualified ? '✓ QUALIFIED FOR TOP 400 (Rank #' + data.rank + ')' : '○ NOT IN TOP 400 YET'}</span></div>`);
+    addLn('<button class="ai-done-btn2 show" onclick="closeTermV3()">Done — Reload</button>');
+}
+
+function closeTermV3() { location.reload(); }
+
+// Toast
+function showToast(msg, type = 'info') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `<span class="material-symbols-outlined" style="font-size:18px;">
+        ${type === 'success' ? 'check_circle' : type === 'warning' ? 'warning' : 'info'}
+    </span>${msg}`;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 3500);
+}
+</script>
+</body>
+</html>

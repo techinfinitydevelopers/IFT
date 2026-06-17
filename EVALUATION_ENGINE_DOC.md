@@ -4,15 +4,20 @@
 
 1. [Overview](#1-overview)
 2. [Evaluation Flow](#2-evaluation-flow)
-3. [Scoring System - 10 Parameters](#3-scoring-system---10-parameters)
-4. [Coherence Check](#4-coherence-check)
-5. [Effort Level Detection](#5-effort-level-detection)
-6. [Attachment Analysis](#6-attachment-analysis)
-7. [Penalty System](#7-penalty-system)
-8. [Final Score Calculation](#8-final-score-calculation)
-9. [Re-Evaluation Logic](#9-re-evaluation-logic)
-10. [Ranking System](#10-ranking-system)
-11. [Complete Scenario Table](#11-complete-scenario-table)
+3. [12 Questions & Primary/Secondary Mapping](#3-12-questions--primarysecondary-mapping)
+4. [Scoring System - 10 Parameters (0-10 Scale)](#4-scoring-system---10-parameters-0-10-scale)
+5. [Coherence Check (10 Cross-Checks)](#5-coherence-check-10-cross-checks)
+6. [Coherence Penalty Map](#6-coherence-penalty-map)
+7. [Effort Level Detection](#7-effort-level-detection)
+8. [Attachment Analysis](#8-attachment-analysis)
+9. [Attachment Penalty System](#9-attachment-penalty-system)
+10. [Final Score Calculation](#10-final-score-calculation)
+11. [Re-Evaluation Logic (Main Evaluator)](#11-re-evaluation-logic-main-evaluator)
+12. [Re-Evaluation App (Light Evaluator)](#12-re-evaluation-app-light-evaluator)
+13. [Ranking System & Top 400](#13-ranking-system--top-400)
+14. [Complete Scenario Table](#14-complete-scenario-table)
+15. [AI Models Used](#15-ai-models-used)
+16. [File Upload Limits](#16-file-upload-limits)
 
 ---
 
@@ -20,121 +25,237 @@
 
 The IFT (India Future Tycoon) Evaluation Engine is an AI-powered system that evaluates student innovation idea submissions. It uses a **hybrid AI approach**:
 
-- **Claude 3.5 Sonnet** (via OpenRouter) — Evaluates text answers, analyzes images, and checks document relevance.
+- **Claude Sonnet 4** (via OpenRouter) — Evaluates text answers, analyzes images, checks document relevance, and runs coherence checks.
 - **Gemini 2.0 Flash** (via OpenRouter) — Natively analyzes video files for content and relevance.
 
-Each submission is scored on a **50-point scale** (10 parameters x 5 marks each), with penalties deducted for attachment issues. The system is designed to be **strict and rigorous** — only truly strong ideas score high.
+Each submission is scored on a **100-point scale** (10 parameters x 10 marks each), with penalties deducted for coherence failures and attachment issues.
+
+There are **two separate evaluators**:
+- **Main Evaluator** (`ai_assistant/evaluator.py`) — Full evaluation using 12 questions, coherence checks, attachment analysis.
+- **Light Evaluator** (`re_evaluation/evaluator.py`) — Simplified evaluation using only short description + attachments, for comparing AI vs Mentor scores.
 
 ---
 
 ## 2. Evaluation Flow
 
-When a submission is evaluated, the engine follows these steps in order:
+When a submission is evaluated via the **Main Evaluator**, the engine follows these steps:
 
 ```
-Step 1: COHERENCE CHECK
-   Is the submission talking about ONE consistent idea?
-   ├── NO  → All scores = 0, submission marked "Incoherent", STOP scoring
-   └── YES → Proceed to Step 2
+Step 1: PARALLEL EXECUTION (3 tasks run simultaneously)
+   ├── Task A: 10-PARAMETER SCORING (Claude AI)
+   │     Score each parameter 0-10 using 12 questions with 60/40 primary/secondary weightage
+   │     Raw Score = Sum of all 10 parameters (max 100)
+   │
+   ├── Task B: COHERENCE CHECK (Claude AI)
+   │     Run 10 cross-checks between question pairs
+   │     Each failure = -1 penalty to specific parameters
+   │     >5 failures = DISQUALIFIED (all scores = 0)
+   │
+   └── Task C: ATTACHMENT ANALYSIS (Claude + Gemini)
+         Images → Claude (visual analysis)
+         Videos → Gemini (native video understanding)
+         Documents → Text extracted, then Claude
 
-Step 2: EFFORT LEVEL DETECTION
-   Count total words across all 8 answers
-   └── Tag submission as VERY LOW / LOW / MODERATE / GOOD effort
+Step 2: APPLY COHERENCE PENALTIES
+   Failed checks → -1 to mapped parameters
+   >5 failures → all scores = 0, marked disqualified
 
-Step 3: 10-PARAMETER SCORING (by Claude AI)
-   Score each parameter 1-5 based on the jury rubric
-   └── Raw Score = Sum of all 10 parameters (max 50)
+Step 3: EFFORT LEVEL (detected before AI call)
+   Count total words across all 12 answers
+   Tag as VERY LOW / LOW / MODERATE / GOOD effort
 
-Step 4: ATTACHMENT ANALYSIS
-   ├── Images  → Analyzed by Claude (visual analysis)
-   ├── Videos  → Analyzed by Gemini (native video understanding)
-   └── Documents → Text extracted, then analyzed by Claude
+Step 4: ATTACHMENT PENALTY CALCULATION
+   Content Mismatch Penalty (irrelevant files)
+   + Missing Attachment Types Penalty
+   = Total Penalty (capped at -5)
 
-Step 5: PENALTY CALCULATION
-   ├── Content Mismatch Penalty (irrelevant files)
-   ├── Missing Attachment Types Penalty
-   └── Total Penalty capped at -5
+Step 5: FINAL SCORE
+   Final Score = Raw Score (after coherence penalties) - Attachment Penalty
+   Final Score = max(0, Final Score)
+   Range: 0 to 100
 
-Step 6: FINAL SCORE
-   Final Score = Raw Score - Total Penalty (minimum 0)
+Step 6: RE-EVALUATION PROTECTION (if force_reevaluate=True)
+   Each parameter score = min(old_score, new_score)
+   Scores can only go down or stay same, never up
 ```
 
 ---
 
-## 3. Scoring System - 10 Parameters
+## 3. 12 Questions & Primary/Secondary Mapping
 
-The evaluation uses exactly **10 parameters** divided into two categories. Each parameter is scored on a **1-5 scale** (1 = worst, 5 = best).
+Students answer 12 questions. Each parameter is scored using **Primary (60% weight)** and **Secondary (40% weight)** questions:
+
+| # | Question | Field Name |
+|---|----------|------------|
+| Q1 | Describe the person or group you are trying to help. Who are they, and what is their daily struggle related to this problem? | `q1_target_group` |
+| Q2 | What exact problem are they facing? When, where, and why does this problem matter? | `q2_exact_problem` |
+| Q3 | What is your solution, explained simply as if you are talking to a 10-year-old? | `q3_solution_simple` |
+| Q4 | How is your solution different from what already exists or what people currently do to solve this problem? | `q4_differentiation` |
+| Q5 | What are the key steps required to build and test your solution in the real world? | `q5_build_steps` |
+| Q6 | What resources (skills, tools, money, technology, people) are required, and which of these do you already have? | `q6_resources` |
+| Q7 | If your solution succeeds, what positive change will it create for users and society? | `q7_positive_change` |
+| Q8 | What challenges or problems could come while building or using this idea? How will you deal with them? | `q8_challenges` |
+| Q9 | Why do you think that your team is rightly placed to solve this problem than anyone else? | `q9_team_fit` |
+| Q10 | Have you taken any feedback from users on your idea? Describe one situation where your team changed its thinking or improved the idea after feedback or failure. | `q10_feedback` |
+| Q11 | What is the most creative or unexpected element in your solution, and why did you think of it? | `q11_creative_element` |
+| Q12 | If you had 60 seconds to convince someone to try or support your idea, what would you say? | `q12_pitch` |
+
+### Primary/Secondary Parameter Mapping (60/40 Weightage)
+
+| Parameter | Primary Questions (60%) | Secondary Questions (40%) |
+|-----------|------------------------|--------------------------|
+| 1. Uniqueness | Q4 | Q11 |
+| 2. Ease of Implementation | Q5 | Q6 |
+| 3. Feasibility | Q6 | Q5, Q8 |
+| 4. Impact | Q1, Q7 | Q12 |
+| 5. Sustainability | Q7 | Q1 |
+| 6. Conceptual Clarity | Q2, Q3 | Q4, Q9 |
+| 7. Empathy | Q1 | Q2, Q10 |
+| 8. Creativity | Q11 | Q4 |
+| 9. Communication | Q12 | Q3, Q9 |
+| 10. Flexible Thinking | Q8, Q10 | Q6 |
+
+---
+
+## 4. Scoring System - 10 Parameters (0-10 Scale)
+
+Each parameter is scored **0-10** (0 = worst, 10 = best). Total max = **100**.
 
 ### Idea Parameters (5 parameters)
 
-| # | Parameter | What It Measures | Score 5 (Best) | Score 1 (Worst) |
-|---|-----------|-----------------|-----------------|-----------------|
-| 1 | **Uniqueness** | How original is the idea? | Completely new — even a targeted Google search shows nothing similar | Same as existing alternatives, no differentiator |
-| 2 | **Ease of Implementation** | Can this idea be built? | Resources available, team has expertise, clear feature-to-benefit plan | Resources unavailable, no expertise, no plan |
-| 3 | **Scalable** | Can the business grow? | Potential for X to 30X growth in 2 years | Unlikely to grow at all without major changes |
-| 4 | **Impactful** | How many people benefit? | Widespread customer base, critical for users, removes pains AND adds new benefits | Sporadic users, no visible positive difference |
-| 5 | **Sustainable** | Will it last? | Solves common problem + users would pay + lasts more than a year (all YES) | Any of the three questions is a clear NO |
+#### 1. UNIQUENESS (0-10)
+- **High (8-10):** Completely new/unheard idea — even targeted Google search shows nothing similar. No market competitors with similar approach. Clear differentiator explained.
+- **Moderate (4-7):** Idea has some novelty. A few similar alternatives exist but this has distinguishing features.
+- **Low (0-3):** Idea seems like any existing solution. No visible differentiator from alternatives.
+- **Keywords:** novel, first-of-its-kind, no competitor, patent-worthy, unique angle, disrupts existing, never done before, gap in market
+
+#### 2. EASE OF IMPLEMENTATION (0-10)
+- **High (8-10):** Clear step-by-step plan. Resources available and listed. Team has expertise. Feature-to-benefit translation is clear.
+- **Moderate (4-7):** Some plan exists but gaps in execution details. Resources partially available.
+- **Low (0-3):** No clear plan. Resources unavailable. Team lacks expertise. No idea how to translate features to benefits.
+- **Keywords:** step-by-step, prototype ready, tested, pilot, resources listed, team skills, timeline, actionable
+
+#### 3. FEASIBILITY (0-10)
+- **High (8-10):** Clearly identifies required and available resources with awareness of gaps. Explains how missing resources will be obtained. Phased execution thinking with realistic constraints acknowledged. Solution can begin with simple, low-cost steps. Small-scale testing possible.
+- **Moderate (4-7):** Resources listed but acquisition pathway unclear. Some realism present but optimistic assumptions remain. Logical steps exist but with large jumps in execution. Dependencies underexplored.
+- **Low (0-3):** Assumes resources will automatically appear. Ignores major constraints. Build steps unrealistic for capability. Heavy dependence on unknown external support. No awareness of operational complexity.
+- **Keywords:** resource listing, gaps acknowledged, phased approach, realistic for age, dependencies, testing pathway, practical constraints
+
+#### 4. IMPACT (0-10)
+- **High (8-10):** Widespread customer base. Solution is critical for users. Removes pains AND adds new benefits over alternatives. Shows scale of impact.
+- **Moderate (4-7):** Customer base identified but not fully characterized. Some positive impact visible.
+- **Low (0-3):** Sporadic users. No visible positive difference. Impact claim not supported.
+- **Keywords:** millions affected, daily pain, life-changing, saves time/money, health impact, community benefit, scalable impact
+
+#### 5. SUSTAINABILITY (0-10)
+- **High (8-10):** Solves common problem + users would pay + lasts more than a year. Revenue model clear. Long-term viability demonstrated.
+- **Moderate (4-7):** Some sustainability factors present. Revenue model unclear but idea has staying power.
+- **Low (0-3):** Any of: not a common problem, users won't pay, won't last. No long-term plan.
+- **Keywords:** revenue model, subscription, recurring, long-term, sustainable, growth plan, retention, business model
 
 ### Team Parameters (5 parameters)
 
-Since this is a text-based submission (not face-to-face), team qualities are **inferred from the writing**:
+Since this is text-based (not face-to-face), team qualities are **inferred from writing quality**.
 
-| # | Parameter | What It Measures | Score 5 (Best) | Score 1 (Worst) |
-|---|-----------|-----------------|-----------------|-----------------|
-| 6 | **Conceptual Clarity** | Does the team understand their own idea? | Clear on idea AND execution, knows which features are non-negotiable vs nice-to-have | Still unclear about the idea, no execution plan |
-| 7 | **Empathy** | Does the team understand user pain? | Deep empathy — felt user challenges, removes pains AND brings extra gains | Focused on thrill of ideation, ignored user needs |
-| 8 | **Creativity** | Is the approach innovative? | Divergent/out-of-box thinking, trend-setter, creative presentation | Average problem-solving, no creative temperament |
-| 9 | **Communication** | Is the idea clearly written? | Well-structured writing, uses examples, effectively conveys the vision | Confusing, unclear, fails to convey the idea |
-| 10 | **Flexible Thinking** | Is the team willing to adapt? | Mentions willingness to learn, adapt, iterate; aware idea may evolve | Completely closed to any change or iteration |
+#### 6. CONCEPTUAL CLARITY (0-10)
+- **High (8-10):** Clear about idea AND execution. Knows non-negotiable vs nice-to-have features. Problem-solution link is crystal clear.
+- **Moderate (4-7):** Clear about idea but execution plan is vague. Has product image but details are sketchy.
+- **Low (0-3):** Still unclear about the idea itself. No execution plan. Getting lost in explanation.
+- **Keywords:** clear vision, roadmap, feature list, MVP, priority, architecture, well-defined, structured
 
-### Scoring Guidelines
+#### 7. EMPATHY (0-10)
+- **High (8-10):** Deep empathy — put themselves in users' shoes, felt challenges. Describes real user stories/observations. Removes pains AND brings extra gains.
+- **Moderate (4-7):** Some empathy. Tried to identify user challenges but description is generic.
+- **Low (0-3):** Focused on thrill of ideation. Ignored users and their actual pains. No user understanding.
+- **Keywords:** user interviews, observed, felt, struggled, pain point, user story, walked in shoes, feedback
 
-- **Score 5** — Should be **rare** (top 5% quality only)
-- **Score 4** — Strong submission
-- **Score 3** — Average
-- **Score 2** — Below average
-- **Score 1** — Poor
-- **Score 0** — Only for **incoherent** submissions (all parameters get 0)
+#### 8. CREATIVITY (0-10)
+- **High (8-10):** Divergent/out-of-box thinking. Trend-setter. Creative presentation and approach. Unexpected element clearly described.
+- **Moderate (4-7):** Good problem-solving but conventional approach. Plays safe.
+- **Low (0-3):** Average approach. No creative temperament visible. Copy of existing solutions.
+- **Keywords:** innovative, unexpected, creative twist, new approach, reimagined, disrupted, unconventional
 
-### Strict Rules Applied During Scoring
+#### 9. COMMUNICATION (0-10)
+- **High (8-10):** Ideas communicated clearly. Well-structured writing. Uses examples. Vision effectively conveyed. Pitch is compelling.
+- **Moderate (4-7):** Communication is adequate but has gaps. Reader has to work to understand.
+- **Low (0-3):** Confusing, unclear writing. Fails to convey the idea. No structure.
+- **Keywords:** clear, concise, examples, structured, compelling, persuasive, well-written, engaging
+
+#### 10. FLEXIBLE THINKING (0-10)
+- **High (8-10):** Mentions willingness to learn, adapt, iterate. Shows awareness idea may evolve. Describes actual pivot or change after feedback.
+- **Moderate (4-7):** Some flexibility shown. Willing to adapt if essential.
+- **Low (0-3):** No mention of adaptability. Appears closed to iteration. No evidence of learning from feedback.
+- **Keywords:** pivot, iterate, adapt, feedback, learned, changed approach, flexible, open to change
+
+### Strict Scoring Rules
 
 - Vague, short, or generic answers → score LOW
-- Generic ideas ("make an app to solve X") without differentiation → Uniqueness and Creativity score 1-2
-- No explanation of why solution is better than alternatives → Uniqueness and Impact score LOW
+- Generic ideas ("make an app to solve X") without differentiation → Uniqueness and Creativity score 0-3
+- No explanation of WHY solution is better than alternatives → Uniqueness and Impact score LOW
 - No understanding of user pain points with examples → Empathy score LOW
-- No mention of adaptability or willingness to learn → Flexible Thinking MUST be 1-2
+- No mention of adaptability or willingness to learn → Flexible Thinking MUST be 0-3
+- High scores (8-10) should be RARE — reserved for top quality submissions
+- Remember 60/40 weightage: Primary questions matter MORE for each parameter
 
 ---
 
-## 4. Coherence Check
+## 5. Coherence Check (10 Cross-Checks)
 
-**This is done FIRST, before any scoring.**
+**This runs in PARALLEL with the main evaluation.** The AI checks logical consistency between question pairs:
 
-The AI checks whether ALL 8 answers in the submission are talking about the **same idea**:
+| # | Check Name | Questions Compared | What It Checks |
+|---|-----------|-------------------|----------------|
+| 1 | User-Problem Fit | Q1 vs Q2 | Does the target group match the problem? |
+| 2 | Problem-Solution Fit | Q2 vs Q3 | Does the solution directly address the problem? |
+| 3 | Difference Validity | Q3 vs Q4 | Is the claimed difference visible in the solution? |
+| 4 | Execution Reality | Q3 vs Q5 | Are build steps needed to create the solution? |
+| 5 | Resources Alignment | Q5 vs Q6 | Do resources support the listed steps? |
+| 6 | Risk Awareness | Q6 vs Q8 | Do challenges reflect real resource constraints? |
+| 7 | Impact Continuity | Q7 vs Q8 | Do challenges contradict the claimed impact? |
+| 8 | Sustainability Logic | Q7 vs Q9 | Does team positioning support long-term impact? |
+| 9 | Team Fit | Q5+Q6 vs Q9 | Does team have skills for the listed steps/resources? |
+| 10 | Learning Loop | Q10 vs Q3+Q5 | Has feedback influenced the solution or build steps? |
 
-1. Does the Problem Statement describe ONE clear problem?
-2. Does the Proposed Solution DIRECTLY address that specific problem?
-3. Are the Target Users the people who would face that specific problem?
-4. Do all fields logically connect and make sense together?
+### Coherence Rules
+- Only passes if there is a CLEAR logical connection
+- If an answer is empty or too short (<10 words), that check FAILS
+- If answers contradict each other, that check FAILS
+- If answers seem to be about different topics, that check FAILS
 
-### If Incoherent:
-
-- All 10 parameter scores = **0**
+### Disqualification
+- **>5 failed checks = DISQUALIFIED** — all 10 parameter scores become 0, final_score = 0
 - Submission marked as `incoherent` category
-- Overall justification clearly states: "INCOHERENT SUBMISSION"
-- Final score = **0**
-
-### Examples of Incoherent Submissions:
-
-- Problem says "water pollution" but solution talks about "online education"
-- Target users are "farmers" but the idea is about "gaming for teenagers"
-- Different fields appear to be copied from different ideas
 
 ---
 
-## 5. Effort Level Detection
+## 6. Coherence Penalty Map
 
-Before sending to AI, the system counts the **total words** across all 7 text fields (Q1 to Q7) and tags the submission:
+Each failed coherence check applies a **-1 penalty** to specific parameters:
+
+| Failed Check | Parameters Penalized (-1 each) |
+|---|---|
+| User-Problem Fit | Empathy, Conceptual Clarity |
+| Problem-Solution Fit | Conceptual Clarity, Impact |
+| Difference Validity | Uniqueness |
+| Execution Reality | Ease of Implementation, Feasibility |
+| Resources Alignment | Feasibility |
+| Risk Awareness | Flexible Thinking |
+| Impact Continuity | Impact |
+| Sustainability Logic | Sustainability |
+| Team Fit | Communication |
+| Learning Loop | Flexible Thinking |
+
+**Notes:**
+- Penalties are applied AFTER the AI scores are received
+- Scores cannot go below 0 after penalties: `max(0, score - 1)`
+- A single parameter can receive multiple -1 penalties from different failed checks
+- Example: If both "Execution Reality" and "Resources Alignment" fail, Feasibility gets -2 total
+
+---
+
+## 7. Effort Level Detection
+
+Before sending to AI, the system counts the **total words** across all 12 question answers and tags the submission:
 
 | Total Words | Effort Tag | AI Instruction |
 |-------------|-----------|----------------|
@@ -147,7 +268,7 @@ This tag is included in the AI prompt so the evaluator knows to penalize lazy su
 
 ---
 
-## 6. Attachment Analysis
+## 8. Attachment Analysis
 
 Students can upload 3 types of files:
 
@@ -162,7 +283,7 @@ Students can upload 3 types of files:
 **Images:**
 - The actual image is sent to Claude AI
 - Claude describes EXACTLY what it sees (objects, text, diagrams, scenes)
-- Claude then judges if the image DIRECTLY relates to the student's idea
+- Claude judges if the image DIRECTLY relates to the student's idea
 - Stock photos, random images, memes → marked IRRELEVANT
 
 **Videos:**
@@ -183,35 +304,24 @@ A file is marked **IRRELEVANT** if:
 - It's about a DIFFERENT topic than the idea
 - It's a random screenshot unrelated to the idea
 - The connection to the idea is vague or requires stretching logic
-- It contains content about a completely different domain
-
-### Edge Cases Handled
-
-| Situation | What Happens |
-|-----------|-------------|
-| Image file missing from disk | Claude is told "Image file missing" — NOT "image attached" |
-| Unsupported video format (.avi, .mkv) | Marked as "unverified — manual review needed" |
-| Gemini video analysis fails (API error, timeout) | Marked as "analysis failed — manual review needed" |
-| Video file > 20MB | Rejected with clear error message |
-| Document text extraction fails | Claude sees only the filename (limited analysis) |
 
 ---
 
-## 7. Penalty System
+## 9. Attachment Penalty System
 
 Penalties are deducted from the raw score. **Maximum total penalty is capped at -5.**
 
 ### Penalty Table
 
-| Scenario | Penalty | Severity Label | Reason |
-|----------|---------|---------------|--------|
-| **No files uploaded at all** | **-3** | `missing` | No evidence to support the idea |
-| **Some files irrelevant** (but not all) | **-2** | `minor` | Partial content mismatch |
-| **ALL files irrelevant** | **-5** | `severe` | Complete content mismatch |
-| **1 attachment type missing** (e.g., no video) | **-1** | `minor` | Incomplete submission |
-| **2 attachment types missing** (e.g., only image uploaded) | **-2** | `minor` | Incomplete submission |
-| **Gemini video analysis failed** | counts as irrelevant | varies | Cannot verify video content |
-| **Unsupported video format** | counts as irrelevant | varies | Cannot verify video content |
+| Scenario | Penalty | Severity Label |
+|----------|---------|---------------|
+| **No files uploaded at all** | **-3** | `missing` |
+| **Some files irrelevant** (but not all) | **-2** | `minor` |
+| **ALL files irrelevant** | **-5** | `severe` |
+| **1 attachment type missing** (e.g., no video) | **-1** | added to existing |
+| **2 attachment types missing** (e.g., only image uploaded) | **-2** | added to existing |
+| **Gemini video analysis failed** | counts as irrelevant | varies |
+| **Unsupported video format** | counts as irrelevant | varies |
 
 ### How Penalties Stack
 
@@ -232,39 +342,46 @@ Mismatch penalty and missing types penalty **add together**, but are **capped at
 
 ---
 
-## 8. Final Score Calculation
+## 10. Final Score Calculation
 
 ```
-Raw Score    = Sum of all 10 parameter scores (range: 0-50)
-Penalty      = Mismatch Penalty + Missing Types Penalty (capped at 5)
-Final Score  = max(0, Raw Score - Penalty)
+Step 1: AI scores 10 parameters (0-10 each)            → Raw AI Scores
+Step 2: Apply coherence penalties (-1 per failed check) → Adjusted Scores
+Step 3: Sum all 10 adjusted scores                      → Raw Score (0-100)
+Step 4: Subtract attachment penalty (max -5)             → Final Score
+Step 5: Final Score = max(0, Final Score)                → Range: 0 to 100
 ```
 
-**Final Score Range: 0 to 50**
+### If Disqualified (>5 coherence failures):
+```
+Final Score = 0 (regardless of parameter scores)
+```
 
 ### Score Breakdown Example
 
 | Component | Value |
 |-----------|-------|
-| Uniqueness | 3 |
-| Ease of Implementation | 4 |
-| Scalable | 3 |
-| Impactful | 4 |
-| Sustainable | 3 |
-| Conceptual Clarity | 4 |
-| Empathy | 3 |
-| Creativity | 3 |
-| Communication | 4 |
-| Flexible Thinking | 2 |
-| **Raw Score** | **33** |
-| Penalty (1 file irrelevant + 1 type missing) | -3 |
-| **Final Score** | **30 / 50** |
+| Uniqueness | 6 |
+| Ease of Implementation | 7 |
+| Feasibility | 5 |
+| Impact | 7 |
+| Sustainability | 6 |
+| Conceptual Clarity | 5 |
+| Empathy | 7 |
+| Creativity | 5 |
+| Communication | 6 |
+| Flexible Thinking | 4 |
+| **Raw Score** | **58** |
+| Coherence Penalties (2 checks failed) | -2 (spread across parameters) |
+| **Adjusted Raw Score** | **56** |
+| Attachment Penalty (1 file irrelevant + 1 type missing) | -3 |
+| **Final Score** | **53 / 100** |
 
 ---
 
-## 9. Re-Evaluation Logic
+## 11. Re-Evaluation Logic (Main Evaluator)
 
-When an admin triggers re-evaluation for a submission:
+When an admin triggers re-evaluation for a submission via the main evaluator (`force_reevaluate=True`):
 
 ### Score Protection (Anti-Inflation)
 
@@ -294,59 +411,105 @@ On re-evaluation, attachment analysis always runs **fresh** (not reused from old
 
 ---
 
-## 10. Ranking System
+## 12. Re-Evaluation App (Light Evaluator)
 
-After evaluation, submissions are ranked by `final_score` in descending order (higher = better).
+A separate evaluation system (`re_evaluation/evaluator.py`) for comparing AI scores with Mentor scores.
+
+### Key Differences from Main Evaluator
+
+| Feature | Main Evaluator | Light Evaluator |
+|---------|---------------|-----------------|
+| Input | 12 questions (Q1-Q12) | Short description + attachments only |
+| Primary/Secondary mapping | Yes (60/40) | No |
+| Coherence checks | 10 cross-checks | None |
+| Disqualification | Yes (>5 failures) | None |
+| Attachment penalty | Yes (max -5) | None |
+| Score storage | AIEvaluation model | LightSubmission model (direct) |
+| Purpose | Full production evaluation | AI vs Mentor comparison testing |
+
+### Light Evaluator Prompt Calibration
+
+The Light Evaluator is calibrated for school students (ages 13-18):
+- Does NOT penalize heavily for missing details in short descriptions
+- Team parameters default to moderate (5-6) unless clear evidence otherwise
+- Most student ideas should fall in the 4-7 range
+- Score 0-3 only if idea is genuinely poor
+- Score 8-10 only for truly outstanding ideas
+
+### Parameter-specific calibration notes:
+- **Impact:** Do not give high scores just because the problem sounds important. Student must show HOW their solution creates impact.
+- **Conceptual Clarity:** Short but clear description = 4-5. Reserve 6+ for descriptions with both clarity AND depth.
+- **Communication:** Simple/short descriptions = 4-5 max. Score 6+ only for genuinely strong writing.
+- **Flexible Thinking:** If description does NOT mention feedback, iteration, or adaptability at all, score 1-2.
+
+### Mentor Score Comparison
+
+Each LightSubmission can have a MentorScore (one-to-one). The list page shows:
+- Per-submission AI vs Mentor total score comparison
+- **Parameter-wise Mode comparison**: For each parameter, calculates the Mode (most frequently occurring score) across all submissions for both AI and Mentor, then shows the difference.
+
+---
+
+## 13. Ranking System & Top 400
+
+After evaluation, submissions are ranked by `final_score` in descending order.
+
+### Sort Order (Tiebreaker Sequence)
+
+1. **Final Score** (descending) — primary sort
+2. **Uniqueness Score** (descending) — first tiebreaker
+3. **Impact Score** (descending) — second tiebreaker
 
 ### Ranking Rules
 
 - **Tied scores** get the **same rank** (competition-style ranking)
-- Tiebreaker order: Uniqueness Score > Impactful Score
-- Rankings update automatically after each evaluation or batch evaluation
+- Rankings recalculate every time the rankings page is loaded
+- Disqualified submissions get **no rank** and are excluded from Top 400
 
 ### Top 400 Selection
 
-A submission qualifies for **Top 400** only if BOTH conditions are met:
+```python
+is_top_400 = (rank <= 400)
+```
 
-1. Rank is within top 400 positions
-2. Final score is **>= 34** (average of 3.4+ per parameter, i.e., 68% of max 50)
-
-This means even if fewer than 400 submissions exist, only those scoring 34+ are selected.
-
----
-
-## 11. Complete Scenario Table
-
-| # | Scenario | Coherent? | Raw Score | Penalty | Final Score |
-|---|----------|-----------|-----------|---------|-------------|
-| 1 | Strong idea, all 3 files relevant | Yes | 40 | 0 | **40** |
-| 2 | Strong idea, 1 file irrelevant | Yes | 40 | -2 | **38** |
-| 3 | Strong idea, no files uploaded | Yes | 40 | -3 | **37** |
-| 4 | Strong idea, only image (relevant) | Yes | 40 | -2 | **38** |
-| 5 | Average idea, all files relevant | Yes | 30 | 0 | **30** |
-| 6 | Average idea, all files irrelevant | Yes | 30 | -5 | **25** |
-| 7 | Weak idea (< 30 words), no files | Yes | 15 | -3 | **12** |
-| 8 | Incoherent submission, has files | No | 0 | varies | **0** |
-| 9 | Incoherent submission, no files | No | 0 | -3 | **0** |
-| 10 | Average idea, only irrelevant image | Yes | 30 | -5 (capped) | **25** |
-| 11 | Good idea, image+doc relevant, no video | Yes | 35 | -1 | **34** |
-| 12 | Good idea, video analysis failed | Yes | 35 | -2 to -3 | **32-33** |
+- **No minimum score threshold** — purely rank-based
+- If fewer than 400 non-disqualified submissions exist, all of them are in Top 400
+- When new submissions are evaluated and ranked, the list dynamically updates — a higher-scoring new submission pushes out the lowest-ranked submission if the list exceeds 400
 
 ---
 
-## AI Models Used
+## 14. Complete Scenario Table
+
+| # | Scenario | Coherent? | Coherence Penalties | Raw Score | Attachment Penalty | Final Score |
+|---|----------|-----------|--------------------|-----------|--------------------|-------------|
+| 1 | Strong idea, all 3 files relevant, 0 coherence fails | Yes | 0 | 80 | 0 | **80** |
+| 2 | Strong idea, 1 file irrelevant, 1 coherence fail | Yes | -1 | 79 | -2 | **77** |
+| 3 | Strong idea, no files uploaded, 0 coherence fails | Yes | 0 | 80 | -3 | **77** |
+| 4 | Strong idea, only image (relevant), 0 fails | Yes | 0 | 80 | -2 | **78** |
+| 5 | Average idea, all files relevant, 2 coherence fails | Yes | -3 | 57 | 0 | **57** |
+| 6 | Average idea, all files irrelevant, 3 fails | Yes | -4 | 56 | -5 | **51** |
+| 7 | Weak idea (< 30 words), no files, 4 fails | Yes | -5 | 25 | -3 | **22** |
+| 8 | Incoherent submission (>5 fails), has files | No | all=0 | 0 | varies | **0** |
+| 9 | Incoherent submission (>5 fails), no files | No | all=0 | 0 | -3 | **0** |
+| 10 | Good idea, image+doc relevant, no video, 1 fail | Yes | -1 | 69 | -1 | **68** |
+| 11 | Good idea, video analysis failed, 2 fails | Yes | -2 | 68 | -3 | **65** |
+| 12 | Re-evaluation: old=70, new=65 | Yes | varies | 65 | varies | **≤65** |
+
+---
+
+## 15. AI Models Used
 
 | Purpose | Model | Provider |
 |---------|-------|----------|
-| Text evaluation (10 parameters) | Claude 3.5 Sonnet | Anthropic (via OpenRouter) |
+| Main evaluation (10 parameters) | Claude 3.5 Sonnet | Anthropic (via OpenRouter) |
+| Light evaluation (re-evaluation app) | Claude Sonnet 4 | Anthropic (via OpenRouter) |
 | Image analysis | Claude 3.5 Sonnet | Anthropic (via OpenRouter) |
 | Video analysis | Gemini 2.0 Flash | Google (via OpenRouter) |
-| Summary generation | Claude 3.5 Sonnet | Anthropic (via OpenRouter) |
-| Premium deep review | Claude 3 Opus | Anthropic (via OpenRouter) |
+| Coherence checks | Claude 3.5 Sonnet | Anthropic (via OpenRouter) |
 
 ---
 
-## File Upload Limits
+## 16. File Upload Limits
 
 | File Type | Max Size | Accepted Formats |
 |-----------|----------|------------------|
@@ -356,5 +519,5 @@ This means even if fewer than 400 submissions exist, only those scoring 34+ are 
 
 ---
 
-*Document last updated: February 2026*
-*System Version: IFT Platform v2 - Hybrid AI Evaluation Engine*
+*Document last updated: May 2026*
+*System Version: IFT Platform v3 - Hybrid AI Evaluation Engine (0-10 Scale, 12 Questions)*

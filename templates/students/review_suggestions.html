@@ -1,0 +1,482 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Review Suggestions - IFT</title>
+    <link rel="icon" type="image/png" href="{% static 'images/IFT_logo.png' %}">
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <style>
+        :root {
+            --primary: #5E2A97;
+            --primary-hover: #7B3FB5;
+            --secondary: #DEDE50;
+            --primary-light: #E8D4F0;
+            --background-light: #F7F7F7;
+            --surface-light: #FFFFFF;
+            --border-light: #EEEEEE;
+            --text-dark: #222222;
+            --text-muted: #666666;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            overflow: hidden;
+        }
+
+        .main-container { display: flex; height: 100vh; width: 100%; }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px; background: #FFFFFF; border-right: 1px solid #EEEEEE;
+            height: 100vh; display: flex; flex-direction: column;
+            position: sticky; top: 0; transition: all 0.3s ease; z-index: 20;
+        }
+        .sidebar.collapsed { width: 80px; }
+        .sidebar.collapsed .sidebar-title,
+        .sidebar.collapsed .sidebar-subtitle,
+        .sidebar.collapsed .nav-text,
+        .sidebar.collapsed .user-info { opacity: 0; width: 0; overflow: hidden; white-space: nowrap; }
+        .sidebar.collapsed .logo-img { width: 50px; height: 50px; margin: 0 auto; background-position: center; }
+        .sidebar.collapsed .nav-item { justify-content: center; padding-left: 1.7rem; }
+        .sidebar.collapsed .nav-item .material-symbols-outlined { margin: 0; }
+        .sidebar.collapsed .user-avatar { margin: 0 auto; }
+        .sidebar.collapsed .logout-btn { display: none; }
+        .sidebar.collapsed .user-profile { justify-content: center; }
+        .sidebar.collapsed .notification-badge { display: none; }
+
+        .sidebar-header { border-bottom: 1px solid #F7F7F7; }
+        .logo-img {
+            width: 250px; height: 50px;
+            background-size: contain; background-position: left center; background-repeat: no-repeat;
+            flex-shrink: 0;
+        }
+        .nav-item {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.75rem 1rem; border-radius: 0.5rem;
+            text-decoration: none; color: #222222;
+            transition: all 0.2s ease; cursor: pointer;
+            margin-bottom: 0.25rem; position: relative;
+        }
+        .nav-item:hover { background: #F7F7F7; color: #222222; }
+        .nav-item .material-symbols-outlined { font-size: 24px; color: #666666; transition: all 0.2s ease; }
+        .nav-item.nav-item-active { background: rgba(94, 42, 151, 0.1); color: #5E2A97; }
+        .nav-item.nav-item-active .material-symbols-outlined { color: #5E2A97; font-variation-settings: 'FILL' 1; }
+        .nav-text { font-size: 0.875rem; font-weight: 500; }
+        .sidebar-footer { border-top: 1px solid #EEEEEE; margin-top: auto; }
+        .user-profile {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.75rem; border-radius: 0.5rem; transition: all 0.2s ease; cursor: pointer;
+        }
+        .user-profile:hover { background: #F7F7F7; }
+        .user-avatar {
+            width: 2.5rem; height: 2.5rem; border-radius: 50%;
+            overflow: hidden; flex-shrink: 0; border: 2px solid #EEEEEE;
+            background: var(--primary); display: flex; align-items: center;
+            justify-content: center; color: white; font-weight: 700; font-size: 1rem;
+        }
+        .user-info { flex: 1; }
+        .user-name { font-size: 0.875rem; font-weight: 700; color: #222222; margin: 0 0 0.125rem 0; line-height: 1.2; }
+        .user-role { font-size: 0.75rem; color: #666666; margin: 0; line-height: 1.2; }
+        .logout-btn {
+            background: none; border: none; color: #666666; cursor: pointer;
+            padding: 0.5rem; border-radius: 0.375rem; transition: all 0.2s ease;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .logout-btn:hover { background: rgba(94, 42, 151, 0.1); color: #5E2A97; }
+        .logout-btn .material-symbols-outlined { font-size: 20px; }
+        .sidebar-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 998; opacity: 0; transition: opacity 0.3s ease;
+        }
+        .sidebar-overlay.active { display: block; opacity: 1; }
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; left: -280px; z-index: 999; transition: left 0.3s ease; }
+            .sidebar.mobile-open { left: 0; }
+        }
+
+        {% include 'students/partials/header_css.html' %}
+
+        .main-content { flex: 1; display: flex; flex-direction: column; height: 100%; overflow-y: auto; position: relative; z-index: 10; }
+        .content-area { flex: 1; padding: 2rem 2.5rem; overflow-y: auto; }
+
+        .breadcrumb-nav {
+            display: flex; align-items: center; gap: 0.5rem;
+            margin-bottom: 1.5rem; font-size: 0.75rem; font-weight: 600; text-transform: capitalize;
+        }
+        .breadcrumb-nav a { color: #999999; text-decoration: none; transition: color 0.2s ease; }
+        .breadcrumb-nav a:hover { color: var(--primary); }
+        .breadcrumb-nav .material-symbols-outlined { font-size: 16px; color: #CCCCCC; }
+        .breadcrumb-nav .current { color: var(--text-dark); }
+
+        .page-header {
+            display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;
+        }
+        .page-header h1 { font-size: 2rem; font-weight: 700; color: var(--text-dark); margin: 0; }
+        .pending-badge {
+            display: inline-flex; align-items: center; justify-content: center;
+            min-width: 28px; height: 28px; padding: 0 0.5rem;
+            background: #DC2626; color: white; border-radius: 50px;
+            font-size: 0.75rem; font-weight: 700;
+        }
+
+        /* Suggestion Card */
+        .suggestion-card {
+            background: var(--surface-light); border-radius: 16px; padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid var(--border-light);
+            margin-bottom: 1.5rem;
+        }
+
+        .suggestion-meta {
+            display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem;
+        }
+        .meta-avatar {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: var(--primary); color: white;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 0.875rem; flex-shrink: 0;
+        }
+        .meta-info { flex: 1; }
+        .meta-name { font-size: 0.9375rem; font-weight: 700; color: var(--text-dark); margin: 0; }
+        .meta-time { font-size: 0.75rem; color: var(--text-muted); margin: 0; }
+
+        .suggestion-message {
+            background: #F9FAFB; border: 1px solid #F3F4F6; border-radius: 12px;
+            padding: 1rem; margin-bottom: 1.5rem;
+            font-size: 0.875rem; line-height: 1.6; color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* Diff view */
+        .diff-section { margin-bottom: 1.5rem; }
+        .diff-field-label {
+            font-size: 0.75rem; font-weight: 700; color: var(--primary);
+            text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;
+        }
+        .diff-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem; }
+        .diff-old, .diff-new {
+            padding: 1rem; border-radius: 10px; font-size: 0.8125rem; line-height: 1.6;
+            word-break: break-word;
+        }
+        .diff-old {
+            background: #FEF2F2; border: 1px solid #FECACA; color: #991B1B;
+        }
+        .diff-old::before {
+            content: 'CURRENT'; display: block; font-size: 0.625rem; font-weight: 700;
+            color: #DC2626; letter-spacing: 0.1em; margin-bottom: 0.5rem;
+        }
+        .diff-new {
+            background: #F0FDF4; border: 1px solid #BBF7D0; color: #166534;
+        }
+        .diff-new::before {
+            content: 'SUGGESTED'; display: block; font-size: 0.625rem; font-weight: 700;
+            color: #22C55E; letter-spacing: 0.1em; margin-bottom: 0.5rem;
+        }
+
+        /* Action buttons */
+        .suggestion-actions {
+            display: flex; align-items: center; gap: 1rem;
+            padding-top: 1.25rem; border-top: 1px solid var(--border-light);
+        }
+        .btn-approve {
+            display: flex; align-items: center; gap: 0.5rem;
+            padding: 0.625rem 1.25rem; background: #166534; color: white;
+            border: none; border-radius: 8px; font-weight: 700; font-size: 0.8125rem;
+            cursor: pointer; font-family: 'Poppins', sans-serif; transition: all 0.2s ease;
+        }
+        .btn-approve:hover { background: #15803D; }
+        .btn-approve .material-symbols-outlined { font-size: 18px; }
+
+        .btn-reject {
+            display: flex; align-items: center; gap: 0.5rem;
+            padding: 0.625rem 1.25rem; background: white; color: #DC2626;
+            border: 2px solid #FECACA; border-radius: 8px; font-weight: 700; font-size: 0.8125rem;
+            cursor: pointer; font-family: 'Poppins', sans-serif; transition: all 0.2s ease;
+        }
+        .btn-reject:hover { background: #FEF2F2; border-color: #DC2626; }
+        .btn-reject .material-symbols-outlined { font-size: 18px; }
+
+        /* Reject reason input */
+        .reject-reason-input {
+            display: none; margin-top: 1rem;
+        }
+        .reject-reason-input.show { display: flex; gap: 0.75rem; align-items: flex-start; }
+        .reject-reason-input textarea {
+            flex: 1; border: 2px solid #FECACA; border-radius: 10px;
+            padding: 0.75rem; font-family: 'Poppins', sans-serif; font-size: 0.8125rem;
+            resize: none; min-height: 60px;
+        }
+        .reject-reason-input textarea:focus { outline: none; border-color: #DC2626; }
+        .reject-reason-input button {
+            padding: 0.625rem 1rem; background: #DC2626; color: white;
+            border: none; border-radius: 8px; font-weight: 700; font-size: 0.8125rem;
+            cursor: pointer; font-family: 'Poppins', sans-serif; white-space: nowrap;
+        }
+
+        /* History section */
+        .history-section { margin-top: 2rem; }
+        .history-toggle {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 1rem; background: var(--surface-light); border: 1px solid var(--border-light);
+            border-radius: 12px; cursor: pointer; width: 100%;
+            font-size: 0.875rem; font-weight: 700; color: var(--text-muted);
+            transition: all 0.2s ease;
+        }
+        .history-toggle:hover { background: #F9FAFB; }
+        .history-toggle .material-symbols-outlined { font-size: 20px; transition: transform 0.3s ease; }
+        .history-toggle.open .material-symbols-outlined { transform: rotate(180deg); }
+        .history-list { display: none; margin-top: 1rem; }
+        .history-list.show { display: block; }
+
+        .history-item {
+            background: var(--surface-light); border: 1px solid var(--border-light);
+            border-radius: 12px; padding: 1.25rem; margin-bottom: 0.75rem;
+            display: flex; align-items: center; gap: 1rem;
+        }
+        .history-item .meta-avatar { width: 36px; height: 36px; font-size: 0.75rem; }
+        .history-item .meta-info { flex: 1; }
+        .status-pill {
+            display: inline-flex; align-items: center; padding: 0.25rem 0.75rem;
+            border-radius: 50px; font-size: 0.6875rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        .status-pill.approved { background: #F0FDF4; color: #166534; border: 1px solid #BBF7D0; }
+        .status-pill.rejected { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
+
+        /* Empty state */
+        .empty-suggestions {
+            text-align: center; padding: 4rem 2rem; color: var(--text-muted);
+        }
+        .empty-suggestions .material-symbols-outlined { font-size: 48px; color: #CCC; margin-bottom: 1rem; }
+        .empty-suggestions h3 { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-dark); }
+
+        /* Toast */
+        .toast-container { position: fixed; top: 1.5rem; right: 1.5rem; z-index: 9999; }
+        .toast-msg {
+            padding: 1rem 1.5rem; border-radius: 12px; font-size: 0.875rem; font-weight: 600;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15); display: none; align-items: center; gap: 0.75rem;
+            animation: slideIn 0.3s ease;
+        }
+        .toast-msg.success { background: #166534; color: white; display: flex; }
+        .toast-msg.error { background: #991B1B; color: white; display: flex; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        @media (max-width: 768px) {
+            .content-area { padding: 1.5rem; }
+            .diff-row { grid-template-columns: 1fr; }
+            .suggestion-actions { flex-direction: column; align-items: stretch; }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        {% with active_page='my_idea' %}
+        {% include 'students/partials/sidebar.html' %}
+        {% endwith %}
+
+        <div class="main-content">
+            {% include 'students/partials/header.html' %}
+
+            <div class="content-area">
+                <div class="container-fluid" style="max-width: 1280px; padding: 32px 40px;">
+
+                    <nav class="breadcrumb-nav">
+                        <a href="{% url 'students:dashboard' %}">Dashboard</a>
+                        <span class="material-symbols-outlined">chevron_right</span>
+                        <a href="{% url 'students:my_idea' %}">My Idea</a>
+                        <span class="material-symbols-outlined">chevron_right</span>
+                        <span class="current">Review Suggestions</span>
+                    </nav>
+
+                    <div class="page-header">
+                        <h1>Review Suggestions</h1>
+                        {% if pending.count > 0 %}
+                        <span class="pending-badge">{{ pending.count }}</span>
+                        {% endif %}
+                    </div>
+
+                    {% if pending.count == 0 and history.count == 0 %}
+                    <div class="empty-suggestions">
+                        <span class="material-symbols-outlined">inbox</span>
+                        <h3>No suggestions yet</h3>
+                        <p>Team members haven't submitted any change suggestions.</p>
+                    </div>
+                    {% endif %}
+
+                    {% for s in pending %}
+                    <div class="suggestion-card" id="suggestion-{{ s.id }}">
+                        <div class="suggestion-meta">
+                            <div class="meta-avatar">{{ s.suggested_by.first_name|first }}{{ s.suggested_by.last_name|first }}</div>
+                            <div class="meta-info">
+                                <p class="meta-name">{{ s.suggested_by.get_full_name|default:s.suggested_by.username }}</p>
+                                <p class="meta-time">{{ s.created_at|timesince }} ago</p>
+                            </div>
+                        </div>
+
+                        {% if s.message %}
+                        <div class="suggestion-message">"{{ s.message }}"</div>
+                        {% endif %}
+
+                        <div class="diff-section">
+                            {% for field, new_val in s.changes.items %}
+                            <div class="diff-field-label">
+                                {% if field == 'title' %}Project Title
+                                {% elif field == 'q1_target_group' %}Q1 - Target Group
+                                {% elif field == 'q2_exact_problem' %}Q2 - Exact Problem
+                                {% elif field == 'q3_solution_simple' %}Q3 - Solution
+                                {% elif field == 'q4_differentiation' %}Q4 - Differentiation
+                                {% elif field == 'q5_build_steps' %}Q5 - Build Steps
+                                {% elif field == 'q6_resources' %}Q6 - Resources
+                                {% elif field == 'q7_positive_change' %}Q7 - Positive Change
+                                {% elif field == 'q8_challenges' %}Q8 - Challenges
+                                {% elif field == 'q9_team_fit' %}Q9 - Team Fit
+                                {% elif field == 'q10_feedback' %}Q10 - Feedback
+                                {% elif field == 'q11_creative_element' %}Q11 - Creative Element
+                                {% elif field == 'q12_pitch' %}Q12 - Pitch
+                                {% else %}{{ field }}
+                                {% endif %}
+                            </div>
+                            <div class="diff-row">
+                                <div class="diff-old">{% with attr=field %}{% if attr == 'title' %}{{ submission.title }}{% elif attr == 'q1_target_group' %}{{ submission.q1_target_group }}{% elif attr == 'q2_exact_problem' %}{{ submission.q2_exact_problem }}{% elif attr == 'q3_solution_simple' %}{{ submission.q3_solution_simple }}{% elif attr == 'q4_differentiation' %}{{ submission.q4_differentiation }}{% elif attr == 'q5_build_steps' %}{{ submission.q5_build_steps }}{% elif attr == 'q6_resources' %}{{ submission.q6_resources }}{% elif attr == 'q7_positive_change' %}{{ submission.q7_positive_change }}{% elif attr == 'q8_challenges' %}{{ submission.q8_challenges }}{% elif attr == 'q9_team_fit' %}{{ submission.q9_team_fit }}{% elif attr == 'q10_feedback' %}{{ submission.q10_feedback }}{% elif attr == 'q11_creative_element' %}{{ submission.q11_creative_element }}{% elif attr == 'q12_pitch' %}{{ submission.q12_pitch }}{% endif %}{% endwith %}</div>
+                                <div class="diff-new">{{ new_val }}</div>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="suggestion-actions">
+                            <button class="btn-approve" onclick="handleSuggestion({{ s.id }}, 'approve')">
+                                <span class="material-symbols-outlined">check_circle</span>
+                                Approve & Merge
+                            </button>
+                            <button class="btn-reject" onclick="showRejectInput({{ s.id }})">
+                                <span class="material-symbols-outlined">cancel</span>
+                                Reject
+                            </button>
+                        </div>
+
+                        <div class="reject-reason-input" id="reject-input-{{ s.id }}">
+                            <textarea placeholder="Reason for rejection (optional)..." id="reject-reason-{{ s.id }}"></textarea>
+                            <button onclick="handleSuggestion({{ s.id }}, 'reject')">Reject</button>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    {% if history.count > 0 %}
+                    <div class="history-section">
+                        <button class="history-toggle" onclick="toggleHistory(this)">
+                            <span class="material-symbols-outlined">expand_more</span>
+                            Past Suggestions ({{ history.count }})
+                        </button>
+                        <div class="history-list">
+                            {% for s in history %}
+                            <div class="history-item">
+                                <div class="meta-avatar">{{ s.suggested_by.first_name|first }}{{ s.suggested_by.last_name|first }}</div>
+                                <div class="meta-info">
+                                    <p class="meta-name" style="font-size: 0.875rem; margin: 0;">{{ s.suggested_by.get_full_name|default:s.suggested_by.username }}</p>
+                                    <p class="meta-time" style="margin: 0;">{{ s.created_at|timesince }} ago — {{ s.changes|length }} field{{ s.changes|length|pluralize }}</p>
+                                </div>
+                                <span class="status-pill {{ s.status }}">{{ s.status }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container">
+        <div class="toast-msg" id="toastMsg"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% include 'students/partials/header_js.html' %}
+
+    <script>
+    // Sidebar toggle
+    const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
+    const sidebar = document.getElementById('studentAppSidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    if (sidebarToggleBtn && sidebar) {
+        sidebarToggleBtn.addEventListener('click', function() {
+            if (window.innerWidth <= 768) {
+                sidebar.classList.toggle('mobile-open');
+                if (sidebarOverlay) sidebarOverlay.classList.toggle('active');
+            } else {
+                sidebar.classList.toggle('collapsed');
+            }
+        });
+    }
+    if (sidebarOverlay) {
+        sidebarOverlay.addEventListener('click', function() {
+            sidebar.classList.remove('mobile-open');
+            sidebarOverlay.classList.remove('active');
+        });
+    }
+
+    function showToast(msg, type) {
+        const toast = document.getElementById('toastMsg');
+        toast.textContent = msg;
+        toast.className = 'toast-msg ' + type;
+        setTimeout(function() { toast.className = 'toast-msg'; }, 4000);
+    }
+
+    function showRejectInput(id) {
+        const el = document.getElementById('reject-input-' + id);
+        el.classList.toggle('show');
+    }
+
+    function toggleHistory(btn) {
+        btn.classList.toggle('open');
+        const list = btn.nextElementSibling;
+        list.classList.toggle('show');
+    }
+
+    function handleSuggestion(id, action) {
+        const data = { action: action };
+        if (action === 'reject') {
+            const reasonEl = document.getElementById('reject-reason-' + id);
+            if (reasonEl) data.reason = reasonEl.value;
+        }
+
+        fetch('/suggestion/' + id + '/handle/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(res) {
+            if (res.success) {
+                showToast(res.message, 'success');
+                const card = document.getElementById('suggestion-' + id);
+                if (card) {
+                    card.style.opacity = '0.5';
+                    card.style.pointerEvents = 'none';
+                }
+                setTimeout(function() { location.reload(); }, 1500);
+            } else {
+                showToast(res.message || 'Error.', 'error');
+            }
+        })
+        .catch(function() {
+            showToast('Network error.', 'error');
+        });
+    }
+    </script>
+</body>
+</html>

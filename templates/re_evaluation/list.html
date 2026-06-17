@@ -12,10 +12,13 @@
         </div>
         <div style="display: flex; gap: 0.75rem; align-items: center;">
             {% if pending_count %}
-            <button id="batchEvalBtn" onclick="startBatchEval()" class="btn" style="background: #f59e0b; color: #000; font-weight: 700; border: none; padding: 0.5rem 1.2rem; border-radius: 6px; cursor: pointer;">
+            <button id="batchEvalBtn" onclick="startBatchEval(false)" class="btn" style="background: #f59e0b; color: #000; font-weight: 700; border: none; padding: 0.5rem 1.2rem; border-radius: 6px; cursor: pointer;">
                 Evaluate All Pending ({{ pending_count }})
             </button>
             {% endif %}
+            <button id="batchReEvalBtn" onclick="startBatchEval(true)" class="btn" style="background: #ef4444; color: #fff; font-weight: 700; border: none; padding: 0.5rem 1.2rem; border-radius: 6px; cursor: pointer;">
+                Re-Evaluate All ({{ total_count }})
+            </button>
             <a href="{% url 're_evaluation:submit' %}" class="btn btn-primary">+ Submit New Idea</a>
         </div>
     </div>
@@ -221,15 +224,20 @@
 let batchTaskId = null;
 let pollInterval = null;
 
-function startBatchEval() {
-    const btn = document.getElementById('batchEvalBtn');
+function startBatchEval(forceAll) {
+    if (forceAll && !confirm('Are you sure? This will re-evaluate ALL submissions with AI.')) return;
+    const btn = forceAll ? document.getElementById('batchReEvalBtn') : document.getElementById('batchEvalBtn');
     btn.disabled = true;
     btn.textContent = 'Starting...';
     btn.style.opacity = '0.6';
 
+    const formData = new FormData();
+    if (forceAll) formData.append('force_all', 'true');
+
     fetch("{% url 're_evaluation:batch_evaluate' %}", {
         method: 'POST',
         headers: {'X-CSRFToken': '{{ csrf_token }}'},
+        body: formData,
     })
     .then(r => r.json())
     .then(data => {
@@ -262,13 +270,15 @@ function startBatchEval() {
 function showProgress() {
     document.getElementById('batchProgress').style.display = 'block';
     const btn = document.getElementById('batchEvalBtn');
+    const btn2 = document.getElementById('batchReEvalBtn');
     if (btn) btn.style.display = 'none';
+    if (btn2) btn2.style.display = 'none';
 }
 
 function pollBatchStatus() {
     if (!batchTaskId) return;
 
-    fetch(`/jury/re-evaluation/batch-status/${batchTaskId}/`)
+    fetch(`/super-admin/re-evaluation/batch-status/${batchTaskId}/`)
     .then(r => r.json())
     .then(data => {
         const done = data.completed + data.failed;

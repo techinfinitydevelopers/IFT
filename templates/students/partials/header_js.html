@@ -1,0 +1,48 @@
+<script>
+// ── Header Dropdowns ──
+function closeAllDropdowns() {
+    document.querySelectorAll('.header-dropdown').forEach(d => d.classList.remove('show'));
+}
+
+const _profileBtn = document.getElementById('profileBtn');
+const _helpBtn = document.getElementById('helpBtn');
+const _notifBtn = document.getElementById('notifBtn');
+const _fullscreenBtn = document.getElementById('fullscreenBtn');
+
+if (_profileBtn) _profileBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    const dd = document.getElementById('profileDropdown');
+    const isOpen = dd.classList.contains('show');
+    closeAllDropdowns();
+    if (!isOpen) dd.classList.add('show');
+});
+
+if (_helpBtn) _helpBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    const dd = document.getElementById('helpDropdown');
+    const isOpen = dd.classList.contains('show');
+    closeAllDropdowns();
+    if (!isOpen) dd.classList.add('show');
+});
+
+if (_notifBtn) _notifBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    const dd = document.getElementById('notifDropdown');
+    const isOpen = dd.classList.contains('show');
+    closeAllDropdowns();
+    if (!isOpen) dd.classList.add('show');
+});
+
+if (_fullscreenBtn) _fullscreenBtn.addEventListener('click', function() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+        _fullscreenBtn.querySelector('.material-symbols-outlined').textContent = 'fullscreen_exit';
+    } else {
+        document.exitFullscreen();
+        _fullscreenBtn.querySelector('.material-symbols-outlined').textContent = 'fullscreen';
+    }
+});
+
+document.addEventListener('click', function() { closeAllDropdowns(); });
+document.querySelectorAll('.header-dropdown').forEach(d => d.addEventListener('click', e => e.stopPropagation()));
+</script>

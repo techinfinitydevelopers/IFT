@@ -1,0 +1,784 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="icon" type="image/png" href="{% static 'images/IFT_logo.png' %}">
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Evaluator Dashboard | IFT</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+    <style>
+        :root {
+            --primary-color: #5E2A97;
+            --secondary-color: #DEDE50;
+            --background-light: #F7F7F7;
+            --text-dark: #222222;
+            --text-muted: #666666;
+            --border-color: #EEEEEE;
+            --white: #FFFFFF;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--background-light);
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Layout */
+        .dashboard-container {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            background: var(--background-light);
+        }
+
+        .content-wrapper {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 2rem;
+            width: 100%;
+        }
+
+        /* ==================== SIDEBAR STYLES ==================== */
+        .sidebar {
+            width: 280px;
+            background: #FFFFFF;
+            border-right: 1px solid #EEEEEE;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: sticky;
+            top: 0;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar.collapsed { width: 80px; }
+
+        .sidebar.collapsed .sidebar-title,
+        .sidebar.collapsed .sidebar-subtitle,
+        .sidebar.collapsed .nav-text,
+        .sidebar.collapsed .user-info {
+            opacity: 0; width: 0; overflow: hidden; white-space: nowrap;
+        }
+
+        .sidebar.collapsed .logo-img {
+            width: 50px; height: 50px; margin: 0 auto; background-position: center;
+        }
+
+        .sidebar.collapsed .nav-item {
+            justify-content: center; padding-left: 1.75rem;
+        }
+
+        .sidebar.collapsed .nav-item .material-symbols-outlined { margin: 0; }
+
+        .sidebar-header { border-bottom: 1px solid #F7F7F7; }
+
+        .logo-img {
+            width: 250px; height: 50px;
+            background-size: contain; background-position: left center; background-repeat: no-repeat;
+            flex-shrink: 0;
+        }
+
+        .sidebar-title { font-size: 1rem; font-weight: 700; color: #222222; margin: 0; line-height: 1.2; }
+        .sidebar-subtitle { font-size: 0.75rem; font-weight: 500; color: #5E2A97; margin: 0; line-height: 1.2; }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem;
+            border-radius: 0.5rem; text-decoration: none; color: #222222;
+            transition: all 0.2s ease; cursor: pointer; margin-bottom: 0.25rem;
+        }
+
+        .nav-item:hover { background: #F7F7F7; color: #222222; }
+        .nav-item .material-symbols-outlined { font-size: 24px; color: #666666; transition: all 0.2s ease; }
+
+        .nav-item.nav-item-active {
+            background: rgba(94, 42, 151, 0.1); color: #5E2A97;
+            padding-left: calc(1rem - 4px);
+        }
+
+        .nav-item.nav-item-active .material-symbols-outlined {
+            color: #5E2A97; font-variation-settings: 'FILL' 1;
+        }
+
+        .nav-item .material-symbols-outlined.filled { font-variation-settings: 'FILL' 1; }
+        .nav-text { font-size: 0.875rem; font-weight: 500; }
+
+        .sidebar-footer { border-top: 1px solid #EEEEEE; margin-top: auto; }
+
+        .user-profile {
+            display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem;
+            border-radius: 0.5rem; transition: all 0.2s ease; cursor: pointer;
+        }
+
+        .user-profile:hover { background: #F7F7F7; }
+
+        .user-avatar {
+            width: 2.5rem; height: 2.5rem; border-radius: 50%; overflow: hidden;
+            flex-shrink: 0; border: 2px solid #EEEEEE;
+            background: var(--primary-color); color: white; display: flex;
+            align-items: center; justify-content: center; font-weight: 700; font-size: 0.875rem;
+        }
+
+        .user-info { flex: 1; }
+        .user-name { font-size: 0.875rem; font-weight: 700; color: #222222; margin: 0 0 0.125rem 0; line-height: 1.2; }
+        .user-role { font-size: 0.75rem; color: #666666; margin: 0; line-height: 1.2; }
+
+        .logout-btn {
+            background: none; border: none; color: #666666; cursor: pointer;
+            padding: 0.5rem; border-radius: 0.375rem; transition: all 0.2s ease;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .logout-btn:hover { background: rgba(94, 42, 151, 0.1); color: #5E2A97; }
+        .logout-btn .material-symbols-outlined { font-size: 20px; }
+
+        .sidebar.collapsed .user-avatar { margin: 0 auto; }
+        .sidebar.collapsed .logout-btn { display: none; }
+        .sidebar.collapsed .user-profile { justify-content: center; }
+
+        .sidebar-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5); z-index: 998; opacity: 0; transition: opacity 0.3s ease;
+        }
+
+        .sidebar-overlay.active { display: block; opacity: 1; }
+
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; left: -280px; z-index: 999; transition: left 0.3s ease; }
+            .sidebar.mobile-open { left: 0; }
+            .sidebar.collapsed { left: -80px; }
+            .sidebar.collapsed.mobile-open { left: 0; }
+        }
+
+        /* ==================== HEADER STYLES ==================== */
+        .top-header {
+            height: 64px; background: #FFFFFF; border-bottom: 1px solid #EEEEEE;
+            display: flex; align-items: center; padding: 12px 2rem;
+            position: sticky; top: 0; z-index: 100; font-family: 'Poppins', sans-serif;
+        }
+
+        .header-icon-btn {
+            width: 2.5rem; height: 2.5rem; border-radius: 0.5rem; border: none;
+            background: #F7F7F7; color: #666666; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;
+        }
+
+        .header-icon-btn:hover { background: #EEEEEE; color: #5E2A97; }
+        .header-icon-btn .material-symbols-outlined { font-size: 22px; }
+
+        .header-avatar {
+            width: 2.5rem; height: 2.5rem; border-radius: 50%;
+            background: var(--primary-color); color: white; display: flex;
+            align-items: center; justify-content: center; font-weight: 700; font-size: 0.875rem;
+            border: 2px solid #5E2A97; cursor: pointer; transition: all 0.2s ease;
+        }
+
+        .header-avatar:hover { transform: scale(1.05); box-shadow: 0 0 0 4px rgba(94, 42, 151, 0.1); }
+
+        #notificationPanel.active,
+        #helpModal.active,
+        #profileDropdown.active {
+            display: block !important; opacity: 1 !important; transform: translateY(0) !important;
+        }
+
+        @media (max-width: 768px) {
+            .top-header { padding: 0 1rem; }
+        }
+
+        /* ==================== STATS CARDS ==================== */
+        .stat-card {
+            background: var(--white); border: 1px solid var(--border-color); border-radius: 1rem;
+            padding: 1.5rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease; min-height: 140px; height: 100%;
+            display: flex; flex-direction: column;
+        }
+
+        .stat-card:hover { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); transform: translateY(-2px); }
+
+        .stat-card .stat-label {
+            color: var(--text-muted); font-size: 0.875rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem;
+        }
+
+        .stat-card .stat-value { color: var(--text-dark); font-size: 2rem; font-weight: 700; line-height: 1; }
+
+        .stat-card .stat-icon {
+            width: 3rem; height: 3rem; border-radius: 0.75rem;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .stat-icon.primary { background: rgba(94, 42, 151, 0.1); color: var(--primary-color); }
+        .stat-icon.secondary { background: rgba(249, 115, 22, 0.1); color: #f97316; }
+        .stat-icon.success { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
+        .stat-icon.info { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+
+        .stat-card.pending-card { position: relative; overflow: hidden; }
+        .stat-card.pending-card .stat-value { color: #f97316; position: relative; z-index: 1; }
+        .stat-card.pending-card .stat-subtitle { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem; }
+
+        /* ==================== PROGRESS CARD ==================== */
+        .progress-card {
+            background: var(--white); border: 1px solid var(--border-color); border-radius: 1rem;
+            padding: 1.5rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .progress-card h3 { font-size: 1.125rem; font-weight: 700; color: var(--text-dark); margin-bottom: 0.25rem; }
+        .progress-card .progress-subtitle { font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+        .progress-card .progress-percentage { font-size: 1.5rem; font-weight: 700; color: var(--text-dark); }
+
+        .progress-bar-custom { height: 0.75rem; background: #e7ebf4; border-radius: 1rem; overflow: hidden; }
+        .progress-bar-fill { height: 100%; background: var(--primary-color); border-radius: 1rem; transition: width 0.5s ease-out; }
+        .progress-info { display: flex; justify-content: space-between; margin-top: 0.75rem; font-size: 0.875rem; color: var(--text-muted); }
+
+        /* ==================== TABLE CARD ==================== */
+        .table-card {
+            background: var(--white); border: 1px solid var(--border-color); border-radius: 1rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); overflow: hidden;
+        }
+
+        .table-card-header {
+            padding: 1.5rem; border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .table-card-header h3 { font-size: 1.125rem; font-weight: 700; color: var(--text-dark); margin: 0; }
+
+        .view-all-btn {
+            color: var(--primary-color); font-size: 0.875rem; font-weight: 600;
+            text-decoration: none; background: none; border: none; cursor: pointer;
+        }
+
+        .view-all-btn:hover { text-decoration: underline; }
+
+        .custom-table { width: 100%; border-collapse: collapse; }
+        .custom-table thead { background: #f8fafc; }
+
+        .custom-table th {
+            padding: 1rem; font-size: 0.75rem; font-weight: 600; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.05em; text-align: left;
+        }
+
+        .custom-table th:last-child { text-align: right; }
+
+        .custom-table tbody tr { border-bottom: 1px solid var(--border-color); transition: background 0.2s ease; }
+        .custom-table tbody tr:hover { background: #f8fafc; }
+        .custom-table td { padding: 1rem; font-size: 0.875rem; }
+        .custom-table td:last-child { text-align: right; }
+
+        .idea-title { font-weight: 500; color: var(--text-dark); margin: 0 0 0.25rem 0; }
+        .idea-id { font-size: 0.75rem; color: var(--text-muted); margin: 0; }
+        .team-name { color: var(--text-dark); }
+
+        /* Status Badges */
+        .status-badge {
+            display: inline-flex; align-items: center; padding: 0.25rem 0.75rem;
+            border-radius: 9999px; font-size: 0.75rem; font-weight: 600;
+        }
+
+        .status-badge.badge-assigned { background: #dbeafe; color: #1e40af; }
+        .status-badge.badge-in_progress { background: #fef3c7; color: #854d0e; }
+        .status-badge.badge-evaluated { background: #dcfce7; color: #166534; }
+
+        /* Action Buttons */
+        .btn-evaluate {
+            padding: 0.5rem 1rem; background: var(--primary-color); color: #fff; border: none;
+            border-radius: 0.5rem; font-size: 0.875rem; font-weight: 500; cursor: pointer;
+            transition: all 0.2s ease; box-shadow: 0 2px 4px rgba(94, 42, 151, 0.2);
+            text-decoration: none; display: inline-block;
+        }
+
+        .btn-evaluate:hover {
+            background: #8253b4; transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(94, 42, 151, 0.3); color: #fff;
+        }
+
+        .btn-resume {
+            padding: 0.5rem 1rem; background: var(--white); color: var(--text-dark);
+            border: 1px solid var(--border-color); border-radius: 0.5rem;
+            font-size: 0.875rem; font-weight: 500; cursor: pointer;
+            transition: all 0.2s ease; text-decoration: none; display: inline-block;
+        }
+
+        .btn-resume:hover { background: var(--background-light); color: var(--text-dark); }
+
+        .btn-view-result {
+            padding: 0.5rem 1rem; background: rgba(34, 197, 94, 0.1); color: #166534;
+            border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 0.5rem;
+            font-size: 0.875rem; font-weight: 500; cursor: pointer;
+            transition: all 0.2s ease; text-decoration: none; display: inline-block;
+        }
+
+        .btn-view-result:hover { background: rgba(34, 197, 94, 0.2); color: #166534; }
+
+        /* ==================== GUIDELINES CARD ==================== */
+        .guidelines-card {
+            background: linear-gradient(135deg, #5E2A97 0%, #7B3FB5 100%);
+            border-radius: 1rem; padding: 1.5rem;
+            display: flex; flex-direction: column;
+            position: relative; overflow: hidden;
+            box-shadow: 0 4px 12px rgba(94, 42, 151, 0.3);
+        }
+
+        .guidelines-icon {
+            width: 3rem; height: 3rem; background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px); border-radius: 0.75rem;
+            display: flex; align-items: center; justify-content: center; color: #fff;
+            margin-bottom: 1.25rem;
+        }
+
+        .guidelines-content h3 { color: #fff; font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .guidelines-content p { color: #E8D4F0; font-size: 0.875rem; margin-bottom: 1rem; }
+        .guidelines-content ul { color: var(--white); font-size: 0.875rem; margin-bottom: 1.5rem; padding-left: 1.25rem; }
+        .guidelines-content li { margin-bottom: 0.5rem; }
+
+        /* ==================== HELP CARD ==================== */
+        .help-card {
+            background: #FFFEF0; border: 1px solid rgba(222, 222, 80, 0.3);
+            border-radius: 1rem; padding: 1.5rem;
+        }
+
+        .help-header { display: flex; align-items: center; gap: 0.5rem; color: #B8B830; margin-bottom: 0.75rem; }
+        .help-header span.material-symbols-outlined { font-size: 24px; }
+        .help-header .help-title { font-weight: 700; font-size: 0.875rem; }
+        .help-card p { color: var(--text-dark); font-size: 0.875rem; margin-bottom: 0.75rem; }
+        .help-link { color: var(--primary-color); font-size: 0.875rem; font-weight: 600; text-decoration: none; }
+        .help-link:hover { text-decoration: underline; color: #7B3FB5; }
+
+        /* ==================== EMPTY STATE ==================== */
+        .empty-state { text-align: center; padding: 4rem 1.5rem; }
+        .empty-state .material-symbols-outlined { font-size: 56px; color: var(--border-color); margin-bottom: 1rem; }
+        .empty-state h3 { font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-dark); }
+        .empty-state p { font-size: 0.875rem; color: var(--text-muted); }
+
+        /* ==================== RESPONSIVE ==================== */
+        @media (max-width: 768px) {
+            .content-wrapper { padding: 1rem; }
+            .stat-card .stat-value { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- ==================== SIDEBAR ==================== -->
+        <aside class="sidebar d-md-flex flex-column" id="juryAppSidebar">
+            <div class="sidebar-header p-3 pb-1">
+                <div class="d-flex align-items-center">
+                    <div class="logo-img" style='background-image: url("{% static "images/IFT_logo.png" %}");'></div>
+                </div>
+            </div>
+            <nav class="flex-grow-1 px-3 d-flex flex-column gap-2 mt-3" style="overflow-y: auto;">
+                <a class="nav-item nav-item-active" href="{% url 'students:evaluator_dashboard' %}">
+                    <span class="material-symbols-outlined filled" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+                <a class="nav-item" href="{% url 'students:evaluator_assigned_ideas' %}">
+                    <span class="material-symbols-outlined">lightbulb</span>
+                    <span class="nav-text">Assigned Ideas</span>
+                </a>
+                <a class="nav-item" href="{% url 'students:evaluator_profile' %}">
+                    <span class="material-symbols-outlined">person</span>
+                    <span class="nav-text">Profile</span>
+                </a>
+                <a class="nav-item" href="{% url 'students:evaluator_halloffame' %}">
+                    <span class="material-symbols-outlined">emoji_events</span>
+                    <span class="nav-text">Hall of Fame</span>
+                </a>
+                <a class="nav-item" href="{% url 'students:evaluator_faq' %}">
+                    <span class="material-symbols-outlined">help_center</span>
+                    <span class="nav-text">FAQ</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer p-3 mt-auto">
+                <div class="user-profile">
+                    <div class="user-avatar">
+                        {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+                    </div>
+                    <div class="user-info flex-grow-1" id="userInfoDiv">
+                        <p class="user-name">{{ request.user.get_full_name|default:request.user.username }}</p>
+                        <p class="user-role">Evaluator</p>
+                    </div>
+                    <a href="{% url 'accounts:sign_out' %}" class="logout-btn" title="Logout">
+                        <span class="material-symbols-outlined">logout</span>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ==================== MAIN CONTENT ==================== -->
+        <div class="main-content">
+            <!-- Header -->
+            <header class="top-header">
+                <button class="header-icon-btn" id="sidebarToggleBtn" style="margin-right: 16px;">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+
+                <div class="d-flex align-items-center gap-2 ms-auto">
+                    <button class="header-icon-btn" id="fullscreenBtn">
+                        <span class="material-symbols-outlined">fullscreen</span>
+                    </button>
+                    <button class="header-icon-btn" id="notificationBtn">
+                        <span class="material-symbols-outlined">notifications</span>
+                    </button>
+                    <div class="header-avatar" id="profileAvatarBtn">
+                        {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+                    </div>
+                </div>
+            </header>
+
+            <!-- Profile Dropdown -->
+            <div id="profileDropdown" style="position: fixed; top: 70px; right: 20px; width: 280px; background: white; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); z-index: 9999; overflow: hidden; display: none; opacity: 0; transform: translateY(-10px); transition: opacity 0.3s ease, transform 0.3s ease;">
+                <div style="padding: 16px; border-bottom: 1px solid #f1f5f9;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--primary-color); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; border: 2px solid #5E2A97;">
+                            {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+                        </div>
+                        <div style="flex: 1; overflow: hidden;">
+                            <p style="margin: 0; font-size: 0.875rem; font-weight: 700; color: #0f172a;">{{ request.user.get_full_name|default:request.user.username }}</p>
+                            <p style="margin: 4px 0 0 0; font-size: 0.75rem; color: #64748b;">Evaluator</p>
+                            <p style="margin: 2px 0 0 0; font-size: 0.625rem; color: #94a3b8;">{{ request.user.email }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div style="padding: 8px;">
+                    <a href="{% url 'students:evaluator_dashboard' %}" style="display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 8px; text-decoration: none; color: #0f172a; transition: background 0.2s;" onmouseover="this.style.backgroundColor='#f8fafc'" onmouseout="this.style.backgroundColor='transparent'">
+                        <span class="material-symbols-outlined" style="color: #5E2A97; font-size: 20px;">person</span>
+                        <span style="font-weight: 500; font-size: 0.875rem;">My Profile</span>
+                    </a>
+                    <div style="height: 1px; background: #f1f5f9; margin: 8px 0;"></div>
+                    <a href="{% url 'accounts:sign_out' %}" style="width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 8px; text-decoration: none; color: #ef4444; transition: background 0.2s;" onmouseover="this.style.backgroundColor='rgba(239, 68, 68, 0.1)'" onmouseout="this.style.backgroundColor='transparent'">
+                        <span class="material-symbols-outlined" style="color: #ef4444; font-size: 20px;">logout</span>
+                        <span style="font-weight: 600; font-size: 0.875rem;">Logout</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Notification Panel -->
+            <div id="notificationPanel" style="position: fixed; top: 70px; right: 20px; width: 360px; max-height: 500px; background: white; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); z-index: 9999; overflow: hidden; display: none; opacity: 0; transform: translateY(-10px); transition: opacity 0.3s ease, transform 0.3s ease;">
+                <div style="padding: 16px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="margin: 0; font-size: 1rem; font-weight: 700; color: #0f172a;">Notifications</h3>
+                    <button id="closeNotificationPanel" style="background: none; border: none; cursor: pointer; color: #94a3b8;">
+                        <span class="material-symbols-outlined" style="font-size: 20px;">close</span>
+                    </button>
+                </div>
+                <div style="padding: 2rem; text-align: center; color: var(--text-muted); font-size: 0.875rem;">
+                    <span class="material-symbols-outlined" style="font-size: 40px; color: #e2e8f0; display: block; margin-bottom: 0.5rem;">notifications_off</span>
+                    No new notifications
+                </div>
+            </div>
+
+            <!-- ==================== DASHBOARD CONTENT ==================== -->
+            <div class="content-wrapper">
+                <!-- Stats Cards -->
+                <div class="row g-4 mb-4">
+                    <div class="col-12 col-md-4">
+                        <div class="stat-card">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <p class="stat-label">Total Assigned</p>
+                                    <p class="stat-value">{{ total }}</p>
+                                </div>
+                                <div class="stat-icon primary">
+                                    <span class="material-symbols-outlined">lightbulb</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="stat-card pending-card">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <p class="stat-label">Pending Evaluation</p>
+                                    <p class="stat-value">{{ pending }}</p>
+                                    {% if in_progress > 0 %}
+                                    <p class="stat-subtitle">{{ in_progress }} in progress</p>
+                                    {% endif %}
+                                </div>
+                                <div class="stat-icon secondary">
+                                    <span class="material-symbols-outlined">pending_actions</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="stat-card">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <p class="stat-label">Evaluation Completed</p>
+                                    <p class="stat-value">{{ evaluated }}</p>
+                                </div>
+                                <div class="stat-icon success">
+                                    <span class="material-symbols-outlined">check_circle</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Avg Score removed -->
+                </div>
+
+                <!-- Main Grid Layout -->
+                <div class="row g-4">
+                    <!-- Left Column (Progress & Table) -->
+                    <div class="col-12 col-lg-8">
+                        <!-- Progress Bar Section -->
+                        <div class="progress-card mb-4">
+                            <div class="d-flex justify-content-between align-items-end mb-3">
+                                <div>
+                                    <h3>Overall Progress</h3>
+                                    <p class="progress-subtitle">
+                                        {% if completion_pct >= 100 %}
+                                            All evaluations completed. Great work!
+                                        {% elif completion_pct >= 75 %}
+                                            Almost there! Keep up the momentum.
+                                        {% elif completion_pct >= 50 %}
+                                            Good progress. Keep going!
+                                        {% else %}
+                                            Keep up the momentum! You're making progress.
+                                        {% endif %}
+                                    </p>
+                                </div>
+                                <p class="progress-percentage">{{ completion_pct }}%</p>
+                            </div>
+                            <div class="progress-bar-custom">
+                                <div class="progress-bar-fill" style="width: {{ completion_pct }}%"></div>
+                            </div>
+                            <div class="progress-info">
+                                <span>{{ evaluated }} Completed</span>
+                                <span>{{ total }} Total</span>
+                            </div>
+                        </div>
+
+                        <!-- Assigned Ideas Table -->
+                        <div class="table-card">
+                            <div class="table-card-header">
+                                <h3>Assigned Evaluations</h3>
+                                <span class="view-all-btn">{{ total }} Total</span>
+                            </div>
+                            {% if assignments %}
+                            <div class="table-responsive">
+                                <table class="custom-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Idea Title</th>
+                                            <th>Student / Team</th>
+                                            <th>School</th>
+                                            <th>Status</th>
+                                            <th>Assigned</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for a in assignments %}
+                                        <tr>
+                                            <td>
+                                                <p class="idea-title">{{ a.submission.title|default:"Untitled"|truncatechars:40 }}</p>
+                                                <p class="idea-id">ID: #IFT-{{ a.submission.id }}</p>
+                                            </td>
+                                            <td class="team-name">{{ a.submission.student.user.get_full_name|default:a.submission.student.user.username }}</td>
+                                            <td style="font-size: 0.8rem; color: var(--text-muted);">{{ a.submission.student.school.name|default:a.submission.student.school_name|default:"--" }}</td>
+                                            <td>
+                                                <span class="status-badge badge-{{ a.status }}">{{ a.get_status_display }}</span>
+                                            </td>
+                                            <td style="font-size: 0.8rem; color: var(--text-muted);">{{ a.assigned_on|date:"M d, Y" }}</td>
+                                            <td>
+                                                {% if a.status == 'evaluated' %}
+                                                    <a href="{% url 'students:evaluator_evaluate' a.id %}" class="btn-view-result">View</a>
+                                                {% elif a.status == 'in_progress' %}
+                                                    <a href="{% url 'students:evaluator_evaluate' a.id %}" class="btn-resume">Resume</a>
+                                                {% else %}
+                                                    <a href="{% url 'students:evaluator_evaluate' a.id %}" class="btn-evaluate">Evaluate</a>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="empty-state">
+                                <span class="material-symbols-outlined">inbox</span>
+                                <h3>No Assignments Yet</h3>
+                                <p>You haven't been assigned any submissions to evaluate. Check back later.</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Right Column (Guidelines & Help) -->
+                    <div class="col-12 col-lg-4">
+                        <!-- Guidelines Card -->
+                        <div class="guidelines-card mb-4">
+                            <div class="guidelines-icon" style="margin-bottom:8px;">
+                                <span class="material-symbols-outlined">menu_book</span>
+                            </div>
+                            <div class="guidelines-content">
+                                <h3>Evaluation Guidelines</h3>
+                                <p>Before you start evaluating, please watch the orientation video and review the PDF guide to understand the evaluation process, scoring criteria, and best practices.</p>
+                                <ul>
+                                    <li>Innovation & Originality</li>
+                                    <li>Scalability Potential</li>
+                                    <li>Social Impact Factor</li>
+                                    <li>Financial Feasibility</li>
+                                </ul>
+                                <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px;">
+                                    <a href="#" onclick="alert('Video section coming soon')" style="display:flex;align-items:center;justify-content:center;gap:8px;background:#fff;color:var(--primary);padding:10px 16px;border-radius:10px;font-weight:600;font-size:0.85rem;text-decoration:none;transition:all 0.2s;">
+                                        <span class="material-symbols-outlined" style="font-size:20px;">play_circle</span>
+                                        Watch Video
+                                    </a>
+                                    <a href="#" onclick="alert('PDF Guide coming soon')" style="display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(255,255,255,0.15);color:#fff;padding:10px 16px;border-radius:10px;font-weight:600;font-size:0.85rem;text-decoration:none;border:1px solid rgba(255,255,255,0.3);transition:all 0.2s;">
+                                        <span class="material-symbols-outlined" style="font-size:20px;">download</span>
+                                        Download PDF Guide
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Help Card -->
+                        <div class="help-card">
+                            <div class="help-header">
+                                <span class="material-symbols-outlined">support_agent</span>
+                                <span class="help-title">Need Help?</span>
+                            </div>
+                            <p>Contact the support team if you have conflicts of interest with any assigned submission.</p>
+                            <p style="font-size:0.8rem;margin-bottom:0.5rem;"><strong>Support Email:</strong> <a href="mailto:connect@enlearning.in" style="color:var(--primary);">connect@enlearning.in</a></p>
+                            <a href="mailto:connect@enlearning.in" class="help-link">Contact Support &rarr;</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+    (function() {
+        // Sidebar Toggle
+        const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
+        const sidebar = document.getElementById('juryAppSidebar');
+
+        if (sidebarToggleBtn && sidebar) {
+            sidebarToggleBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (window.innerWidth >= 768) {
+                    sidebar.classList.toggle('collapsed');
+                } else {
+                    sidebar.classList.toggle('mobile-open');
+                }
+            });
+        }
+
+        // Close sidebar on mobile when clicking outside
+        document.addEventListener('click', function(e) {
+            if (sidebar && window.innerWidth < 768) {
+                if (!e.target.closest('#juryAppSidebar') && !e.target.closest('#sidebarToggleBtn')) {
+                    sidebar.classList.remove('mobile-open');
+                }
+            }
+        });
+
+        // Fullscreen Toggle
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        if (fullscreenBtn) {
+            fullscreenBtn.addEventListener('click', function() {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                } else {
+                    document.exitFullscreen();
+                }
+            });
+            document.addEventListener('fullscreenchange', function() {
+                const icon = fullscreenBtn.querySelector('.material-symbols-outlined');
+                icon.textContent = document.fullscreenElement ? 'fullscreen_exit' : 'fullscreen';
+            });
+        }
+
+        // Notification Panel
+        const notificationBtn = document.getElementById('notificationBtn');
+        const notificationPanel = document.getElementById('notificationPanel');
+        const closeNotificationPanel = document.getElementById('closeNotificationPanel');
+
+        if (notificationBtn && notificationPanel) {
+            notificationBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                notificationPanel.classList.toggle('active');
+                if (profileDropdownEl) profileDropdownEl.classList.remove('active');
+            });
+        }
+
+        if (closeNotificationPanel) {
+            closeNotificationPanel.addEventListener('click', function() {
+                notificationPanel.classList.remove('active');
+            });
+        }
+
+        // Profile Dropdown
+        const profileAvatarBtn = document.getElementById('profileAvatarBtn');
+        const profileDropdownEl = document.getElementById('profileDropdown');
+
+        if (profileAvatarBtn && profileDropdownEl) {
+            profileAvatarBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                profileDropdownEl.classList.toggle('active');
+                if (notificationPanel) notificationPanel.classList.remove('active');
+            });
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(e) {
+            if (notificationPanel && !e.target.closest('#notificationPanel') && !e.target.closest('#notificationBtn')) {
+                notificationPanel.classList.remove('active');
+            }
+            if (profileDropdownEl && !e.target.closest('#profileDropdown') && !e.target.closest('#profileAvatarBtn')) {
+                profileDropdownEl.classList.remove('active');
+            }
+        });
+
+        // Nav hover effects
+        document.querySelectorAll('.nav-item').forEach(function(item) {
+            item.addEventListener('mouseenter', function() {
+                if (!this.classList.contains('nav-item-active')) {
+                    const icon = this.querySelector('.material-symbols-outlined');
+                    if (icon) icon.style.fontVariationSettings = "'FILL' 0.5";
+                }
+            });
+            item.addEventListener('mouseleave', function() {
+                if (!this.classList.contains('nav-item-active')) {
+                    const icon = this.querySelector('.material-symbols-outlined');
+                    if (icon) icon.style.fontVariationSettings = "'FILL' 0";
+                }
+            });
+        });
+    })();
+    </script>
+</body>
+
+</html>

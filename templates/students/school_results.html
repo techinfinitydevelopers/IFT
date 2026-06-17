@@ -1,0 +1,938 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Results | School | ENpower IFTx</title>
+
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <style>
+        :root {
+            --primary: #5E2A97;
+            --secondary: #DEDE50;
+            --primary-light: #E8D4F0;
+            --background-light: #F7F7F7;
+            --surface-light: #FFFFFF;
+            --border-light: #EEEEEE;
+            --text-dark: #222222;
+            --text-muted: #666666;
+            --deep-purple: #1A0D2D;
+            --mid-purple: #3A1E60;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            overflow: hidden;
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+        .main-container { display: flex; height: 100vh; width: 100%; }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: 280px; background: #FFFFFF; border-right: 1px solid #EEEEEE;
+            height: 100vh; display: flex; flex-direction: column;
+            position: sticky; top: 0; transition: all 0.3s ease; flex-shrink: 0;
+        }
+        .sidebar.collapsed { width: 80px; }
+        .sidebar.collapsed .sidebar-title,
+        .sidebar.collapsed .sidebar-subtitle,
+        .sidebar.collapsed .nav-text,
+        .sidebar.collapsed .user-info { opacity: 0; width: 0; overflow: hidden; white-space: nowrap; }
+        .sidebar.collapsed .logo-img { width: 50px; height: 50px; margin: 0 auto; background-position: center; }
+        .sidebar.collapsed .nav-item { justify-content: center; padding-left: 1.7rem; }
+        .sidebar.collapsed .nav-item .material-symbols-outlined { margin: 0; }
+        .sidebar.collapsed .user-avatar { margin: 0 auto; }
+        .sidebar.collapsed .logout-btn { display: none; }
+        .sidebar.collapsed .user-profile { justify-content: center; }
+
+        .sidebar-header { border-bottom: 1px solid #F7F7F7; }
+        .logo-img {
+            width: 250px; height: 50px;
+            background-size: contain; background-position: left center;
+            background-repeat: no-repeat; flex-shrink: 0;
+        }
+        .nav-item {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.75rem 1rem; border-radius: 0.5rem;
+            text-decoration: none; color: #222222;
+            transition: all 0.2s ease; cursor: pointer; margin-bottom: 0.25rem;
+        }
+        .nav-item:hover { background: #F7F7F7; color: #222222; }
+        .nav-item .material-symbols-outlined { font-size: 24px; color: #666666; transition: all 0.2s ease; }
+        .nav-item.active { background: rgba(94, 42, 151, 0.1); color: #5E2A97; }
+        .nav-item.active .material-symbols-outlined { color: #5E2A97; font-variation-settings: 'FILL' 1; }
+        .nav-text { font-size: 0.875rem; font-weight: 500; }
+
+        .sidebar-footer { border-top: 1px solid #EEEEEE; margin-top: auto; }
+        .user-profile {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.75rem; border-radius: 0.5rem; transition: all 0.2s ease; cursor: pointer;
+        }
+        .user-profile:hover { background: #F7F7F7; }
+        .user-avatar {
+            width: 2.5rem; height: 2.5rem; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            background: var(--primary); color: white;
+            font-size: 0.875rem; font-weight: 700; flex-shrink: 0;
+        }
+        .user-info { flex: 1; }
+        .user-name-text { font-size: 0.875rem; font-weight: 700; color: #222222; margin: 0; line-height: 1.2; }
+        .user-role { font-size: 0.75rem; color: #666666; margin: 0; line-height: 1.2; }
+        .logout-btn {
+            background: none; border: none; color: #666666;
+            cursor: pointer; padding: 0.5rem; border-radius: 0.375rem;
+            transition: all 0.2s ease; display: flex; align-items: center; justify-content: center;
+        }
+        .logout-btn:hover { background: rgba(94, 42, 151, 0.1); color: #5E2A97; }
+        .logout-btn .material-symbols-outlined { font-size: 20px; }
+
+        .sidebar-overlay {
+            display: none; position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; background: rgba(0,0,0,0.5);
+            z-index: 998; opacity: 0; transition: opacity 0.3s ease;
+        }
+        .sidebar-overlay.active { display: block; opacity: 1; }
+
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; left: -280px; z-index: 999; transition: left 0.3s ease; }
+            .sidebar.mobile-open { left: 0; }
+            .sidebar.collapsed { left: -80px; }
+            .sidebar.collapsed.mobile-open { left: 0; }
+        }
+
+        /* ===== HEADER ===== */
+        .top-header {
+            height: 64px; background: #FFFFFF; border-bottom: 1px solid #EEEEEE;
+            display: flex; align-items: center; padding: 12px 2rem;
+            position: sticky; top: 0; z-index: 100;
+        }
+        .header-icon-btn {
+            width: 2.5rem; height: 2.5rem; border-radius: 0.5rem;
+            border: none; background: #F7F7F7; color: #666666;
+            cursor: pointer; display: flex; align-items: center;
+            justify-content: center; transition: all 0.2s ease;
+        }
+        .header-icon-btn:hover { background: #EEEEEE; color: #5E2A97; }
+        .header-icon-btn .material-symbols-outlined { font-size: 22px; }
+        .header-avatar {
+            width: 2.5rem; height: 2.5rem; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            background: var(--primary); color: white;
+            font-size: 0.75rem; font-weight: 700;
+            border: 2px solid #5E2A97; cursor: pointer; transition: all 0.2s ease;
+        }
+        .header-avatar:hover { transform: scale(1.05); box-shadow: 0 0 0 4px rgba(94, 42, 151, 0.1); }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            flex: 1; display: flex; flex-direction: column;
+            height: 100%; overflow-y: auto; position: relative; z-index: 10;
+        }
+        .content-wrapper { flex: 1; padding: 32px; max-width: 100%; margin: 0 auto; width: 100%; }
+
+        /* Page Header */
+        .page-header { margin-bottom: 32px; }
+        .page-header h1 { font-size: 1.75rem; font-weight: 700; color: var(--text-dark); margin-bottom: 8px; }
+        .breadcrumb { font-size: 0.875rem; color: var(--text-muted); background: none; padding: 0; margin: 0; }
+        .breadcrumb-item a { color: var(--text-muted); text-decoration: none; }
+        .breadcrumb-item a:hover { color: var(--primary); }
+        .breadcrumb-item.active { color: var(--text-dark); }
+
+        .btn-secondary-custom {
+            background: white; color: var(--text-dark); font-weight: 600;
+            padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border-light);
+            display: flex; align-items: center; gap: 8px; cursor: pointer;
+            transition: all 0.2s; font-family: 'Poppins', sans-serif; font-size: 0.82rem;
+        }
+        .btn-secondary-custom:hover { background: #f8fafc; }
+
+        /* Stats Cards */
+        .stat-card {
+            background: var(--surface-light); border-radius: 12px; padding: 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04); border: 1px solid var(--border-light);
+            display: flex; align-items: center; gap: 14px; height: 100%;
+        }
+        .stat-icon {
+            width: 44px; height: 44px; min-width: 44px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .stat-icon.purple { background: rgba(94,42,151,0.1); color: var(--primary); }
+        .stat-icon.green { background: rgba(34,197,94,0.1); color: #22c55e; }
+        .stat-icon.amber { background: rgba(245,158,11,0.1); color: #f59e0b; }
+        .stat-icon.blue { background: rgba(59,130,246,0.1); color: #3b82f6; }
+        .stat-label {
+            font-size: 0.7rem; font-weight: 600; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.05em; margin: 0; white-space: nowrap;
+        }
+        .stat-value { font-size: 1.35rem; font-weight: 700; color: var(--text-dark); margin: 0; line-height: 1.2; }
+
+        /* Parameter Averages Section */
+        .param-section {
+            background: var(--surface-light); border-radius: 12px;
+            border: 1px solid var(--border-light); padding: 1.5rem;
+            margin-bottom: 2rem; box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        }
+        .param-section-title {
+            font-size: 1.1rem; font-weight: 700; color: var(--text-dark);
+            display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.25rem;
+        }
+        .param-section-title .material-symbols-outlined { color: var(--primary); }
+        .param-row {
+            display: flex; align-items: center; gap: 1rem; padding: 0.6rem 0;
+            border-bottom: 1px solid #f8f9fa;
+        }
+        .param-row:last-child { border-bottom: none; }
+        .param-name { width: 160px; font-size: 0.8rem; font-weight: 600; color: var(--text-dark); flex-shrink: 0; }
+        .param-bar-bg {
+            flex: 1; height: 8px; background: #f1f5f9; border-radius: 4px; overflow: hidden;
+        }
+        .param-bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+        .param-score { width: 50px; text-align: right; font-size: 0.8rem; font-weight: 700; color: var(--text-dark); }
+
+        /* Podium Section */
+        .podium-section {
+            background: linear-gradient(135deg, var(--deep-purple) 0%, var(--mid-purple) 50%, var(--primary) 100%);
+            border-radius: 16px; padding: 3rem 2rem; margin-bottom: 2rem;
+            position: relative; overflow: hidden;
+        }
+        .podium-section::before {
+            content: ''; position: absolute; inset: 0;
+            background-image: radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px);
+            background-size: 30px 30px; pointer-events: none;
+        }
+        .podium-title { text-align: center; margin-bottom: 2.5rem; position: relative; z-index: 1; }
+        .podium-title h2 {
+            font-family: 'Space Grotesk', 'Poppins', sans-serif;
+            font-size: 1.5rem; font-weight: 700; color: #fff;
+            letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.25rem;
+        }
+        .podium-title p { font-size: 0.8rem; color: rgba(255,255,255,0.5); font-weight: 500; }
+
+        .podium-container {
+            display: flex; align-items: flex-end; justify-content: center;
+            gap: 2rem; min-height: 320px; position: relative; z-index: 1;
+        }
+        .podium-card { text-align: center; transition: all 0.3s ease; }
+        .podium-card:hover { transform: translateY(-8px); }
+        .podium-second { width: 240px; transform: translateY(1.5rem); }
+        .podium-first { width: 260px; position: relative; z-index: 10; }
+        .podium-first::before {
+            content: ''; position: absolute; top: -100px; left: 50%;
+            transform: translateX(-50%); width: 250px; height: 350px;
+            background: radial-gradient(ellipse at bottom, rgba(255,255,255,0.12) 0%, transparent 70%);
+            pointer-events: none; z-index: -1;
+        }
+        .podium-third { width: 240px; transform: translateY(2.5rem); }
+
+        .podium-avatar-container { position: relative; margin-bottom: 1.25rem; display: inline-block; }
+        .podium-avatar {
+            width: 100px; height: 100px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.75rem; font-weight: 700; color: #fff;
+            border: 3px solid; position: relative; z-index: 2;
+        }
+        .podium-first .podium-avatar {
+            width: 120px; height: 120px; font-size: 2rem;
+            border-color: #fff; background: rgba(255,255,255,0.15);
+            box-shadow: 0 0 30px rgba(255,255,255,0.2);
+        }
+        .podium-second .podium-avatar { border-color: var(--secondary); background: rgba(222,222,80,0.15); }
+        .podium-third .podium-avatar { border-color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.1); }
+
+        .podium-glow {
+            position: absolute; inset: -6px; border-radius: 50%;
+            border: 1px solid; z-index: 1;
+        }
+        .podium-first .podium-glow { border-color: rgba(255,255,255,0.25); box-shadow: 0 0 25px rgba(255,255,255,0.15); }
+        .podium-second .podium-glow { border-color: rgba(222,222,80,0.25); box-shadow: 0 0 15px rgba(222,222,80,0.15); }
+        .podium-third .podium-glow { border-color: rgba(255,255,255,0.15); }
+
+        .podium-rank {
+            position: absolute; bottom: -4px; right: -4px;
+            width: 36px; height: 36px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 900; font-size: 0.9rem; border: 3px solid var(--deep-purple); z-index: 3;
+        }
+        .podium-first .podium-rank { background: #fff; color: var(--deep-purple); box-shadow: 0 0 12px rgba(255,255,255,0.5); }
+        .podium-second .podium-rank { background: var(--secondary); color: var(--deep-purple); box-shadow: 0 0 10px rgba(222,222,80,0.4); }
+        .podium-third .podium-rank { background: var(--secondary); color: var(--deep-purple); }
+
+        .crown-icon { position: absolute; top: -32px; left: 50%; transform: translateX(-50%); font-size: 2rem; color: #fff; }
+
+        .podium-info {
+            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+            padding: 1.25rem; border-radius: 10px;
+        }
+        .podium-first .podium-info {
+            background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.25);
+            box-shadow: 0 0 25px rgba(255,255,255,0.08);
+        }
+        .podium-name { font-size: 1.125rem; font-weight: 700; color: #fff; margin-bottom: 0.125rem; }
+        .podium-team { font-size: 0.75rem; font-weight: 500; color: rgba(255,255,255,0.5); margin-bottom: 0.75rem; }
+        .podium-idea-label {
+            font-size: 0.6rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.15em; margin-bottom: 0.375rem;
+        }
+        .podium-first .podium-idea-label { color: rgba(255,255,255,0.7); }
+        .podium-second .podium-idea-label, .podium-third .podium-idea-label { color: var(--secondary); }
+        .podium-idea { font-size: 0.8rem; line-height: 1.4; margin-bottom: 0.75rem; }
+        .podium-first .podium-idea { color: rgba(255,255,255,0.9); }
+        .podium-second .podium-idea, .podium-third .podium-idea { color: #b8a1c9; }
+        .podium-score {
+            display: inline-flex; align-items: center; gap: 0.375rem;
+            background: rgba(0,0,0,0.25); padding: 0.25rem 0.75rem;
+            border-radius: 6px; font-size: 0.8rem; font-weight: 700; color: #fff;
+        }
+        .podium-score .material-symbols-outlined { font-size: 16px; color: var(--secondary); }
+
+        /* Leaderboard Section */
+        .leaderboard-section {
+            background: var(--surface-light); border-radius: 12px;
+            border: 1px solid var(--border-light); overflow: hidden; margin-bottom: 2rem;
+        }
+        .leaderboard-header {
+            padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-light);
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 1rem;
+        }
+        .leaderboard-title {
+            font-size: 1.1rem; font-weight: 700; color: var(--text-dark);
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .leaderboard-title .material-symbols-outlined { color: var(--primary); }
+
+        .filter-tabs { display: flex; gap: 0.5rem; }
+        .filter-tab {
+            padding: 0.5rem 1rem; border-radius: 8px; background: var(--background-light);
+            border: 1px solid var(--border-light); font-size: 0.8rem; font-weight: 600;
+            color: var(--text-muted); cursor: pointer; transition: all 0.2s ease;
+            font-family: 'Poppins', sans-serif;
+        }
+        .filter-tab:hover { border-color: rgba(94,42,151,0.3); color: var(--text-dark); }
+        .filter-tab.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+        /* Leaderboard Grid */
+        .leaderboard-grid { padding: 1.5rem; }
+        .leader-card {
+            background: var(--background-light); border: 1px solid var(--border-light);
+            border-radius: 10px; padding: 1.25rem; transition: all 0.2s ease;
+            position: relative; height: 100%;
+        }
+        .leader-card:hover {
+            border-color: rgba(94,42,151,0.3); box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+            transform: translateY(-2px);
+        }
+        .leader-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
+        .leader-rank {
+            font-size: 1.5rem; font-weight: 900; color: rgba(94,42,151,0.15);
+            min-width: 40px; font-family: 'Space Grotesk', 'Poppins', sans-serif;
+        }
+        .leader-avatar {
+            width: 42px; height: 42px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.85rem; font-weight: 700; color: #fff;
+            background: var(--primary); flex-shrink: 0;
+        }
+        .leader-info { flex: 1; min-width: 0; }
+        .leader-name {
+            font-size: 0.9375rem; font-weight: 700; color: var(--text-dark);
+            margin-bottom: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .leader-team { font-size: 0.75rem; color: var(--text-muted); }
+        .leader-idea {
+            background: var(--surface-light); border: 1px solid var(--border-light);
+            border-radius: 6px; padding: 0.625rem 0.75rem;
+        }
+        .leader-idea-label {
+            font-size: 0.6rem; font-weight: 700; color: var(--primary);
+            text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.25rem;
+        }
+        .leader-idea-text { font-size: 0.8rem; font-weight: 500; color: var(--text-dark); line-height: 1.4; margin: 0; }
+        .leader-score-badge {
+            position: absolute; top: 12px; right: 12px;
+            background: rgba(94,42,151,0.08); color: var(--primary);
+            padding: 0.25rem 0.625rem; border-radius: 6px;
+            font-size: 0.75rem; font-weight: 700; display: flex; align-items: center; gap: 0.25rem;
+        }
+        .leader-score-badge .material-symbols-outlined { font-size: 14px; }
+
+        .status-badge {
+            font-size: 0.625rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.05em; padding: 0.125rem 0.5rem; border-radius: 4px;
+            display: inline-flex; align-items: center;
+        }
+        .status-badge.shortlisted { background: rgba(34,197,94,0.1); color: #16a34a; }
+
+        /* Pagination */
+        .pagination-wrapper {
+            padding: 1.25rem 1.5rem; border-top: 1px solid var(--border-light);
+            display: flex; justify-content: center; gap: 0.5rem;
+        }
+        .page-btn {
+            width: 36px; height: 36px; border-radius: 8px;
+            border: 1px solid var(--border-light); background: white;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem; font-weight: 600; color: var(--text-muted);
+            cursor: pointer; transition: all 0.2s; font-family: 'Poppins', sans-serif;
+            text-decoration: none;
+        }
+        .page-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .page-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center; padding: 4rem 2rem;
+        }
+        .empty-state .material-symbols-outlined { font-size: 64px; color: #cbd5e1; margin-bottom: 1rem; }
+        .empty-state h3 { font-size: 1.25rem; font-weight: 700; color: var(--text-dark); margin-bottom: 0.5rem; }
+        .empty-state p { font-size: 0.875rem; color: var(--text-muted); }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .podium-container { flex-direction: column; align-items: center; gap: 1.5rem; min-height: auto; }
+            .podium-first, .podium-second, .podium-third { transform: none !important; width: 100%; max-width: 280px; }
+        }
+        @media (max-width: 768px) {
+            .content-wrapper { padding: 16px; }
+            .podium-section { padding: 2rem 1rem; }
+            .filter-tabs { flex-wrap: wrap; }
+            .param-name { width: 120px; font-size: 0.7rem; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-container">
+        <!-- Sidebar Overlay (mobile) -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="schoolAppSidebar">
+            <div class="sidebar-header p-3 pb-1">
+                <div class="d-flex align-items-center">
+                    <div class="logo-img" style='background-image: url("{% static "images/IFT_logo.png" %}");'></div>
+                </div>
+            </div>
+            <nav class="flex-grow-1 px-3 d-flex flex-column gap-2 mt-3" style="overflow-y: auto;">
+                <a class="nav-item" href="{% url 'students:school_dashboard' %}">
+                    <span class="material-symbols-outlined">dashboard</span>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+                <a class="nav-item" href="{% url 'students:school_students' %}">
+                    <span class="material-symbols-outlined">school</span>
+                    <span class="nav-text">Students</span>
+                </a>
+                <a class="nav-item" href="{% url 'students:school_teams' %}">
+                    <span class="material-symbols-outlined">groups</span>
+                    <span class="nav-text">Teams</span>
+                </a>
+                <a class="nav-item" href="{% url 'students:school_submissions' %}">
+                    <span class="material-symbols-outlined">assignment</span>
+                    <span class="nav-text">Submissions</span>
+                </a>
+                <a class="nav-item active" href="{% url 'students:school_results' %}">
+                    <span class="material-symbols-outlined">leaderboard</span>
+                    <span class="nav-text">Results</span>
+                </a>
+                <a class="nav-item" href="{% url 'students:school_halloffame' %}">
+                    <span class="material-symbols-outlined">emoji_events</span>
+                    <span class="nav-text">Hall of Fame</span>
+                </a>
+                <a class="nav-item" href="{% url 'students:school_reports' %}">
+                    <span class="material-symbols-outlined">analytics</span>
+                    <span class="nav-text">Reports</span>
+                </a>
+                <a class="nav-item" href="{% url 'students:school_faq' %}">
+                    <span class="material-symbols-outlined">help</span>
+                    <span class="nav-text">FAQ</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer p-3 mt-auto">
+                <div class="user-profile">
+                    <div class="user-avatar">
+                        {{ school.name|make_list|first|upper }}
+                    </div>
+                    <div class="user-info">
+                        <p class="user-name-text">{{ school.name|truncatechars:20 }}</p>
+                        <p class="user-role">School Admin</p>
+                    </div>
+                    <a href="{% url 'accounts:sign_out' %}" class="logout-btn" title="Logout">
+                        <span class="material-symbols-outlined">logout</span>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="top-header">
+                <button class="header-icon-btn" id="sidebarToggleBtn" style="margin-right:16px;">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+                <div class="d-flex align-items-center gap-3 ms-auto">
+                    <button class="header-icon-btn" id="fullscreenBtn" title="Toggle Fullscreen">
+                        <span class="material-symbols-outlined">fullscreen</span>
+                    </button>
+                    <button class="header-icon-btn" id="notificationBtn" title="Notifications" style="position:relative;">
+                        <span class="material-symbols-outlined">notifications</span>
+                    </button>
+                    <div class="header-avatar" id="profileAvatarBtn" style="cursor:pointer;">{{ school.name|make_list|first|upper }}</div>
+                </div>
+            </header>
+
+            <!-- Profile Dropdown -->
+            <div id="profileDropdown" style="display:none;position:fixed;top:70px;right:24px;width:280px;background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.12);border:1px solid #f0f0f0;z-index:200;">
+                <div style="padding:16px;border-bottom:1px solid #f1f5f9;">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <div style="width:48px;height:48px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:1.1rem;">{{ school.name|make_list|first|upper }}</div>
+                        <div>
+                            <p style="margin:0;font-size:0.875rem;font-weight:700;">{{ school.name|truncatechars:25 }}</p>
+                            <p style="margin:2px 0 0;font-size:0.75rem;color:#64748b;">School Admin</p>
+                            <p style="margin:2px 0 0;font-size:0.65rem;color:#94a3b8;">{{ school.contact_email }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div style="padding:8px;">
+                    <a href="{% url 'students:school_profile' %}" style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;text-decoration:none;color:#222;font-size:0.875rem;font-weight:500;transition:background 0.15s;">
+                        <span class="material-symbols-outlined" style="color:var(--primary);font-size:20px;">person</span>
+                        My Profile
+                    </a>
+                    <a href="{% url 'accounts:sign_out' %}" style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;text-decoration:none;color:#ef4444;font-size:0.875rem;font-weight:500;transition:background 0.15s;">
+                        <span class="material-symbols-outlined" style="color:#ef4444;font-size:20px;">logout</span>
+                        Logout
+                    </a>
+                </div>
+            </div>
+
+            <div class="content-wrapper">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div class="row align-items-center">
+                        <div class="col-12 col-md-6">
+                            <h1>Competition Results</h1>
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'students:school_dashboard' %}">Dashboard</a></li>
+                                    <li class="breadcrumb-item active">Results</li>
+                                </ol>
+                            </nav>
+                        </div>
+                        <div class="col-12 col-md-6 d-flex justify-content-md-end align-items-center gap-3 mt-3 mt-md-0">
+                            <button class="btn-secondary-custom" onclick="window.print()">
+                                <span class="material-symbols-outlined" style="font-size: 18px;">print</span>
+                                Print
+                            </button>
+                            <button class="btn-secondary-custom" onclick="exportCSV()">
+                                <span class="material-symbols-outlined" style="font-size: 18px;">file_download</span>
+                                Export CSV
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {% if total_evaluated == 0 %}
+                <!-- Empty State -->
+                <div class="empty-state">
+                    <span class="material-symbols-outlined">leaderboard</span>
+                    <h3>No Results Yet</h3>
+                    <p>Evaluation results will appear here once submissions are evaluated by the AI engine.</p>
+                </div>
+
+                {% else %}
+                <!-- Stats Grid -->
+                <div class="row g-3 mb-4">
+                    <div class="col-6 col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-icon purple">
+                                <span class="material-symbols-outlined">assignment</span>
+                            </div>
+                            <div>
+                                <p class="stat-label">Total Evaluated</p>
+                                <h3 class="stat-value">{{ total_evaluated }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-icon green">
+                                <span class="material-symbols-outlined">emoji_events</span>
+                            </div>
+                            <div>
+                                <p class="stat-label">Shortlisted</p>
+                                <h3 class="stat-value" style="color: #22c55e;">{{ top_400_count }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-icon blue">
+                                <span class="material-symbols-outlined">workspace_premium</span>
+                            </div>
+                            <div>
+                                <p class="stat-label">Highest Score</p>
+                                <h3 class="stat-value" style="color: #3b82f6;">{{ highest_score }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-icon amber">
+                                <span class="material-symbols-outlined">trending_up</span>
+                            </div>
+                            <div>
+                                <p class="stat-label">Avg Score</p>
+                                <h3 class="stat-value" style="color: #f59e0b;">{{ avg_score }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Parameter-wise Averages -->
+                <div class="param-section">
+                    <div class="param-section-title">
+                        <span class="material-symbols-outlined">analytics</span>
+                        Parameter-wise Average Scores
+                    </div>
+                    <div class="param-row">
+                        <div class="param-name">Uniqueness</div>
+                        <div class="param-bar-bg">
+                            <div class="param-bar-fill" style="width: {{ param_avgs.uniqueness }}0%; background: #8b5cf6;"></div>
+                        </div>
+                        <div class="param-score">{{ param_avgs.uniqueness }}/10</div>
+                    </div>
+                    <div class="param-row">
+                        <div class="param-name">Ease of Implementation</div>
+                        <div class="param-bar-bg">
+                            <div class="param-bar-fill" style="width: {{ param_avgs.ease }}0%; background: #3b82f6;"></div>
+                        </div>
+                        <div class="param-score">{{ param_avgs.ease }}/10</div>
+                    </div>
+                    <div class="param-row">
+                        <div class="param-name">Feasibility</div>
+                        <div class="param-bar-bg">
+                            <div class="param-bar-fill" style="width: {{ param_avgs.feasibility }}0%; background: #22c55e;"></div>
+                        </div>
+                        <div class="param-score">{{ param_avgs.feasibility }}/10</div>
+                    </div>
+                    <div class="param-row">
+                        <div class="param-name">Impact</div>
+                        <div class="param-bar-bg">
+                            <div class="param-bar-fill" style="width: {{ param_avgs.impact }}0%; background: #ef4444;"></div>
+                        </div>
+                        <div class="param-score">{{ param_avgs.impact }}/10</div>
+                    </div>
+                    <div class="param-row">
+                        <div class="param-name">Sustainability</div>
+                        <div class="param-bar-bg">
+                            <div class="param-bar-fill" style="width: {{ param_avgs.sustainability }}0%; background: #14b8a6;"></div>
+                        </div>
+                        <div class="param-score">{{ param_avgs.sustainability }}/10</div>
+                    </div>
+                    <div class="param-row">
+                        <div class="param-name">Conceptual Clarity</div>
+                        <div class="param-bar-bg">
+                            <div class="param-bar-fill" style="width: {{ param_avgs.clarity }}0%; background: #f59e0b;"></div>
+                        </div>
+                        <div class="param-score">{{ param_avgs.clarity }}/10</div>
+                    </div>
+                    <div class="param-row">
+                        <div class="param-name">Empathy</div>
+                        <div class="param-bar-bg">
+                            <div class="param-bar-fill" style="width: {{ param_avgs.empathy }}0%; background: #ec4899;"></div>
+                        </div>
+                        <div class="param-score">{{ param_avgs.empathy }}/10</div>
+                    </div>
+                    <div class="param-row">
+                        <div class="param-name">Creativity</div>
+                        <div class="param-bar-bg">
+                            <div class="param-bar-fill" style="width: {{ param_avgs.creativity }}0%; background: #6366f1;"></div>
+                        </div>
+                        <div class="param-score">{{ param_avgs.creativity }}/10</div>
+                    </div>
+                    <div class="param-row">
+                        <div class="param-name">Communication</div>
+                        <div class="param-bar-bg">
+                            <div class="param-bar-fill" style="width: {{ param_avgs.communication }}0%; background: #0ea5e9;"></div>
+                        </div>
+                        <div class="param-score">{{ param_avgs.communication }}/10</div>
+                    </div>
+                    <div class="param-row">
+                        <div class="param-name">Flexible Thinking</div>
+                        <div class="param-bar-bg">
+                            <div class="param-bar-fill" style="width: {{ param_avgs.flexible }}0%; background: #a855f7;"></div>
+                        </div>
+                        <div class="param-score">{{ param_avgs.flexible }}/10</div>
+                    </div>
+                </div>
+
+                {% if top_3 %}
+                <!-- Podium Section -- Top 3 Winners -->
+                <div class="podium-section">
+                    <div class="podium-title">
+                        <h2>School Finals — Top 3</h2>
+                        <p><span style="color: rgba(255,255,255,0.7);">{{ school.name }}</span> IFTx Competition</p>
+                    </div>
+
+                    <div class="podium-container">
+                        {% if top_3|length >= 2 %}
+                        <!-- Second Place -->
+                        <div class="podium-card podium-second">
+                            <div class="podium-avatar-container">
+                                <div class="podium-glow"></div>
+                                <div class="podium-avatar">{{ top_3.1.student_initial }}</div>
+                                <div class="podium-rank">#2</div>
+                            </div>
+                            <div class="podium-info">
+                                <p class="podium-name">{{ top_3.1.student_name }}</p>
+                                <p class="podium-team">Grade {{ top_3.1.grade }}</p>
+                                <p class="podium-idea-label">Idea</p>
+                                <p class="podium-idea">{{ top_3.1.title }}</p>
+                                <div class="podium-score">
+                                    <span class="material-symbols-outlined">star</span>
+                                    {{ top_3.1.score }}/100
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if top_3|length >= 1 %}
+                        <!-- First Place -->
+                        <div class="podium-card podium-first">
+                            <div class="podium-avatar-container">
+                                <span class="material-symbols-outlined crown-icon" style="font-variation-settings: 'FILL' 1">stars</span>
+                                <div class="podium-glow"></div>
+                                <div class="podium-avatar">{{ top_3.0.student_initial }}</div>
+                                <div class="podium-rank">#1</div>
+                            </div>
+                            <div class="podium-info">
+                                <p class="podium-name">{{ top_3.0.student_name }}</p>
+                                <p class="podium-team">Grade {{ top_3.0.grade }}</p>
+                                <p class="podium-idea-label">Idea</p>
+                                <p class="podium-idea">{{ top_3.0.title }}</p>
+                                <div class="podium-score">
+                                    <span class="material-symbols-outlined">star</span>
+                                    {{ top_3.0.score }}/100
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if top_3|length >= 3 %}
+                        <!-- Third Place -->
+                        <div class="podium-card podium-third">
+                            <div class="podium-avatar-container">
+                                <div class="podium-glow"></div>
+                                <div class="podium-avatar">{{ top_3.2.student_initial }}</div>
+                                <div class="podium-rank">#3</div>
+                            </div>
+                            <div class="podium-info">
+                                <p class="podium-name">{{ top_3.2.student_name }}</p>
+                                <p class="podium-team">Grade {{ top_3.2.grade }}</p>
+                                <p class="podium-idea-label">Idea</p>
+                                <p class="podium-idea">{{ top_3.2.title }}</p>
+                                <div class="podium-score">
+                                    <span class="material-symbols-outlined">star</span>
+                                    {{ top_3.2.score }}/100
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Leaderboard Section -->
+                <div class="leaderboard-section">
+                    <div class="leaderboard-header">
+                        <div class="leaderboard-title">
+                            <span class="material-symbols-outlined">leaderboard</span>
+                            Full Rankings
+                        </div>
+                        <div class="filter-tabs">
+                            <button class="filter-tab active" data-filter="all">All</button>
+                            <button class="filter-tab" data-filter="shortlisted">Shortlisted</button>
+                        </div>
+                    </div>
+
+                    <div class="leaderboard-grid">
+                        {% for result in results %}
+                        {% if forloop.counter0|divisibleby:3 %}<div class="row g-3 mb-3">{% endif %}
+                            <div class="col-lg-4 col-md-6">
+                                <div class="leader-card" data-type="{% if result.is_top_400 %}shortlisted{% endif %}">
+                                    <div class="leader-header">
+                                        <div class="leader-rank">{{ result.rank|stringformat:"02d" }}</div>
+                                        <div class="leader-avatar" style="background: {% cycle '#3b82f6' '#f59e0b' '#22c55e' '#ef4444' '#8b5cf6' '#14b8a6' '#ec4899' '#6366f1' '#78716c' %};">{{ result.student_initial }}</div>
+                                        <div class="leader-info">
+                                            <p class="leader-name">{{ result.student_name }}</p>
+                                            <span class="leader-team">Grade {{ result.grade }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="leader-idea">
+                                        <p class="leader-idea-label">Idea</p>
+                                        <p class="leader-idea-text">{{ result.title }}</p>
+                                    </div>
+                                    <div class="leader-score-badge">
+                                        <span class="material-symbols-outlined">star</span>
+                                        {{ result.score }}/100
+                                    </div>
+                                    {% if result.is_top_400 %}
+                                    <span class="status-badge shortlisted" style="position: absolute; bottom: 12px; right: 12px;">Shortlisted</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% if forloop.counter|divisibleby:3 or forloop.last %}</div>{% endif %}
+                        {% empty %}
+                        <div class="text-center py-4">
+                            <p style="color: var(--text-muted); font-size: 0.875rem;">No additional results beyond the top 3.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    {% if results.has_other_pages %}
+                    <div class="pagination-wrapper">
+                        {% if results.has_previous %}
+                        <a href="?page={{ results.previous_page_number }}" class="page-btn">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">chevron_left</span>
+                        </a>
+                        {% endif %}
+                        {% for num in results.paginator.page_range %}
+                        <a href="?page={{ num }}" class="page-btn {% if results.number == num %}active{% endif %}">{{ num }}</a>
+                        {% endfor %}
+                        {% if results.has_next %}
+                        <a href="?page={{ results.next_page_number }}" class="page-btn">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">chevron_right</span>
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+    (function() {
+        // Sidebar toggle
+        const sidebar = document.getElementById('schoolAppSidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const toggleBtn = document.getElementById('sidebarToggleBtn');
+
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', function() {
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.toggle('mobile-open');
+                    overlay.classList.toggle('active');
+                } else {
+                    sidebar.classList.toggle('collapsed');
+                }
+            });
+        }
+
+        if (overlay) {
+            overlay.addEventListener('click', function() {
+                sidebar.classList.remove('mobile-open');
+                overlay.classList.remove('active');
+            });
+        }
+
+        // Fullscreen
+        const fsBtn = document.getElementById('fullscreenBtn');
+        if (fsBtn) {
+            fsBtn.addEventListener('click', function() {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                    fsBtn.querySelector('.material-symbols-outlined').textContent = 'fullscreen_exit';
+                } else {
+                    document.exitFullscreen();
+                    fsBtn.querySelector('.material-symbols-outlined').textContent = 'fullscreen';
+                }
+            });
+        }
+
+        // Filter tabs
+        const filterTabs = document.querySelectorAll('.filter-tab');
+        const leaderCards = document.querySelectorAll('.leader-card');
+
+        filterTabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                filterTabs.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+
+                const filter = this.getAttribute('data-filter');
+
+                leaderCards.forEach(card => {
+                    const types = card.getAttribute('data-type') || '';
+                    if (filter === 'all') {
+                        card.closest('.col-lg-4').style.display = '';
+                    } else if (types.includes(filter)) {
+                        card.closest('.col-lg-4').style.display = '';
+                    } else {
+                        card.closest('.col-lg-4').style.display = 'none';
+                    }
+                });
+            });
+        });
+    })();
+
+    // Export CSV
+    function exportCSV() {
+        const rows = [['Rank', 'Name', 'Grade', 'Idea', 'Score', 'Shortlisted']];
+
+        // Podium (top 3)
+        {% for r in top_3 %}
+        rows.push(['{{ r.rank }}', '{{ r.student_name|escapejs }}', '{{ r.grade }}', '{{ r.title|escapejs }}', '{{ r.score }}', '{% if r.is_top_400 %}Yes{% else %}No{% endif %}']);
+        {% endfor %}
+
+        // Leaderboard cards
+        document.querySelectorAll('.leader-card').forEach(card => {
+            const rank = card.querySelector('.leader-rank')?.textContent.trim() || '';
+            const name = card.querySelector('.leader-name')?.textContent.trim() || '';
+            const team = card.querySelector('.leader-team')?.textContent.trim() || '';
+            const idea = card.querySelector('.leader-idea-text')?.textContent.trim() || '';
+            const score = card.querySelector('.leader-score-badge')?.textContent.trim().replace('star', '').trim() || '';
+            const shortlisted = card.querySelector('.status-badge.shortlisted') ? 'Yes' : 'No';
+            rows.push([rank, name, team, idea, score, shortlisted]);
+        });
+
+        const csv = rows.map(r => r.map(c => '"' + c.replace(/"/g, '""') + '"').join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'iftx-results-{{ school.name|slugify }}.csv'; a.click();
+        URL.revokeObjectURL(url);
+    }
+    </script>
+    <script>
+    // Profile dropdown toggle
+    const profileBtn = document.getElementById('profileAvatarBtn');
+    const profileDd = document.getElementById('profileDropdown');
+    if (profileBtn && profileDd) {
+        profileBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            profileDd.style.display = profileDd.style.display === 'none' ? 'block' : 'none';
+        });
+        document.addEventListener('click', function() { profileDd.style.display = 'none'; });
+        profileDd.addEventListener('click', function(e) { e.stopPropagation(); });
+    }
+    </script>
+</body>
+</html>

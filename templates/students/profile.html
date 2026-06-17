@@ -1,0 +1,852 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>My Profile - IFT Student Portal</title>
+    <link rel="icon" type="image/png" href="{% static 'images/IFT_logo.png' %}">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+    <!-- Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <style>
+        :root {
+            --primary: #5E2A97;
+            --secondary: #DEDE50;
+            --primary-light: #E8D4F0;
+            --background-light: #F7F7F7;
+            --surface-light: #FFFFFF;
+            --border-light: #EEEEEE;
+            --text-dark: #222222;
+            --text-muted: #666666;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            overflow: hidden;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        .main-container { display: flex; height: 100vh; width: 100%; }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: 280px;
+            background: #FFFFFF;
+            border-right: 1px solid #EEEEEE;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: sticky;
+            top: 0;
+            transition: all 0.3s ease;
+            z-index: 20;
+        }
+
+        .sidebar.collapsed { width: 80px; }
+        .sidebar.collapsed .sidebar-title,
+        .sidebar.collapsed .sidebar-subtitle,
+        .sidebar.collapsed .nav-text,
+        .sidebar.collapsed .user-info { opacity: 0; width: 0; overflow: hidden; white-space: nowrap; }
+        .sidebar.collapsed .logo-img { width: 50px; height: 50px; margin: 0 auto; background-position: center; }
+        .sidebar.collapsed .nav-item { justify-content: center; padding-left: 1.7rem; }
+        .sidebar.collapsed .nav-item .material-symbols-outlined { margin: 0; }
+        .sidebar.collapsed .user-avatar { margin: 0 auto; }
+        .sidebar.collapsed .logout-btn { display: none; }
+        .sidebar.collapsed .user-profile { justify-content: center; }
+        .sidebar.collapsed .notification-badge { display: none; }
+
+        .sidebar-header { border-bottom: 1px solid #F7F7F7; }
+
+        .logo-img {
+            width: 250px; height: 50px;
+            background-size: contain; background-position: left center; background-repeat: no-repeat;
+            flex-shrink: 0;
+        }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.75rem 1rem; border-radius: 0.5rem;
+            text-decoration: none; color: #222222;
+            transition: all 0.2s ease; cursor: pointer;
+            margin-bottom: 0.25rem; position: relative;
+        }
+        .nav-item:hover { background: #F7F7F7; color: #222222; }
+        .nav-item .material-symbols-outlined { font-size: 24px; color: #666666; transition: all 0.2s ease; }
+        .nav-item.nav-item-active { background: rgba(94, 42, 151, 0.1); color: #5E2A97; }
+        .nav-item.nav-item-active .material-symbols-outlined { color: #5E2A97; font-variation-settings: 'FILL' 1; }
+        .nav-text { font-size: 0.875rem; font-weight: 500; }
+
+        .notification-badge {
+            position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%);
+            font-size: 0.625rem; font-weight: 700; background: #EF4444; color: white;
+            padding: 0.125rem 0.375rem; border-radius: 9999px; min-width: 1.125rem;
+            text-align: center; line-height: 1.2; display: inline-flex;
+            align-items: center; justify-content: center; height: 1.125rem;
+        }
+
+        .sidebar-footer { border-top: 1px solid #EEEEEE; margin-top: auto; }
+        .user-profile {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.75rem; border-radius: 0.5rem; transition: all 0.2s ease; cursor: pointer;
+        }
+        .user-profile:hover { background: #F7F7F7; }
+        .user-avatar {
+            width: 2.5rem; height: 2.5rem; border-radius: 50%;
+            overflow: hidden; flex-shrink: 0; border: 2px solid #EEEEEE;
+            background: var(--primary); display: flex; align-items: center;
+            justify-content: center; color: white; font-weight: 700; font-size: 1rem;
+        }
+        .user-info { flex: 1; }
+        .user-name { font-size: 0.875rem; font-weight: 700; color: #222222; margin: 0 0 0.125rem 0; line-height: 1.2; }
+        .user-role { font-size: 0.75rem; color: #666666; margin: 0; line-height: 1.2; }
+        .logout-btn {
+            background: none; border: none; color: #666666; cursor: pointer;
+            padding: 0.5rem; border-radius: 0.375rem; transition: all 0.2s ease;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .logout-btn:hover { background: rgba(94, 42, 151, 0.1); color: #5E2A97; }
+        .logout-btn .material-symbols-outlined { font-size: 20px; }
+
+        /* Mobile sidebar */
+        .sidebar-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 998; opacity: 0; transition: opacity 0.3s ease;
+        }
+        .sidebar-overlay.active { display: block; opacity: 1; }
+
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; left: -280px; z-index: 999; transition: left 0.3s ease; }
+            .sidebar.mobile-open { left: 0; }
+            .sidebar.collapsed { left: -80px; }
+            .sidebar.collapsed.mobile-open { left: 0; }
+        }
+
+        /* ===== HEADER ===== */
+        .top-header {
+            height: 64px; background: #FFFFFF; border-bottom: 1px solid #EEEEEE;
+            display: flex; align-items: center; padding: 12px 2rem;
+            position: sticky; top: 0; z-index: 100;
+        }
+        .header-icon-btn {
+            width: 2.5rem; height: 2.5rem; border-radius: 0.5rem; border: none;
+            background: #F7F7F7; color: #666666; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;
+        }
+        .header-icon-btn:hover { background: #EEEEEE; color: #5E2A97; }
+        .header-icon-btn .material-symbols-outlined { font-size: 22px; }
+        .header-avatar {
+            width: 2.5rem; height: 2.5rem; border-radius: 50%;
+            background: var(--primary); display: flex; align-items: center;
+            justify-content: center; color: white; font-weight: 700; font-size: 0.875rem;
+            border: 2px solid #5E2A97; cursor: pointer; transition: all 0.2s ease;
+        }
+        .header-avatar:hover { transform: scale(1.05); box-shadow: 0 0 0 4px rgba(94,42,151,0.1); }
+
+        /* Header Dropdowns */
+        .header-dropdown {
+            display: none; position: absolute; top: calc(100% + 12px); right: 0;
+            background: #fff; border-radius: 16px; padding: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12); border: 1px solid #f0f0f0;
+            min-width: 260px; z-index: 200;
+        }
+        .header-dropdown.show { display: block; }
+        .header-dropdown.notif-dropdown { min-width: 320px; }
+        .dropdown-link {
+            display: flex; align-items: center; gap: 12px; padding: 10px 4px;
+            text-decoration: none; color: var(--text-dark); font-size: 0.9rem; font-weight: 500;
+            border-radius: 8px; transition: background 0.15s;
+        }
+        .dropdown-link:hover { background: #f8f8f8; }
+        .notif-item {
+            display: flex; align-items: flex-start; gap: 12px; padding: 10px 4px;
+            border-radius: 8px; transition: background 0.15s;
+        }
+        .notif-item:hover { background: #f8f8f8; }
+        .notif-item.priority { background: rgba(94,42,151,0.04); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0; }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-content { flex: 1; display: flex; flex-direction: column; height: 100%; overflow-y: auto; position: relative; z-index: 10; }
+        .content-wrapper { flex: 1; padding: 2rem; max-width: 1200px; margin: 0 auto; width: 100%; }
+
+        /* Page Header */
+        .page-header { margin-bottom: 2rem; }
+        .page-title { font-size: 2rem; font-weight: 600; color: var(--text-dark); margin-bottom: 0.5rem; line-height: 1.2; }
+        .page-subtitle { font-size: 0.875rem; font-weight: 500; color: var(--text-muted); }
+
+        /* Profile Header Card */
+        .profile-header-card {
+            background: linear-gradient(135deg, var(--primary) 0%, #7B3FB5 100%);
+            border-radius: 1rem; padding: 2rem; margin-bottom: 2rem;
+            position: relative; overflow: hidden;
+        }
+        .profile-header-card::before {
+            content: ''; position: absolute; top: -50%; right: -10%;
+            width: 400px; height: 400px; background: rgba(255,255,255,0.1); border-radius: 50%;
+        }
+        .profile-header-content {
+            position: relative; z-index: 1; display: flex; align-items: center; gap: 2rem;
+        }
+        .profile-avatar-wrapper { position: relative; display: inline-block; }
+        .profile-avatar-large {
+            width: 120px; height: 120px; border-radius: 50%; border: 4px solid white;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.2); color: white; font-size: 3rem; font-weight: 700;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .avatar-edit-overlay {
+            position: absolute; bottom: 0; right: 0; width: 36px; height: 36px;
+            background: var(--primary); border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; cursor: pointer;
+            border: 3px solid white; transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .avatar-edit-overlay:hover { background: #7B3FB5; transform: scale(1.1); }
+        .avatar-edit-overlay .material-symbols-outlined { font-size: 18px; color: white; }
+        .profile-header-info { flex: 1; color: white; }
+        .profile-name { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .profile-meta { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1rem; }
+        .profile-meta-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; }
+        .profile-meta-item .material-symbols-outlined { font-size: 18px; }
+        .profile-stats { display: flex; gap: 2rem; }
+        .profile-stat { text-align: center; }
+        .profile-stat-value { font-size: 1.5rem; font-weight: 700; display: block; }
+        .profile-stat-label { font-size: 0.75rem; opacity: 0.9; display: block; }
+
+        /* Cards */
+        .profile-card {
+            background: var(--surface-light); border: 1px solid var(--border-light);
+            border-radius: 1rem; padding: 1.5rem; margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .card-header-custom {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-light);
+        }
+        .card-title-custom {
+            font-size: 1.125rem; font-weight: 700; color: var(--text-dark); margin: 0;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .card-title-custom .material-symbols-outlined { color: var(--primary); }
+
+        .btn-edit {
+            padding: 0.5rem 1rem; background: none; border: 1px solid var(--border-light);
+            border-radius: 0.5rem; font-size: 0.875rem; font-weight: 500;
+            color: var(--text-dark); cursor: pointer; transition: all 0.2s ease;
+            font-family: 'Poppins', sans-serif;
+        }
+        .btn-edit:hover { background: var(--background-light); border-color: var(--primary); color: var(--primary); }
+
+        /* Info Grid */
+        .info-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;
+        }
+        .info-item { display: flex; flex-direction: column; gap: 0.5rem; }
+        .info-label {
+            font-size: 0.75rem; font-weight: 600; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        .info-value { font-size: 0.9375rem; font-weight: 500; color: var(--text-dark); }
+
+        /* Edit Mode Styles */
+        .edit-mode .info-item input,
+        .edit-mode .info-item select,
+        .edit-mode .info-item textarea {
+            width: 100%; padding: 0.625rem 0.875rem; border: 1px solid var(--border-light);
+            border-radius: 0.5rem; font-size: 0.875rem; font-family: 'Poppins', sans-serif;
+            color: var(--text-dark); background: white; transition: all 0.2s ease;
+        }
+        .edit-mode .info-item input:focus,
+        .edit-mode .info-item select:focus,
+        .edit-mode .info-item textarea:focus {
+            outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(94,42,151,0.1);
+        }
+        .edit-mode .info-item input.error,
+        .edit-mode .info-item select.error { border-color: #ef4444; }
+        .edit-mode .info-item input.error:focus,
+        .edit-mode .info-item select.error:focus { box-shadow: 0 0 0 3px rgba(239,68,68,0.1); }
+        .edit-mode .info-value { display: none; }
+
+        .error-message { font-size: 0.75rem; color: #ef4444; margin-top: 0.25rem; display: none; }
+        .error-message.show { display: block; }
+
+        .edit-actions {
+            display: none; gap: 0.75rem; margin-top: 1.5rem;
+            padding-top: 1.5rem; border-top: 1px solid var(--border-light);
+        }
+        .edit-mode .edit-actions { display: flex; }
+
+        .btn-save {
+            padding: 0.75rem 2rem; background: var(--primary); color: white; border: none;
+            border-radius: 0.5rem; font-size: 0.875rem; font-weight: 700; cursor: pointer;
+            transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(94,42,151,0.3);
+            font-family: 'Poppins', sans-serif;
+        }
+        .btn-save:hover { background: #7B3FB5; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(94,42,151,0.4); }
+        .btn-cancel {
+            padding: 0.75rem 2rem; background: white; color: var(--text-dark);
+            border: 1px solid var(--border-light); border-radius: 0.5rem;
+            font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease;
+            font-family: 'Poppins', sans-serif;
+        }
+        .btn-cancel:hover { background: var(--background-light); border-color: var(--text-muted); }
+
+        /* Achievement Badge */
+        .achievement-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem;
+        }
+        .achievement-badge {
+            background: var(--background-light); border: 1px solid var(--border-light);
+            border-radius: 0.75rem; padding: 1rem; text-align: center; transition: all 0.2s ease;
+        }
+        .achievement-badge:hover { background: white; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .achievement-icon {
+            width: 3rem; height: 3rem; background: rgba(94,42,151,0.1); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 0.75rem; color: var(--primary);
+        }
+        .achievement-icon .material-symbols-outlined { font-size: 28px; }
+        .achievement-name { font-size: 0.875rem; font-weight: 600; color: var(--text-dark); margin-bottom: 0.25rem; }
+        .achievement-date { font-size: 0.75rem; color: var(--text-muted); }
+
+        /* Activity Timeline */
+        .activity-timeline { display: flex; flex-direction: column; gap: 1rem; }
+        .activity-item {
+            display: flex; gap: 1rem; padding: 1rem; background: var(--background-light);
+            border-radius: 0.5rem; transition: all 0.2s ease;
+        }
+        .activity-item:hover { background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .activity-icon {
+            width: 2.5rem; height: 2.5rem; background: rgba(94,42,151,0.1); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; color: var(--primary); flex-shrink: 0;
+        }
+        .activity-icon .material-symbols-outlined { font-size: 20px; }
+        .activity-content { flex: 1; }
+        .activity-title { font-size: 0.875rem; font-weight: 600; color: var(--text-dark); margin-bottom: 0.25rem; }
+        .activity-description { font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 0.25rem; }
+        .activity-time { font-size: 0.75rem; color: var(--text-muted); }
+
+        /* Toast */
+        @keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(400px); opacity: 0; } }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .content-wrapper { padding: 1rem; }
+            .profile-header-content { flex-direction: column; text-align: center; }
+            .profile-meta, .profile-stats { flex-direction: column; gap: 1rem; }
+            .page-title { font-size: 1.5rem; }
+            .info-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Sidebar Overlay (mobile) -->
+        {% with active_page='profile' %}
+        {% include 'students/partials/sidebar.html' %}
+        {% endwith %}
+
+        <!-- Main Content -->
+        <main class="main-content">
+            {% include 'students/partials/header.html' %}
+
+            <!-- Page Content -->
+            <div class="content-wrapper">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <h1 class="page-title">My Profile</h1>
+                    <p class="page-subtitle">Manage your personal information and track your progress</p>
+                </div>
+
+                <!-- Profile Header Card -->
+                <div class="profile-header-card">
+                    <div class="profile-header-content">
+                        <div class="profile-avatar-wrapper">
+                            <div class="profile-avatar-large" id="profileAvatar">
+                                {{ student.user.first_name|first|upper }}
+                            </div>
+                            <div class="avatar-edit-overlay" id="avatarEditBtn" title="Change profile picture">
+                                <span class="material-symbols-outlined">photo_camera</span>
+                            </div>
+                        </div>
+                        <div class="profile-header-info">
+                            <h2 class="profile-name">{{ student.user.get_full_name|default:student.user.username }}</h2>
+                            <div class="profile-meta">
+                                <div class="profile-meta-item">
+                                    <span class="material-symbols-outlined">school</span>
+                                    <span>{% if student.grade %}Grade {{ student.grade }}{% else %}Grade N/A{% endif %}</span>
+                                </div>
+                                <div class="profile-meta-item">
+                                    <span class="material-symbols-outlined">location_on</span>
+                                    <span>{{ student.school_name|default:"School not set" }}</span>
+                                </div>
+                            </div>
+                            <div class="profile-stats">
+                                <div class="profile-stat">
+                                    <span class="profile-stat-value">{{ submissions_count }}</span>
+                                    <span class="profile-stat-label">Ideas Submitted</span>
+                                </div>
+                                <div class="profile-stat">
+                                    <span class="profile-stat-value">{{ team_count }}</span>
+                                    <span class="profile-stat-label">Team Members</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Two Column Layout -->
+                <div class="row">
+                    <!-- Left Column -->
+                    <div class="col-12 col-lg-8">
+                        <!-- Personal Information -->
+                        <div class="profile-card" id="card-personal">
+                            <div class="card-header-custom">
+                                <h3 class="card-title-custom">
+                                    <span class="material-symbols-outlined">person</span>
+                                    Personal Information
+                                </h3>
+                                <button class="btn-edit" onclick="toggleEdit('personal')">Edit</button>
+                            </div>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <span class="info-label">Full Name</span>
+                                    <span class="info-value">{{ student.user.get_full_name|default:"Not set" }}</span>
+                                    <input type="text" class="form-control" value="{{ student.user.get_full_name }}" data-field="full_name" style="display:none;">
+                                    <span class="error-message" data-error="full_name"></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Email Address</span>
+                                    <span class="info-value">{{ student.user.email|default:"Not set" }}</span>
+                                    <input type="email" class="form-control" value="{{ student.user.email }}" data-field="email" style="display:none;">
+                                    <span class="error-message" data-error="email"></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Phone Number</span>
+                                    <span class="info-value">{{ student.phone|default:"Not set" }}</span>
+                                    <input type="tel" class="form-control" value="{{ student.phone|default:'' }}" data-field="phone" style="display:none;">
+                                    <span class="error-message" data-error="phone"></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Student ID</span>
+                                    <span class="info-value">{{ student.student_id|default:"N/A" }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Gender</span>
+                                    <span class="info-value">{{ student.get_gender_display|default:"Not set" }}</span>
+                                    <select class="form-control" data-field="gender" style="display:none;">
+                                        <option value="">Select Gender</option>
+                                        <option value="male" {% if student.gender == "male" %}selected{% endif %}>Male</option>
+                                        <option value="female" {% if student.gender == "female" %}selected{% endif %}>Female</option>
+                                        <option value="other" {% if student.gender == "other" %}selected{% endif %}>Other</option>
+                                    </select>
+                                    <span class="error-message" data-error="gender"></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Date of Birth</span>
+                                    <span class="info-value">{{ student.date_of_birth|date:"M d, Y"|default:"Not set" }}</span>
+                                    <input type="date" class="form-control" value="{{ student.date_of_birth|date:'Y-m-d'|default:'' }}" data-field="date_of_birth" style="display:none;">
+                                    <span class="error-message" data-error="date_of_birth"></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Nationality</span>
+                                    <span class="info-value">{{ student.nationality|default:"Not set" }}</span>
+                                    <input type="text" class="form-control" value="{{ student.nationality|default:'' }}" data-field="nationality" style="display:none;">
+                                    <span class="error-message" data-error="nationality"></span>
+                                </div>
+                            </div>
+                            <div class="edit-actions">
+                                <button class="btn-save" onclick="saveSection('personal')">Save Changes</button>
+                                <button class="btn-cancel" onclick="cancelEdit('personal')">Cancel</button>
+                            </div>
+                        </div>
+
+                        <!-- Academic Information -->
+                        <div class="profile-card" id="card-academic">
+                            <div class="card-header-custom">
+                                <h3 class="card-title-custom">
+                                    <span class="material-symbols-outlined">school</span>
+                                    Academic Information
+                                </h3>
+                                <button class="btn-edit" onclick="toggleEdit('academic')">Edit</button>
+                            </div>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <span class="info-label">School Name</span>
+                                    <span class="info-value">{{ student.school_display_name|default:"Not set" }}</span>
+                                    <!-- School is read-only -->
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Current Grade</span>
+                                    <span class="info-value">{% if student.grade %}Grade {{ student.grade }}{% else %}Not set{% endif %}</span>
+                                    <select class="form-control" data-field="grade" style="display:none;">
+                                        <option value="">Select Grade</option>
+                                        {% for i in "123456789" %}
+                                        <option value="{{ i }}" {% if student.grade == i %}selected{% endif %}>Grade {{ i }}</option>
+                                        {% endfor %}
+                                        <option value="10" {% if student.grade == "10" %}selected{% endif %}>Grade 10</option>
+                                        <option value="11" {% if student.grade == "11" %}selected{% endif %}>Grade 11</option>
+                                        <option value="12" {% if student.grade == "12" %}selected{% endif %}>Grade 12</option>
+                                    </select>
+                                    <span class="error-message" data-error="grade"></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Division</span>
+                                    <span class="info-value">{{ student.division|default:"Not set" }}</span>
+                                    <input type="text" class="form-control" value="{{ student.division|default:'' }}" data-field="division" style="display:none;">
+                                    <span class="error-message" data-error="division"></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Roll Number</span>
+                                    <span class="info-value">{{ student.roll_number|default:"Not set" }}</span>
+                                    <input type="text" class="form-control" value="{{ student.roll_number|default:'' }}" data-field="roll_number" style="display:none;">
+                                    <span class="error-message" data-error="roll_number"></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Academic Year</span>
+                                    <span class="info-value">{{ student.academic_year|default:"Not set" }}</span>
+                                    <input type="text" class="form-control" value="{{ student.academic_year|default:'' }}" data-field="academic_year" placeholder="e.g. 2025-26" style="display:none;">
+                                    <span class="error-message" data-error="academic_year"></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Stream</span>
+                                    <span class="info-value">{{ student.get_stream_display|default:"Not set" }}</span>
+                                    <select class="form-control" data-field="stream" style="display:none;">
+                                        <option value="">Select Stream</option>
+                                        <option value="science" {% if student.stream == "science" %}selected{% endif %}>Science</option>
+                                        <option value="commerce" {% if student.stream == "commerce" %}selected{% endif %}>Commerce</option>
+                                        <option value="arts" {% if student.stream == "arts" %}selected{% endif %}>Arts/Humanities</option>
+                                        <option value="na" {% if student.stream == "na" %}selected{% endif %}>Not Applicable</option>
+                                    </select>
+                                    <span class="error-message" data-error="stream"></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">School Board</span>
+                                    <span class="info-value">{{ student.get_school_board_display|default:"Not set" }}</span>
+                                    <select class="form-control" data-field="school_board" style="display:none;">
+                                        <option value="">Select Board</option>
+                                        <option value="CBSE" {% if student.school_board == "CBSE" %}selected{% endif %}>CBSE</option>
+                                        <option value="ICSE" {% if student.school_board == "ICSE" %}selected{% endif %}>ICSE</option>
+                                        <option value="SSC" {% if student.school_board == "SSC" %}selected{% endif %}>SSC</option>
+                                        <option value="IB" {% if student.school_board == "IB" %}selected{% endif %}>IB</option>
+                                        <option value="IGCSE" {% if student.school_board == "IGCSE" %}selected{% endif %}>IGCSE</option>
+                                    </select>
+                                    <span class="error-message" data-error="school_board"></span>
+                                </div>
+                            </div>
+                            <div class="edit-actions">
+                                <button class="btn-save" onclick="saveSection('academic')">Save Changes</button>
+                                <button class="btn-cancel" onclick="cancelEdit('academic')">Cancel</button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="col-12 col-lg-4">
+                        <!-- Contact Information -->
+                        <div class="profile-card" id="card-contact">
+                            <div class="card-header-custom">
+                                <h3 class="card-title-custom">
+                                    <span class="material-symbols-outlined">contact_mail</span>
+                                    Contact Information
+                                </h3>
+                                <button class="btn-edit" onclick="toggleEdit('contact')">Edit</button>
+                            </div>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <span class="info-label">Phone</span>
+                                    <span class="info-value">{{ student.phone|default:"Not set" }}</span>
+                                    <input type="tel" class="form-control" value="{{ student.phone|default:'' }}" data-field="phone" style="display:none;">
+                                    <span class="error-message" data-error="phone"></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Parent Mobile</span>
+                                    <span class="info-value">{{ student.parent_mobile|default:"Not set" }}</span>
+                                    <input type="tel" class="form-control" value="{{ student.parent_mobile|default:'' }}" data-field="parent_mobile" style="display:none;">
+                                    <span class="error-message" data-error="parent_mobile"></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Parent Email</span>
+                                    <span class="info-value">{{ student.parent_email|default:"Not set" }}</span>
+                                    <input type="email" class="form-control" value="{{ student.parent_email|default:'' }}" data-field="parent_email" style="display:none;">
+                                    <span class="error-message" data-error="parent_email"></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Address</span>
+                                    <span class="info-value">{{ student.address|default:"Not set" }}</span>
+                                    <textarea class="form-control" data-field="address" rows="2" style="display:none;">{{ student.address|default:'' }}</textarea>
+                                    <span class="error-message" data-error="address"></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">City</span>
+                                    <span class="info-value">{{ student.city|default:"Not set" }}</span>
+                                    <input type="text" class="form-control" value="{{ student.city|default:'' }}" data-field="city" style="display:none;">
+                                    <span class="error-message" data-error="city"></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">State</span>
+                                    <span class="info-value">{{ student.state|default:"Not set" }}</span>
+                                    <input type="text" class="form-control" value="{{ student.state|default:'' }}" data-field="state" style="display:none;">
+                                    <span class="error-message" data-error="state"></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">PIN Code</span>
+                                    <span class="info-value">{{ student.pin_code|default:"Not set" }}</span>
+                                    <input type="text" class="form-control" value="{{ student.pin_code|default:'' }}" data-field="pin_code" maxlength="10" style="display:none;">
+                                    <span class="error-message" data-error="pin_code"></span>
+                                </div>
+                            </div>
+                            <div class="edit-actions">
+                                <button class="btn-save" onclick="saveSection('contact')">Save Changes</button>
+                                <button class="btn-cancel" onclick="cancelEdit('contact')">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // ===== SIDEBAR TOGGLE =====
+        const sidebar = document.getElementById('studentAppSidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
+
+        sidebarToggleBtn.addEventListener('click', function() {
+            if (window.innerWidth <= 768) {
+                sidebar.classList.toggle('mobile-open');
+                sidebarOverlay.classList.toggle('active');
+            } else {
+                sidebar.classList.toggle('collapsed');
+            }
+        });
+
+        sidebarOverlay.addEventListener('click', function() {
+            sidebar.classList.remove('mobile-open');
+            sidebarOverlay.classList.remove('active');
+        });
+
+        // ===== HEADER DROPDOWNS =====
+        const profileBtn = document.getElementById('profileBtn');
+        const profileDropdown = document.getElementById('profileDropdown');
+        const helpBtn = document.getElementById('helpBtn');
+        const helpDropdown = document.getElementById('helpDropdown');
+        const notifBtn = document.getElementById('notifBtn');
+        const notifDropdown = document.getElementById('notifDropdown');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+
+        function closeAllDropdowns() {
+            profileDropdown.classList.remove('show');
+            helpDropdown.classList.remove('show');
+            notifDropdown.classList.remove('show');
+        }
+
+        profileBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const isOpen = profileDropdown.classList.contains('show');
+            closeAllDropdowns();
+            if (!isOpen) profileDropdown.classList.add('show');
+        });
+
+        helpBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const isOpen = helpDropdown.classList.contains('show');
+            closeAllDropdowns();
+            if (!isOpen) helpDropdown.classList.add('show');
+        });
+
+        notifBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const isOpen = notifDropdown.classList.contains('show');
+            closeAllDropdowns();
+            if (!isOpen) notifDropdown.classList.add('show');
+        });
+
+        document.addEventListener('click', function() { closeAllDropdowns(); });
+
+        fullscreenBtn.addEventListener('click', function() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+                this.querySelector('.material-symbols-outlined').textContent = 'fullscreen_exit';
+            } else {
+                document.exitFullscreen();
+                this.querySelector('.material-symbols-outlined').textContent = 'fullscreen';
+            }
+        });
+
+        // ===== PROFILE EDIT FUNCTIONALITY =====
+        let originalValues = {};
+
+        function toggleEdit(section) {
+            const card = document.getElementById('card-' + section);
+            if (!card) return;
+
+            if (card.classList.contains('edit-mode')) {
+                cancelEdit(section);
+            } else {
+                // Store original values
+                originalValues[section] = {};
+                const inputs = card.querySelectorAll('input[data-field], select[data-field], textarea[data-field]');
+                inputs.forEach(function(input) {
+                    originalValues[section][input.getAttribute('data-field')] = input.value;
+                });
+
+                card.classList.add('edit-mode');
+                inputs.forEach(function(input) {
+                    input.style.display = 'block';
+                    const infoItem = input.closest('.info-item');
+                    const valueSpan = infoItem.querySelector('.info-value');
+                    if (valueSpan) valueSpan.style.display = 'none';
+                });
+
+                const editBtn = card.querySelector('.btn-edit');
+                if (editBtn) { editBtn.textContent = 'Cancel'; editBtn.style.background = 'var(--background-light)'; }
+            }
+        }
+
+        function cancelEdit(section) {
+            const card = document.getElementById('card-' + section);
+            if (!card) return;
+
+            const inputs = card.querySelectorAll('input[data-field], select[data-field], textarea[data-field]');
+
+            // Restore original values
+            if (originalValues[section]) {
+                inputs.forEach(function(input) {
+                    const field = input.getAttribute('data-field');
+                    if (originalValues[section][field] !== undefined) {
+                        input.value = originalValues[section][field];
+                    }
+                });
+            }
+
+            card.classList.remove('edit-mode');
+            inputs.forEach(function(input) {
+                input.style.display = 'none';
+                input.classList.remove('error');
+                const infoItem = input.closest('.info-item');
+                const valueSpan = infoItem.querySelector('.info-value');
+                if (valueSpan) valueSpan.style.display = 'block';
+                const errorSpan = infoItem.querySelector('.error-message');
+                if (errorSpan) { errorSpan.classList.remove('show'); errorSpan.textContent = ''; }
+            });
+
+            const editBtn = card.querySelector('.btn-edit');
+            if (editBtn) { editBtn.textContent = 'Edit'; editBtn.style.background = 'none'; }
+
+            delete originalValues[section];
+        }
+
+        function saveSection(section) {
+            const card = document.getElementById('card-' + section);
+            if (!card) return;
+
+            const inputs = card.querySelectorAll('input[data-field], select[data-field], textarea[data-field]');
+            const payload = { section: section };
+
+            inputs.forEach(function(input) {
+                payload[input.getAttribute('data-field')] = input.value;
+            });
+
+            fetch("{% url 'students:student_profile' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    // Update displayed values
+                    inputs.forEach(function(input) {
+                        const infoItem = input.closest('.info-item');
+                        const valueSpan = infoItem.querySelector('.info-value');
+                        if (valueSpan) {
+                            const val = input.value;
+                            if (input.tagName === 'SELECT') {
+                                valueSpan.textContent = input.options[input.selectedIndex].text;
+                            } else {
+                                valueSpan.textContent = val || 'Not set';
+                            }
+                        }
+                    });
+
+                    card.classList.remove('edit-mode');
+                    inputs.forEach(function(input) {
+                        input.style.display = 'none';
+                        const infoItem = input.closest('.info-item');
+                        const valueSpan = infoItem.querySelector('.info-value');
+                        if (valueSpan) valueSpan.style.display = 'block';
+                    });
+
+                    const editBtn = card.querySelector('.btn-edit');
+                    if (editBtn) { editBtn.textContent = 'Edit'; editBtn.style.background = 'none'; }
+
+                    showToast(data.message || 'Saved successfully!', 'success');
+                } else {
+                    showToast(data.message || 'Error saving changes', 'error');
+                }
+            })
+            .catch(function(err) {
+                console.error(err);
+                showToast('Network error. Please try again.', 'error');
+            });
+        }
+
+        // ===== TOAST NOTIFICATION =====
+        function showToast(message, type) {
+            const toast = document.createElement('div');
+            const bg = type === 'success' ? '#10b981' : '#ef4444';
+            toast.style.cssText = 'position:fixed;top:20px;right:20px;background:' + bg + ';color:white;padding:1rem 1.5rem;border-radius:0.5rem;box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:9999;font-weight:600;font-family:Poppins,sans-serif;font-size:0.875rem;animation:slideIn 0.3s ease-out;';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(function() {
+                toast.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(function() {
+                    if (toast.parentNode) document.body.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
+
+        // ===== CSRF COOKIE HELPER =====
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
+</html>

@@ -12,7 +12,7 @@ class OpenRouterClient:
     def __init__(self, api_key=None):
         self.api_key = api_key or settings.OPENROUTER_API_KEY
         self.base_url = "https://openrouter.ai/api/v1/chat/completions"
-        self.default_model = "anthropic/claude-3.5-sonnet"
+        self.default_model = "anthropic/claude-sonnet-4"
         
     def generate_completion(self, system_prompt, user_prompt, model=None, max_tokens=800, images=None):
         """
@@ -190,7 +190,7 @@ class OpenRouterClient:
                 json=payload,
                 timeout=300  # 5 min timeout for large video processing
             )
-            
+
             if not response.ok:
                 try:
                     error_data = response.json()
@@ -202,6 +202,11 @@ class OpenRouterClient:
 
             data = response.json()
             processing_time = time.time() - start_time
+
+            if 'choices' not in data:
+                error_msg = data.get('error', {}).get('message', '') if isinstance(data.get('error'), dict) else str(data.get('error', ''))
+                print(f"[VIDEO API] No 'choices' in response. Keys: {list(data.keys())}. Error: {error_msg}")
+                raise Exception(f"Video API error: {error_msg or 'No choices in response'}")
 
             return {
                 'content': data['choices'][0]['message']['content'],

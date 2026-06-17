@@ -23,23 +23,27 @@
             </a>
             <ul class="navbar-nav">
                 {% if user.is_authenticated %}
-                {% if user.is_staff or user.is_superuser %}
+                {% if user_role == 'superadmin' %}
                 <li><a href="{% url 'admins:dashboard' %}"
                         class="nav-link {% if 'admins' in request.path %}active{% endif %}">Admin Dashboard</a></li>
                 <li><a href="{% url 'admins:all_submissions' %}" class="nav-link">All Submissions</a></li>
                 <li><a href="{% url 're_evaluation:list' %}" class="nav-link {% if 're-evaluation' in request.path %}active{% endif %}">Re-Evaluation</a></li>
+                {% elif user_role == 'jury' %}
+                <li><a href="{% url 'admins:dashboard' %}"
+                        class="nav-link {% if 'admins' in request.path %}active{% endif %}">Evaluator Dashboard</a></li>
+                <li><a href="{% url 'admins:all_submissions' %}" class="nav-link">Assigned Ideas</a></li>
                 {% else %}
                 <li><a href="{% url 'students:dashboard' %}"
                         class="nav-link {% if 'dashboard' in request.path %}active{% endif %}">Dashboard</a></li>
                 <li><a href="{% url 'students:submit_idea' %}" class="nav-link">Submit Idea</a></li>
                 {% endif %}
-                <li><a href="{% url 'students:logout' %}"
+                <li><a href="{% url 'accounts:sign_out' %}"
                         style="padding-left: 1rem; border-left: 1px solid var(--border); margin-left: 1rem;"
                         class="nav-link">Logout</a></li>
                 {% else %}
                 <li><a href="{% url 'students:home' %}" class="nav-link">Home</a></li>
-                <li><a href="{% url 'students:login' %}" class="nav-link">Login</a></li>
-                <li><a href="{% url 'students:register' %}" class="btn btn-primary btn-sm">Get Started</a></li>
+                <li><a href="{% url 'accounts:sign_in' %}" class="nav-link">Login</a></li>
+                <li><a href="{% url 'accounts:sign_up' %}" class="btn btn-primary btn-sm">Get Started</a></li>
                 {% endif %}
             </ul>
         </div>

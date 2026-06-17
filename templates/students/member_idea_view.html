@@ -1,0 +1,168 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Idea Submission - IFT</title>
+    <link rel="icon" type="image/png" href="{% static 'images/IFT_logo.png' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        :root { --primary: #5E2A97; --secondary: #DEDE50; --text-dark: #222222; --text-muted: #666666; --border-light: #EEEEEE; --background-light: #F7F7F7; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background: var(--background-light); color: var(--text-dark); overflow: hidden; }
+        .main-container { display: flex; height: 100vh; width: 100%; }
+
+        .sidebar { width: 280px; background: #FFFFFF; border-right: 1px solid #EEEEEE; height: 100vh; display: flex; flex-direction: column; position: sticky; top: 0; transition: all 0.3s ease; overflow-y: auto; overflow-x: hidden; }
+        .sidebar-header { padding: 1rem; }
+        .logo-img { width: 250px; height: 50px; background-size: contain; background-repeat: no-repeat; background-position: left center; }
+        .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; border-radius: 0.5rem; text-decoration: none; color: #222; transition: all 0.2s; }
+        .nav-item:hover { background: #F7F7F7; }
+        .nav-item .material-symbols-outlined { font-size: 24px; color: #666; }
+        .nav-item.nav-item-active { background: rgba(94,42,151,0.1); color: #5E2A97; }
+        .nav-item.nav-item-active .material-symbols-outlined { color: #5E2A97; font-variation-settings: 'FILL' 1; }
+        .sidebar-footer { padding: 1rem; margin-top: auto; border-top: 1px solid #EEEEEE; }
+        .user-profile { display: flex; align-items: center; gap: 0.75rem; }
+        .user-avatar { width: 2.5rem; height: 2.5rem; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 0.875rem; }
+        .user-name { font-size: 0.875rem; font-weight: 600; margin: 0; }
+        .user-role { font-size: 0.75rem; color: #666; margin: 0; }
+        .logout-btn { color: #666; text-decoration: none; }
+
+        .main-content { flex: 1; display: flex; flex-direction: column; height: 100%; overflow-y: auto; }
+        {% include 'students/partials/header_css.html' %}
+
+        .content-wrapper { flex: 1; padding: 32px 40px; max-width: 1280px; width: 100%; }
+
+        .status-card {
+            background: #fff; border-radius: 16px; padding: 48px; text-align: center;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04); border: 1px solid var(--border-light);
+        }
+        .status-icon { width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 24px; display: flex; align-items: center; justify-content: center; }
+        .status-icon.waiting { background: #fef3c7; }
+        .status-icon.waiting .material-symbols-outlined { font-size: 40px; color: #d97706; }
+        .status-icon.ready { background: #f0fdf4; }
+        .status-icon.ready .material-symbols-outlined { font-size: 40px; color: #16a34a; }
+        .status-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; }
+        .status-desc { font-size: 0.95rem; color: var(--text-muted); margin-bottom: 24px; max-width: 500px; margin-left: auto; margin-right: auto; }
+        .btn-primary-custom {
+            display: inline-flex; align-items: center; gap: 8px; background: var(--primary); color: #fff;
+            padding: 12px 32px; border-radius: 10px; font-weight: 600; font-size: 0.9rem;
+            text-decoration: none; transition: all 0.2s; border: none; cursor: pointer;
+        }
+        .btn-primary-custom:hover { background: #7B3FB5; color: #fff; }
+        .btn-outline-custom {
+            display: inline-flex; align-items: center; gap: 8px; background: #fff; color: var(--primary);
+            padding: 12px 32px; border-radius: 10px; font-weight: 600; font-size: 0.9rem;
+            text-decoration: none; transition: all 0.2s; border: 2px solid var(--primary); cursor: pointer;
+        }
+        .btn-outline-custom:hover { background: rgba(94,42,151,0.05); color: var(--primary); }
+
+        .idea-preview { background: #fff; border-radius: 16px; padding: 32px; margin-top: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); border: 1px solid var(--border-light); text-align: left; }
+        .idea-preview h3 { font-size: 1.125rem; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .preview-field { margin-bottom: 16px; padding: 12px; background: #f8fafc; border-radius: 8px; }
+        .preview-label { font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; letter-spacing: 0.05em; margin-bottom: 4px; }
+        .preview-value { font-size: 0.875rem; line-height: 1.6; }
+    </style>
+</head>
+<body>
+<div class="main-container">
+    {% with active_page='submit' %}
+    {% include 'students/partials/sidebar.html' %}
+    {% endwith %}
+
+    <main class="main-content">
+        {% include 'students/partials/header.html' %}
+
+        <div class="content-wrapper">
+            <h1 style="font-size: 2rem; font-weight: 800; margin-bottom: 8px;">Idea Submission</h1>
+            <p style="color: var(--text-muted); margin-bottom: 32px;">You are a team member of <strong>{{ team.name }}</strong></p>
+
+            {% if leader_submission %}
+            <!-- Leader has submitted an idea — member can view + suggest changes -->
+            <div class="status-card">
+                <div class="status-icon ready">
+                    <span class="material-symbols-outlined">check_circle</span>
+                </div>
+                <h2 class="status-title">Idea Submitted by Team Leader</h2>
+                <p class="status-desc">
+                    Your team leader has submitted an idea. You can view it and suggest changes for the leader to review.
+                </p>
+                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                    <a href="{% url 'students:suggest_edit' leader_submission.id %}" class="btn-primary-custom">
+                        <span class="material-symbols-outlined" style="font-size:20px;">edit_note</span>
+                        Suggest Changes
+                    </a>
+                    <a href="{% url 'students:my_idea' %}" class="btn-outline-custom">
+                        <span class="material-symbols-outlined" style="font-size:20px;">visibility</span>
+                        View Idea
+                    </a>
+                </div>
+            </div>
+
+            <!-- Quick Preview -->
+            <div class="idea-preview">
+                <h3><span class="material-symbols-outlined" style="color:var(--primary);">article</span> Idea Preview</h3>
+                {% if leader_submission.title %}
+                <div class="preview-field">
+                    <p class="preview-label">Project Title</p>
+                    <p class="preview-value">{{ leader_submission.title }}</p>
+                </div>
+                {% endif %}
+                {% if leader_submission.q3_solution_simple %}
+                <div class="preview-field">
+                    <p class="preview-label">Solution</p>
+                    <p class="preview-value">{{ leader_submission.q3_solution_simple|truncatewords:50 }}</p>
+                </div>
+                {% endif %}
+                {% if leader_submission.q1_target_group %}
+                <div class="preview-field">
+                    <p class="preview-label">Target Group</p>
+                    <p class="preview-value">{{ leader_submission.q1_target_group|truncatewords:30 }}</p>
+                </div>
+                {% endif %}
+            </div>
+
+            {% else %}
+            <!-- Leader hasn't submitted yet -->
+            <div class="status-card">
+                <div class="status-icon waiting">
+                    <span class="material-symbols-outlined">hourglass_empty</span>
+                </div>
+                <h2 class="status-title">Waiting for Team Leader</h2>
+                <p class="status-desc">
+                    Your team leader hasn't submitted an idea yet. Once the idea is submitted, you'll be able to view it and suggest changes.
+                </p>
+                <p style="font-size:0.85rem; color:#94a3b8; margin-top:16px;">
+                    <span class="material-symbols-outlined" style="font-size:16px; vertical-align:middle;">info</span>
+                    Only the team leader can create and submit the idea. Team members can suggest edits after submission.
+                </p>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+
+{% include 'students/partials/header_js.html' %}
+<script>
+    const sidebar = document.getElementById('studentAppSidebar');
+    const toggle = document.getElementById('sidebarToggleBtn');
+    const overlay = document.getElementById('sidebarOverlay');
+    if (toggle && sidebar) {
+        toggle.addEventListener('click', () => {
+            if (window.innerWidth < 768) {
+                sidebar.classList.toggle('mobile-open');
+                if (overlay) overlay.classList.toggle('active');
+            } else {
+                sidebar.classList.toggle('collapsed');
+            }
+        });
+    }
+    if (overlay) overlay.addEventListener('click', () => {
+        sidebar.classList.remove('mobile-open');
+        overlay.classList.remove('active');
+    });
+</script>
+</body>
+</html>

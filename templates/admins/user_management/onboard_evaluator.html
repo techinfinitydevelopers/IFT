@@ -1,0 +1,1921 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Onboard Evaluator - IFT Platform</title>
+
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <style>
+        :root {
+            --primary: #5E2A97;
+            --secondary: #DEDE50;
+            --primary-light: #E8D4F0;
+            --background-light: #F7F7F7;
+            --surface-light: #FFFFFF;
+            --border-light: #EEEEEE;
+            --text-dark: #222222;
+            --text-muted: #666666;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #F3F4F6;
+            color: #1F2937;
+            min-height: 100vh;
+        }
+
+        .main-container { display: flex; min-height: 100vh; }
+
+        /* -- Sidebar -- */
+        .sidebar {
+            width: 280px;
+            background: #FFFFFF;
+            border-right: 1px solid #EEEEEE;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: sticky;
+            top: 0;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s ease;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .sidebar.collapsed { width: 80px; }
+        .sidebar.collapsed .sidebar-title,
+        .sidebar.collapsed .sidebar-subtitle,
+        .sidebar.collapsed .nav-text,
+        .sidebar.collapsed .user-info { opacity: 0; width: 0; overflow: hidden; white-space: nowrap; }
+        .sidebar.collapsed .logo-img { width: 50px; height: 50px; margin: 0 auto; background-position: center; }
+        .sidebar.collapsed .nav-item { justify-content: center; padding-left: 1.7rem; }
+        .sidebar.collapsed .nav-item .material-symbols-outlined { margin: 0; }
+        .sidebar.collapsed .user-avatar { margin: 0 auto; }
+        .sidebar.collapsed .logout-btn { display: none; }
+        .sidebar.collapsed .user-profile { justify-content: center; }
+        .sidebar.collapsed .notification-badge { display: none; }
+
+        .sidebar-header { border-bottom: 1px solid #F7F7F7; }
+
+        .logo-img {
+            width: 250px; height: 50px;
+            background-size: contain; background-position: left center;
+            background-repeat: no-repeat; flex-shrink: 0;
+        }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.75rem 1rem; border-radius: 0.5rem;
+            text-decoration: none; color: #222222;
+            transition: all 0.2s ease; cursor: pointer; margin-bottom: 0.25rem;
+        }
+        .nav-item:hover { background: #F7F7F7; color: #222222; }
+        .nav-item .material-symbols-outlined { font-size: 24px; color: #666666; transition: all 0.2s ease; }
+        .nav-item.nav-item-active { background: rgba(94, 42, 151, 0.1); color: #5E2A97; padding-left: calc(1rem - 4px); }
+        .nav-item.nav-item-active .material-symbols-outlined { color: #5E2A97; font-variation-settings: 'FILL' 1; }
+        .nav-text { font-size: 0.875rem; font-weight: 500; }
+
+        .notification-badge {
+            margin-left: auto; font-size: 0.625rem; font-weight: 700;
+            background: #EF4444; color: white; padding: 0.125rem 0.375rem;
+            border-radius: 9999px; min-width: 1.125rem; text-align: center;
+            line-height: 1.2; display: inline-flex; align-items: center;
+            justify-content: center; height: 1.125rem;
+        }
+
+        .nav-dropdown { position: relative; }
+        .nav-dropdown-toggle { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+        .nav-dropdown-icon { font-size: 18px !important; transition: transform 0.2s ease; }
+        .nav-dropdown.open .nav-dropdown-icon { transform: rotate(180deg); }
+        .nav-dropdown-menu { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; padding-left: 2.5rem; }
+        .nav-dropdown.open .nav-dropdown-menu { max-height: 400px; margin-top: 0.25rem; overflow-y: auto; }
+
+        .nav-dropdown-item {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.625rem 1rem; border-radius: 0.5rem;
+            text-decoration: none; color: #666666; font-size: 0.875rem;
+            font-weight: 500; transition: all 0.2s ease; margin-bottom: 0.25rem;
+        }
+        .nav-dropdown-item:hover { background: #F7F7F7; color: #5E2A97; }
+        .nav-dropdown-item.active { background: rgba(94, 42, 151, 0.1); color: #5E2A97; }
+
+        .sidebar.collapsed .nav-dropdown-toggle { justify-content: center; }
+        .sidebar.collapsed .nav-dropdown-icon { display: none; }
+        .sidebar.collapsed .nav-dropdown-menu { padding-left: 0rem; }
+        .sidebar.collapsed .nav-dropdown-item { padding-left: 0.6rem; }
+
+        .sidebar-footer { border-top: 1px solid #EEEEEE; margin-top: auto; }
+
+        .user-profile {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.75rem; border-radius: 0.5rem;
+            transition: all 0.2s ease; cursor: pointer;
+        }
+        .user-profile:hover { background: #F7F7F7; }
+        .user-avatar { width: 2.5rem; height: 2.5rem; border-radius: 50%; overflow: hidden; flex-shrink: 0; border: 2px solid #EEEEEE; }
+        .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .user-info { flex: 1; }
+        .user-name { font-size: 0.875rem; font-weight: 700; color: #222222; margin: 0 0 0.125rem 0; line-height: 1.2; }
+        .user-role { font-size: 0.75rem; color: #666666; margin: 0; line-height: 1.2; }
+        .logout-btn {
+            background: none; border: none; color: #666666; cursor: pointer;
+            padding: 0.5rem; border-radius: 0.375rem; transition: all 0.2s ease;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .logout-btn:hover { background: rgba(94, 42, 151, 0.1); color: #5E2A97; }
+        .logout-btn .material-symbols-outlined { font-size: 20px; }
+
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; left: -280px; z-index: 999; transition: left 0.3s ease; }
+            .sidebar.mobile-open { left: 0; }
+            .sidebar.collapsed { left: -80px; }
+            .sidebar.collapsed.mobile-open { left: 0; }
+        }
+
+        /* -- Header -- */
+        .top-header {
+            height: 70px; min-height: 70px; flex-shrink: 0;
+            background: #FFFFFF; border-bottom: 1px solid #EEEEEE;
+            display: flex; align-items: center; padding: 0 1.5rem;
+            position: sticky; top: 0; z-index: 100; font-family: 'Poppins', sans-serif;
+        }
+        .header-icon-btn {
+            width: 2.5rem; height: 2.5rem; border-radius: 0.5rem; border: none;
+            background: #F7F7F7; color: #666666; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;
+        }
+        .header-icon-btn:hover { background: #EEEEEE; color: #5E2A97; }
+        .header-icon-btn .material-symbols-outlined { font-size: 22px; }
+        .header-avatar {
+            width: 2.5rem; height: 2.5rem; border-radius: 50%;
+            background-size: cover; background-position: center; background-repeat: no-repeat;
+            border: 2px solid #5E2A97; cursor: pointer; transition: all 0.2s ease;
+        }
+        .header-avatar:hover { transform: scale(1.05); box-shadow: 0 0 0 4px rgba(94, 42, 151, 0.1); }
+        #notificationPanel.active, #profileDropdown.active { display: block !important; opacity: 1 !important; transform: translateY(0) !important; }
+
+        /* -- Main Content -- */
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow-x: hidden; }
+
+        /* Add Evaluator Page */
+        .add-jury-page {
+            padding: 1rem;
+            flex: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Form Header */
+        .form-header {
+            padding: 2rem;
+            border-radius: 1rem 1rem 0 0;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #000;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 0 0 0.5rem 0;
+        }
+
+        .page-subtitle {
+            font-size: 1rem;
+            color: #000;
+            margin: 0;
+            opacity: 0.95;
+        }
+
+        /* Stepper Container */
+        .stepper-container {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        /* Progress Stepper */
+        .stepper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            margin: 0 auto;
+            gap: 10px;
+        }
+
+        .stepper::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 5%;
+            right: 5%;
+            height: 2px;
+            background: #E5E7EB;
+            z-index: 0;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .step-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #E5E7EB;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #6B7280;
+            transition: all 0.3s ease;
+        }
+
+        .step.active .step-icon {
+            background: #5E2A97;
+            color: white;
+            box-shadow: 0 0 0 4px rgba(94, 42, 151, 0.1);
+        }
+
+        .step.completed .step-icon {
+            background: #DEDE50;
+            color: white;
+        }
+
+        .step-label {
+            font-size: 12px;
+            color: #6B7280;
+            text-align: center;
+            font-weight: 500;
+            margin-top: 4px;
+        }
+
+        .step.active .step-label {
+            color: #5E2A97;
+            font-weight: 600;
+        }
+
+        .step.completed .step-label {
+            color: #DEDE50;
+        }
+
+        /* Form Container */
+        .add-jury-form {
+            background-color: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        /* Form Section */
+        .form-section {
+            padding: 2rem;
+        }
+
+        .section-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1F2937;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0;
+        }
+
+        .section-title .material-symbols-outlined {
+            font-size: 1.75rem;
+            color: #5E2A97;
+        }
+
+        /* Form Grid */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        /* Form Group */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-label {
+            font-size: 0.938rem;
+            font-weight: 500;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .required {
+            color: #EF4444;
+            font-weight: 600;
+        }
+
+        /* Form Inputs */
+        .form-input,
+        .form-textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #D1D5DB;
+            border-radius: 0.5rem;
+            background-color: #ffffff;
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
+            color: #1F2937;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus {
+            border-color: #5E2A97;
+            box-shadow: 0 0 0 3px rgba(94, 42, 151, 0.1);
+        }
+
+        .form-input::placeholder,
+        .form-textarea::placeholder {
+            color: #9CA3AF;
+        }
+
+        .form-input[readonly] {
+            background-color: #F3F4F6;
+            cursor: not-allowed;
+        }
+
+        .form-input.error,
+        .form-textarea.error {
+            border-color: #EF4444;
+            background-color: #FEF2F2;
+        }
+
+        .form-input.error:focus,
+        .form-textarea.error:focus {
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+            border-color: #EF4444;
+        }
+
+        /* Error Messages */
+        .error-message {
+            display: none;
+            font-size: 0.813rem;
+            color: #EF4444;
+            margin-top: 0.25rem;
+            font-weight: 500;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* Field Hint */
+        .field-hint {
+            font-size: 0.813rem;
+            color: #6B7280;
+            margin: 0;
+        }
+
+        /* Photo Upload */
+        .photo-upload-container {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .photo-preview {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 3px dashed #D1D5DB;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background-color: #F9FAFB;
+            color: #9CA3AF;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .photo-preview:hover {
+            border-color: #5E2A97;
+        }
+
+        .photo-preview .material-symbols-outlined {
+            font-size: 3rem;
+        }
+
+        .photo-preview-text {
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .photo-input {
+            display: none;
+        }
+
+        .upload-photo-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background-color: #5E2A97;
+            color: #ffffff;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.938rem;
+            font-weight: 500;
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-photo-btn:hover {
+            background-color: #7B3DB8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(94, 42, 151, 0.3);
+        }
+
+        .upload-photo-btn .material-symbols-outlined {
+            font-size: 1.25rem;
+        }
+
+        /* Form Actions */
+        .form-actions {
+            padding: 2rem;
+            background-color: #F9FAFB;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            border-top: 1px solid #E5E7EB;
+        }
+
+        .action-buttons-right {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-cancel,
+        .btn-back,
+        .btn-next,
+        .btn-submit {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-cancel {
+            background-color: #F3F4F6;
+            color: #6B7280;
+        }
+
+        .btn-cancel:hover {
+            background-color: #E5E7EB;
+            color: #374151;
+        }
+
+        .btn-back {
+            background-color: #F3F4F6;
+            color: #6B7280;
+        }
+
+        .btn-back:hover {
+            background-color: #E5E7EB;
+            color: #374151;
+        }
+
+        .btn-next {
+            background-color: #5E2A97;
+            color: #ffffff;
+        }
+
+        .btn-next:hover {
+            background-color: #7B3DB8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(94, 42, 151, 0.3);
+        }
+
+        .btn-submit {
+            background-color: #10B981;
+            color: #ffffff;
+        }
+
+        .btn-submit:hover {
+            background-color: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-cancel .material-symbols-outlined,
+        .btn-back .material-symbols-outlined,
+        .btn-next .material-symbols-outlined,
+        .btn-submit .material-symbols-outlined {
+            font-size: 1.25rem;
+        }
+
+        /* Step Content Animation */
+        .step-content {
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Breadcrumb */
+        .breadcrumb-nav {
+            display: flex; align-items: center; gap: 0.5rem;
+            margin-bottom: 1.5rem; font-size: 0.875rem; padding: 1rem 0 0 1rem;
+        }
+        .breadcrumb-nav a {
+            color: var(--text-muted); text-decoration: none; font-weight: 500;
+            transition: color 0.2s ease;
+        }
+        .breadcrumb-nav a:hover { color: var(--primary); }
+        .breadcrumb-nav .separator { color: var(--text-muted); }
+        .breadcrumb-nav .current { color: var(--primary); font-weight: 600; }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .add-jury-page { padding: 1.5rem; }
+            .form-section { padding: 1.5rem; }
+        }
+
+        @media (max-width: 768px) {
+            .add-jury-page { padding: 1rem; }
+            .form-header { padding: 1.5rem; }
+            .page-title { font-size: 1.75rem; }
+            .stepper-container { padding: 1.5rem; overflow-x: auto; }
+            .stepper { min-width: 500px; }
+            .step-label { font-size: 10px; }
+            .form-grid { grid-template-columns: 1fr; gap: 1rem; }
+            .form-section { padding: 1.25rem; }
+            .section-title { font-size: 1.125rem; }
+            .section-title .material-symbols-outlined { font-size: 1.5rem; }
+            .photo-upload-container { flex-direction: column; align-items: flex-start; }
+            .photo-preview { width: 120px; height: 120px; }
+            .form-actions { padding: 1.5rem; flex-direction: column; align-items: stretch; }
+            .action-buttons-right { width: 100%; justify-content: space-between; }
+            .stepper::before { left: 3%; right: 3%; }
+            .step { min-width: 70px; }
+            .step-icon { width: 36px; height: 36px; font-size: 13px; }
+        }
+
+        @media (max-width: 480px) {
+            .add-jury-page { padding: 0.75rem; }
+            .form-header { padding: 1.25rem; }
+            .page-title { font-size: 1.5rem; }
+            .stepper-container { padding: 1rem; }
+            .stepper { overflow-x: auto; padding: 5px; min-width: max-content; }
+            .stepper::before { left: 40px; right: 40px; }
+            .step { min-width: 80px; }
+            .step-icon { width: 32px; height: 32px; font-size: 12px; }
+            .step-label { font-size: 10px; max-width: 80px; }
+            .form-section { padding: 1rem; }
+            .section-header { margin-bottom: 1rem; }
+            .form-grid { gap: 0.875rem; }
+            .form-input, .form-textarea { padding: 0.625rem 0.875rem; font-size: 0.938rem; }
+            .form-actions { padding: 1rem; }
+            .action-buttons-right { flex-direction: column; width: 100%; }
+            .btn-cancel, .btn-back, .btn-next, .btn-submit { width: 100%; justify-content: center; padding: 0.875rem 1.25rem; }
+            .photo-preview { width: 130px; height: 130px; }
+            .photo-preview .material-symbols-outlined { font-size: 2.5rem; }
+            .upload-photo-btn { width: 60%; justify-content: center; }
+        }
+
+        /* Focus visible for accessibility */
+        .btn-cancel:focus-visible,
+        .btn-back:focus-visible,
+        .btn-next:focus-visible,
+        .btn-submit:focus-visible,
+        .upload-photo-btn:focus-visible {
+            outline: 2px solid #5E2A97;
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+
+<body>
+<div class="main-container">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar d-md-flex flex-column" id="superAdminAppSidebar">
+        <div class="sidebar-header p-3 pb-1">
+            <div class="d-flex align-items-center">
+                <div class="logo-img" style="background-image: url('{% static 'images/IFT_logo.png' %}');"></div>
+            </div>
+        </div>
+        <nav class="flex-grow-1 px-3 d-flex flex-column gap-2 mt-3">
+            <a class="nav-item" href="{% url 'admins:dashboard' %}">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span class="nav-text">Dashboard</span>
+            </a>
+
+            <div class="nav-dropdown open">
+                <div class="nav-item nav-dropdown-toggle" id="userManagementToggle">
+                    <div style="display:flex;align-items:center;gap:0.75rem;">
+                        <span class="material-symbols-outlined">manage_accounts</span>
+                        <span class="nav-text">User Management</span>
+                    </div>
+                    <span class="material-symbols-outlined nav-dropdown-icon">expand_more</span>
+                </div>
+                <div class="nav-dropdown-menu">
+                    <a class="nav-dropdown-item" href="{% url 'admins:onboard_student' %}">
+                        <span class="material-symbols-outlined">person_add</span>
+                        <span class="nav-text">Onboard Student</span>
+                    </a>
+                    <a class="nav-dropdown-item" href="{% url 'admins:students_list' %}">
+                        <span class="material-symbols-outlined">school</span>
+                        <span class="nav-text">Students</span>
+                    </a>
+                    <a class="nav-dropdown-item" href="{% url 'admins:onboard_school' %}">
+                        <span class="material-symbols-outlined">add_business</span>
+                        <span class="nav-text">Onboard School</span>
+                    </a>
+                    <a class="nav-dropdown-item" href="{% url 'admins:schools_list' %}">
+                        <span class="material-symbols-outlined">apartment</span>
+                        <span class="nav-text">Schools</span>
+                    </a>
+                    <a class="nav-dropdown-item active" href="{% url 'admins:onboard_evaluator' %}">
+                        <span class="material-symbols-outlined">person_add</span>
+                        <span class="nav-text">Onboard Evaluator</span>
+                    </a>
+                    <a class="nav-dropdown-item" href="{% url 'admins:evaluators_list' %}">
+                        <span class="material-symbols-outlined">groups</span>
+                        <span class="nav-text">Evaluators</span>
+                    </a>
+                </div>
+            </div>
+
+            <a class="nav-item" href="{% url 'admins:evaluator_management' %}">
+                <span class="material-symbols-outlined">supervisor_account</span>
+                <span class="nav-text">Evaluator Management</span>
+            </a>
+
+            <a class="nav-item" href="{% url 'admins:all_submissions' %}">
+                <span class="material-symbols-outlined">assignment</span>
+                <span class="nav-text">Submissions</span>
+            </a>
+
+            <a class="nav-item" href="{% url 'admins:rankings' %}">
+                <span class="material-symbols-outlined">leaderboard</span>
+                <span class="nav-text">Rankings</span>
+            </a>
+
+            <a class="nav-item" href="{% url 'admins:schedule' %}">
+                <span class="material-symbols-outlined">event_note</span>
+                <span class="nav-text">Schedule</span>
+            </a>
+
+            <a class="nav-item" href="{% url 'admins:content_list' %}">
+                <span class="material-symbols-outlined">article</span>
+                <span class="nav-text">Content</span>
+            </a>
+
+            <a class="nav-item" href="{% url 'admins:reports' %}">
+                <span class="material-symbols-outlined">analytics</span>
+                <span class="nav-text">Reports</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer p-3 mt-auto">
+            <div class="user-profile">
+                <div class="user-avatar">
+                    <img alt="Admin" src="https://ui-avatars.com/api/?name={{ request.user.get_full_name|default:request.user.username }}&background=5E2A97&color=fff" />
+                </div>
+                <div class="user-info flex-grow-1">
+                    <p class="user-name">{{ request.user.get_full_name|default:request.user.username }}</p>
+                    <p class="user-role">Super Administrator</p>
+                </div>
+                <a href="{% url 'accounts:sign_out' %}" class="logout-btn" title="Logout">
+                    <span class="material-symbols-outlined">logout</span>
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+        <!-- Header -->
+        <header class="top-header">
+            <button class="header-icon-btn" id="sidebarToggleBtn" style="margin-right:16px;">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+            <div class="d-flex align-items-center gap-2 ms-auto">
+                <button class="header-icon-btn" id="notifBtn">
+                    <span class="material-symbols-outlined">notifications</span>
+                </button>
+                <div class="header-avatar" style="background-image: url('https://ui-avatars.com/api/?name={{ request.user.get_full_name|default:request.user.username }}&background=5E2A97&color=fff');" id="profileAvatarBtn"></div>
+            </div>
+        </header>
+
+        <!-- Profile Dropdown -->
+        <div id="profileDropdown" style="position:fixed;top:70px;right:20px;width:280px;background:white;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.15);z-index:9999;overflow:hidden;display:none;opacity:0;transform:translateY(-10px);transition:opacity 0.3s ease,transform 0.3s ease;">
+            <div style="padding:16px;border-bottom:1px solid #f1f5f9;">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <div style="width:48px;height:48px;border-radius:50%;background-image:url('https://ui-avatars.com/api/?name={{ request.user.get_full_name|default:request.user.username }}&background=5E2A97&color=fff');background-size:cover;border:2px solid #5E2A97;"></div>
+                    <div>
+                        <p style="margin:0;font-size:0.875rem;font-weight:700;color:#0f172a;">{{ request.user.get_full_name|default:request.user.username }}</p>
+                        <p style="margin:4px 0 0;font-size:0.75rem;color:#64748b;">Super Admin</p>
+                        <p style="margin:2px 0 0;font-size:0.625rem;color:#94a3b8;">{{ request.user.email }}</p>
+                    </div>
+                </div>
+            </div>
+            <div style="padding:8px;">
+                <a href="{% url 'accounts:sign_out' %}" style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:8px;text-decoration:none;color:#ef4444;">
+                    <span class="material-symbols-outlined" style="color:#ef4444;font-size:20px;">logout</span>
+                    <span style="font-weight:600;font-size:0.875rem;">Logout</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb-nav">
+            <a href="{% url 'admins:dashboard' %}">Dashboard</a>
+            <span class="separator">/</span>
+            <a href="#">User Management</a>
+            <span class="separator">/</span>
+            <span class="current">Onboard Evaluator</span>
+        </nav>
+
+        <!-- Add Evaluator Page -->
+        <div class="add-jury-page">
+            <!-- Add Evaluator Form -->
+            <form class="add-jury-form" id="addJuryForm" novalidate>
+                {% csrf_token %}
+
+                <!-- Form Header -->
+                <div class="form-header">
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; flex-direction: row; gap: 1rem;">
+                        <div>
+                            <h1 class="page-title">
+                                <span class="material-symbols-outlined" style="color:#5E2A97;font-size:2rem;">person_add</span>
+                                Onboard New Evaluator
+                            </h1>
+                            <p class="page-subtitle">Fill in the evaluator's information below to add them to the evaluation panel</p>
+                        </div>
+                        <button type="button" class="btn btn-next" id="autoFillBtn"
+                            style="display: flex; align-items: center; gap: 8px;">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">auto_fix_high</span>
+                            Auto Fill
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Progress Stepper -->
+                <div class="stepper-container">
+                    <div class="stepper">
+                        <div class="step active" data-step="1">
+                            <div class="step-icon">1</div>
+                            <div class="step-label">Personal Info</div>
+                        </div>
+                        <div class="step" data-step="2">
+                            <div class="step-icon">2</div>
+                            <div class="step-label">Professional</div>
+                        </div>
+                        <div class="step" data-step="3">
+                            <div class="step-icon">3</div>
+                            <div class="step-label">Expertise</div>
+                        </div>
+                        <div class="step" data-step="4">
+                            <div class="step-icon">4</div>
+                            <div class="step-label">Contact</div>
+                        </div>
+                        <div class="step" data-step="5">
+                            <div class="step-icon">5</div>
+                            <div class="step-label">Availability</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 1: Personal Information -->
+                <div class="form-section step-content" id="step1">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <span class="material-symbols-outlined">person</span>
+                            A. Personal Information
+                        </h2>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label for="juryPhoto" class="form-label">Profile Photo</label>
+                            <div class="photo-upload-container">
+                                <div class="photo-preview" id="photoPreview">
+                                    <span class="material-symbols-outlined">add_a_photo</span>
+                                    <span class="photo-preview-text">Upload Photo</span>
+                                </div>
+                                <input type="file" id="juryPhoto" name="juryPhoto" accept="image/*" class="photo-input">
+                                <button type="button" class="upload-photo-btn" id="uploadPhotoBtn">
+                                    <span class="material-symbols-outlined">upload</span>
+                                    Choose Photo
+                                </button>
+                                <p class="field-hint">Recommended: Square image, max 2MB</p>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="firstName" class="form-label">First Name <span class="required">*</span></label>
+                            <input type="text" id="firstName" name="first_name" class="form-input" placeholder="Enter first name" required>
+                            <span class="error-message" id="firstNameError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="lastName" class="form-label">Last Name <span class="required">*</span></label>
+                            <input type="text" id="lastName" name="last_name" class="form-input" placeholder="Enter last name" required>
+                            <span class="error-message" id="lastNameError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gender" class="form-label">Gender <span class="required">*</span></label>
+                            <select id="gender" name="gender" class="form-input" required>
+                                <option value="" disabled selected hidden>Select gender</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                            </select>
+                            <span class="error-message" id="genderError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="dateOfBirth" class="form-label">Date of Birth</label>
+                            <input type="date" id="dateOfBirth" name="date_of_birth" class="form-input">
+                            <span class="error-message" id="dateOfBirthError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="nationality" class="form-label">Nationality</label>
+                            <input type="text" id="nationality" name="nationality" class="form-input" placeholder="Enter nationality" value="Indian">
+                            <span class="error-message" id="nationalityError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="city" class="form-label">City <span class="required">*</span></label>
+                            <input type="text" id="city" name="city" class="form-input" placeholder="Enter city" required>
+                            <span class="error-message" id="cityError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="state" class="form-label">State <span class="required">*</span></label>
+                            <input type="text" id="state" name="state" class="form-input" placeholder="Enter state" required>
+                            <span class="error-message" id="stateError"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Professional Background -->
+                <div class="form-section step-content" id="step2" style="display: none;">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <span class="material-symbols-outlined">business_center</span>
+                            B. Professional Background
+                        </h2>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="designation" class="form-label">Current Designation <span class="required">*</span></label>
+                            <input type="text" id="designation" name="designation" class="form-input" placeholder="e.g., CEO, Professor, Director" required>
+                            <span class="error-message" id="designationError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="organization" class="form-label">Organization / Company <span class="required">*</span></label>
+                            <input type="text" id="organization" name="organization" class="form-input" placeholder="e.g., TCS, IIT Delhi, Sequoia Capital" required>
+                            <span class="error-message" id="organizationError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="industry" class="form-label">Industry <span class="required">*</span></label>
+                            <select id="industry" name="industry" class="form-input" required>
+                                <option value="" disabled selected hidden>Select industry</option>
+                                <option value="technology-software">Technology & Software Development</option>
+                                <option value="ai-data-science">Artificial Intelligence & Data Science</option>
+                                <option value="engineering-product">Engineering & Product Design</option>
+                                <option value="healthcare-medical">Healthcare & Medical Sciences</option>
+                                <option value="biotech-life-sciences">Biotechnology & Life Sciences</option>
+                                <option value="education-learning">Education & Learning Sciences</option>
+                                <option value="finance-fintech">Finance, Banking & FinTech</option>
+                                <option value="entrepreneurship-startup">Entrepreneurship & Start-up Ecosystem</option>
+                                <option value="business-strategy">Business Strategy & Management</option>
+                                <option value="marketing-branding">Marketing, Branding & Sales</option>
+                                <option value="food-technology">Food Technology & Nutrition</option>
+                                <option value="agriculture-agritech">Agriculture & AgriTech</option>
+                                <option value="supply-chain-logistics">Supply Chain, Transportation & Logistics</option>
+                                <option value="energy-sustainability">Energy, Sustainability & Environmental Sciences</option>
+                                <option value="fashion-textile">Fashion, Apparel & Textile Design</option>
+                                <option value="media-entertainment">Media, Entertainment & Creative Industries</option>
+                                <option value="manufacturing-industrial">Manufacturing & Industrial Innovation</option>
+                                <option value="social-impact-csr">Social Impact, CSR & Non-Profit Development</option>
+                                <option value="legal-policy">Legal, Policy & Regulatory Affairs</option>
+                                <option value="hr-organizational">Human Resources & Organizational Development</option>
+                                <option value="architecture-smart-cities">Architecture, Infrastructure & Smart Cities</option>
+                                <option value="research-academia">Research & Academia</option>
+                                <option value="government-public-admin">Government & Public Administration</option>
+                                <option value="design-thinking-ux">Design Thinking, Innovation & User Experience (UX)</option>
+                                <option value="cybersecurity">Cybersecurity & Information Security</option>
+                                <option value="robotics-iot">Robotics, IoT & Automation</option>
+                                <option value="ecommerce-retail">E-commerce & Retail</option>
+                                <option value="tourism-hospitality">Tourism, Hospitality & Travel</option>
+                                <option value="others">Others (Please Specify)</option>
+                            </select>
+                            <span class="error-message" id="industryError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="experience" class="form-label">Years of Experience <span class="required">*</span></label>
+                            <select id="experience" name="experience" class="form-input" required>
+                                <option value="" disabled selected hidden>Select experience</option>
+                                <option value="3-5">3-5 years</option>
+                                <option value="5-10">5-10 years</option>
+                                <option value="10-15">10-15 years</option>
+                                <option value="15-20">15-20 years</option>
+                                <option value="20+">20+ years</option>
+                            </select>
+                            <span class="error-message" id="experienceError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="highestQualification" class="form-label">Highest Qualification <span class="required">*</span></label>
+                            <select id="highestQualification" name="highest_qualification" class="form-input" required>
+                                <option value="" disabled selected hidden>Select qualification</option>
+                                <option value="bachelors">Bachelor's Degree</option>
+                                <option value="masters">Master's Degree</option>
+                                <option value="mba">MBA</option>
+                                <option value="phd">PhD / Doctorate</option>
+                                <option value="postdoc">Post-Doctoral</option>
+                                <option value="professional">Professional Certification</option>
+                                <option value="other">Other</option>
+                            </select>
+                            <span class="error-message" id="highestQualificationError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="linkedinUrl" class="form-label">LinkedIn Profile URL</label>
+                            <input type="url" id="linkedinUrl" name="linkedin_url" class="form-input" placeholder="https://linkedin.com/in/your-profile">
+                            <span class="error-message" id="linkedinUrlError"></span>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="bio" class="form-label">Short Bio <span class="required">*</span></label>
+                            <textarea id="bio" name="bio" class="form-textarea" rows="3" placeholder="Brief professional bio (100-300 words) highlighting relevant experience and achievements" required></textarea>
+                            <span class="error-message" id="bioError"></span>
+                            <p class="field-hint">This will be displayed on the jury panel page</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Expertise & Evaluation -->
+                <div class="form-section step-content" id="step3" style="display: none;">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <span class="material-symbols-outlined">psychology</span>
+                            C. Expertise & Evaluation Preferences
+                        </h2>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="primaryExpertise" class="form-label">Primary Area of Expertise <span class="required">*</span></label>
+                            <select id="primaryExpertise" name="primary_expertise" class="form-input" required>
+                                <option value="" disabled selected hidden>Select expertise</option>
+                                <option value="entrepreneurship">Entrepreneurship / Startups</option>
+                                <option value="technology">Technology / AI / ML</option>
+                                <option value="business-strategy">Business Strategy</option>
+                                <option value="product-design">Product Design / UX</option>
+                                <option value="sustainability">Sustainability / Climate Tech</option>
+                                <option value="social-impact">Social Impact / NGO</option>
+                                <option value="healthcare-innovation">Healthcare Innovation</option>
+                                <option value="fintech">Fintech / Finance</option>
+                                <option value="edtech">EdTech / Education</option>
+                                <option value="agritech">AgriTech / Agriculture</option>
+                                <option value="marketing">Marketing / Branding</option>
+                                <option value="operations">Operations / Supply Chain</option>
+                            </select>
+                            <span class="error-message" id="primaryExpertiseError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="secondaryExpertise" class="form-label">Secondary Area of Expertise</label>
+                            <select id="secondaryExpertise" name="secondary_expertise" class="form-input">
+                                <option value="" disabled selected hidden>Select expertise</option>
+                                <option value="entrepreneurship">Entrepreneurship / Startups</option>
+                                <option value="technology">Technology / AI / ML</option>
+                                <option value="business-strategy">Business Strategy</option>
+                                <option value="product-design">Product Design / UX</option>
+                                <option value="sustainability">Sustainability / Climate Tech</option>
+                                <option value="social-impact">Social Impact / NGO</option>
+                                <option value="healthcare-innovation">Healthcare Innovation</option>
+                                <option value="fintech">Fintech / Finance</option>
+                                <option value="edtech">EdTech / Education</option>
+                                <option value="agritech">AgriTech / Agriculture</option>
+                                <option value="marketing">Marketing / Branding</option>
+                                <option value="operations">Operations / Supply Chain</option>
+                            </select>
+                            <span class="error-message" id="secondaryExpertiseError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="juryRole" class="form-label">Jury Role <span class="required">*</span></label>
+                            <select id="juryRole" name="jury_role" class="form-input" required>
+                                <option value="" disabled selected hidden>Select role</option>
+                                <option value="evaluator">Evaluator</option>
+                                <option value="mentor-evaluator">Mentor + Evaluator</option>
+                                <option value="lead-jury">Lead Jury</option>
+                                <option value="guest-jury">Guest Jury</option>
+                            </select>
+                            <span class="error-message" id="juryRoleError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="evaluationSeason" class="form-label">Evaluation Season <span class="required">*</span></label>
+                            <select id="evaluationSeason" name="evaluation_season" class="form-input" required>
+                                <option value="" disabled selected hidden>Select season</option>
+                                <option value="season-6">Season 6 (Current)</option>
+                            </select>
+                            <span class="error-message" id="evaluationSeasonError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="maxIdeas" class="form-label">Max Ideas to Evaluate (per week)</label>
+                            <select id="maxIdeas" name="max_ideas" class="form-input">
+                                <option value="" disabled selected hidden>Select capacity</option>
+                                <option value="5-10">5-10 ideas</option>
+                                <option value="10-20">10-20 ideas</option>
+                                <option value="20-30">20-30 ideas</option>
+                                <option value="30+">30+ ideas</option>
+                            </select>
+                            <span class="error-message" id="maxIdeasError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="previousJuryExp" class="form-label">Previous Jury Experience</label>
+                            <select id="previousJuryExp" name="previous_jury_exp" class="form-input">
+                                <option value="" disabled selected hidden>Select experience</option>
+                                <option value="none">No prior jury experience</option>
+                                <option value="ift-previous">Previous IFT season</option>
+                                <option value="other-competitions">Other competitions</option>
+                                <option value="both">IFT + Other competitions</option>
+                            </select>
+                            <span class="error-message" id="previousJuryExpError"></span>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="evaluationNote" class="form-label">Evaluation Approach / Note</label>
+                            <textarea id="evaluationNote" name="evaluation_note" class="form-textarea" rows="3" placeholder="Describe your approach to evaluating student innovation ideas (optional)"></textarea>
+                            <span class="error-message" id="evaluationNoteError"></span>
+                            <p class="field-hint">Helps us match you with relevant ideas</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Contact Details -->
+                <div class="form-section step-content" id="step4" style="display: none;">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <span class="material-symbols-outlined">contact_phone</span>
+                            D. Contact Details
+                        </h2>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="email" class="form-label">Email Address <span class="required">*</span></label>
+                            <input type="email" id="email" name="email" class="form-input" placeholder="evaluator@company.com" required>
+                            <span class="error-message" id="emailError"></span>
+                            <p class="field-hint">Used for login and notifications</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="alternateEmail" class="form-label">Alternate Email</label>
+                            <input type="email" id="alternateEmail" name="alternate_email" class="form-input" placeholder="personal@gmail.com">
+                            <span class="error-message" id="alternateEmailError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="mobile" class="form-label">Mobile Number <span class="required">*</span></label>
+                            <input type="tel" id="mobile" name="phone" class="form-input" placeholder="10-digit mobile number" maxlength="10" required>
+                            <span class="error-message" id="mobileError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="alternateMobile" class="form-label">Alternate Mobile</label>
+                            <input type="tel" id="alternateMobile" name="alternate_mobile" class="form-input" placeholder="10-digit mobile number" maxlength="10">
+                            <span class="error-message" id="alternateMobileError"></span>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="address" class="form-label">Address</label>
+                            <textarea id="address" name="address" class="form-textarea" rows="3" placeholder="Enter full address (optional)"></textarea>
+                            <span class="error-message" id="addressError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pinCode" class="form-label">PIN Code</label>
+                            <input type="text" id="pinCode" name="pin_code" class="form-input" placeholder="Enter 6-digit PIN code" maxlength="6">
+                            <span class="error-message" id="pinCodeError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="preferredContact" class="form-label">Preferred Contact Method</label>
+                            <select id="preferredContact" name="preferred_contact" class="form-input">
+                                <option value="" disabled selected hidden>Select preference</option>
+                                <option value="email">Email</option>
+                                <option value="phone">Phone Call</option>
+                                <option value="whatsapp">WhatsApp</option>
+                            </select>
+                            <span class="error-message" id="preferredContactError"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 5: Availability & Preferences -->
+                <div class="form-section step-content" id="step5" style="display: none;">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <span class="material-symbols-outlined">calendar_month</span>
+                            E. Availability & Preferences
+                        </h2>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="availableFrom" class="form-label">Available From <span class="required">*</span></label>
+                            <input type="date" id="availableFrom" name="available_from" class="form-input" required>
+                            <span class="error-message" id="availableFromError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="availableTo" class="form-label">Available Until</label>
+                            <input type="date" id="availableTo" name="available_to" class="form-input">
+                            <span class="error-message" id="availableToError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="preferredTime" class="form-label">Preferred Evaluation Time</label>
+                            <select id="preferredTime" name="preferred_time" class="form-input">
+                                <option value="" disabled selected hidden>Select time slot</option>
+                                <option value="morning">Morning (9 AM - 12 PM)</option>
+                                <option value="afternoon">Afternoon (12 PM - 4 PM)</option>
+                                <option value="evening">Evening (4 PM - 8 PM)</option>
+                                <option value="flexible">Flexible / Any time</option>
+                            </select>
+                            <span class="error-message" id="preferredTimeError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="evaluationMode" class="form-label">Evaluation Mode</label>
+                            <select id="evaluationMode" name="evaluation_mode" class="form-input">
+                                <option value="" disabled selected hidden>Select mode</option>
+                                <option value="online">Online Only</option>
+                                <option value="offline">Offline Only</option>
+                                <option value="hybrid">Hybrid (Both)</option>
+                            </select>
+                            <span class="error-message" id="evaluationModeError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="willingToMentor" class="form-label">Willing to Mentor Students?</label>
+                            <select id="willingToMentor" name="willing_to_mentor" class="form-input">
+                                <option value="" disabled selected hidden>Select</option>
+                                <option value="yes">Yes</option>
+                                <option value="no">No</option>
+                                <option value="maybe">Maybe (based on availability)</option>
+                            </select>
+                            <span class="error-message" id="willingToMentorError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="willingToBootcamp" class="form-label">Available for Bootcamp?</label>
+                            <select id="willingToBootcamp" name="willing_to_bootcamp" class="form-input">
+                                <option value="" disabled selected hidden>Select</option>
+                                <option value="yes">Yes - available for 3-day residential bootcamp</option>
+                                <option value="no">No</option>
+                                <option value="virtual">Only virtually</option>
+                            </select>
+                            <span class="error-message" id="willingToBootcampError"></span>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="additionalNotes" class="form-label">Additional Notes</label>
+                            <textarea id="additionalNotes" name="additional_notes" class="form-textarea" rows="3" placeholder="Any other information or special requirements"></textarea>
+                            <span class="error-message" id="additionalNotesError"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" id="cancelBtn">
+                        <span class="material-symbols-outlined">close</span>
+                        Cancel
+                    </button>
+                    <div class="action-buttons-right">
+                        <button type="button" class="btn-back" id="backBtn" style="display: none;">
+                            <span class="material-symbols-outlined">arrow_back</span>
+                            Back
+                        </button>
+                        <button type="button" class="btn-next" id="nextBtn">
+                            Next
+                            <span class="material-symbols-outlined">arrow_forward</span>
+                        </button>
+                        <button type="submit" class="btn-submit" id="submitBtn" style="display: none;">
+                            <span class="material-symbols-outlined">check_circle</span>
+                            Onboard Evaluator
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+(function () {
+    // Sidebar toggle
+    const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
+    const sidebar = document.getElementById('superAdminAppSidebar');
+    if (sidebarToggleBtn && sidebar) {
+        sidebarToggleBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            if (window.innerWidth >= 768) {
+                sidebar.classList.toggle('collapsed');
+            } else {
+                sidebar.classList.toggle('mobile-open');
+            }
+        });
+        document.addEventListener('click', function (e) {
+            if (window.innerWidth < 768 && !e.target.closest('#superAdminAppSidebar') && !e.target.closest('#sidebarToggleBtn')) {
+                sidebar.classList.remove('mobile-open');
+            }
+        });
+    }
+
+    // User management dropdown
+    const toggle = document.getElementById('userManagementToggle');
+    const dropdown = document.querySelector('.nav-dropdown');
+    if (toggle && dropdown) {
+        toggle.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            dropdown.classList.toggle('open');
+        });
+    }
+
+    // Profile dropdown
+    const profileBtn = document.getElementById('profileAvatarBtn');
+    const profileDropdown = document.getElementById('profileDropdown');
+    if (profileBtn && profileDropdown) {
+        profileBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            profileDropdown.classList.toggle('active');
+        });
+        document.addEventListener('click', function (e) {
+            if (!profileDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
+                profileDropdown.classList.remove('active');
+            }
+        });
+    }
+})();
+
+// Multi-Step Form Navigation
+let currentStep = 1;
+const totalSteps = 5;
+const formData = {};
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function () {
+    updateStepDisplay();
+    initializeValidation();
+    initializePhotoUpload();
+    initializeFormatting();
+});
+
+// Navigation Functions
+function updateStepDisplay() {
+    for (let i = 1; i <= totalSteps; i++) {
+        const stepContent = document.getElementById('step' + i);
+        if (stepContent) {
+            stepContent.style.display = 'none';
+        }
+    }
+
+    const currentStepElement = document.getElementById('step' + currentStep);
+    if (currentStepElement) {
+        currentStepElement.style.display = 'block';
+    }
+
+    document.querySelectorAll('.step').forEach(function (step, index) {
+        step.classList.remove('active', 'completed');
+        if (index + 1 < currentStep) {
+            step.classList.add('completed');
+        } else if (index + 1 === currentStep) {
+            step.classList.add('active');
+        }
+    });
+
+    const backBtn = document.getElementById('backBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const submitBtn = document.getElementById('submitBtn');
+
+    backBtn.style.display = currentStep > 1 ? 'inline-flex' : 'none';
+    nextBtn.style.display = currentStep < totalSteps ? 'inline-flex' : 'none';
+    submitBtn.style.display = currentStep === totalSteps ? 'inline-flex' : 'none';
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Next Button Handler
+document.getElementById('nextBtn').addEventListener('click', function () {
+    if (validateCurrentStep()) {
+        saveCurrentStepData();
+        if (currentStep < totalSteps) {
+            currentStep++;
+            updateStepDisplay();
+        }
+    }
+});
+
+// Back Button Handler
+document.getElementById('backBtn').addEventListener('click', function () {
+    if (currentStep > 1) {
+        currentStep--;
+        updateStepDisplay();
+    }
+});
+
+// Step Click Handler
+document.querySelectorAll('.step').forEach(function (step, index) {
+    step.addEventListener('click', function () {
+        const stepNumber = index + 1;
+        if (stepNumber < currentStep || stepNumber === currentStep) {
+            currentStep = stepNumber;
+            updateStepDisplay();
+        }
+    });
+});
+
+// Validators
+const validators = {
+    firstName: {
+        validate: function (value) {
+            if (!value.trim()) return 'First name is required';
+            if (value.trim().length < 2) return 'First name must be at least 2 characters';
+            if (value.trim().length > 50) return 'First name cannot exceed 50 characters';
+            if (!/^[a-zA-Z\s]+$/.test(value)) return 'First name can only contain letters';
+            return '';
+        }
+    },
+    lastName: {
+        validate: function (value) {
+            if (!value.trim()) return 'Last name is required';
+            if (value.trim().length < 2) return 'Last name must be at least 2 characters';
+            if (value.trim().length > 50) return 'Last name cannot exceed 50 characters';
+            if (!/^[a-zA-Z\s]+$/.test(value)) return 'Last name can only contain letters';
+            return '';
+        }
+    },
+    gender: {
+        validate: function (value) {
+            if (!value || value === '') return 'Gender is required';
+            return '';
+        }
+    },
+    city: {
+        validate: function (value) {
+            if (!value.trim()) return 'City is required';
+            if (value.trim().length < 2) return 'City name must be at least 2 characters';
+            if (!/^[a-zA-Z\s]+$/.test(value)) return 'City can only contain letters';
+            return '';
+        }
+    },
+    state: {
+        validate: function (value) {
+            if (!value.trim()) return 'State is required';
+            if (value.trim().length < 2) return 'State name must be at least 2 characters';
+            if (!/^[a-zA-Z\s]+$/.test(value)) return 'State can only contain letters';
+            return '';
+        }
+    },
+    designation: {
+        validate: function (value) {
+            if (!value.trim()) return 'Designation is required';
+            if (value.trim().length < 2) return 'Designation must be at least 2 characters';
+            return '';
+        }
+    },
+    organization: {
+        validate: function (value) {
+            if (!value.trim()) return 'Organization is required';
+            if (value.trim().length < 2) return 'Organization name must be at least 2 characters';
+            return '';
+        }
+    },
+    industry: {
+        validate: function (value) {
+            if (!value || value === '') return 'Industry is required';
+            return '';
+        }
+    },
+    experience: {
+        validate: function (value) {
+            if (!value || value === '') return 'Experience is required';
+            return '';
+        }
+    },
+    highestQualification: {
+        validate: function (value) {
+            if (!value || value === '') return 'Qualification is required';
+            return '';
+        }
+    },
+    bio: {
+        validate: function (value) {
+            if (!value.trim()) return 'Bio is required';
+            if (value.trim().length < 50) return 'Bio must be at least 50 characters';
+            if (value.trim().length > 2000) return 'Bio cannot exceed 2000 characters';
+            return '';
+        }
+    },
+    linkedinUrl: {
+        validate: function (value) {
+            if (!value || value.trim() === '') return '';
+            if (!/^https?:\/\/(www\.)?linkedin\.com\/in\//.test(value)) {
+                return 'Please enter a valid LinkedIn profile URL';
+            }
+            return '';
+        }
+    },
+    primaryExpertise: {
+        validate: function (value) {
+            if (!value || value === '') return 'Primary expertise is required';
+            return '';
+        }
+    },
+    juryRole: {
+        validate: function (value) {
+            if (!value || value === '') return 'Jury role is required';
+            return '';
+        }
+    },
+    evaluationSeason: {
+        validate: function (value) {
+            if (!value || value === '') return 'Evaluation season is required';
+            return '';
+        }
+    },
+    email: {
+        validate: function (value) {
+            if (!value.trim()) return 'Email is required';
+            var emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            if (!emailRegex.test(value)) return 'Please enter a valid email address';
+            return '';
+        }
+    },
+    alternateEmail: {
+        validate: function (value) {
+            if (!value || value.trim() === '') return '';
+            var emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            if (!emailRegex.test(value)) return 'Please enter a valid email address';
+            return '';
+        }
+    },
+    mobile: {
+        validate: function (value) {
+            if (!value || value.trim() === '') return 'Mobile number is required';
+            var cleanPhone = value.replace(/\D/g, '');
+            if (cleanPhone.length !== 10) return 'Phone number must be exactly 10 digits';
+            if (!/^[6-9]\d{9}$/.test(cleanPhone)) return 'Please enter a valid Indian mobile number';
+            return '';
+        }
+    },
+    alternateMobile: {
+        validate: function (value) {
+            if (!value || value.trim() === '') return '';
+            var cleanPhone = value.replace(/\D/g, '');
+            if (cleanPhone.length !== 10) return 'Phone number must be exactly 10 digits';
+            if (!/^[6-9]\d{9}$/.test(cleanPhone)) return 'Please enter a valid Indian mobile number';
+            return '';
+        }
+    },
+    pinCode: {
+        validate: function (value) {
+            if (!value || value.trim() === '') return '';
+            var cleanPin = value.replace(/\D/g, '');
+            if (!/^\d{6}$/.test(cleanPin)) return 'PIN code must be exactly 6 digits';
+            return '';
+        }
+    },
+    availableFrom: {
+        validate: function (value) {
+            if (!value) return 'Available from date is required';
+            return '';
+        }
+    },
+    additionalNotes: {
+        validate: function (value) {
+            if (!value || value.trim() === '') return '';
+            if (value.trim().length > 2000) return 'Notes cannot exceed 2000 characters';
+            return '';
+        }
+    },
+    evaluationNote: {
+        validate: function (value) {
+            if (!value || value.trim() === '') return '';
+            if (value.trim().length > 2000) return 'Note cannot exceed 2000 characters';
+            return '';
+        }
+    }
+};
+
+// Validation Functions
+function validateCurrentStep() {
+    var currentStepElement = document.getElementById('step' + currentStep);
+    var allInputs = currentStepElement.querySelectorAll('input, select, textarea');
+    var isValid = true;
+
+    allInputs.forEach(function (input) {
+        var fieldId = input.id;
+        if (input.type === 'file' || !validators[fieldId]) return;
+
+        if (input.hasAttribute('required')) {
+            var error = validators[fieldId].validate(input.value);
+            if (error) {
+                showError(fieldId, error);
+                isValid = false;
+            } else {
+                clearError(fieldId);
+            }
+        } else {
+            if (input.value && input.value.trim() !== '') {
+                var error = validators[fieldId].validate(input.value);
+                if (error) {
+                    showError(fieldId, error);
+                    isValid = false;
+                } else {
+                    clearError(fieldId);
+                }
+            } else {
+                clearError(fieldId);
+            }
+        }
+    });
+
+    if (!isValid) {
+        var firstError = currentStepElement.querySelector('.form-input.error, .form-textarea.error');
+        if (firstError) {
+            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            firstError.focus();
+        }
+    }
+
+    return isValid;
+}
+
+function saveCurrentStepData() {
+    var currentStepElement = document.getElementById('step' + currentStep);
+    var inputs = currentStepElement.querySelectorAll('input, select, textarea');
+
+    inputs.forEach(function (input) {
+        if (input.name && input.type !== 'file') {
+            formData[input.name] = input.value;
+        }
+    });
+}
+
+function showError(fieldId, message) {
+    var field = document.getElementById(fieldId);
+    var errorElement = document.getElementById(fieldId + 'Error');
+
+    if (field) field.classList.add('error');
+    if (errorElement) {
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
+    }
+}
+
+function clearError(fieldId) {
+    var field = document.getElementById(fieldId);
+    var errorElement = document.getElementById(fieldId + 'Error');
+
+    if (field) field.classList.remove('error');
+    if (errorElement) {
+        errorElement.textContent = '';
+        errorElement.style.display = 'none';
+    }
+}
+
+// Initialize Validation
+function initializeValidation() {
+    Object.keys(validators).forEach(function (fieldId) {
+        var field = document.getElementById(fieldId);
+        if (field) {
+            field.addEventListener('blur', function () {
+                var error = validators[fieldId].validate(this.value);
+                if (error) {
+                    showError(fieldId, error);
+                } else {
+                    clearError(fieldId);
+                }
+            });
+
+            field.addEventListener('input', function () {
+                if (this.classList.contains('error')) {
+                    var error = validators[fieldId].validate(this.value);
+                    if (!error) {
+                        clearError(fieldId);
+                    }
+                }
+            });
+        }
+    });
+}
+
+// Photo Upload Functionality
+function initializePhotoUpload() {
+    var uploadPhotoBtn = document.getElementById('uploadPhotoBtn');
+    var juryPhoto = document.getElementById('juryPhoto');
+    var photoPreview = document.getElementById('photoPreview');
+
+    if (uploadPhotoBtn && juryPhoto && photoPreview) {
+        uploadPhotoBtn.addEventListener('click', function () {
+            juryPhoto.click();
+        });
+
+        juryPhoto.addEventListener('change', function (e) {
+            var file = e.target.files[0];
+            if (file) {
+                var validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+                if (validTypes.indexOf(file.type) === -1) {
+                    showToast('Please upload a valid image file (JPEG, PNG, GIF, or WebP)', 'error');
+                    juryPhoto.value = '';
+                    return;
+                }
+
+                var maxSize = 2 * 1024 * 1024;
+                if (file.size > maxSize) {
+                    showToast('File size should not exceed 2MB. Your file is ' + (file.size / (1024 * 1024)).toFixed(2) + 'MB', 'error');
+                    juryPhoto.value = '';
+                    return;
+                }
+
+                var reader = new FileReader();
+                reader.onload = function (event) {
+                    photoPreview.style.backgroundImage = 'url(' + event.target.result + ')';
+                    photoPreview.style.backgroundSize = 'cover';
+                    photoPreview.style.backgroundPosition = 'center';
+                    photoPreview.innerHTML = '';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+}
+
+// Input Formatting
+function initializeFormatting() {
+    var phoneInputs = document.querySelectorAll('input[type="tel"]');
+    phoneInputs.forEach(function (input) {
+        input.addEventListener('input', function (e) {
+            var value = e.target.value.replace(/\D/g, '');
+            if (value.length > 10) {
+                value = value.slice(0, 10);
+            }
+            e.target.value = value;
+        });
+    });
+
+    var pinCodeInput = document.getElementById('pinCode');
+    if (pinCodeInput) {
+        pinCodeInput.addEventListener('input', function (e) {
+            var value = e.target.value.replace(/\D/g, '');
+            if (value.length > 6) {
+                value = value.slice(0, 6);
+            }
+            e.target.value = value;
+        });
+    }
+}
+
+// Form Submission via AJAX
+document.getElementById('addJuryForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    if (validateCurrentStep()) {
+        saveCurrentStepData();
+
+        var form = this;
+        var submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="material-symbols-outlined">hourglass_empty</span> Submitting...';
+
+        // Collect all form data
+        var allData = {};
+        for (var i = 1; i <= totalSteps; i++) {
+            var stepEl = document.getElementById('step' + i);
+            var inputs = stepEl.querySelectorAll('input, select, textarea');
+            inputs.forEach(function (input) {
+                if (input.name && input.type !== 'file') {
+                    allData[input.name] = input.value;
+                }
+            });
+        }
+
+        var csrfToken = form.querySelector('[name="csrfmiddlewaretoken"]').value;
+
+        fetch("{% url 'admins:onboard_evaluator' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify(allData)
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (data.success) {
+                showToast(data.message || 'Evaluator onboarded successfully!', 'success');
+                setTimeout(function () {
+                    window.location.href = data.redirect || "{% url 'admins:evaluators_list' %}";
+                }, 2000);
+            } else {
+                showToast(data.message || 'Something went wrong', 'error');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span class="material-symbols-outlined">check_circle</span> Onboard Evaluator';
+            }
+        })
+        .catch(function (err) {
+            showToast('Network error. Please try again.', 'error');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<span class="material-symbols-outlined">check_circle</span> Onboard Evaluator';
+        });
+    }
+});
+
+// Reset Form
+function resetForm() {
+    document.getElementById('addJuryForm').reset();
+
+    var photoPreview = document.getElementById('photoPreview');
+    if (photoPreview) {
+        photoPreview.style.backgroundImage = '';
+        photoPreview.innerHTML = '<span class="material-symbols-outlined">add_a_photo</span><span class="photo-preview-text">Upload Photo</span>';
+    }
+
+    Object.keys(validators).forEach(function (fieldId) { clearError(fieldId); });
+
+    currentStep = 1;
+    updateStepDisplay();
+
+    Object.keys(formData).forEach(function (key) { delete formData[key]; });
+}
+
+// Cancel Button
+document.getElementById('cancelBtn').addEventListener('click', function () {
+    if (confirm('Are you sure you want to cancel? All unsaved data will be lost.')) {
+        window.location.href = "{% url 'admins:evaluators_list' %}";
+    }
+});
+
+// Keyboard Navigation
+document.addEventListener('keydown', function (e) {
+    if (e.altKey && e.key === 'ArrowRight') {
+        e.preventDefault();
+        if (currentStep < totalSteps) {
+            document.getElementById('nextBtn').click();
+        }
+    }
+
+    if (e.altKey && e.key === 'ArrowLeft') {
+        e.preventDefault();
+        if (currentStep > 1) {
+            document.getElementById('backBtn').click();
+        }
+    }
+});
+
+// Auto Fill Form
+function autoFillForm() {
+    // Step 1: Personal Information
+    document.getElementById('firstName').value = 'Rajesh';
+    document.getElementById('lastName').value = 'Sharma';
+    document.getElementById('gender').value = 'male';
+    document.getElementById('dateOfBirth').value = '1978-03-15';
+    document.getElementById('nationality').value = 'Indian';
+    document.getElementById('city').value = 'Mumbai';
+    document.getElementById('state').value = 'Maharashtra';
+
+    // Step 2: Professional Background
+    document.getElementById('designation').value = 'Director of Innovation';
+    document.getElementById('organization').value = 'Tata Consultancy Services';
+    document.getElementById('industry').value = 'technology-software';
+    document.getElementById('experience').value = '20+';
+    document.getElementById('highestQualification').value = 'mba';
+    document.getElementById('linkedinUrl').value = 'https://linkedin.com/in/rajesh-sharma';
+    document.getElementById('bio').value = 'Seasoned technology leader with 20+ years of experience in driving innovation across enterprise solutions. Led multiple startup incubation programs and mentored 50+ young entrepreneurs. Passionate about nurturing the next generation of Indian innovators through design thinking and lean startup methodologies.';
+
+    // Step 3: Expertise & Evaluation
+    document.getElementById('primaryExpertise').value = 'entrepreneurship';
+    document.getElementById('secondaryExpertise').value = 'technology';
+    document.getElementById('juryRole').value = 'mentor-evaluator';
+    document.getElementById('evaluationSeason').value = 'season-6';
+    document.getElementById('maxIdeas').value = '10-20';
+    document.getElementById('previousJuryExp').value = 'ift-previous';
+    document.getElementById('evaluationNote').value = 'I focus on the feasibility and scalability of ideas while encouraging creative problem-solving approaches.';
+
+    // Step 4: Contact Details
+    document.getElementById('email').value = 'rajesh.sharma@tcs.com';
+    document.getElementById('alternateEmail').value = 'rajesh.sharma@gmail.com';
+    document.getElementById('mobile').value = '9876543210';
+    document.getElementById('alternateMobile').value = '8765432109';
+    document.getElementById('address').value = '42, Marine Drive, Nariman Point, Mumbai';
+    document.getElementById('pinCode').value = '400021';
+    document.getElementById('preferredContact').value = 'email';
+
+    // Step 5: Availability & Preferences
+    document.getElementById('availableFrom').value = '2026-04-01';
+    document.getElementById('availableTo').value = '2026-08-31';
+    document.getElementById('preferredTime').value = 'evening';
+    document.getElementById('evaluationMode').value = 'hybrid';
+    document.getElementById('willingToMentor').value = 'yes';
+    document.getElementById('willingToBootcamp').value = 'yes';
+    document.getElementById('additionalNotes').value = 'Available for the Grand National Showcase as a panel judge.';
+
+    showToast('Form auto-filled with sample data!', 'success');
+}
+
+// Auto Fill Button Event Listener
+document.getElementById('autoFillBtn').addEventListener('click', autoFillForm);
+
+// Toast Notification
+function showToast(msg, type) {
+    var toast = document.getElementById('onboardToast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'onboardToast';
+        toast.style.cssText = 'position:fixed;top:24px;right:24px;z-index:9999;padding:16px 24px;border-radius:12px;font-family:Poppins,sans-serif;font-size:0.9rem;font-weight:600;color:#fff;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,0.15);transform:translateX(120%);transition:transform 0.4s ease;max-width:450px;';
+        document.body.appendChild(toast);
+    }
+    toast.style.background = type === 'success' ? '#10B981' : '#EF4444';
+    var icon = type === 'success' ? 'check_circle' : 'error';
+    toast.innerHTML = '<span class="material-symbols-outlined" style="font-size:20px;">' + icon + '</span>' + msg;
+    setTimeout(function () { toast.style.transform = 'translateX(0)'; }, 50);
+    setTimeout(function () { toast.style.transform = 'translateX(120%)'; }, 4000);
+}
+</script>
+</body>
+</html>

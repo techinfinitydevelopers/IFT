@@ -11,11 +11,15 @@ from django.utils import timezone
 from ai_assistant.openrouter_client import OpenRouterClient
 
 
-LIGHT_EVALUATION_PROMPT = """You are a STRICT Idea Evaluation AI for a student innovation competition called "India Future Tycoon".
-You must be RIGOROUS - this is a competition, and only truly strong ideas should score high.
+LIGHT_EVALUATION_PROMPT = """You are an Idea Evaluation AI for a SCHOOL STUDENT innovation competition called "India Future Tycoon".
+These are school students (ages 13-18), NOT startup founders. Calibrate your expectations accordingly.
 
 You are given a SHORT DESCRIPTION of the idea and possibly some attachments (images/documents/video).
 Evaluate the idea using exactly these 10 parameters on a 0-10 scale.
+
+CALIBRATION NOTE: Since you only have a short description, do NOT penalize heavily for missing details.
+If the core idea is good, give credit for it. Most student ideas should fall in the 4-7 range.
+Only score 0-3 if the idea is genuinely poor or description is meaningless. Score 8-10 for truly outstanding ideas.
 
 PROJECT NAME: {project_name}
 IDEA DESCRIPTION: {description}
@@ -39,14 +43,15 @@ SCORING RUBRIC (Rate each 0-10):
    Low (0-3): No clear plan. Seems unrealistic to execute.
 
 3. FEASIBILITY (0-10)
-   High (8-10): Resources realistically available. Plan is practical.
-   Moderate (4-7): Partially realistic. Some constraints visible.
-   Low (0-3): Unrealistic. No awareness of real constraints.
+   High (8-10): Clearly identifies required and available resources with awareness of gaps. Explains how missing resources will be obtained. Phased execution thinking with realistic constraints acknowledged. Solution can begin with simple, low-cost steps. Small-scale testing possible.
+   Moderate (4-7): Resources listed but acquisition pathway unclear. Some realism present but optimistic assumptions remain. Logical steps exist but with large jumps in execution. Dependencies underexplored.
+   Low (0-3): Assumes resources will automatically appear. Ignores major constraints. Build steps unrealistic for capability. Heavy dependence on unknown external support. No awareness of operational complexity.
 
 4. IMPACT (0-10)
-   High (8-10): Widespread benefit. Solution is critical for users. Shows scale of impact.
-   Moderate (4-7): Some positive impact visible but limited scope.
-   Low (0-3): No visible positive difference. Impact claim not supported.
+   High (8-10): Widespread benefit with clear evidence of scale. Solution is critical for users AND shows specific data or reasoning for impact.
+   Moderate (4-7): Some positive impact visible but limited scope. General claims without specifics.
+   Low (0-3): No visible positive difference. Impact claim not supported or exaggerated.
+   NOTE: Do not give high scores just because the problem sounds important. The student must show HOW their solution creates impact.
 
 5. SUSTAINABILITY (0-10)
    High (8-10): Solves common problem + lasting value. Long-term viability visible.
@@ -55,11 +60,13 @@ SCORING RUBRIC (Rate each 0-10):
 
 === TEAM PARAMETERS ===
 NOTE: Infer team qualities from description quality and attachments.
+IMPORTANT: Since you only have a short description, give moderate scores (5-6) by default for team parameters unless there is clear evidence of high or low quality. Do NOT score low just because the description is brief.
 
 6. CONCEPTUAL CLARITY (0-10)
-   High (8-10): Clear about idea AND how it works. Problem-solution link is crystal clear.
-   Moderate (4-7): Clear about idea but execution is vague.
-   Low (0-3): Unclear about the idea itself. Confusing description.
+   High (8-10): Clear about idea AND execution with specific details. Problem-solution link is crystal clear with no ambiguity.
+   Moderate (4-7): Clear about the idea but execution is vague or missing details. Most short descriptions fall here.
+   Low (0-3): Unclear about the idea itself. Confusing or contradictory description.
+   NOTE: A short but clear description should score 4-5, not higher. Reserve 6+ for descriptions that show both clarity AND depth.
 
 7. EMPATHY (0-10)
    High (8-10): Deep understanding of user pain. Real user needs addressed.
@@ -72,14 +79,16 @@ NOTE: Infer team qualities from description quality and attachments.
    Low (0-3): Average approach. Copy of existing solutions.
 
 9. COMMUNICATION (0-10)
-   High (8-10): Description is clear, concise. Vision effectively conveyed.
-   Moderate (4-7): Adequate but has gaps. Reader has to work to understand.
+   High (8-10): Description is well-structured, persuasive, and engaging. Uses examples. Vision compellingly conveyed.
+   Moderate (4-7): Adequate but has gaps. Reader has to work to understand. Grammar issues or unclear flow.
    Low (0-3): Confusing, unclear. Fails to convey the idea.
+   NOTE: Simple or short descriptions should score 4-5 max on communication. Only score 6+ if the writing quality is genuinely strong.
 
 10. FLEXIBLE THINKING (0-10)
-    High (8-10): Shows awareness that idea may evolve. Mentions adaptability.
-    Moderate (4-7): Some flexibility visible.
-    Low (0-3): No mention of adaptability. Appears closed to iteration.
+    High (8-10): Explicitly describes a pivot, iteration, or change based on feedback. Shows concrete evidence of adaptability.
+    Moderate (4-7): Mentions willingness to adapt but no specific examples.
+    Low (0-3): No mention of adaptability or iteration whatsoever.
+    NOTE: This is the hardest parameter to score from a short description. If the description does NOT mention feedback, iteration, or adaptability at all, score 1-2. Do NOT assume flexibility — it must be visible in the text.
 
 RESPONSE FORMAT (STRICT JSON):
 ===============================
@@ -105,11 +114,11 @@ Return ONLY valid JSON with this exact structure:
 IMPORTANT RULES:
 - Score MUST be integer 0-10
 - Higher score = BETTER (10 is best, 0 is worst)
-- Be STRICT and RIGOROUS. This is a national competition.
-- High scores (8-10) should be RARE (top 5% quality).
-- You have LIMITED information (short description only). Score based on what is available.
-- If description is vague or generic, score LOW on Conceptual Clarity and Communication.
-- If no differentiation mentioned, Uniqueness should be LOW.
+- These are SCHOOL STUDENTS. Be fair, not harsh. Judge the idea's potential, not just what's written.
+- You have LIMITED information (short description only). Give benefit of doubt where the idea concept is sound.
+- If the idea is clearly innovative or addresses a real problem, score accordingly even if details are sparse.
+- If description is very short, default team parameters to 5-6 (moderate) rather than penalizing.
+- If no differentiation mentioned but the idea itself is unique, still give moderate Uniqueness score.
 - Reason MUST be one short sentence.
 - Do NOT include recommendations or rankings.
 """
@@ -218,7 +227,7 @@ def evaluate_light_submission(submission):
     response = client.generate_completion(
         system_prompt="You are an expert idea evaluator. Return ONLY valid JSON, no other text.",
         user_prompt=prompt,
-        model="anthropic/claude-3.5-sonnet",
+        model="anthropic/claude-sonnet-4",
         max_tokens=2000,
         images=image_paths if image_paths else None,
     )
@@ -271,7 +280,7 @@ def evaluate_light_submission(submission):
 
     # Metadata
     submission.ai_confidence = eval_data.get('confidence', 'medium')
-    submission.ai_model_used = response.get('model', 'anthropic/claude-3.5-sonnet')
+    submission.ai_model_used = response.get('model', 'anthropic/claude-sonnet-4')
     submission.ai_raw_response = response.get('raw_response', '')
     submission.is_evaluated = True
     submission.evaluated_at = timezone.now()

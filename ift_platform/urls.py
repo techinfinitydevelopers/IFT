@@ -21,10 +21,11 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('accounts/', include('accounts.urls')),
     path('', include('students.urls')),
-    path('jury/', include('admins.urls')),
+    path('super-admin/', include('admins.urls')),
     # Re-Evaluation module (remove this line to uninstall)
-    path('jury/re-evaluation/', include('re_evaluation.urls')),
+    path('super-admin/re-evaluation/', include('re_evaluation.urls')),
 ]
 
 # Serve media files during development

@@ -1,0 +1,66 @@
+{% extends "accounts/auth_base.html" %}
+
+{% block title %}Register School - IFT{% endblock %}
+
+{% block content %}
+<h1>Register your School</h1>
+<p class="subtitle">Join India's Future Tycoon as a participating school</p>
+
+<form method="post" action="{% url 'accounts:school_sign_up' %}">
+    {% csrf_token %}
+
+    <!-- School Name -->
+    <div class="form-group">
+        <div class="icon"><iconify-icon icon="mdi:school-outline"></iconify-icon></div>
+        <input type="text" class="form-control" name="school_name" placeholder="School Name" required value="{{ form.school_name.value|default:'' }}">
+        {% if form.school_name.errors %}<p class="field-error">{{ form.school_name.errors.0 }}</p>{% endif %}
+    </div>
+
+    <!-- Email -->
+    <div class="form-group">
+        <div class="icon"><iconify-icon icon="mage:email"></iconify-icon></div>
+        <input type="email" class="form-control" name="contact_email" placeholder="School Email" required value="{{ form.contact_email.value|default:'' }}">
+        {% if form.contact_email.errors %}<p class="field-error">{{ form.contact_email.errors.0 }}</p>{% endif %}
+    </div>
+
+    <!-- Phone -->
+    <div class="form-group">
+        <div class="icon"><iconify-icon icon="mdi:phone-outline"></iconify-icon></div>
+        <input type="text" class="form-control" name="contact_phone" placeholder="Phone Number" required value="{{ form.contact_phone.value|default:'' }}">
+        {% if form.contact_phone.errors %}<p class="field-error">{{ form.contact_phone.errors.0 }}</p>{% endif %}
+    </div>
+
+    <!-- City -->
+    <div class="form-group">
+        <div class="icon"><iconify-icon icon="mdi:city-variant-outline"></iconify-icon></div>
+        <input type="text" class="form-control" name="city" placeholder="City" required value="{{ form.city.value|default:'' }}">
+        {% if form.city.errors %}<p class="field-error">{{ form.city.errors.0 }}</p>{% endif %}
+    </div>
+
+    <!-- State -->
+    <div class="form-group">
+        <div class="icon"><iconify-icon icon="mdi:map-marker-outline"></iconify-icon></div>
+        <input type="text" class="form-control" name="state" placeholder="State" required value="{{ form.state.value|default:'' }}">
+        {% if form.state.errors %}<p class="field-error">{{ form.state.errors.0 }}</p>{% endif %}
+    </div>
+
+    <!-- Terms -->
+    <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="terms" name="terms" required>
+        <label class="form-check-label" for="terms">
+            I agree to the <a href="#">Terms & Conditions</a> and <a href="#">Privacy Policy</a>
+        </label>
+    </div>
+    {% if form.terms.errors %}<p class="field-error" style="margin-top:-1rem;margin-bottom:1rem;">{{ form.terms.errors.0 }}</p>{% endif %}
+
+    <button type="submit" class="btn-primary">Register School</button>
+</form>
+
+<p class="subtitle" style="margin-top:1.5rem;font-size:0.85rem;color:#999;">
+    After registration, you'll receive login credentials via email. Complete your profile to activate your school.
+</p>
+
+<div class="signin-link">
+    Already have an account? <a href="{% url 'accounts:sign_in' %}">Sign In</a>
+</div>
+{% endblock %}

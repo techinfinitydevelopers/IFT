@@ -5,18 +5,103 @@ from django.utils import timezone
 
 class Student(models.Model):
     """Student profile linked to Django User model"""
+    GENDER_CHOICES = [('male', 'Male'), ('female', 'Female'), ('other', 'Other')]
+    BOARD_CHOICES = [('CBSE', 'CBSE'), ('ICSE', 'ICSE'), ('SSC', 'SSC'), ('IB', 'IB'), ('IGCSE', 'IGCSE')]
+    STREAM_CHOICES = [('science', 'Science'), ('commerce', 'Commerce'), ('arts', 'Arts/Humanities'), ('na', 'Not Applicable')]
+
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student_profile')
     student_id = models.CharField(max_length=50, unique=True, blank=True)
-    school_name = models.CharField(max_length=200)
+    school = models.ForeignKey('School', on_delete=models.SET_NULL, null=True, blank=True, related_name='students')
+    school_name = models.CharField(max_length=200)  # kept for backward compat
+    school_branch = models.CharField(max_length=200, blank=True)
+
+    # Personal
+    middle_name = models.CharField(max_length=100, blank=True)
+    gender = models.CharField(max_length=10, choices=GENDER_CHOICES, blank=True)
+    date_of_birth = models.DateField(null=True, blank=True)
+    nationality = models.CharField(max_length=100, blank=True, default='Indian')
+
+    # Academic
     grade = models.CharField(max_length=20)
-    phone = models.CharField(max_length=15, blank=True)
+    division = models.CharField(max_length=10, blank=True)
+    roll_number = models.CharField(max_length=50, blank=True)
+    academic_year = models.CharField(max_length=20, blank=True)
+    school_board = models.CharField(max_length=10, choices=BOARD_CHOICES, blank=True)
+    stream = models.CharField(max_length=20, choices=STREAM_CHOICES, blank=True)
+
+    # Contact
+    phone = models.CharField(max_length=15, blank=True)  # student mobile
+    parent_mobile = models.CharField(max_length=15, blank=True)
+    parent_email = models.EmailField(blank=True)
+    address = models.TextField(blank=True)
+    city = models.CharField(max_length=100, blank=True)
+    state = models.CharField(max_length=100, blank=True)
+    pin_code = models.CharField(max_length=10, blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
+    @property
+    def school_display_name(self):
+        return self.school.name if self.school else self.school_name
+
     def __str__(self):
-        return f"{self.user.get_full_name() or self.user.username} - {self.school_name}"
-    
+        return f"{self.user.get_full_name() or self.user.username} - {self.school_display_name}"
+
     class Meta:
         ordering = ['-created_at']
+
+
+class School(models.Model):
+    """School information model"""
+    BOARD_CHOICES = [
+        ('CBSE', 'CBSE'),
+        ('ICSE', 'ICSE'),
+        ('SSC', 'SSC'),
+        ('IB', 'IB'),
+        ('IGCSE', 'IGCSE'),
+        ('Other', 'Other'),
+    ]
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('inactive', 'Inactive'),
+        ('active', 'Active'),
+    ]
+
+    SCHOOL_TYPE_CHOICES = [
+        ('private', 'Private'),
+        ('government', 'Government'),
+        ('aided', 'Aided'),
+        ('other', 'Other'),
+    ]
+
+    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='school_profile')
+    name = models.CharField(max_length=300)
+    branch = models.CharField(max_length=200, blank=True)
+    board = models.CharField(max_length=10, choices=BOARD_CHOICES, blank=True)
+    affiliation_number = models.CharField(max_length=100, blank=True)
+    address = models.TextField(blank=True)
+    city = models.CharField(max_length=100, blank=True)
+    state = models.CharField(max_length=100, blank=True)
+    pin_code = models.CharField(max_length=10, blank=True)
+    country = models.CharField(max_length=100, blank=True, default='India')
+    principal_name = models.CharField(max_length=200, blank=True)
+    principal_email = models.EmailField(blank=True)
+    contact_email = models.EmailField(blank=True)
+    contact_phone = models.CharField(max_length=15, blank=True)
+    website = models.URLField(blank=True)
+    established_year = models.IntegerField(null=True, blank=True)
+    total_students = models.IntegerField(null=True, blank=True)
+    school_type = models.CharField(max_length=20, choices=SCHOOL_TYPE_CHOICES, blank=True)
+    medium = models.CharField(max_length=100, blank=True)
+    is_active = models.BooleanField(default=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        ordering = ['name']
 
 
 class IdeaSubmission(models.Model):
@@ -101,6 +186,17 @@ class IdeaSubmission(models.Model):
         help_text="If you had 60 seconds to convince someone to try or support your idea, what would you say?"
     )
 
+    # Competition Track
+    TRACK_CHOICES = [
+        ('sustainable-energy', 'Sustainable Energy'),
+        ('healthcare', 'Healthcare'),
+        ('education', 'Education'),
+        ('fintech', 'FinTech'),
+        ('agriculture', 'Agriculture'),
+        ('smart-cities', 'Smart Cities'),
+    ]
+    competition_track = models.CharField(max_length=30, choices=TRACK_CHOICES, blank=True)
+
     # ===== Legacy v2 Questions (kept for backward compatibility) =====
     problem_definition = models.TextField(
         blank=True, default='',
@@ -182,6 +278,98 @@ class IdeaSubmission(models.Model):
 
 
 
+class Team(models.Model):
+    """Standalone team model - max 3 members"""
+    TRACK_CHOICES = [
+        ('sustainable-energy', 'Sustainable Energy'),
+        ('healthcare', 'Healthcare'),
+        ('education', 'Education'),
+        ('fintech', 'FinTech'),
+        ('agriculture', 'Agriculture'),
+        ('smart-cities', 'Smart Cities'),
+    ]
+
+    name = models.CharField(max_length=100)
+    tagline = models.CharField(max_length=200, blank=True)
+    description = models.TextField(blank=True)
+    track = models.CharField(max_length=30, choices=TRACK_CHOICES, blank=True)
+    team_code = models.CharField(max_length=10, unique=True)
+    leader = models.OneToOneField(User, on_delete=models.CASCADE, related_name='led_team')
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def member_count(self):
+        return self.memberships.count()
+
+    @property
+    def slots_available(self):
+        return max(0, 3 - self.member_count)
+
+    @property
+    def is_full(self):
+        return self.member_count >= 3
+
+    def __str__(self):
+        return f"{self.name} ({self.team_code})"
+
+    class Meta:
+        ordering = ['-created_at']
+
+
+class TeamMembership(models.Model):
+    """Team membership - links students to teams"""
+    STATUS_CHOICES = [
+        ('active', 'Active'),
+        ('pending', 'Pending'),
+    ]
+
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='memberships')
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True, blank=True, related_name='team_memberships')
+    email = models.EmailField(blank=True)
+    role = models.CharField(max_length=20, default='member')  # 'leader' or 'member'
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+    joined_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def display_name(self):
+        """Name for display - full name if active, email-derived if pending."""
+        if self.student:
+            return self.student.user.get_full_name() or self.student.user.username
+        if self.email:
+            local = self.email.split('@')[0]
+            return local.replace('.', ' ').replace('_', ' ').title()
+        return 'Unknown'
+
+    def __str__(self):
+        if self.student:
+            return f"{self.student} in {self.team.name}"
+        return f"{self.email} (pending) in {self.team.name}"
+
+    class Meta:
+        ordering = ['role', 'joined_at']
+
+
+class TeamMember(models.Model):
+    """Legacy team members for idea submission (kept for backward compat)"""
+    ROLE_CHOICES = [
+        ('leader', 'Team Leader'),
+        ('member', 'Member'),
+    ]
+    submission = models.ForeignKey(IdeaSubmission, on_delete=models.CASCADE, related_name='team_members')
+    name = models.CharField(max_length=200)
+    grade = models.CharField(max_length=20, blank=True)
+    school_name = models.CharField(max_length=200, blank=True)
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='member')
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.get_role_display()}) — {self.submission}"
+
+    class Meta:
+        ordering = ['role', 'name']
+
+
 class UploadedFile(models.Model):
     """Files uploaded with submission"""
     FILE_TYPE_CHOICES = [
@@ -205,3 +393,83 @@ class UploadedFile(models.Model):
     
     class Meta:
         ordering = ['uploaded_at']
+
+
+class IdeaSuggestion(models.Model):
+    """Suggestion/PR from team member to edit the idea. Leader approves/rejects."""
+    STATUS_CHOICES = [
+        ('pending', 'Pending Review'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    ]
+
+    submission = models.ForeignKey(IdeaSubmission, on_delete=models.CASCADE, related_name='suggestions')
+    suggested_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='idea_suggestions')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    message = models.TextField(blank=True, help_text="What changed and why")
+    reject_reason = models.TextField(blank=True)
+    reviewed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='reviewed_suggestions')
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    # Store suggested changes as JSON — field_name: new_value
+    changes = models.JSONField(default=dict, help_text="Dict of field_name: new_value")
+
+    @property
+    def changed_fields_display(self):
+        """Human-readable list of changed fields."""
+        labels = {
+            'q1_target_group': 'Q1 - Target Group & Struggle',
+            'q2_exact_problem': 'Q2 - Exact Problem',
+            'q3_solution_simple': 'Q3 - Solution',
+            'q4_differentiation': 'Q4 - Differentiation',
+            'q5_build_steps': 'Q5 - Build Steps',
+            'q6_resources': 'Q6 - Resources',
+            'q7_positive_change': 'Q7 - Positive Change',
+            'q8_challenges': 'Q8 - Challenges',
+            'q9_team_fit': 'Q9 - Team Fit',
+            'q10_feedback': 'Q10 - Feedback',
+            'q11_creative_element': 'Q11 - Creative Element',
+            'q12_pitch': 'Q12 - Pitch',
+            'title': 'Project Title',
+        }
+        return [labels.get(f, f) for f in self.changes.keys()]
+
+    def apply_changes(self):
+        """Merge approved changes into the submission."""
+        for field, value in self.changes.items():
+            if hasattr(self.submission, field):
+                setattr(self.submission, field, value)
+        self.submission.save()
+
+    def __str__(self):
+        return f"Suggestion by {self.suggested_by.get_full_name()} on {self.submission} ({self.status})"
+
+    class Meta:
+        ordering = ['-created_at']
+
+
+class Notification(models.Model):
+    """Student notifications"""
+    TYPE_CHOICES = [
+        ('team', 'Team'),
+        ('submission', 'Submission'),
+        ('announcement', 'Announcement'),
+        ('system', 'System'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    notification_type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='system')
+    title = models.CharField(max_length=300)
+    message = models.TextField(blank=True)
+    icon = models.CharField(max_length=50, default='notifications')  # Material icon name
+    is_read = models.BooleanField(default=False)
+    action_url = models.CharField(max_length=500, blank=True)  # optional link
+    action_label = models.CharField(max_length=100, blank=True)  # button text
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.title} \u2192 {self.user.username}"
+
+    class Meta:
+        ordering = ['-created_at']

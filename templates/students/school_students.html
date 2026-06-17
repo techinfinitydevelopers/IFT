@@ -1,0 +1,947 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Students | {{ school.name }} | IFTx</title>
+
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <style>
+        :root {
+            --primary: #5E2A97;
+            --primary-light: #E8D4F0;
+            --background-light: #F7F7F7;
+            --surface-light: #FFFFFF;
+            --border-light: #EEEEEE;
+            --text-dark: #222222;
+            --text-muted: #666666;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            overflow: hidden;
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        .main-container { display: flex; height: 100vh; width: 100%; }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: 280px;
+            background: #FFFFFF;
+            border-right: 1px solid #EEEEEE;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: sticky;
+            top: 0;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .sidebar.collapsed { width: 80px; }
+        .sidebar.collapsed .sidebar-title,
+        .sidebar.collapsed .sidebar-subtitle,
+        .sidebar.collapsed .nav-text,
+        .sidebar.collapsed .user-info { opacity: 0; width: 0; overflow: hidden; white-space: nowrap; }
+        .sidebar.collapsed .logo-img { width: 50px; height: 50px; margin: 0 auto; background-position: center; }
+        .sidebar.collapsed .nav-item { justify-content: center; padding-left: 1.7rem; }
+        .sidebar.collapsed .nav-item .material-symbols-outlined { margin: 0; }
+        .sidebar.collapsed .user-avatar { margin: 0 auto; }
+        .sidebar.collapsed .logout-btn { display: none; }
+        .sidebar.collapsed .user-profile { justify-content: center; }
+
+        .sidebar-header { border-bottom: 1px solid #F7F7F7; }
+
+        .logo-img {
+            width: 250px; height: 50px;
+            background-size: contain; background-position: left center;
+            background-repeat: no-repeat; flex-shrink: 0;
+        }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.75rem 1rem; border-radius: 0.5rem;
+            text-decoration: none; color: #222222;
+            transition: all 0.2s ease; cursor: pointer;
+            margin-bottom: 0.25rem;
+        }
+        .nav-item:hover { background: #F7F7F7; color: #222222; }
+        .nav-item .material-symbols-outlined { font-size: 24px; color: #666666; transition: all 0.2s ease; }
+        .nav-item.active { background: rgba(94, 42, 151, 0.1); color: #5E2A97; }
+        .nav-item.active .material-symbols-outlined { color: #5E2A97; font-variation-settings: 'FILL' 1; }
+        .nav-text { font-size: 0.875rem; font-weight: 500; }
+
+        .sidebar-footer { border-top: 1px solid #EEEEEE; margin-top: auto; }
+
+        .user-profile {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.75rem; border-radius: 0.5rem;
+            transition: all 0.2s ease; cursor: pointer;
+        }
+        .user-profile:hover { background: #F7F7F7; }
+
+        .user-avatar {
+            width: 2.5rem; height: 2.5rem; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            background: var(--primary); color: white;
+            font-size: 0.875rem; font-weight: 700; flex-shrink: 0;
+        }
+
+        .user-info { flex: 1; }
+        .user-name-text { font-size: 0.875rem; font-weight: 700; color: #222222; margin: 0; line-height: 1.2; }
+        .user-role { font-size: 0.75rem; color: #666666; margin: 0; line-height: 1.2; }
+
+        .logout-btn {
+            background: none; border: none; color: #666666;
+            cursor: pointer; padding: 0.5rem; border-radius: 0.375rem;
+            transition: all 0.2s ease; display: flex; align-items: center; justify-content: center;
+        }
+        .logout-btn:hover { background: rgba(94, 42, 151, 0.1); color: #5E2A97; }
+        .logout-btn .material-symbols-outlined { font-size: 20px; }
+
+        /* Mobile sidebar */
+        .sidebar-overlay {
+            display: none; position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; background: rgba(0,0,0,0.5);
+            z-index: 998; opacity: 0; transition: opacity 0.3s ease;
+        }
+        .sidebar-overlay.active { display: block; opacity: 1; }
+
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; left: -280px; z-index: 999; transition: left 0.3s ease; }
+            .sidebar.mobile-open { left: 0; }
+            .sidebar.collapsed { left: -80px; }
+            .sidebar.collapsed.mobile-open { left: 0; }
+        }
+
+        /* ===== HEADER ===== */
+        .top-header {
+            height: 64px; background: #FFFFFF;
+            border-bottom: 1px solid #EEEEEE;
+            display: flex; align-items: center;
+            padding: 12px 2rem; position: sticky;
+            top: 0; z-index: 100;
+        }
+
+        .header-icon-btn {
+            width: 2.5rem; height: 2.5rem; border-radius: 0.5rem;
+            border: none; background: #F7F7F7; color: #666666;
+            cursor: pointer; display: flex; align-items: center;
+            justify-content: center; transition: all 0.2s ease;
+        }
+        .header-icon-btn:hover { background: #EEEEEE; color: #5E2A97; }
+        .header-icon-btn .material-symbols-outlined { font-size: 22px; }
+
+        .header-avatar {
+            width: 2.5rem; height: 2.5rem; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            background: #5E2A97; color: white;
+            font-size: 0.875rem; font-weight: 700;
+            border: 2px solid #5E2A97; cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .header-avatar:hover { transform: scale(1.05); box-shadow: 0 0 0 4px rgba(94,42,151,0.1); }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            flex: 1; display: flex; flex-direction: column;
+            height: 100%; overflow-y: auto; position: relative; z-index: 10;
+        }
+
+        .content-wrapper { flex: 1; padding: 32px; max-width: 100%; margin: 0 auto; width: 100%; }
+
+        /* Page Header */
+        .page-header { margin-bottom: 32px; }
+        .page-header h1 { font-size: 1.75rem; font-weight: 700; color: var(--text-dark); margin-bottom: 8px; }
+        .breadcrumb { font-size: 0.875rem; color: var(--text-muted); background: none; padding: 0; margin: 0; }
+        .breadcrumb-item a { color: var(--text-muted); text-decoration: none; }
+        .breadcrumb-item a:hover { color: var(--primary); }
+        .breadcrumb-item.active { color: var(--text-dark); }
+
+        /* Stats Cards */
+        .stat-card {
+            background: var(--surface-light); border-radius: 12px; padding: 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04); border: 1px solid var(--border-light);
+            display: flex; align-items: center; gap: 14px; height: 100%;
+        }
+
+        .stat-icon {
+            width: 44px; height: 44px; min-width: 44px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+
+        .stat-icon.purple { background: rgba(94,42,151,0.1); color: var(--primary); }
+        .stat-icon.green { background: rgba(34,197,94,0.1); color: #22c55e; }
+        .stat-icon.amber { background: rgba(245,158,11,0.1); color: #f59e0b; }
+        .stat-icon.blue { background: rgba(59,130,246,0.1); color: #3b82f6; }
+
+        .stat-label {
+            font-size: 0.7rem; font-weight: 600; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.05em; margin: 0; white-space: nowrap;
+        }
+
+        .stat-value { font-size: 1.35rem; font-weight: 700; color: var(--text-dark); margin: 0; line-height: 1.2; }
+
+        /* Main Card */
+        .main-card {
+            background: var(--surface-light); border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04); border: 1px solid var(--border-light); overflow: hidden;
+        }
+
+        .main-card-header { padding: 24px; border-bottom: 1px solid var(--border-light); }
+
+        /* Search & Filter */
+        .search-input { position: relative; }
+        .search-input .material-symbols-outlined {
+            position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+            color: var(--text-muted); font-size: 20px;
+        }
+        .search-input input {
+            width: 100%; padding: 10px 12px 10px 44px; border: 1px solid var(--border-light);
+            border-radius: 8px; font-size: 0.875rem; background: #f8fafc;
+            font-family: 'Poppins', sans-serif;
+        }
+        .search-input input:focus {
+            outline: none; border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(94,42,151,0.1);
+        }
+
+        /* Table */
+        .custom-table { width: 100%; font-size: 0.875rem; }
+        .custom-table thead { background: #f8fafc; }
+        .custom-table th {
+            padding: 14px 20px; font-size: 0.75rem; font-weight: 700;
+            color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;
+            text-align: left; border-bottom: 1px solid var(--border-light);
+        }
+        .custom-table td { padding: 14px 20px; vertical-align: middle; border-bottom: 1px solid #f8f9fa; }
+        .custom-table tbody tr { transition: background 0.2s; cursor: pointer; }
+        .custom-table tbody tr:hover { background: rgba(94,42,151,0.03); }
+
+        .avatar-circle {
+            width: 32px; height: 32px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.75rem; font-weight: 700;
+        }
+        .avatar-circle.default { background: #e2e8f0; color: #64748b; }
+        .avatar-circle.primary { background: var(--primary); color: white; }
+
+        .student-name { font-weight: 600; color: var(--text-dark); margin: 0; }
+        .student-email { font-size: 0.75rem; color: var(--text-muted); margin: 0; }
+
+        .badge-status {
+            font-size: 0.6875rem; font-weight: 700; padding: 4px 10px;
+            border-radius: 999px; text-transform: uppercase;
+        }
+        .badge-status.in-team { background: #d1fae5; color: #065f46; }
+        .badge-status.no-team { background: #e2e8f0; color: #475569; }
+        .badge-status.submitted { background: rgba(94,42,151,0.1); color: var(--primary); }
+
+        /* Pagination */
+        .pagination-custom {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 20px 24px; border-top: 1px solid var(--border-light);
+        }
+        .pagination-info { font-size: 0.875rem; color: var(--text-muted); }
+        .pagination-controls { display: flex; align-items: center; gap: 8px; }
+        .page-btn {
+            width: 32px; height: 32px; border-radius: 8px;
+            border: 1px solid var(--border-light); background: white;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s; font-size: 0.8125rem; font-weight: 600;
+            font-family: 'Poppins', sans-serif; text-decoration: none; color: var(--text-dark);
+        }
+        .page-btn:hover { background: #f8fafc; }
+        .page-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Buttons */
+        .btn-secondary-custom {
+            background: white; color: var(--text-dark); font-weight: 600;
+            padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border-light);
+            display: flex; align-items: center; gap: 8px; cursor: pointer;
+            transition: all 0.2s; font-family: 'Poppins', sans-serif; font-size: 0.82rem;
+        }
+        .btn-secondary-custom:hover { background: #f8fafc; }
+
+        /* Details Sidebar */
+        .details-sidebar {
+            position: fixed; top: 0; right: -480px; width: 480px; height: 100vh;
+            background: var(--surface-light); box-shadow: -4px 0 24px rgba(0,0,0,0.1);
+            z-index: 1000; transition: right 0.3s ease; display: flex; flex-direction: column;
+        }
+        .details-sidebar.open { right: 0; }
+
+        .details-sidebar-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 999; display: none;
+            opacity: 0; transition: opacity 0.3s ease;
+        }
+        .details-sidebar-overlay.show { display: block; opacity: 1; }
+
+        .details-sidebar-header {
+            padding: 24px; border-bottom: 1px solid var(--border-light);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .details-sidebar-header h2 { font-size: 1.125rem; font-weight: 700; margin: 0; }
+
+        .details-sidebar-close {
+            width: 32px; height: 32px; border-radius: 8px;
+            border: 1px solid var(--border-light); background: white;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: var(--text-muted); transition: all 0.2s;
+        }
+        .details-sidebar-close:hover { background: #f8fafc; color: var(--text-dark); }
+
+        .details-sidebar-content { flex: 1; overflow-y: auto; padding: 24px; }
+
+        .detail-section { margin-bottom: 28px; }
+        .detail-section-title {
+            font-size: 0.75rem; font-weight: 700; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 14px;
+            display: flex; align-items: center; gap: 8px;
+        }
+
+        .detail-profile { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+        .detail-avatar {
+            width: 56px; height: 56px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.25rem; font-weight: 700; box-shadow: 0 4px 12px rgba(94,42,151,0.2);
+        }
+        .detail-profile-info h3 { font-size: 1.125rem; font-weight: 700; margin: 0 0 4px 0; }
+        .detail-profile-info p { font-size: 0.8125rem; color: var(--text-muted); margin: 0; }
+
+        .detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
+        .detail-item { padding: 12px; background: #f8fafc; border-radius: 8px; }
+        .detail-item-label {
+            font-size: 0.6875rem; font-weight: 600; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;
+        }
+        .detail-item-value { font-size: 0.875rem; font-weight: 600; color: var(--text-dark); }
+
+        .detail-info-row { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
+        .detail-info-row .material-symbols-outlined { color: var(--primary); font-size: 20px; margin-top: 2px; }
+        .detail-info-row-content h4 { font-size: 0.8125rem; font-weight: 600; margin: 0 0 2px 0; }
+        .detail-info-row-content p { font-size: 0.8125rem; color: var(--text-muted); margin: 0; }
+
+        .team-card {
+            padding: 16px; border: 1px solid var(--border-light); border-radius: 12px;
+        }
+        .team-card-header {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
+        }
+        .team-card-title { font-size: 0.875rem; font-weight: 700; margin: 0; }
+        .team-leader-badge {
+            font-size: 0.625rem; font-weight: 700; padding: 4px 8px;
+            background: rgba(94,42,151,0.1); color: var(--primary); border-radius: 4px;
+        }
+        .team-member { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .team-member:last-child { margin-bottom: 0; }
+        .team-member-avatar {
+            width: 24px; height: 24px; border-radius: 50%; background: #e2e8f0;
+            color: #64748b; display: flex; align-items: center; justify-content: center;
+            font-size: 0.625rem; font-weight: 700;
+        }
+        .team-member-name { font-size: 0.8125rem; color: var(--text-muted); }
+
+        .idea-card {
+            padding: 16px; background: rgba(94,42,151,0.05); border-radius: 10px;
+        }
+        .idea-card h4 { font-size: 0.875rem; font-weight: 700; margin: 0 0 6px 0; }
+        .idea-card p { font-size: 0.8125rem; color: var(--text-muted); line-height: 1.6; font-style: italic; margin: 0; }
+
+        .score-bar {
+            display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+        }
+        .score-bar-label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); width: 60px; }
+        .score-bar-track { flex: 1; height: 6px; background: #f1f5f9; border-radius: 3px; overflow: hidden; }
+        .score-bar-fill { height: 100%; border-radius: 3px; }
+        .score-bar-value { font-size: 0.75rem; font-weight: 700; color: var(--text-dark); width: 36px; text-align: right; }
+
+        .tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+        .tag {
+            font-size: 0.625rem; font-weight: 700; padding: 4px 10px;
+            background: #e2e8f0; color: var(--text-dark); border-radius: 4px;
+        }
+
+        @media (max-width: 768px) {
+            .content-wrapper { padding: 16px; }
+            .details-sidebar { width: 100%; right: -100%; }
+            .detail-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-container">
+        <!-- Sidebar Overlay (mobile) -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="schoolAppSidebar">
+            <div class="sidebar-header p-3 pb-1">
+                <div class="d-flex align-items-center">
+                    <div class="logo-img" style='background-image: url("{% static "images/IFT_logo.png" %}");'></div>
+                </div>
+            </div>
+            <nav class="flex-grow-1 px-3 d-flex flex-column gap-2 mt-3" style="overflow-y: auto;">
+                <a class="nav-item" href="{% url 'students:school_dashboard' %}">
+                    <span class="material-symbols-outlined">dashboard</span>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+                <a class="nav-item active" href="{% url 'students:school_students' %}">
+                    <span class="material-symbols-outlined">school</span>
+                    <span class="nav-text">Students</span>
+                </a>
+                <a class="nav-item" href="{% url 'students:school_teams' %}">
+                    <span class="material-symbols-outlined">groups</span>
+                    <span class="nav-text">Teams</span>
+                </a>
+                <a class="nav-item" href="{% url 'students:school_submissions' %}">
+                    <span class="material-symbols-outlined">assignment</span>
+                    <span class="nav-text">Submissions</span>
+                </a>
+                <a class="nav-item" href="{% url 'students:school_results' %}">
+                    <span class="material-symbols-outlined">leaderboard</span>
+                    <span class="nav-text">Results</span>
+                </a>
+                <a class="nav-item" href="{% url 'students:school_halloffame' %}">
+                    <span class="material-symbols-outlined">emoji_events</span>
+                    <span class="nav-text">Hall of Fame</span>
+                </a>
+                <a class="nav-item" href="{% url 'students:school_reports' %}">
+                    <span class="material-symbols-outlined">analytics</span>
+                    <span class="nav-text">Reports</span>
+                </a>
+                <a class="nav-item" href="{% url 'students:school_faq' %}">
+                    <span class="material-symbols-outlined">help</span>
+                    <span class="nav-text">FAQ</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer p-3 mt-auto">
+                <div class="user-profile">
+                    <div class="user-avatar">
+                        {{ school.name|make_list|first|upper }}
+                    </div>
+                    <div class="user-info">
+                        <p class="user-name-text">{{ school.name|truncatechars:20 }}</p>
+                        <p class="user-role">School Admin</p>
+                    </div>
+                    <a href="{% url 'accounts:sign_out' %}" class="logout-btn" title="Logout">
+                        <span class="material-symbols-outlined">logout</span>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="top-header">
+                <button class="header-icon-btn" id="sidebarToggleBtn" style="margin-right:16px;">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+                <div class="d-flex align-items-center gap-3 ms-auto">
+                    <button class="header-icon-btn" id="fullscreenBtn" title="Toggle Fullscreen">
+                        <span class="material-symbols-outlined">fullscreen</span>
+                    </button>
+                    <button class="header-icon-btn" title="Notifications" style="position:relative;">
+                        <span class="material-symbols-outlined">notifications</span>
+                    </button>
+                    <div class="header-avatar" id="profileAvatarBtn" style="cursor:pointer;">{{ school.name|make_list|first|upper }}</div>
+                </div>
+            </header>
+
+            <!-- Profile Dropdown -->
+            <div id="profileDropdown" style="display:none;position:fixed;top:70px;right:24px;width:280px;background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.12);border:1px solid #f0f0f0;z-index:200;">
+                <div style="padding:16px;border-bottom:1px solid #f1f5f9;">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <div style="width:48px;height:48px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:1.1rem;">{{ school.name|make_list|first|upper }}</div>
+                        <div>
+                            <p style="margin:0;font-size:0.875rem;font-weight:700;">{{ school.name|truncatechars:25 }}</p>
+                            <p style="margin:2px 0 0;font-size:0.75rem;color:#64748b;">School Admin</p>
+                            <p style="margin:2px 0 0;font-size:0.65rem;color:#94a3b8;">{{ school.contact_email }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div style="padding:8px;">
+                    <a href="{% url 'students:school_profile' %}" style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;text-decoration:none;color:#222;font-size:0.875rem;font-weight:500;transition:background 0.15s;">
+                        <span class="material-symbols-outlined" style="color:var(--primary);font-size:20px;">person</span>
+                        My Profile
+                    </a>
+                    <a href="{% url 'accounts:sign_out' %}" style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;text-decoration:none;color:#ef4444;font-size:0.875rem;font-weight:500;transition:background 0.15s;">
+                        <span class="material-symbols-outlined" style="color:#ef4444;font-size:20px;">logout</span>
+                        Logout
+                    </a>
+                </div>
+            </div>
+
+            <div class="content-wrapper">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div class="row align-items-center">
+                        <div class="col-12 col-md-6">
+                            <h1>Enrolled Students</h1>
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'students:school_dashboard' %}">Dashboard</a></li>
+                                    <li class="breadcrumb-item active">Students</li>
+                                </ol>
+                            </nav>
+                        </div>
+                        <div class="col-12 col-md-6 d-flex justify-content-md-end align-items-center gap-3 mt-3 mt-md-0">
+                            <button class="btn-secondary-custom" onclick="exportCSV()">
+                                <span class="material-symbols-outlined" style="font-size: 18px;">file_download</span>
+                                Export CSV
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="row g-3 mb-4">
+                    <div class="col-6 col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-icon purple">
+                                <span class="material-symbols-outlined">school</span>
+                            </div>
+                            <div>
+                                <p class="stat-label">Total Enrolled</p>
+                                <h3 class="stat-value">{{ total }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-icon green">
+                                <span class="material-symbols-outlined">check_circle</span>
+                            </div>
+                            <div>
+                                <p class="stat-label">Active</p>
+                                <h3 class="stat-value">{{ active_count }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-icon blue">
+                                <span class="material-symbols-outlined">groups</span>
+                            </div>
+                            <div>
+                                <p class="stat-label">In Teams</p>
+                                <h3 class="stat-value">{{ in_teams }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-icon amber">
+                                <span class="material-symbols-outlined">person_off</span>
+                            </div>
+                            <div>
+                                <p class="stat-label">Without Teams</p>
+                                <h3 class="stat-value">{{ no_teams }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Data Card -->
+                <div class="main-card">
+                    <!-- Search & Filters -->
+                    <div class="main-card-header">
+                        <form method="get" id="filterForm">
+                            <div class="row align-items-center g-3">
+                                <div class="col-12 col-md-5">
+                                    <div class="search-input">
+                                        <span class="material-symbols-outlined">search</span>
+                                        <input type="text" name="q" id="searchInput" placeholder="Search by name or ID..." value="{{ search_query }}">
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-7 d-flex align-items-center gap-3 justify-content-md-end flex-wrap">
+                                    <select class="form-select" name="grade" id="gradeFilter" style="width: auto; font-size: 0.8125rem;" onchange="document.getElementById('filterForm').submit();">
+                                        <option value="">All Grades</option>
+                                        {% for g in grades %}
+                                        <option value="{{ g }}" {% if grade_filter == g %}selected{% endif %}>Grade {{ g }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <select class="form-select" name="status" id="statusFilter" style="width: auto; font-size: 0.8125rem;" onchange="document.getElementById('filterForm').submit();">
+                                        <option value="">All Status</option>
+                                        <option value="in-team" {% if status_filter == 'in-team' %}selected{% endif %}>In Team</option>
+                                        <option value="no-team" {% if status_filter == 'no-team' %}selected{% endif %}>No Team</option>
+                                        <option value="submitted" {% if status_filter == 'submitted' %}selected{% endif %}>Submitted</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Table -->
+                    <div class="table-responsive">
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Student Name</th>
+                                    <th>Class & Section</th>
+                                    <th>Team Name</th>
+                                    <th>Idea Title</th>
+                                    <th>Status</th>
+                                    <th style="text-align: right;">Score</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for student in students %}
+                                <tr data-name="{{ student.first_name }} {{ student.last_name }}"
+                                    data-email="{{ student.email }}"
+                                    data-grade="{{ student.grade }}"
+                                    data-division="{{ student.division }}"
+                                    data-status="{{ student.status }}"
+                                    data-team="{{ student.team_name }}"
+                                    data-idea="{{ student.idea_title }}"
+                                    data-score="{{ student.ai_score|default:'' }}"
+                                    data-phone="{{ student.phone|default:'' }}"
+                                    data-sid="{{ student.student_id }}"
+                                    data-created="{{ student.created_at|date:'M d, Y' }}">
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="avatar-circle {% if student.ai_score %}primary{% else %}default{% endif %}">
+                                                {{ student.first_name|truncatechars:1 }}{{ student.last_name|truncatechars:1 }}
+                                            </div>
+                                            <div>
+                                                <p class="student-name">{{ student.first_name }} {{ student.last_name }}</p>
+                                                <p class="student-email">{{ student.email }}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="color: var(--text-muted);">{{ student.grade }}th {{ student.division }}</td>
+                                    <td style="font-weight: 500;">{% if student.team_name %}{{ student.team_name }}{% else %}<span style="color: var(--text-muted);">&mdash;</span>{% endif %}</td>
+                                    <td style="font-weight: 500;">{% if student.idea_title %}{{ student.idea_title }}{% else %}<span style="color: var(--text-muted);">&mdash;</span>{% endif %}</td>
+                                    <td>
+                                        {% if student.status == 'submitted' %}
+                                        <span class="badge-status submitted">Submitted</span>
+                                        {% elif student.status == 'in-team' %}
+                                        <span class="badge-status in-team">In Team</span>
+                                        {% else %}
+                                        <span class="badge-status no-team">No Team</span>
+                                        {% endif %}
+                                    </td>
+                                    <td style="text-align: right; {% if student.ai_score %}font-weight: 700; color: var(--primary);{% else %}color: var(--text-muted);{% endif %}">
+                                        {% if student.ai_score %}{{ student.ai_score }}{% else %}&mdash;{% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" style="text-align: center; padding: 48px 20px; color: var(--text-muted);">
+                                        <span class="material-symbols-outlined" style="font-size: 48px; display: block; margin-bottom: 12px; opacity: 0.3;">school</span>
+                                        No students found{% if search_query %} for "{{ search_query }}"{% endif %}.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    {% if students.paginator.num_pages > 1 %}
+                    <div class="pagination-custom">
+                        <p class="pagination-info">
+                            Showing <span style="font-weight: 600;">{{ students.start_index }}&ndash;{{ students.end_index }}</span> of <span style="font-weight: 600;">{{ students.paginator.count }}</span> students
+                        </p>
+                        <div class="pagination-controls">
+                            {% if students.has_previous %}
+                            <a href="?page={{ students.previous_page_number }}&q={{ search_query }}&grade={{ grade_filter }}&status={{ status_filter }}" class="page-btn">
+                                <span class="material-symbols-outlined" style="font-size: 18px;">chevron_left</span>
+                            </a>
+                            {% else %}
+                            <button class="page-btn" disabled>
+                                <span class="material-symbols-outlined" style="font-size: 18px;">chevron_left</span>
+                            </button>
+                            {% endif %}
+
+                            {% for p in students.paginator.page_range %}
+                            <a href="?page={{ p }}&q={{ search_query }}&grade={{ grade_filter }}&status={{ status_filter }}" class="page-btn {% if p == students.number %}active{% endif %}">{{ p }}</a>
+                            {% endfor %}
+
+                            {% if students.has_next %}
+                            <a href="?page={{ students.next_page_number }}&q={{ search_query }}&grade={{ grade_filter }}&status={{ status_filter }}" class="page-btn">
+                                <span class="material-symbols-outlined" style="font-size: 18px;">chevron_right</span>
+                            </a>
+                            {% else %}
+                            <button class="page-btn" disabled>
+                                <span class="material-symbols-outlined" style="font-size: 18px;">chevron_right</span>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Details Sidebar Overlay -->
+    <div class="details-sidebar-overlay" id="detailsOverlay"></div>
+
+    <!-- Details Sidebar -->
+    <div class="details-sidebar" id="detailsSidebar">
+        <div class="details-sidebar-header">
+            <h2>Student Details</h2>
+            <button class="details-sidebar-close" id="closeSidebar">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div class="details-sidebar-content" id="sidebarContent"></div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Sidebar toggle
+        const sidebar = document.getElementById('schoolAppSidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
+
+        sidebarToggleBtn.addEventListener('click', function() {
+            if (window.innerWidth <= 768) {
+                sidebar.classList.toggle('mobile-open');
+                sidebarOverlay.classList.toggle('active');
+            } else {
+                sidebar.classList.toggle('collapsed');
+            }
+        });
+
+        sidebarOverlay.addEventListener('click', function() {
+            sidebar.classList.remove('mobile-open');
+            sidebarOverlay.classList.remove('active');
+        });
+
+        // Fullscreen
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        if (fullscreenBtn) {
+            fullscreenBtn.addEventListener('click', function() {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                } else {
+                    document.exitFullscreen();
+                }
+            });
+        }
+
+        // Search on Enter
+        document.getElementById('searchInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('filterForm').submit();
+            }
+        });
+
+        // Details Sidebar
+        const detailsSidebar = document.getElementById('detailsSidebar');
+        const detailsOverlay = document.getElementById('detailsOverlay');
+        const closeSidebar = document.getElementById('closeSidebar');
+        const sidebarContent = document.getElementById('sidebarContent');
+
+        function openDetailsSidebar(row) {
+            const name = row.getAttribute('data-name');
+            const email = row.getAttribute('data-email');
+            const grade = row.getAttribute('data-grade');
+            const division = row.getAttribute('data-division');
+            const status = row.getAttribute('data-status');
+            const team = row.getAttribute('data-team');
+            const idea = row.getAttribute('data-idea');
+            const score = row.getAttribute('data-score');
+            const phone = row.getAttribute('data-phone');
+            const sid = row.getAttribute('data-sid');
+            const created = row.getAttribute('data-created');
+
+            const initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
+            const hasScore = score && score !== '' && score !== 'None';
+
+            let statusBadge = '';
+            if (status === 'submitted') statusBadge = '<span class="badge-status submitted">SUBMITTED</span>';
+            else if (status === 'in-team') statusBadge = '<span class="badge-status in-team">IN TEAM</span>';
+            else statusBadge = '<span class="badge-status no-team">NO TEAM</span>';
+
+            let html = `
+                <!-- Profile -->
+                <div class="detail-section">
+                    <div class="detail-profile">
+                        <div class="detail-avatar" style="background: ${hasScore ? 'var(--primary)' : '#e2e8f0'}; color: ${hasScore ? 'white' : '#64748b'};">
+                            ${initials}
+                        </div>
+                        <div class="detail-profile-info">
+                            <h3>${name}</h3>
+                            <p>${email}</p>
+                        </div>
+                    </div>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <p class="detail-item-label">Class</p>
+                            <p class="detail-item-value">${grade}th ${division}</p>
+                        </div>
+                        <div class="detail-item">
+                            <p class="detail-item-label">Student ID</p>
+                            <p class="detail-item-value">${sid || 'N/A'}</p>
+                        </div>
+                        <div class="detail-item">
+                            <p class="detail-item-label">Registered</p>
+                            <p class="detail-item-value">${created}</p>
+                        </div>
+                        <div class="detail-item">
+                            <p class="detail-item-label">Status</p>
+                            <p class="detail-item-value">${statusBadge}</p>
+                        </div>
+                    </div>
+                </div>`;
+
+            // Contact info
+            if (phone) {
+                html += `
+                <div class="detail-section">
+                    <div class="detail-section-title">
+                        <span class="material-symbols-outlined">contact_phone</span>
+                        Contact
+                    </div>
+                    <div class="detail-info-row">
+                        <span class="material-symbols-outlined">phone</span>
+                        <div class="detail-info-row-content">
+                            <h4>Phone</h4>
+                            <p>${phone}</p>
+                        </div>
+                    </div>
+                    <div class="detail-info-row">
+                        <span class="material-symbols-outlined">mail</span>
+                        <div class="detail-info-row-content">
+                            <h4>Email</h4>
+                            <p>${email}</p>
+                        </div>
+                    </div>
+                </div>`;
+            }
+
+            // Team info
+            if (team) {
+                html += `
+                <div class="detail-section">
+                    <div class="detail-section-title">
+                        <span class="material-symbols-outlined">groups</span>
+                        Team Information
+                    </div>
+                    <div class="team-card">
+                        <div class="team-card-header">
+                            <h4 class="team-card-title">${team}</h4>
+                        </div>
+                    </div>
+                </div>`;
+            }
+
+            // Idea info
+            if (idea) {
+                html += `
+                <div class="detail-section">
+                    <div class="detail-section-title">
+                        <span class="material-symbols-outlined">emoji_objects</span>
+                        Idea Submission
+                    </div>
+                    <div class="idea-card">
+                        <h4>${idea}</h4>
+                    </div>
+                </div>`;
+            }
+
+            // Score
+            if (hasScore) {
+                const scoreVal = parseFloat(score);
+                html += `
+                <div class="detail-section">
+                    <div class="detail-section-title">
+                        <span class="material-symbols-outlined">scoreboard</span>
+                        Score Breakdown
+                    </div>
+                    <div class="score-bar">
+                        <span class="score-bar-label">AI Score</span>
+                        <div class="score-bar-track">
+                            <div class="score-bar-fill" style="width: ${(scoreVal / 50) * 100}%; background: #7c3aed;"></div>
+                        </div>
+                        <span class="score-bar-value">${scoreVal}/50</span>
+                    </div>
+                </div>`;
+            }
+
+            sidebarContent.innerHTML = html;
+            detailsSidebar.classList.add('open');
+            detailsOverlay.classList.add('show');
+        }
+
+        function closeDetailsSidebarFn() {
+            detailsSidebar.classList.remove('open');
+            detailsOverlay.classList.remove('show');
+        }
+
+        // Click row to open sidebar
+        document.querySelectorAll('.custom-table tbody tr').forEach(row => {
+            row.addEventListener('click', function() {
+                if (this.getAttribute('data-name')) openDetailsSidebar(this);
+            });
+        });
+
+        closeSidebar.addEventListener('click', closeDetailsSidebarFn);
+        detailsOverlay.addEventListener('click', closeDetailsSidebarFn);
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && detailsSidebar.classList.contains('open')) closeDetailsSidebarFn();
+        });
+
+        // Export CSV
+        function exportCSV() {
+            const rows = [['Name', 'Email', 'Class', 'Team', 'Idea', 'Status', 'Score']];
+            document.querySelectorAll('.custom-table tbody tr').forEach(row => {
+                const name = row.getAttribute('data-name');
+                if (!name) return;
+                rows.push([
+                    name,
+                    row.getAttribute('data-email'),
+                    row.getAttribute('data-grade') + 'th ' + row.getAttribute('data-division'),
+                    row.getAttribute('data-team') || '',
+                    row.getAttribute('data-idea') || '',
+                    row.getAttribute('data-status'),
+                    row.getAttribute('data-score') || ''
+                ]);
+            });
+            const csv = rows.map(r => r.map(c => '"' + (c || '').replace(/"/g, '""') + '"').join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = 'iftx-students.csv'; a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+    <script>
+    // Profile dropdown toggle
+    const profileBtn = document.getElementById('profileAvatarBtn');
+    const profileDd = document.getElementById('profileDropdown');
+    if (profileBtn && profileDd) {
+        profileBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            profileDd.style.display = profileDd.style.display === 'none' ? 'block' : 'none';
+        });
+        document.addEventListener('click', function() { profileDd.style.display = 'none'; });
+        profileDd.addEventListener('click', function(e) { e.stopPropagation(); });
+    }
+    </script>
+</body>
+</html>
