@@ -94,8 +94,6 @@ def dashboard(request):
         # Auto-create student profile if missing
         student = Student.objects.create(
             user=request.user,
-            name=request.user.get_full_name() or request.user.username,
-            email=request.user.email,
             school_name='Not Assigned',
             grade='10',
         )
