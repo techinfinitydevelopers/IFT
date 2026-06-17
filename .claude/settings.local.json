@@ -4,7 +4,14 @@
       "Bash(python:*)",
       "Bash(dir \"C:\\\\Users\\\\kunal\\\\Desktop\\\\IFT\\\\Parameters_Sheet\"\" /S /B *.xlsx)",
       "WebSearch",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(find /c/Users/kunal/Desktop/IFT -type f \\\\\\(-name *.txt -o -name *.md -o -name *.json \\\\\\))",
+      "Bash(netstat -ano)",
+      "Bash(taskkill //PID 32252 //F)",
+      "Bash(py manage.py runserver 8002)",
+      "Bash(py manage.py shell -c \":*)",
+      "Bash(taskkill //PID 12256 //F)",
+      "Bash(py:*)"
     ]
   }
 }
