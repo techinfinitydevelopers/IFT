@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+import dj_database_url
 
 # Load environment variables
 load_dotenv()
@@ -33,10 +34,10 @@ if not os.getenv('SECRET_KEY') and not os.getenv('DEBUG', 'True').lower() in ('t
 DEBUG = os.getenv('DEBUG', 'True').lower() in ('true', '1')
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
-# Allow ngrok tunneling (remove this line when not using ngrok)
 CSRF_TRUSTED_ORIGINS = [origin for origin in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',') if origin]
-CSRF_TRUSTED_ORIGINS += ['https://*.ngrok-free.app', 'https://*.ngrok.io']
-ALLOWED_HOSTS += ['*']  # ngrok support (remove when not needed)
+if not DEBUG:
+    ALLOWED_HOSTS += ['.railway.app']
+    CSRF_TRUSTED_ORIGINS += ['https://*.railway.app']
 
 
 # Application definition
@@ -59,6 +60,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -92,10 +94,10 @@ WSGI_APPLICATION = 'ift_platform.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default='sqlite:///db.sqlite3',
+        conn_max_age=600,
+    )
 }
 
 
@@ -136,6 +138,11 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+STORAGES = {
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+    },
+}
 
 # Media files (User uploads)
 MEDIA_URL = '/media/'
