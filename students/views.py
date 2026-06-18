@@ -1132,18 +1132,23 @@ def idea_corner(request):
         # Slug for filtering
         category_slug = track if track else category.lower().replace(' ', '-')
 
+        # Get AI summary if available
+        ai_summary_text = ''
+        try:
+            ai_summary_text = idea.ai_summary.summary or ''
+        except:
+            pass
+
         idea_list.append({
             'id': idea.id,
             'title': title,
-            'pitch': (idea.q12_pitch or idea.q3_solution_simple or '')[:200],
+            'pitch': ai_summary_text[:200] if ai_summary_text else (idea.q3_solution_simple or '')[:100] + '...',
             'category': category,
             'category_slug': category_slug,
             'student_name': idea.student.user.get_full_name() or 'Anonymous',
             'school_name': idea.student.school_display_name or 'Not specified',
             'student_initial': idea.student.user.first_name[:1].upper() if idea.student.user.first_name else 'A',
-            'target_audience': idea.q1_target_group or '',
-            'problem': idea.q2_exact_problem or '',
-            'solution': idea.q3_solution_simple or '',
+            'ai_summary': ai_summary_text,
             'tags': [category],
             'submitted_at': idea.submitted_at,
         })

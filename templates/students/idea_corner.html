@@ -855,9 +855,7 @@
                          data-title="{{ idea.title }}"
                          data-school="{{ idea.school_name }}"
                          data-tags="{% for tag in idea.tags %}{{ tag }} {% endfor %}"
-                         data-problem="{{ idea.problem }}"
-                         data-solution="{{ idea.solution }}"
-                         data-target="{{ idea.target_audience }}"
+                         data-summary="{{ idea.ai_summary }}"
                          data-student="{{ idea.student_name }}"
                          data-initial="{{ idea.student_initial }}"
                          data-pitch="{{ idea.pitch }}">
@@ -937,18 +935,8 @@
                 </div>
 
                 <div class="modal-section">
-                    <div class="modal-section-title">Problem Statement</div>
-                    <p class="modal-section-text" id="modalProblem"></p>
-                </div>
-
-                <div class="modal-section">
-                    <div class="modal-section-title">Proposed Solution</div>
-                    <p class="modal-section-text" id="modalSolution"></p>
-                </div>
-
-                <div class="modal-section">
-                    <div class="modal-section-title">Target Audience</div>
-                    <p class="modal-section-text" id="modalTarget"></p>
+                    <div class="modal-section-title">AI Summary</div>
+                    <p class="modal-section-text" id="modalSummary"></p>
                 </div>
 
                 <div class="modal-section">
@@ -1095,9 +1083,7 @@
                     const pitch = this.getAttribute('data-pitch') || '';
                     const student = this.getAttribute('data-student') || '';
                     const school = this.getAttribute('data-school') || '';
-                    const problem = this.getAttribute('data-problem') || 'Details coming soon.';
-                    const solution = this.getAttribute('data-solution') || 'Details coming soon.';
-                    const target = this.getAttribute('data-target') || 'Not specified';
+                    const summary = this.getAttribute('data-summary') || 'AI summary not available yet.';
                     const categoryBadge = this.querySelector('.category-badge');
                     const tags = this.querySelectorAll('.idea-tag');
 
@@ -1105,9 +1091,7 @@
                     document.getElementById('modalPitch').textContent = pitch;
                     document.getElementById('modalTeam').textContent = student;
                     document.getElementById('modalSchool').textContent = school;
-                    document.getElementById('modalProblem').textContent = problem;
-                    document.getElementById('modalSolution').textContent = solution;
-                    document.getElementById('modalTarget').textContent = target;
+                    document.getElementById('modalSummary').textContent = summary;
 
                     const modalCat = document.getElementById('modalCategory');
                     modalCat.className = categoryBadge.className;
