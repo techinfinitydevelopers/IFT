@@ -621,7 +621,8 @@
                         </thead>
                         <tbody>
                             {% for ev in evaluators %}
-                            <tr data-name="{{ ev.first_name }} {{ ev.last_name }}"
+                            <tr data-id="{{ ev.id }}"
+                                data-name="{{ ev.first_name }} {{ ev.last_name }}"
                                 data-email="{{ ev.email }}"
                                 data-expertise="{{ ev.expertise_area }}"
                                 data-organization="{{ ev.organization }}"
@@ -678,10 +679,13 @@
                                     <span class="badge-status inactive">Inactive</span>
                                     {% endif %}
                                 </td>
-                                <td style="text-align: center;">
+                                <td style="text-align: center; display:flex; gap:4px; justify-content:center;">
                                     <button class="btn-icon-action" title="View Details" onclick="event.stopPropagation(); openDetailsSidebar(this.closest('tr'));">
                                         <span class="material-symbols-outlined">visibility</span>
                                     </button>
+                                    <a class="btn-icon-action" title="Edit Evaluator" href="{% url 'admins:onboard_evaluator' %}?edit={{ ev.id }}" onclick="event.stopPropagation();">
+                                        <span class="material-symbols-outlined">edit</span>
+                                    </a>
                                 </td>
                             </tr>
                             {% endfor %}
