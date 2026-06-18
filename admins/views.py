@@ -1366,6 +1366,45 @@ def onboard_school(request):
 
 @login_required
 @user_passes_test(is_staff_or_superuser)
+def edit_school(request, school_id):
+    """Edit an existing school."""
+    school = get_object_or_404(School, id=school_id)
+
+    if request.method == 'POST':
+        school.name = request.POST.get('school_name', school.name).strip()
+        school.branch = request.POST.get('branch', school.branch).strip()
+        school.board = request.POST.get('board', school.board)
+        school.affiliation_number = request.POST.get('affiliation_number', school.affiliation_number).strip()
+        school.address = request.POST.get('address', school.address).strip()
+        school.city = request.POST.get('city', school.city).strip()
+        school.state = request.POST.get('state', school.state).strip()
+        school.pin_code = request.POST.get('pin_code', school.pin_code).strip()
+        school.country = request.POST.get('country', school.country).strip()
+        school.principal_name = request.POST.get('principal_name', school.principal_name).strip()
+        school.principal_email = request.POST.get('principal_email', school.principal_email).strip()
+        school.contact_email = request.POST.get('school_email', school.contact_email).strip()
+        school.contact_phone = request.POST.get('school_phone', school.contact_phone).strip()
+        school.website = request.POST.get('website', school.website).strip()
+        established = request.POST.get('established_year', '') or None
+        school.established_year = int(established) if established else school.established_year
+        total = request.POST.get('total_students', '') or None
+        school.total_students = int(total) if total else school.total_students
+        school.school_type = request.POST.get('school_type', school.school_type).strip()
+        school.medium = request.POST.get('medium', school.medium).strip()
+        school.save()
+
+        return JsonResponse({
+            'success': True,
+            'message': f'School "{school.name}" updated successfully!',
+            'redirect': '/super-admin/user-management/schools/'
+        })
+
+    context = {'school': school, 'edit_mode': True}
+    return render(request, 'admins/user_management/edit_school.html', context)
+
+
+@login_required
+@user_passes_test(is_staff_or_superuser)
 def onboard_evaluator(request):
     """Onboard a new evaluator/jury member."""
     if request.method == 'POST':
@@ -1449,6 +1488,111 @@ def onboard_evaluator(request):
         })
 
     return render(request, 'admins/user_management/onboard_evaluator.html')
+
+
+@login_required
+@user_passes_test(is_staff_or_superuser)
+def edit_evaluator(request, evaluator_id):
+    """Edit an existing evaluator."""
+    user = get_object_or_404(User, id=evaluator_id)
+    jury = None
+    try:
+        jury = user.jury_profile
+    except JuryProfile.DoesNotExist:
+        jury = JuryProfile.objects.create(user=user)
+
+    if request.method == 'POST':
+        import json as json_mod
+        if request.content_type == 'application/json':
+            data = json_mod.loads(request.body)
+        else:
+            data = request.POST
+
+        user.first_name = data.get('first_name', user.first_name).strip()
+        user.last_name = data.get('last_name', user.last_name).strip()
+        new_email = data.get('email', user.email).strip()
+        if new_email != user.email and User.objects.filter(email=new_email).exclude(id=user.id).exists():
+            return JsonResponse({'success': False, 'message': 'A user with this email already exists.'}, status=400)
+        user.email = new_email
+        user.username = new_email
+        user.save()
+
+        # Professional
+        jury.designation = data.get('designation', jury.designation).strip()
+        jury.organization = data.get('organization', jury.organization).strip()
+        jury.industry = data.get('industry', jury.industry).strip()
+        jury.experience = data.get('experience', jury.experience).strip()
+        jury.qualification = data.get('highest_qualification', jury.qualification).strip()
+        jury.linkedin_url = data.get('linkedin_url', jury.linkedin_url).strip()
+        jury.bio = data.get('bio', jury.bio).strip()
+        # Expertise
+        jury.expertise_area = data.get('primary_expertise', jury.expertise_area).strip()
+        jury.secondary_expertise = data.get('secondary_expertise', jury.secondary_expertise).strip()
+        jury.jury_role = data.get('jury_role', jury.jury_role).strip()
+        jury.evaluation_season = data.get('evaluation_season', jury.evaluation_season).strip()
+        jury.max_ideas_per_week = data.get('max_ideas', jury.max_ideas_per_week).strip()
+        jury.previous_jury_exp = data.get('previous_jury_exp', jury.previous_jury_exp).strip()
+        jury.evaluation_note = data.get('evaluation_note', jury.evaluation_note).strip()
+        # Contact
+        jury.phone = data.get('mobile', jury.phone).strip()
+        jury.alternate_phone = data.get('alternate_mobile', jury.alternate_phone).strip()
+        jury.alternate_email = data.get('alternate_email', jury.alternate_email).strip()
+        jury.address = data.get('address', jury.address).strip()
+        jury.pin_code = data.get('pin_code', jury.pin_code).strip()
+        jury.preferred_contact = data.get('preferred_contact', jury.preferred_contact).strip()
+        # Personal
+        jury.gender = data.get('gender', jury.gender).strip()
+        dob = data.get('date_of_birth', '')
+        if dob:
+            jury.date_of_birth = dob
+        jury.nationality = data.get('nationality', jury.nationality).strip()
+        jury.city = data.get('city', jury.city).strip()
+        jury.state = data.get('state', jury.state).strip()
+        # Availability
+        avail_from = data.get('available_from', '')
+        if avail_from:
+            jury.available_from = avail_from
+        avail_to = data.get('available_to', '')
+        if avail_to:
+            jury.available_to = avail_to
+        jury.preferred_time = data.get('preferred_time', jury.preferred_time).strip()
+        jury.evaluation_mode = data.get('evaluation_mode', jury.evaluation_mode).strip()
+        jury.willing_to_mentor = data.get('willing_to_mentor', jury.willing_to_mentor).strip()
+        jury.willing_to_bootcamp = data.get('willing_to_bootcamp', jury.willing_to_bootcamp).strip()
+        jury.additional_notes = data.get('additional_notes', jury.additional_notes).strip()
+        jury.save()
+
+        return JsonResponse({
+            'success': True,
+            'message': f'Evaluator {user.first_name} {user.last_name} updated successfully!',
+            'redirect': '/super-admin/user-management/evaluators/'
+        })
+
+    evaluator_data = {
+        'id': user.id,
+        'first_name': user.first_name,
+        'last_name': user.last_name,
+        'email': user.email,
+        'designation': jury.designation, 'organization': jury.organization,
+        'industry': jury.industry, 'experience': jury.experience,
+        'qualification': jury.qualification, 'linkedin_url': jury.linkedin_url,
+        'bio': jury.bio, 'expertise_area': jury.expertise_area,
+        'secondary_expertise': jury.secondary_expertise, 'jury_role': jury.jury_role,
+        'evaluation_season': jury.evaluation_season, 'max_ideas_per_week': jury.max_ideas_per_week,
+        'previous_jury_exp': jury.previous_jury_exp, 'evaluation_note': jury.evaluation_note,
+        'phone': jury.phone, 'alternate_phone': jury.alternate_phone,
+        'alternate_email': jury.alternate_email, 'address': jury.address,
+        'pin_code': jury.pin_code, 'preferred_contact': jury.preferred_contact,
+        'gender': jury.gender, 'date_of_birth': str(jury.date_of_birth) if jury.date_of_birth else '',
+        'nationality': jury.nationality, 'city': jury.city, 'state': jury.state,
+        'available_from': str(jury.available_from) if jury.available_from else '',
+        'available_to': str(jury.available_to) if jury.available_to else '',
+        'preferred_time': jury.preferred_time, 'evaluation_mode': jury.evaluation_mode,
+        'willing_to_mentor': jury.willing_to_mentor, 'willing_to_bootcamp': jury.willing_to_bootcamp,
+        'additional_notes': jury.additional_notes,
+    }
+    context = {'evaluator': evaluator_data, 'edit_mode': True}
+    return render(request, 'admins/user_management/edit_evaluator.html', context)
 
 
 @login_required

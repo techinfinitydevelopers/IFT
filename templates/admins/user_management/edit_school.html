@@ -1,0 +1,723 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Edit School - IFT Platform</title>
+
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <style>
+        :root {
+            --primary: #5E2A97;
+            --secondary: #DEDE50;
+            --primary-light: #E8D4F0;
+            --background-light: #F3F4F6;
+            --surface-light: #FFFFFF;
+            --border-light: #E5E7EB;
+            --text-dark: #1F2937;
+            --text-muted: #6B7280;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            overflow: hidden;
+        }
+
+        .main-container { display: flex; height: 100vh; width: 100%; }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            width: 280px;
+            background: #FFFFFF;
+            border-right: 1px solid #EEEEEE;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: sticky;
+            top: 0;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s ease;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .sidebar.collapsed { width: 80px; }
+        .sidebar.collapsed .sidebar-title,
+        .sidebar.collapsed .sidebar-subtitle,
+        .sidebar.collapsed .nav-text,
+        .sidebar.collapsed .user-info { opacity: 0; width: 0; overflow: hidden; white-space: nowrap; }
+        .sidebar.collapsed .logo-img { width: 50px; height: 50px; margin: 0 auto; background-position: center; }
+        .sidebar.collapsed .nav-item { justify-content: center; padding-left: 1.7rem; }
+        .sidebar.collapsed .nav-item .material-symbols-outlined { margin: 0; }
+        .sidebar.collapsed .user-avatar { margin: 0 auto; }
+        .sidebar.collapsed .logout-btn { display: none; }
+        .sidebar.collapsed .user-profile { justify-content: center; }
+        .sidebar.collapsed .notification-badge { display: none; }
+
+        .sidebar-header { border-bottom: 1px solid #F7F7F7; }
+
+        .logo-img {
+            width: 250px; height: 50px;
+            background-size: contain; background-position: left center;
+            background-repeat: no-repeat; flex-shrink: 0;
+        }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.75rem 1rem; border-radius: 0.5rem;
+            text-decoration: none; color: #222222;
+            transition: all 0.2s ease; cursor: pointer; margin-bottom: 0.25rem;
+        }
+        .nav-item:hover { background: #F7F7F7; color: #222222; }
+        .nav-item .material-symbols-outlined { font-size: 24px; color: #666666; transition: all 0.2s ease; }
+        .nav-item.nav-item-active { background: rgba(94, 42, 151, 0.1); color: #5E2A97; padding-left: calc(1rem - 4px); }
+        .nav-item.nav-item-active .material-symbols-outlined { color: #5E2A97; font-variation-settings: 'FILL' 1; }
+        .nav-text { font-size: 0.875rem; font-weight: 500; }
+
+        .notification-badge {
+            margin-left: auto; font-size: 0.625rem; font-weight: 700;
+            background: #EF4444; color: white; padding: 0.125rem 0.375rem;
+            border-radius: 9999px; min-width: 1.125rem; text-align: center;
+            line-height: 1.2; display: inline-flex; align-items: center;
+            justify-content: center; height: 1.125rem;
+        }
+
+        .nav-dropdown { position: relative; }
+        .nav-dropdown-toggle { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+        .nav-dropdown-icon { font-size: 18px !important; transition: transform 0.2s ease; }
+        .nav-dropdown.open .nav-dropdown-icon { transform: rotate(180deg); }
+        .nav-dropdown-menu { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; padding-left: 2.5rem; }
+        .nav-dropdown.open .nav-dropdown-menu { max-height: 400px; margin-top: 0.25rem; }
+
+        .nav-dropdown-item {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.625rem 1rem; border-radius: 0.5rem;
+            text-decoration: none; color: #666666; font-size: 0.875rem;
+            font-weight: 500; transition: all 0.2s ease; margin-bottom: 0.25rem;
+        }
+        .nav-dropdown-item:hover { background: #F7F7F7; color: #5E2A97; }
+        .nav-dropdown-item.active { background: rgba(94, 42, 151, 0.1); color: #5E2A97; }
+
+        .sidebar.collapsed .nav-dropdown-toggle { justify-content: center; }
+        .sidebar.collapsed .nav-dropdown-icon { display: none; }
+        .sidebar.collapsed .nav-dropdown-menu { padding-left: 0rem; }
+        .sidebar.collapsed .nav-dropdown-item { padding-left: 0.6rem; }
+
+        .sidebar-footer { border-top: 1px solid #EEEEEE; margin-top: auto; }
+
+        .user-profile {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.75rem; border-radius: 0.5rem;
+            transition: all 0.2s ease; cursor: pointer;
+        }
+        .user-profile:hover { background: #F7F7F7; }
+        .user-avatar { width: 2.5rem; height: 2.5rem; border-radius: 50%; overflow: hidden; flex-shrink: 0; border: 2px solid #EEEEEE; }
+        .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .user-info { flex: 1; }
+        .user-name { font-size: 0.875rem; font-weight: 700; color: #222222; margin: 0 0 0.125rem 0; line-height: 1.2; }
+        .user-role { font-size: 0.75rem; color: #666666; margin: 0; line-height: 1.2; }
+        .logout-btn {
+            background: none; border: none; color: #666666; cursor: pointer;
+            padding: 0.5rem; border-radius: 0.375rem; transition: all 0.2s ease;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .logout-btn:hover { background: rgba(94, 42, 151, 0.1); color: #5E2A97; }
+        .logout-btn .material-symbols-outlined { font-size: 20px; }
+
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; left: -280px; z-index: 999; transition: left 0.3s ease; }
+            .sidebar.mobile-open { left: 0; }
+            .sidebar.collapsed { left: -80px; }
+            .sidebar.collapsed.mobile-open { left: 0; }
+        }
+
+        /* ── Header ── */
+        .top-header {
+            height: 70px; min-height: 70px; flex-shrink: 0;
+            background: #FFFFFF; border-bottom: 1px solid #EEEEEE;
+            display: flex; align-items: center; padding: 0 1.5rem;
+            position: sticky; top: 0; z-index: 100; font-family: 'Poppins', sans-serif;
+        }
+        .header-icon-btn {
+            width: 2.5rem; height: 2.5rem; border-radius: 0.5rem; border: none;
+            background: #F7F7F7; color: #666666; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;
+        }
+        .header-icon-btn:hover { background: #EEEEEE; color: #5E2A97; }
+        .header-icon-btn .material-symbols-outlined { font-size: 22px; }
+        .header-avatar {
+            width: 2.5rem; height: 2.5rem; border-radius: 50%;
+            background-size: cover; background-position: center; background-repeat: no-repeat;
+            border: 2px solid #5E2A97; cursor: pointer; transition: all 0.2s ease;
+        }
+        .header-avatar:hover { transform: scale(1.05); box-shadow: 0 0 0 4px rgba(94, 42, 151, 0.1); }
+        #notificationPanel.active, #profileDropdown.active { display: block !important; opacity: 1 !important; transform: translateY(0) !important; }
+
+        /* ── Main Content ── */
+        .main-content { flex: 1; display: flex; flex-direction: column; height: 100%; overflow-y: auto; position: relative; z-index: 10; }
+        .page-area { padding: 2rem; flex: 1; max-width: 1200px; margin: 0 auto; width: 100%; }
+
+        /* ── Page Header ── */
+        .page-header { margin-bottom: 2rem; }
+        .page-header h1 { font-size: 1.625rem; font-weight: 700; color: var(--text-dark); margin-bottom: 4px; }
+        .breadcrumb { font-size: 0.8125rem; margin: 0; }
+        .breadcrumb-item a { color: var(--primary); text-decoration: none; }
+
+        /* ── Section Card ── */
+        .section-card { background: #fff; border-radius: 12px; padding: 28px; margin-bottom: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+        .section-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-light); }
+        .section-icon { width: 40px; height: 40px; border-radius: 10px; background: rgba(94,42,151,0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .section-icon .material-symbols-outlined { font-size: 22px; color: var(--primary); }
+        .section-card-header h2 { font-size: 1rem; font-weight: 700; margin: 0; color: var(--text-dark); }
+        .section-card-header p { font-size: 0.8125rem; color: var(--text-muted); margin: 0; }
+
+        /* ── Form elements ── */
+        .form-group { margin-bottom: 0; }
+        .form-label { font-size: 0.875rem; font-weight: 600; color: var(--text-dark); margin-bottom: 6px; display: block; }
+        .form-label .required { color: #ef4444; margin-left: 2px; }
+        .form-input, .form-select-input, .form-textarea {
+            width: 100%; padding: 10px 14px; border: 1.5px solid var(--border-light); border-radius: 8px;
+            font-size: 0.875rem; font-family: inherit; color: var(--text-dark); background: #fff;
+            outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-input:focus, .form-select-input:focus, .form-textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(94,42,151,0.08); }
+        .form-input.error, .form-select-input.error { border-color: #ef4444; }
+        .form-textarea { resize: vertical; min-height: 80px; }
+        .field-hint { font-size: 0.775rem; color: var(--text-muted); margin-top: 4px; }
+        .error-msg { font-size: 0.775rem; color: #ef4444; margin-top: 4px; display: none; }
+        .error-msg.show { display: block; }
+
+        /* ── School type selector ── */
+        .type-selector { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .type-option { padding: 12px 10px; border: 1.5px solid var(--border-light); border-radius: 8px; text-align: center; cursor: pointer; transition: all 0.2s; }
+        .type-option:hover { border-color: var(--primary); background: rgba(94,42,151,0.04); }
+        .type-option.selected { border-color: var(--primary); background: rgba(94,42,151,0.08); }
+        .type-option .material-symbols-outlined { font-size: 22px; color: var(--text-muted); display: block; margin-bottom: 4px; }
+        .type-option.selected .material-symbols-outlined { color: var(--primary); }
+        .type-option span.label { font-size: 0.8125rem; font-weight: 600; color: var(--text-dark); }
+
+        /* ── Toggle switch ── */
+        .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--border-light); }
+        .toggle-row:last-child { border-bottom: none; }
+        .toggle-info { flex: 1; }
+        .toggle-info label { font-size: 0.875rem; font-weight: 600; color: var(--text-dark); display: block; cursor: pointer; }
+        .toggle-info small { font-size: 0.775rem; color: var(--text-muted); }
+        .toggle-switch { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; inset: 0; background: #d1d5db; border-radius: 24px; cursor: pointer; transition: 0.3s; }
+        .slider:before { content:''; position: absolute; width: 18px; height: 18px; border-radius: 50%; background: #fff; left: 3px; top: 3px; transition: 0.3s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+        input:checked + .slider { background: var(--primary); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        /* ── Sticky footer ── */
+        .sticky-footer { position: sticky; bottom: 0; background: #fff; border-top: 1px solid var(--border-light); padding: 16px 2rem; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 -4px 12px rgba(0,0,0,0.06); z-index: 100; }
+        .footer-left { font-size: 0.8125rem; color: var(--text-muted); }
+        .footer-actions { display: flex; gap: 10px; }
+        .btn-secondary { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; background: #fff; border: 1.5px solid var(--border-light); border-radius: 8px; font-size: 0.875rem; font-weight: 600; font-family: inherit; color: var(--text-dark); cursor: pointer; text-decoration: none; }
+        .btn-primary { display: inline-flex; align-items: center; gap: 6px; padding: 10px 24px; background: var(--primary); border: none; border-radius: 8px; font-size: 0.875rem; font-weight: 600; font-family: inherit; color: #fff; cursor: pointer; }
+        .btn-primary:hover { background: #4a2178; }
+
+        @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+    </style>
+</head>
+
+<body>
+<div class="main-container">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar d-md-flex flex-column" id="superAdminAppSidebar">
+        <div class="sidebar-header p-3 pb-1">
+            <div class="d-flex align-items-center">
+                <div class="logo-img" style="background-image: url('{% static 'images/IFT_logo.png' %}');"></div>
+            </div>
+        </div>
+        <nav class="flex-grow-1 px-3 d-flex flex-column gap-2 mt-3">
+            <a class="nav-item" href="{% url 'admins:dashboard' %}">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span class="nav-text">Dashboard</span>
+            </a>
+
+            <div class="nav-dropdown open">
+                <div class="nav-item nav-dropdown-toggle" id="userManagementToggle">
+                    <div style="display:flex;align-items:center;gap:0.75rem;">
+                        <span class="material-symbols-outlined">manage_accounts</span>
+                        <span class="nav-text">User Management</span>
+                    </div>
+                    <span class="material-symbols-outlined nav-dropdown-icon">expand_more</span>
+                </div>
+                <div class="nav-dropdown-menu">
+                    <a class="nav-dropdown-item" href="{% url 'admins:onboard_student' %}">
+                        <span class="material-symbols-outlined">person_add</span>
+                        <span class="nav-text">Onboard Student</span>
+                    </a>
+                    <a class="nav-dropdown-item" href="{% url 'admins:students_list' %}">
+                        <span class="material-symbols-outlined">school</span>
+                        <span class="nav-text">Students</span>
+                    </a>
+                    <a class="nav-dropdown-item" href="{% url 'admins:onboard_school' %}">
+                        <span class="material-symbols-outlined">add_business</span>
+                        <span class="nav-text">Onboard School</span>
+                    </a>
+                    <a class="nav-dropdown-item active" href="{% url 'admins:schools_list' %}">
+                        <span class="material-symbols-outlined">apartment</span>
+                        <span class="nav-text">Schools</span>
+                    </a>
+                    <a class="nav-dropdown-item" href="{% url 'admins:onboard_evaluator' %}">
+                        <span class="material-symbols-outlined">person_add</span>
+                        <span class="nav-text">Onboard Evaluator</span>
+                    </a>
+                    <a class="nav-dropdown-item" href="{% url 'admins:evaluators_list' %}">
+                        <span class="material-symbols-outlined">groups</span>
+                        <span class="nav-text">Evaluators</span>
+                    </a>
+                </div>
+            </div>
+
+            <a class="nav-item" href="{% url 'admins:evaluator_management' %}">
+                <span class="material-symbols-outlined">supervisor_account</span>
+                <span class="nav-text">Evaluator Management</span>
+            </a>
+
+            <a class="nav-item" href="{% url 'admins:all_submissions' %}">
+                <span class="material-symbols-outlined">assignment</span>
+                <span class="nav-text">Submissions</span>
+            </a>
+
+            <a class="nav-item" href="{% url 'admins:rankings' %}">
+                <span class="material-symbols-outlined">leaderboard</span>
+                <span class="nav-text">Rankings</span>
+            </a>
+
+            <a class="nav-item" href="{% url 'admins:schedule' %}">
+                <span class="material-symbols-outlined">event_note</span>
+                <span class="nav-text">Schedule</span>
+            </a>
+
+            <a class="nav-item" href="{% url 'admins:content_list' %}">
+                <span class="material-symbols-outlined">article</span>
+                <span class="nav-text">Content</span>
+            </a>
+
+            <a class="nav-item" href="{% url 'admins:reports' %}">
+                <span class="material-symbols-outlined">analytics</span>
+                <span class="nav-text">Reports</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer p-3 mt-auto">
+            <div class="user-profile">
+                <div class="user-avatar">
+                    <img alt="Admin" src="https://ui-avatars.com/api/?name={{ request.user.get_full_name|default:request.user.username }}&background=5E2A97&color=fff" />
+                </div>
+                <div class="user-info flex-grow-1">
+                    <p class="user-name">{{ request.user.get_full_name|default:request.user.username }}</p>
+                    <p class="user-role">Super Administrator</p>
+                </div>
+                <a href="{% url 'accounts:sign_out' %}" class="logout-btn" title="Logout">
+                    <span class="material-symbols-outlined">logout</span>
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+        <!-- Header -->
+        <header class="top-header">
+            <button class="header-icon-btn" id="sidebarToggleBtn" style="margin-right:16px;">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+            <div class="d-flex align-items-center gap-2 ms-auto">
+                <button class="header-icon-btn" id="notifBtn">
+                    <span class="material-symbols-outlined">notifications</span>
+                </button>
+                <div class="header-avatar" style="background-image: url('https://ui-avatars.com/api/?name={{ request.user.get_full_name|default:request.user.username }}&background=5E2A97&color=fff');" id="profileAvatarBtn"></div>
+            </div>
+        </header>
+
+        <!-- Profile Dropdown -->
+        <div id="profileDropdown" style="position:fixed;top:70px;right:20px;width:280px;background:white;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.15);z-index:9999;overflow:hidden;display:none;opacity:0;transform:translateY(-10px);transition:opacity 0.3s ease,transform 0.3s ease;">
+            <div style="padding:16px;border-bottom:1px solid #f1f5f9;">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <div style="width:48px;height:48px;border-radius:50%;background-image:url('https://ui-avatars.com/api/?name={{ request.user.get_full_name|default:request.user.username }}&background=5E2A97&color=fff');background-size:cover;border:2px solid #5E2A97;"></div>
+                    <div>
+                        <p style="margin:0;font-size:0.875rem;font-weight:700;color:#0f172a;">{{ request.user.get_full_name|default:request.user.username }}</p>
+                        <p style="margin:4px 0 0;font-size:0.75rem;color:#64748b;">Super Admin</p>
+                        <p style="margin:2px 0 0;font-size:0.625rem;color:#94a3b8;">{{ request.user.email }}</p>
+                    </div>
+                </div>
+            </div>
+            <div style="padding:8px;">
+                <a href="{% url 'accounts:sign_out' %}" style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:8px;text-decoration:none;color:#ef4444;">
+                    <span class="material-symbols-outlined" style="color:#ef4444;font-size:20px;">logout</span>
+                    <span style="font-weight:600;font-size:0.875rem;">Logout</span>
+                </a>
+            </div>
+        </div>
+
+        <form method="POST" action="{% url 'admins:edit_school' school.id %}" id="editSchoolForm" novalidate>
+            {% csrf_token %}
+
+            <div class="page-area">
+
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+                        <div>
+                            <h1>Edit School</h1>
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'admins:dashboard' %}">Admin</a></li>
+                                    <li class="breadcrumb-item"><a href="{% url 'admins:schools_list' %}">Schools</a></li>
+                                    <li class="breadcrumb-item active">Edit School</li>
+                                </ol>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <!-- Left Column — Main Form -->
+                    <div class="col-12">
+
+                        <!-- Section 1: School Type -->
+                        <div class="section-card">
+                            <div class="section-card-header">
+                                <div class="section-icon"><span class="material-symbols-outlined">category</span></div>
+                                <div><h2>School Type</h2><p>Select the type of school</p></div>
+                            </div>
+                            <input type="hidden" name="school_type" id="schoolType" value="{{ school.school_type }}">
+                            <div class="type-selector" id="typeSelector">
+                                <div class="type-option{% if school.school_type == 'private' %} selected{% endif %}" data-type="private" onclick="selectType(this)">
+                                    <span class="material-symbols-outlined">school</span>
+                                    <span class="label">Private</span>
+                                </div>
+                                <div class="type-option{% if school.school_type == 'government' %} selected{% endif %}" data-type="government" onclick="selectType(this)">
+                                    <span class="material-symbols-outlined">account_balance</span>
+                                    <span class="label">Government</span>
+                                </div>
+                                <div class="type-option{% if school.school_type == 'aided' %} selected{% endif %}" data-type="aided" onclick="selectType(this)">
+                                    <span class="material-symbols-outlined">handshake</span>
+                                    <span class="label">Govt. Aided</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 2: School Information -->
+                        <div class="section-card">
+                            <div class="section-card-header">
+                                <div class="section-icon"><span class="material-symbols-outlined">domain</span></div>
+                                <div><h2>School Information</h2><p>Basic details about the school</p></div>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label class="form-label">School Name <span class="required">*</span></label>
+                                        <input type="text" class="form-input" id="schoolName" name="school_name" placeholder="e.g. Delhi Public School, R.K. Puram" value="{{ school.name }}">
+                                        <div class="error-msg" id="schoolNameErr">School name is required</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">Branch</label>
+                                        <input type="text" class="form-input" id="schoolBranch" name="branch" placeholder="e.g. R.K. Puram" value="{{ school.branch }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">Board <span class="required">*</span></label>
+                                        <select class="form-select-input" id="schoolBoard" name="board">
+                                            <option value="">Select Board</option>
+                                            <option value="CBSE"{% if school.board == 'CBSE' %} selected{% endif %}>CBSE</option>
+                                            <option value="ICSE"{% if school.board == 'ICSE' %} selected{% endif %}>ICSE</option>
+                                            <option value="IB"{% if school.board == 'IB' %} selected{% endif %}>IB (International Baccalaureate)</option>
+                                            <option value="SSC"{% if school.board == 'SSC' %} selected{% endif %}>State Board</option>
+                                            <option value="Other"{% if school.board == 'Other' %} selected{% endif %}>Other</option>
+                                        </select>
+                                        <div class="error-msg" id="schoolBoardErr">Please select a board</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">Affiliation Number</label>
+                                        <input type="text" class="form-input" id="affiliationNumber" name="affiliation_number" placeholder="e.g. 2730001" value="{{ school.affiliation_number }}">
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label class="form-label">Address</label>
+                                        <textarea class="form-textarea" id="schoolAddress" name="address" placeholder="Full school address">{{ school.address }}</textarea>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">City <span class="required">*</span></label>
+                                        <input type="text" class="form-input" id="schoolCity" name="city" placeholder="e.g. New Delhi" value="{{ school.city }}">
+                                        <div class="error-msg" id="schoolCityErr">City is required</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">State <span class="required">*</span></label>
+                                        <select class="form-select-input" id="schoolState" name="state">
+                                            <option value="">Select State</option>
+                                            <option{% if school.state == 'Andhra Pradesh' %} selected{% endif %}>Andhra Pradesh</option>
+                                            <option{% if school.state == 'Delhi' %} selected{% endif %}>Delhi</option>
+                                            <option{% if school.state == 'Gujarat' %} selected{% endif %}>Gujarat</option>
+                                            <option{% if school.state == 'Karnataka' %} selected{% endif %}>Karnataka</option>
+                                            <option{% if school.state == 'Kerala' %} selected{% endif %}>Kerala</option>
+                                            <option{% if school.state == 'Maharashtra' %} selected{% endif %}>Maharashtra</option>
+                                            <option{% if school.state == 'Punjab' %} selected{% endif %}>Punjab</option>
+                                            <option{% if school.state == 'Rajasthan' %} selected{% endif %}>Rajasthan</option>
+                                            <option{% if school.state == 'Tamil Nadu' %} selected{% endif %}>Tamil Nadu</option>
+                                            <option{% if school.state == 'Telangana' %} selected{% endif %}>Telangana</option>
+                                            <option{% if school.state == 'Uttar Pradesh' %} selected{% endif %}>Uttar Pradesh</option>
+                                            <option{% if school.state == 'West Bengal' %} selected{% endif %}>West Bengal</option>
+                                            <option{% if school.state == 'Other' %} selected{% endif %}>Other</option>
+                                        </select>
+                                        <div class="error-msg" id="schoolStateErr">State is required</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="form-label">PIN Code</label>
+                                        <input type="text" class="form-input" id="schoolPin" name="pin_code" placeholder="e.g. 110022" maxlength="6" value="{{ school.pin_code }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="form-label">Country</label>
+                                        <input type="text" class="form-input" id="schoolCountry" name="country" placeholder="e.g. India" value="{{ school.country }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="form-label">Medium</label>
+                                        <input type="text" class="form-input" id="schoolMedium" name="medium" placeholder="e.g. English" value="{{ school.medium }}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 3: Principal & Contact Information -->
+                        <div class="section-card">
+                            <div class="section-card-header">
+                                <div class="section-icon"><span class="material-symbols-outlined">person</span></div>
+                                <div><h2>Principal & Contact Information</h2><p>The school's head / principal and contact details</p></div>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">Principal Name <span class="required">*</span></label>
+                                        <input type="text" class="form-input" id="principalName" name="principal_name" placeholder="e.g. Dr. Vandana Sharma" value="{{ school.principal_name }}">
+                                        <div class="error-msg" id="principalNameErr">Principal name is required</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">Principal Email <span class="required">*</span></label>
+                                        <input type="email" class="form-input" id="principalEmail" name="principal_email" placeholder="principal@school.in" value="{{ school.principal_email }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">Contact Email</label>
+                                        <input type="email" class="form-input" id="contactEmail" name="contact_email" placeholder="info@school.in" value="{{ school.contact_email }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">Contact Phone</label>
+                                        <input type="tel" class="form-input" id="contactPhone" name="contact_phone" placeholder="+91 XXXXX XXXXX" value="{{ school.contact_phone }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">Website</label>
+                                        <input type="url" class="form-input" id="schoolWebsite" name="website" placeholder="https://www.school.in" value="{{ school.website }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label class="form-label">Established Year</label>
+                                        <input type="number" class="form-input" id="establishedYear" name="established_year" placeholder="e.g. 1990" value="{{ school.established_year }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label class="form-label">Total Students</label>
+                                        <input type="number" class="form-input" id="totalStudents" name="total_students" placeholder="e.g. 1500" value="{{ school.total_students }}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Sticky Footer -->
+            <div class="sticky-footer">
+                <span class="footer-left"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;color:#94a3b8;">info</span> All fields marked <span style="color:#ef4444;">*</span> are required</span>
+                <div class="footer-actions">
+                    <a href="{% url 'admins:schools_list' %}" class="btn-secondary">
+                        <span class="material-symbols-outlined" style="font-size:16px;">arrow_back</span>
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn-primary" id="submitBtn">
+                        <span class="material-symbols-outlined" style="font-size:16px;">check</span>
+                        Update School
+                    </button>
+                </div>
+            </div>
+        </form>
+
+    </main>
+</div><!-- /main-container -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+(function () {
+    // ── Sidebar toggle ──
+    const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
+    const sidebar = document.getElementById('superAdminAppSidebar');
+    if (sidebarToggleBtn && sidebar) {
+        sidebarToggleBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            if (window.innerWidth >= 768) {
+                sidebar.classList.toggle('collapsed');
+            } else {
+                sidebar.classList.toggle('mobile-open');
+            }
+        });
+        document.addEventListener('click', function (e) {
+            if (window.innerWidth < 768 && !e.target.closest('#superAdminAppSidebar') && !e.target.closest('#sidebarToggleBtn')) {
+                sidebar.classList.remove('mobile-open');
+            }
+        });
+    }
+
+    // ── User management dropdown ──
+    const toggle = document.getElementById('userManagementToggle');
+    const dropdown = document.querySelector('.nav-dropdown');
+    if (toggle && dropdown) {
+        toggle.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            dropdown.classList.toggle('open');
+        });
+    }
+
+    // ── Profile dropdown ──
+    const profileBtn = document.getElementById('profileAvatarBtn');
+    const profileDropdown = document.getElementById('profileDropdown');
+    if (profileBtn && profileDropdown) {
+        profileBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            profileDropdown.classList.toggle('active');
+        });
+        document.addEventListener('click', function (e) {
+            if (!profileDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
+                profileDropdown.classList.remove('active');
+            }
+        });
+    }
+
+    const form = document.getElementById('editSchoolForm');
+
+    // ── School type selector ──
+    window.selectType = function (el) {
+        document.querySelectorAll('.type-option').forEach(o => o.classList.remove('selected'));
+        el.classList.add('selected');
+        document.getElementById('schoolType').value = el.dataset.type;
+    };
+
+    // ── Validation ──
+    function validate() {
+        let valid = true;
+        const required = [
+            { id: 'schoolName', errId: 'schoolNameErr' },
+            { id: 'schoolBoard', errId: 'schoolBoardErr' },
+            { id: 'schoolCity', errId: 'schoolCityErr' },
+            { id: 'schoolState', errId: 'schoolStateErr' },
+            { id: 'principalName', errId: 'principalNameErr' },
+        ];
+        required.forEach(({ id, errId }) => {
+            const el = document.getElementById(id);
+            const err = document.getElementById(errId);
+            if (!el.value.trim()) {
+                el.classList.add('error'); err.classList.add('show'); valid = false;
+            } else {
+                el.classList.remove('error'); err.classList.remove('show');
+            }
+        });
+        return valid;
+    }
+
+    // ── AJAX Submit with Toast ──
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        if (!validate()) {
+            showToast('Please fill in all required fields', 'error');
+            document.querySelector('.form-input.error, .form-select-input.error')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:16px;animation:spin 1s linear infinite;">progress_activity</span> Updating...';
+
+        const formData = new FormData(form);
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-CSRFToken': formData.get('csrfmiddlewaretoken') }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                showToast(data.message || 'School updated successfully', 'success');
+                setTimeout(() => { window.location.href = data.redirect || '{% url "admins:schools_list" %}'; }, 2000);
+            } else {
+                showToast(data.message || 'Something went wrong', 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:16px;">check</span> Update School';
+            }
+        })
+        .catch(() => {
+            showToast('Network error. Please try again.', 'error');
+            btn.disabled = false;
+            btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:16px;">check</span> Update School';
+        });
+    });
+
+    function showToast(msg, type) {
+        let toast = document.getElementById('editToast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'editToast';
+            toast.style.cssText = 'position:fixed;top:24px;right:24px;z-index:9999;padding:16px 24px;border-radius:12px;font-family:Poppins,sans-serif;font-size:0.9rem;font-weight:600;color:#fff;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,0.15);transform:translateX(120%);transition:transform 0.4s ease;max-width:450px;';
+            document.body.appendChild(toast);
+        }
+        toast.style.background = type === 'success' ? '#10B981' : '#EF4444';
+        const icon = type === 'success' ? 'check_circle' : 'error';
+        toast.innerHTML = '<span class="material-symbols-outlined" style="font-size:20px;">' + icon + '</span>' + msg;
+        setTimeout(() => { toast.style.transform = 'translateX(0)'; }, 50);
+        setTimeout(() => { toast.style.transform = 'translateX(120%)'; }, 4000);
+    }
+
+})();
+</script>
+</body>
+</html>

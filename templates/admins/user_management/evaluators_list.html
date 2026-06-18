@@ -683,7 +683,7 @@
                                     <button class="btn-icon-action" title="View Details" onclick="event.stopPropagation(); openDetailsSidebar(this.closest('tr'));">
                                         <span class="material-symbols-outlined">visibility</span>
                                     </button>
-                                    <a class="btn-icon-action" title="Edit Evaluator" href="{% url 'admins:onboard_evaluator' %}?edit={{ ev.id }}" onclick="event.stopPropagation();">
+                                    <a class="btn-icon-action" title="Edit Evaluator" href="{% url 'admins:edit_evaluator' ev.id %}" onclick="event.stopPropagation();">
                                         <span class="material-symbols-outlined">edit</span>
                                     </a>
                                 </td>

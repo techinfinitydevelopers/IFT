@@ -33,6 +33,8 @@ urlpatterns = [
     path('user-management/onboard-school/', views.onboard_school, name='onboard_school'),
     path('user-management/onboard-evaluator/', views.onboard_evaluator, name='onboard_evaluator'),
     path('user-management/evaluators/', views.evaluators_list, name='evaluators_list'),
+    path('user-management/evaluator/<int:evaluator_id>/edit/', views.edit_evaluator, name='edit_evaluator'),
+    path('user-management/school/<int:school_id>/edit/', views.edit_school, name='edit_school'),
 
     # Evaluator Management
     path('evaluator-management/', views.evaluator_management, name='evaluator_management'),

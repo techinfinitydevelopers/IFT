@@ -697,7 +697,7 @@
                                     <button class="btn-icon-action" onclick="event.stopPropagation(); openDetailsSidebar(this.closest('tr'));" title="View Details">
                                         <span class="material-symbols-outlined">visibility</span>
                                     </button>
-                                    <a class="btn-icon-action" title="Edit School" href="{% url 'admins:onboard_school' %}?edit={{ school.id }}" onclick="event.stopPropagation();">
+                                    <a class="btn-icon-action" title="Edit School" href="{% url 'admins:edit_school' school.id %}" onclick="event.stopPropagation();">
                                         <span class="material-symbols-outlined">edit</span>
                                     </a>
                                 </td>
