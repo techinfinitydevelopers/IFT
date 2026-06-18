@@ -2532,22 +2532,22 @@ def reports_view(request):
     for i, c in enumerate(city_counts[:4]):
         context[f'top_city_{i+1}'] = f"{c['city']} ({c['c']})"
 
-    # Domain-wise (from submission categories)
-    domain_map = {'education': 0, 'agriculture': 0, 'healthcare': 0, 'technology': 0}
-    for s in IdeaSubmission.objects.values_list('final_category', flat=True):
-        cat = (s or '').lower()
-        if 'edu' in cat or 'learn' in cat:
-            domain_map['education'] += 1
-        elif 'agri' in cat:
-            domain_map['agriculture'] += 1
-        elif 'health' in cat or 'medical' in cat:
-            domain_map['healthcare'] += 1
-        else:
-            domain_map['technology'] += 1
-    context['domain_education'] = domain_map['education']
-    context['domain_agriculture'] = domain_map['agriculture']
-    context['domain_healthcare'] = domain_map['healthcare']
-    context['domain_technology'] = domain_map['technology']
+    # Domain-wise (from competition_track — UN SDG tracks)
+    from students.models import IdeaSubmission as _IS
+    sdg_tracks = dict(_IS.TRACK_CHOICES)
+    domain_map = {k: 0 for k in sdg_tracks}
+    for track_val in IdeaSubmission.objects.values_list('competition_track', flat=True):
+        t = (track_val or '').strip()
+        if t in domain_map:
+            domain_map[t] += 1
+    # Expose top SDG counts to template
+    for slug, label in sdg_tracks.items():
+        context[f'domain_{slug.replace("-", "_")}'] = domain_map[slug]
+    # Keep legacy keys for backward-compatible templates
+    context['domain_education'] = domain_map.get('quality-education', 0)
+    context['domain_agriculture'] = domain_map.get('zero-hunger', 0)
+    context['domain_healthcare'] = domain_map.get('good-health', 0)
+    context['domain_technology'] = domain_map.get('industry-innovation', 0)
 
     # Student count
     context['student_count'] = all_students.count()

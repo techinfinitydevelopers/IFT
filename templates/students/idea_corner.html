@@ -295,34 +295,89 @@
             white-space: nowrap;
         }
 
-        .category-badge.sustainable-energy {
-            background: #dcfce7;
-            color: #166534;
+        .category-badge.no-poverty {
+            background: #fee2e2;
+            color: #991b1b;
         }
 
-        .category-badge.healthcare {
-            background: #fce7f3;
-            color: #9d174d;
-        }
-
-        .category-badge.education {
-            background: #dbeafe;
-            color: #1e40af;
-        }
-
-        .category-badge.fintech {
-            background: #ede9fe;
-            color: #5b21b6;
-        }
-
-        .category-badge.agriculture {
+        .category-badge.zero-hunger {
             background: #fef9c3;
             color: #854d0e;
         }
 
-        .category-badge.smart-cities {
+        .category-badge.good-health {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .category-badge.quality-education {
+            background: #fce7f3;
+            color: #9d174d;
+        }
+
+        .category-badge.gender-equality {
+            background: #ffe4e6;
+            color: #be123c;
+        }
+
+        .category-badge.clean-water {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .category-badge.clean-energy {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .category-badge.economic-growth {
+            background: #fce7f3;
+            color: #831843;
+        }
+
+        .category-badge.industry-innovation {
+            background: #ede9fe;
+            color: #5b21b6;
+        }
+
+        .category-badge.reduced-inequalities {
+            background: #fce4ec;
+            color: #880e4f;
+        }
+
+        .category-badge.sustainable-cities {
             background: #e0e7ff;
             color: #3730a3;
+        }
+
+        .category-badge.responsible-consumption {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .category-badge.climate-action {
+            background: #e0f2fe;
+            color: #075985;
+        }
+
+        .category-badge.life-below-water {
+            background: #cffafe;
+            color: #155e75;
+        }
+
+        .category-badge.life-on-land {
+            background: #d9f99d;
+            color: #3f6212;
+        }
+
+        .category-badge.peace-justice {
+            background: #e0e7ff;
+            color: #312e81;
+        }
+
+        .category-badge.partnerships {
+            background: #f3f4f6;
+            color: #1f2937;
         }
 
         .category-badge.other {
@@ -830,12 +885,23 @@
                             <span>All</span>
                             <span class="filter-count">{{ total_ideas }}</span>
                         </button>
-                        <button class="filter-tab" data-filter="sustainable-energy">Sustainable Energy</button>
-                        <button class="filter-tab" data-filter="healthcare">Healthcare</button>
-                        <button class="filter-tab" data-filter="education">Education</button>
-                        <button class="filter-tab" data-filter="fintech">FinTech</button>
-                        <button class="filter-tab" data-filter="agriculture">Agriculture</button>
-                        <button class="filter-tab" data-filter="smart-cities">Smart Cities</button>
+                        <button class="filter-tab" data-filter="no-poverty">No Poverty</button>
+                        <button class="filter-tab" data-filter="zero-hunger">Zero Hunger</button>
+                        <button class="filter-tab" data-filter="good-health">Good Health</button>
+                        <button class="filter-tab" data-filter="quality-education">Quality Education</button>
+                        <button class="filter-tab" data-filter="gender-equality">Gender Equality</button>
+                        <button class="filter-tab" data-filter="clean-water">Clean Water</button>
+                        <button class="filter-tab" data-filter="clean-energy">Clean Energy</button>
+                        <button class="filter-tab" data-filter="economic-growth">Economic Growth</button>
+                        <button class="filter-tab" data-filter="industry-innovation">Innovation</button>
+                        <button class="filter-tab" data-filter="reduced-inequalities">Reduced Inequalities</button>
+                        <button class="filter-tab" data-filter="sustainable-cities">Sustainable Cities</button>
+                        <button class="filter-tab" data-filter="responsible-consumption">Responsible Consumption</button>
+                        <button class="filter-tab" data-filter="climate-action">Climate Action</button>
+                        <button class="filter-tab" data-filter="life-below-water">Life Below Water</button>
+                        <button class="filter-tab" data-filter="life-on-land">Life on Land</button>
+                        <button class="filter-tab" data-filter="peace-justice">Peace & Justice</button>
+                        <button class="filter-tab" data-filter="partnerships">Partnerships</button>
                     </div>
 
                     <select class="sort-select" id="sortSelect">
@@ -862,7 +928,7 @@
                         <div class="idea-card-header">
                             <span class="category-badge {{ idea.category_slug }}">
                                 <span class="material-symbols-outlined" style="font-size: 14px;">
-                                    {% if idea.category_slug == 'sustainable-energy' %}bolt{% elif idea.category_slug == 'healthcare' %}health_and_safety{% elif idea.category_slug == 'education' %}school{% elif idea.category_slug == 'fintech' %}account_balance{% elif idea.category_slug == 'agriculture' %}grass{% elif idea.category_slug == 'smart-cities' %}location_city{% else %}category{% endif %}
+                                    {% if idea.category_slug == 'no-poverty' %}money_off{% elif idea.category_slug == 'zero-hunger' %}restaurant{% elif idea.category_slug == 'good-health' %}health_and_safety{% elif idea.category_slug == 'quality-education' %}school{% elif idea.category_slug == 'gender-equality' %}wc{% elif idea.category_slug == 'clean-water' %}water_drop{% elif idea.category_slug == 'clean-energy' %}bolt{% elif idea.category_slug == 'economic-growth' %}trending_up{% elif idea.category_slug == 'industry-innovation' %}precision_manufacturing{% elif idea.category_slug == 'reduced-inequalities' %}balance{% elif idea.category_slug == 'sustainable-cities' %}location_city{% elif idea.category_slug == 'responsible-consumption' %}recycling{% elif idea.category_slug == 'climate-action' %}eco{% elif idea.category_slug == 'life-below-water' %}water{% elif idea.category_slug == 'life-on-land' %}forest{% elif idea.category_slug == 'peace-justice' %}gavel{% elif idea.category_slug == 'partnerships' %}handshake{% else %}category{% endif %}
                                 </span>
                                 {{ idea.category }}
                             </span>

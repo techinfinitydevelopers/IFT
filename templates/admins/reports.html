@@ -1377,10 +1377,23 @@
             },
             'Domain-wise performance': {
                 regions: [
-                    { label: 'Education', value: '{{ domain_education|default:"--" }}', width: '90%', color: 'var(--primary)' },
-                    { label: 'Agriculture', value: '{{ domain_agriculture|default:"--" }}', width: '75%', color: '#0EA5E9' },
-                    { label: 'Healthcare', value: '{{ domain_healthcare|default:"--" }}', width: '65%', color: '#0D9488' },
-                    { label: 'Technology', value: '{{ domain_technology|default:"--" }}', width: '50%', color: '#94a3b8' }
+                    { label: 'No Poverty', value: '{{ domain_no_poverty|default:"--" }}', width: '95%', color: '#e11d48' },
+                    { label: 'Zero Hunger', value: '{{ domain_zero_hunger|default:"--" }}', width: '90%', color: '#d97706' },
+                    { label: 'Good Health', value: '{{ domain_good_health|default:"--" }}', width: '85%', color: '#059669' },
+                    { label: 'Quality Education', value: '{{ domain_quality_education|default:"--" }}', width: '80%', color: '#dc2626' },
+                    { label: 'Gender Equality', value: '{{ domain_gender_equality|default:"--" }}', width: '75%', color: '#e11d48' },
+                    { label: 'Clean Water', value: '{{ domain_clean_water|default:"--" }}', width: '70%', color: '#0EA5E9' },
+                    { label: 'Clean Energy', value: '{{ domain_clean_energy|default:"--" }}', width: '65%', color: '#f59e0b' },
+                    { label: 'Economic Growth', value: '{{ domain_economic_growth|default:"--" }}', width: '60%', color: '#831843' },
+                    { label: 'Innovation', value: '{{ domain_industry_innovation|default:"--" }}', width: '55%', color: '#f97316' },
+                    { label: 'Reduced Inequalities', value: '{{ domain_reduced_inequalities|default:"--" }}', width: '50%', color: '#db2777' },
+                    { label: 'Sustainable Cities', value: '{{ domain_sustainable_cities|default:"--" }}', width: '48%', color: '#f59e0b' },
+                    { label: 'Responsible Consumption', value: '{{ domain_responsible_consumption|default:"--" }}', width: '45%', color: '#0D9488' },
+                    { label: 'Climate Action', value: '{{ domain_climate_action|default:"--" }}', width: '42%', color: '#166534' },
+                    { label: 'Life Below Water', value: '{{ domain_life_below_water|default:"--" }}', width: '40%', color: '#0284c7' },
+                    { label: 'Life on Land', value: '{{ domain_life_on_land|default:"--" }}', width: '38%', color: '#65a30d' },
+                    { label: 'Peace & Justice', value: '{{ domain_peace_justice|default:"--" }}', width: '35%', color: '#1d4ed8' },
+                    { label: 'Partnerships', value: '{{ domain_partnerships|default:"--" }}', width: '32%', color: '#94a3b8' }
                 ],
                 statusBadge: '{{ total_submissions }} Submissions'
             }

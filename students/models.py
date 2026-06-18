@@ -115,16 +115,29 @@ class IdeaSubmission(models.Model):
     ]
     
     CATEGORY_CHOICES = [
-        ('edtech', 'EdTech'),
-        ('sustainability', 'Sustainability'),
-        ('health', 'Health & Wellness'),
-        ('fintech', 'FinTech'),
-        ('social_impact', 'Social Impact'),
-        ('agriculture', 'Agriculture'),
-        ('technology', 'Technology'),
-        ('entertainment', 'Entertainment'),
-        ('other', 'Other'),
-        ('incoherent', 'Incoherent'),
+        ('no-poverty', 'No Poverty'),
+        ('zero-hunger', 'Zero Hunger'),
+        ('good-health', 'Good Health and Well-Being'),
+        ('quality-education', 'Quality Education'),
+        ('gender-equality', 'Gender Equality'),
+        ('clean-water', 'Clean Water and Sanitation'),
+        ('clean-energy', 'Affordable and Clean Energy'),
+        ('economic-growth', 'Decent Work and Economic Growth'),
+        ('industry-innovation', 'Industry, Innovation and Infrastructure'),
+        ('reduced-inequalities', 'Reduced Inequalities'),
+        ('sustainable-cities', 'Sustainable Cities and Communities'),
+        ('responsible-consumption', 'Responsible Consumption and Production'),
+        ('climate-action', 'Climate Action'),
+        ('life-below-water', 'Life Below Water'),
+        ('life-on-land', 'Life on Land'),
+        ('peace-justice', 'Peace, Justice and Strong Institutions'),
+        ('partnerships', 'Partnerships for the Goals'),
+        # Legacy values (kept for backward compatibility with existing data)
+        ('edtech', 'EdTech'), ('sustainability', 'Sustainability'),
+        ('health', 'Health & Wellness'), ('fintech', 'FinTech'),
+        ('social_impact', 'Social Impact'), ('agriculture', 'Agriculture'),
+        ('technology', 'Technology'), ('entertainment', 'Entertainment'),
+        ('other', 'Other'), ('incoherent', 'Incoherent'),
     ]
     
     IDEA_STAGE_CHOICES = [
@@ -188,12 +201,23 @@ class IdeaSubmission(models.Model):
 
     # Competition Track
     TRACK_CHOICES = [
-        ('sustainable-energy', 'Sustainable Energy'),
-        ('healthcare', 'Healthcare'),
-        ('education', 'Education'),
-        ('fintech', 'FinTech'),
-        ('agriculture', 'Agriculture'),
-        ('smart-cities', 'Smart Cities'),
+        ('no-poverty', 'No Poverty'),
+        ('zero-hunger', 'Zero Hunger'),
+        ('good-health', 'Good Health and Well-Being'),
+        ('quality-education', 'Quality Education'),
+        ('gender-equality', 'Gender Equality'),
+        ('clean-water', 'Clean Water and Sanitation'),
+        ('clean-energy', 'Affordable and Clean Energy'),
+        ('economic-growth', 'Decent Work and Economic Growth'),
+        ('industry-innovation', 'Industry, Innovation and Infrastructure'),
+        ('reduced-inequalities', 'Reduced Inequalities'),
+        ('sustainable-cities', 'Sustainable Cities and Communities'),
+        ('responsible-consumption', 'Responsible Consumption and Production'),
+        ('climate-action', 'Climate Action'),
+        ('life-below-water', 'Life Below Water'),
+        ('life-on-land', 'Life on Land'),
+        ('peace-justice', 'Peace, Justice and Strong Institutions'),
+        ('partnerships', 'Partnerships for the Goals'),
     ]
     competition_track = models.CharField(max_length=30, choices=TRACK_CHOICES, blank=True)
 
@@ -281,12 +305,23 @@ class IdeaSubmission(models.Model):
 class Team(models.Model):
     """Standalone team model - max 3 members"""
     TRACK_CHOICES = [
-        ('sustainable-energy', 'Sustainable Energy'),
-        ('healthcare', 'Healthcare'),
-        ('education', 'Education'),
-        ('fintech', 'FinTech'),
-        ('agriculture', 'Agriculture'),
-        ('smart-cities', 'Smart Cities'),
+        ('no-poverty', 'No Poverty'),
+        ('zero-hunger', 'Zero Hunger'),
+        ('good-health', 'Good Health and Well-Being'),
+        ('quality-education', 'Quality Education'),
+        ('gender-equality', 'Gender Equality'),
+        ('clean-water', 'Clean Water and Sanitation'),
+        ('clean-energy', 'Affordable and Clean Energy'),
+        ('economic-growth', 'Decent Work and Economic Growth'),
+        ('industry-innovation', 'Industry, Innovation and Infrastructure'),
+        ('reduced-inequalities', 'Reduced Inequalities'),
+        ('sustainable-cities', 'Sustainable Cities and Communities'),
+        ('responsible-consumption', 'Responsible Consumption and Production'),
+        ('climate-action', 'Climate Action'),
+        ('life-below-water', 'Life Below Water'),
+        ('life-on-land', 'Life on Land'),
+        ('peace-justice', 'Peace, Justice and Strong Institutions'),
+        ('partnerships', 'Partnerships for the Goals'),
     ]
 
     name = models.CharField(max_length=100)

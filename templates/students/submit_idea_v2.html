@@ -226,12 +226,23 @@
                                 </label>
                                 <select class="form-textarea" style="min-height:auto;padding:12px 16px;" id="id_track" name="competition_track">
                                     <option value="" disabled {% if not form.competition_track.value %}selected{% endif %}>Select a track</option>
-                                    <option value="sustainable-energy" {% if form.competition_track.value == 'sustainable-energy' %}selected{% endif %}>Sustainable Energy</option>
-                                    <option value="healthcare" {% if form.competition_track.value == 'healthcare' %}selected{% endif %}>Healthcare</option>
-                                    <option value="education" {% if form.competition_track.value == 'education' %}selected{% endif %}>Education</option>
-                                    <option value="fintech" {% if form.competition_track.value == 'fintech' %}selected{% endif %}>FinTech</option>
-                                    <option value="agriculture" {% if form.competition_track.value == 'agriculture' %}selected{% endif %}>Agriculture</option>
-                                    <option value="smart-cities" {% if form.competition_track.value == 'smart-cities' %}selected{% endif %}>Smart Cities</option>
+                                    <option value="no-poverty" {% if form.competition_track.value == 'no-poverty' %}selected{% endif %}>No Poverty</option>
+                                    <option value="zero-hunger" {% if form.competition_track.value == 'zero-hunger' %}selected{% endif %}>Zero Hunger</option>
+                                    <option value="good-health" {% if form.competition_track.value == 'good-health' %}selected{% endif %}>Good Health and Well-Being</option>
+                                    <option value="quality-education" {% if form.competition_track.value == 'quality-education' %}selected{% endif %}>Quality Education</option>
+                                    <option value="gender-equality" {% if form.competition_track.value == 'gender-equality' %}selected{% endif %}>Gender Equality</option>
+                                    <option value="clean-water" {% if form.competition_track.value == 'clean-water' %}selected{% endif %}>Clean Water and Sanitation</option>
+                                    <option value="clean-energy" {% if form.competition_track.value == 'clean-energy' %}selected{% endif %}>Affordable and Clean Energy</option>
+                                    <option value="economic-growth" {% if form.competition_track.value == 'economic-growth' %}selected{% endif %}>Decent Work and Economic Growth</option>
+                                    <option value="industry-innovation" {% if form.competition_track.value == 'industry-innovation' %}selected{% endif %}>Industry, Innovation and Infrastructure</option>
+                                    <option value="reduced-inequalities" {% if form.competition_track.value == 'reduced-inequalities' %}selected{% endif %}>Reduced Inequalities</option>
+                                    <option value="sustainable-cities" {% if form.competition_track.value == 'sustainable-cities' %}selected{% endif %}>Sustainable Cities and Communities</option>
+                                    <option value="responsible-consumption" {% if form.competition_track.value == 'responsible-consumption' %}selected{% endif %}>Responsible Consumption and Production</option>
+                                    <option value="climate-action" {% if form.competition_track.value == 'climate-action' %}selected{% endif %}>Climate Action</option>
+                                    <option value="life-below-water" {% if form.competition_track.value == 'life-below-water' %}selected{% endif %}>Life Below Water</option>
+                                    <option value="life-on-land" {% if form.competition_track.value == 'life-on-land' %}selected{% endif %}>Life on Land</option>
+                                    <option value="peace-justice" {% if form.competition_track.value == 'peace-justice' %}selected{% endif %}>Peace, Justice and Strong Institutions</option>
+                                    <option value="partnerships" {% if form.competition_track.value == 'partnerships' %}selected{% endif %}>Partnerships for the Goals</option>
                                 </select>
                             </div>
                         </section>

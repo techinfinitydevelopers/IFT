@@ -18,18 +18,22 @@
             <span class="material-symbols-outlined" {% if active_page == 'profile' %}style="font-variation-settings: 'FILL' 1;"{% endif %}>person</span>
             <span class="nav-text">My Profile</span>
         </a>
+        {% if not student_has_submission %}
         <a class="nav-item {% if active_page == 'submit' %}nav-item-active{% endif %}" href="{% url 'students:submit_idea' %}">
             <span class="material-symbols-outlined" {% if active_page == 'submit' %}style="font-variation-settings: 'FILL' 1;"{% endif %}>lightbulb</span>
             <span class="nav-text">Idea Submission</span>
         </a>
+        {% endif %}
         <a class="nav-item {% if active_page == 'resources' %}nav-item-active{% endif %}" href="#">
             <span class="material-symbols-outlined">menu_book</span>
             <span class="nav-text">Learning Resources</span>
         </a>
+        {% if student_has_submission %}
         <a class="nav-item {% if active_page == 'my_idea' %}nav-item-active{% endif %}" href="{% url 'students:my_idea' %}">
             <span class="material-symbols-outlined" {% if active_page == 'my_idea' %}style="font-variation-settings: 'FILL' 1;"{% endif %}>description</span>
             <span class="nav-text">My Idea</span>
         </a>
+        {% endif %}
         <a class="nav-item {% if active_page == 'team' %}nav-item-active{% endif %}" href="{% url 'students:team_page' %}">
             <span class="material-symbols-outlined">groups</span>
             <span class="nav-text">Team</span>

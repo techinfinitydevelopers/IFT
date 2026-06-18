@@ -373,12 +373,15 @@ Return JSON:
         # Update category
         if ai_data.get('tags'):
             cat_map = {
-                'EdTech': 'edtech', 'Sustainability': 'sustainability',
-                'Health': 'health', 'FinTech': 'fintech', 
-                'Social Impact': 'social_impact', 'Agriculture': 'agriculture',
-                'Technology': 'technology', 'Entertainment': 'entertainment'
+                'EdTech': 'quality-education', 'Sustainability': 'climate-action',
+                'Health': 'good-health', 'FinTech': 'economic-growth',
+                'Social Impact': 'reduced-inequalities', 'Agriculture': 'zero-hunger',
+                'Technology': 'industry-innovation', 'Entertainment': 'sustainable-cities',
+                'Environment': 'life-on-land', 'Water': 'clean-water',
+                'Energy': 'clean-energy', 'Poverty': 'no-poverty',
+                'Gender': 'gender-equality', 'Peace': 'peace-justice',
             }
-            submission.ai_suggested_category = cat_map.get(ai_data['tags'][0], 'other')
+            submission.ai_suggested_category = cat_map.get(ai_data['tags'][0], 'partnerships')
             if not submission.final_category:
                 submission.final_category = submission.ai_suggested_category
         

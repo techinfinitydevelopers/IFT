@@ -699,14 +699,23 @@
                                 </select>
                                 <select class="filter-select" name="category" id="categoryFilter" onchange="document.getElementById('filterForm').submit();">
                                     <option value="">All Categories</option>
-                                    <option value="healthtech" {% if selected_category == 'healthtech' %}selected{% endif %}>HealthTech</option>
-                                    <option value="edtech" {% if selected_category == 'edtech' %}selected{% endif %}>EdTech</option>
-                                    <option value="agritech" {% if selected_category == 'agritech' %}selected{% endif %}>AgriTech</option>
-                                    <option value="sustainability" {% if selected_category == 'sustainability' %}selected{% endif %}>Sustainability</option>
-                                    <option value="fintech" {% if selected_category == 'fintech' %}selected{% endif %}>FinTech</option>
-                                    <option value="social_impact" {% if selected_category == 'social_impact' %}selected{% endif %}>Social Impact</option>
-                                    <option value="technology" {% if selected_category == 'technology' %}selected{% endif %}>Technology</option>
-                                    <option value="other" {% if selected_category == 'other' %}selected{% endif %}>Other</option>
+                                    <option value="no-poverty" {% if selected_category == 'no-poverty' %}selected{% endif %}>No Poverty</option>
+                                    <option value="zero-hunger" {% if selected_category == 'zero-hunger' %}selected{% endif %}>Zero Hunger</option>
+                                    <option value="good-health" {% if selected_category == 'good-health' %}selected{% endif %}>Good Health and Well-Being</option>
+                                    <option value="quality-education" {% if selected_category == 'quality-education' %}selected{% endif %}>Quality Education</option>
+                                    <option value="gender-equality" {% if selected_category == 'gender-equality' %}selected{% endif %}>Gender Equality</option>
+                                    <option value="clean-water" {% if selected_category == 'clean-water' %}selected{% endif %}>Clean Water and Sanitation</option>
+                                    <option value="clean-energy" {% if selected_category == 'clean-energy' %}selected{% endif %}>Affordable and Clean Energy</option>
+                                    <option value="economic-growth" {% if selected_category == 'economic-growth' %}selected{% endif %}>Decent Work and Economic Growth</option>
+                                    <option value="industry-innovation" {% if selected_category == 'industry-innovation' %}selected{% endif %}>Industry, Innovation and Infrastructure</option>
+                                    <option value="reduced-inequalities" {% if selected_category == 'reduced-inequalities' %}selected{% endif %}>Reduced Inequalities</option>
+                                    <option value="sustainable-cities" {% if selected_category == 'sustainable-cities' %}selected{% endif %}>Sustainable Cities and Communities</option>
+                                    <option value="responsible-consumption" {% if selected_category == 'responsible-consumption' %}selected{% endif %}>Responsible Consumption and Production</option>
+                                    <option value="climate-action" {% if selected_category == 'climate-action' %}selected{% endif %}>Climate Action</option>
+                                    <option value="life-below-water" {% if selected_category == 'life-below-water' %}selected{% endif %}>Life Below Water</option>
+                                    <option value="life-on-land" {% if selected_category == 'life-on-land' %}selected{% endif %}>Life on Land</option>
+                                    <option value="peace-justice" {% if selected_category == 'peace-justice' %}selected{% endif %}>Peace, Justice and Strong Institutions</option>
+                                    <option value="partnerships" {% if selected_category == 'partnerships' %}selected{% endif %}>Partnerships for the Goals</option>
                                 </select>
                             </div>
                         </div>

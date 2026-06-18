@@ -1105,21 +1105,34 @@ def idea_corner(request):
         # Use competition_track as primary category, fallback to final_category
         track = idea.competition_track or ''
         track_map = {
-            'sustainable-energy': 'Sustainable Energy',
-            'healthcare': 'Healthcare',
-            'education': 'Education',
-            'fintech': 'FinTech',
-            'agriculture': 'Agriculture',
-            'smart-cities': 'Smart Cities',
+            'no-poverty': 'No Poverty',
+            'zero-hunger': 'Zero Hunger',
+            'good-health': 'Good Health and Well-Being',
+            'quality-education': 'Quality Education',
+            'gender-equality': 'Gender Equality',
+            'clean-water': 'Clean Water and Sanitation',
+            'clean-energy': 'Affordable and Clean Energy',
+            'economic-growth': 'Decent Work and Economic Growth',
+            'industry-innovation': 'Industry, Innovation and Infrastructure',
+            'reduced-inequalities': 'Reduced Inequalities',
+            'sustainable-cities': 'Sustainable Cities and Communities',
+            'responsible-consumption': 'Responsible Consumption and Production',
+            'climate-action': 'Climate Action',
+            'life-below-water': 'Life Below Water',
+            'life-on-land': 'Life on Land',
+            'peace-justice': 'Peace, Justice and Strong Institutions',
+            'partnerships': 'Partnerships for the Goals',
         }
         category = track_map.get(track, '')
         if not category:
             raw_category = idea.final_category or idea.ai_suggested_category or ''
             category_map = {
-                'other': 'General', 'incoherent': 'General',
-                'healthtech': 'Healthcare', 'edtech': 'Education', 'agritech': 'Agriculture',
-                'sustainability': 'Sustainable Energy', 'fintech': 'FinTech',
-                'social_impact': 'Smart Cities', 'technology': 'General',
+                'other': 'Partnerships for the Goals', 'incoherent': 'Partnerships for the Goals',
+                'healthtech': 'Good Health and Well-Being', 'edtech': 'Quality Education',
+                'agritech': 'Zero Hunger', 'sustainability': 'Climate Action',
+                'fintech': 'Decent Work and Economic Growth', 'social_impact': 'Reduced Inequalities',
+                'technology': 'Industry, Innovation and Infrastructure',
+                'entertainment': 'Sustainable Cities and Communities',
             }
             category = category_map.get(raw_category.lower(), 'General')
 
