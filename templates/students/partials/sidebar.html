@@ -38,7 +38,7 @@
             <span class="material-symbols-outlined" {% if active_page == 'idea_corner' %}style="font-variation-settings: 'FILL' 1;"{% endif %}>forum</span>
             <span class="nav-text">Idea Corner</span>
         </a>
-        <a class="nav-item {% if active_page == 'halloffame' %}nav-item-active{% endif %}" href="#">
+        <a class="nav-item {% if active_page == 'halloffame' %}nav-item-active{% endif %}" href="{% url 'students:student_halloffame' %}">
             <span class="material-symbols-outlined">emoji_events</span>
             <span class="nav-text">Hall of Fame</span>
         </a>

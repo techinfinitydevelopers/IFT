@@ -2161,6 +2161,12 @@ def evaluator_profile(request):
 
 
 @login_required
+def student_halloffame(request):
+    """Student Hall of Fame — hardcoded season 1 winners."""
+    return render(request, 'students/halloffame.html')
+
+
+@login_required
 def evaluator_halloffame(request):
     """Evaluator Hall of Fame — top ideas evaluated by this evaluator."""
     from admins.models import EvaluatorAssignment
