@@ -1109,6 +1109,20 @@ def publish_idea(request, submission_id):
 
     create_notification(request.user, 'submission', 'Idea Published', 'Your idea has been published and submitted for review.', 'rocket_launch', '/my-idea/', 'View Idea')
 
+    # Send publish confirmation email
+    try:
+        from django.core.mail import send_mail
+        from django.conf import settings
+        send_mail(
+            subject='Your Idea Has Been Published - IFT Season 6',
+            message=f'Dear {request.user.first_name},\n\nYour idea was published successfully on IFT and is now under review. Announcing shortlisted ideas soon!\n\nTeam IFT\nhttps://indiafuturetycoons.com/',
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[request.user.email],
+            fail_silently=True,
+        )
+    except:
+        pass
+
     # Trigger AI processing
     def run_ai(sub_id):
         try:

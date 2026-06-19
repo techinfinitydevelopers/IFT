@@ -75,6 +75,21 @@ def sign_up(request):
             )
             login(request, user)
             messages.success(request, 'Account created successfully!')
+
+            # Send welcome email
+            try:
+                from django.core.mail import send_mail
+                from django.conf import settings
+                send_mail(
+                    subject='Welcome to India\'s Future Tycoons - Season 6!',
+                    message=f'Dear {user.first_name},\n\nCongratulations! You have successfully registered for IFT Season 6. Welcome to the journey of innovation, entrepreneurship, and future leadership. We wish you all the best!\n\nTeam IFT\nhttps://indiafuturetycoons.com/',
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[user.email],
+                    fail_silently=True,
+                )
+            except:
+                pass
+
             return redirect('students:dashboard')
     else:
         form = StudentSignUpForm()

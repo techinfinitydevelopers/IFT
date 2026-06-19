@@ -9,10 +9,10 @@
 <form method="post" action="{% url 'accounts:school_sign_up' %}">
     {% csrf_token %}
 
-    <!-- School Name -->
+    <!-- School Name (Google Places Autocomplete) -->
     <div class="form-group">
         <div class="icon"><iconify-icon icon="mdi:school-outline"></iconify-icon></div>
-        <input type="text" class="form-control" name="school_name" placeholder="School Name" required value="{{ form.school_name.value|default:'' }}">
+        <input type="text" class="form-control" id="schoolNameInput" name="school_name" placeholder="Start typing school name..." required autocomplete="off" value="{{ form.school_name.value|default:'' }}">
         {% if form.school_name.errors %}<p class="field-error">{{ form.school_name.errors.0 }}</p>{% endif %}
     </div>
 
@@ -63,4 +63,38 @@
 <div class="signin-link">
     Already have an account? <a href="{% url 'accounts:sign_in' %}">Sign In</a>
 </div>
+
+<script>
+function initAutocomplete() {
+    var input = document.getElementById('schoolNameInput');
+    var cityInput = document.querySelector('input[name="city"]');
+    var stateInput = document.querySelector('input[name="state"]');
+
+    var autocomplete = new google.maps.places.Autocomplete(input, {
+        types: ['establishment'],
+        componentRestrictions: { country: 'in' },
+        fields: ['name', 'address_components', 'formatted_address']
+    });
+
+    autocomplete.addListener('place_changed', function() {
+        var place = autocomplete.getPlace();
+        if (place.name) {
+            input.value = place.name;
+        }
+        if (place.address_components) {
+            for (var i = 0; i < place.address_components.length; i++) {
+                var comp = place.address_components[i];
+                var types = comp.types;
+                if (types.indexOf('locality') !== -1) {
+                    cityInput.value = comp.long_name;
+                }
+                if (types.indexOf('administrative_area_level_1') !== -1) {
+                    stateInput.value = comp.long_name;
+                }
+            }
+        }
+    });
+}
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD_wnsVS7mGiCySaZhY1IUEB2-kVeclrEc&libraries=places&callback=initAutocomplete" async defer></script>
 {% endblock %}
