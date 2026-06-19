@@ -907,7 +907,10 @@
     function copyJoinCode() {
         const code = document.querySelector('.join-code-value');
         if (!code) return;
-        navigator.clipboard.writeText(code.textContent.trim()).then(() => {
+        const teamCode = code.textContent.trim();
+        const joinLink = window.location.origin + '/team/?team_code=' + teamCode;
+        const msg = 'Hey! 👋\nI\'ve joined India\'s Future Tycoons (IFT) and would love for you to join my team!\n\nLet\'s build ideas, learn from industry experts, and get showcased on a national stage.\n\nUse this invite code to join my team:\n' + teamCode + '\n\nOr click here to join directly:\n' + joinLink + '\n\nLearn more: https://indiafuturetycoons.com/\n\nHope to see you on the team! 🚀';
+        navigator.clipboard.writeText(msg).then(() => {
             const btn = document.getElementById('copyCodeBtn');
             btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:16px;color:#16a34a;">check</span> Copied!';
             btn.style.background = '#f0fdf4';
