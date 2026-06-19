@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 from django.http import JsonResponse
 from django.utils import timezone
+from django.views.decorators.http import require_POST
 from .models import Student, IdeaSubmission, UploadedFile, School
 from .forms import StudentRegistrationForm, IdeaSubmissionForm
 from ai_assistant.processors import generate_summary
@@ -168,6 +169,23 @@ def dashboard(request):
         visibility__in=['all', 'students']
     ).order_by('-created_at')[:5]
 
+    # Learning Videos
+    from students.models import LearningVideo, VideoProgress
+    learning_videos = LearningVideo.objects.filter(is_active=True).order_by('order')
+    watched_video_ids = set()
+    if student:
+        watched_video_ids = set(VideoProgress.objects.filter(student=student, watched=True).values_list('video_id', flat=True))
+    video_list = []
+    for v in learning_videos:
+        video_list.append({
+            'id': v.id,
+            'title': v.title,
+            'youtube_id': v.youtube_id,
+            'youtube_url': v.youtube_url,
+            'is_mandatory': v.is_mandatory,
+            'watched': v.id in watched_video_ids,
+        })
+
     context = {
         'student': student,
         'submissions': submissions[:5],
@@ -186,6 +204,9 @@ def dashboard(request):
         'team_role': team_role,
         'announcements': announcements,
         'recent_activity': recent_activity,
+        'learning_videos': video_list,
+        'videos_total': len(video_list),
+        'videos_watched': len([v for v in video_list if v['watched']]),
     }
     return render(request, 'students/dashboard_v2.html', context)
 
@@ -266,6 +287,26 @@ def submit_idea(request):
 
             messages.success(request, 'Draft saved successfully!')
             return redirect('students:dashboard')
+
+        # Check mandatory videos completion for team
+        from students.models import LearningVideo, VideoProgress, TeamMembership
+        mandatory_videos = LearningVideo.objects.filter(is_active=True, is_mandatory=True)
+        if mandatory_videos.exists():
+            # Check current student
+            watched = VideoProgress.objects.filter(student=student, watched=True, video__in=mandatory_videos).count()
+            if watched < mandatory_videos.count():
+                messages.error(request, 'Please complete all mandatory learning videos before submitting.')
+                return redirect('students:submit_idea')
+
+            # Check team members
+            membership = TeamMembership.objects.filter(student=student).first()
+            if membership and membership.role == 'leader':
+                for m in membership.team.memberships.filter(status='active').exclude(student=student):
+                    if m.student:
+                        m_watched = VideoProgress.objects.filter(student=m.student, watched=True, video__in=mandatory_videos).count()
+                        if m_watched < mandatory_videos.count():
+                            messages.error(request, f'Team member {m.student.user.get_full_name()} has not completed all mandatory videos.')
+                            return redirect('students:submit_idea')
 
         # Submit for Review — no validation, save all fields as draft
         if existing:
@@ -2238,3 +2279,46 @@ def evaluator_faq(request):
         'jury_profile': jury_profile,
     }
     return render(request, 'students/evaluator_faq.html', context)
+
+
+@login_required
+@require_POST
+def mark_video_watched(request, video_id):
+    from students.models import LearningVideo, VideoProgress
+    student = request.user.student_profile
+    video = get_object_or_404(LearningVideo, id=video_id)
+    progress, _ = VideoProgress.objects.get_or_create(student=student, video=video)
+    if not progress.watched:
+        progress.watched = True
+        progress.watched_at = timezone.now()
+        progress.save()
+    return JsonResponse({'success': True})
+
+
+@login_required
+def video_completion_status(request):
+    from students.models import LearningVideo, VideoProgress, TeamMembership
+    student = request.user.student_profile
+    videos = LearningVideo.objects.filter(is_active=True, is_mandatory=True)
+
+    # Current student progress
+    watched_ids = set(VideoProgress.objects.filter(student=student, watched=True).values_list('video_id', flat=True))
+    my_progress = {'total': videos.count(), 'watched': len(watched_ids), 'complete': len(watched_ids) >= videos.count()}
+
+    # Team members progress
+    team_progress = []
+    membership = TeamMembership.objects.filter(student=student).first()
+    if membership and membership.role == 'leader':
+        team_members = membership.team.memberships.filter(status='active').select_related('student__user')
+        for m in team_members:
+            if m.student:
+                m_watched = VideoProgress.objects.filter(student=m.student, watched=True, video__is_mandatory=True).count()
+                team_progress.append({
+                    'name': m.student.user.get_full_name() or m.student.user.username,
+                    'role': m.role,
+                    'watched': m_watched,
+                    'total': videos.count(),
+                    'complete': m_watched >= videos.count()
+                })
+
+    return JsonResponse({'my_progress': my_progress, 'team_progress': team_progress})

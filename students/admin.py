@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Student, IdeaSubmission, UploadedFile, TeamMember
+from .models import Student, IdeaSubmission, UploadedFile, TeamMember, LearningVideo, VideoProgress
 
 
 @admin.register(Student)
@@ -62,3 +62,15 @@ class TeamMemberAdmin(admin.ModelAdmin):
     list_display = ('name', 'submission', 'role', 'grade', 'school_name')
     search_fields = ('name', 'submission__title')
     list_filter = ('role',)
+
+
+@admin.register(LearningVideo)
+class LearningVideoAdmin(admin.ModelAdmin):
+    list_display = ['title', 'order', 'is_mandatory', 'is_active']
+    list_editable = ['order', 'is_mandatory', 'is_active']
+
+
+@admin.register(VideoProgress)
+class VideoProgressAdmin(admin.ModelAdmin):
+    list_display = ['student', 'video', 'watched', 'watched_at']
+    list_filter = ['watched', 'video']

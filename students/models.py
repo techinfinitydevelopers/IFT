@@ -508,3 +508,32 @@ class Notification(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+
+
+class LearningVideo(models.Model):
+    title = models.CharField(max_length=200)
+    youtube_url = models.URLField()
+    youtube_id = models.CharField(max_length=20)
+    order = models.PositiveIntegerField(default=0)
+    is_mandatory = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return self.title
+
+
+class VideoProgress(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='video_progress')
+    video = models.ForeignKey(LearningVideo, on_delete=models.CASCADE, related_name='progress')
+    watched = models.BooleanField(default=False)
+    watched_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ['student', 'video']
+
+    def __str__(self):
+        return f"{self.student} - {self.video.title} - {'Watched' if self.watched else 'Pending'}"

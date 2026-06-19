@@ -48,4 +48,7 @@ urlpatterns = [
     path('notifications/', views.notifications_page, name='notifications_page'),
     path('notifications/<int:notification_id>/read/', views.mark_notification_read, name='mark_notification_read'),
     path('notifications/mark-all-read/', views.mark_all_notifications_read, name='mark_all_read'),
+    # Video tracking
+    path('video/<int:video_id>/watched/', views.mark_video_watched, name='mark_video_watched'),
+    path('video-status/', views.video_completion_status, name='video_completion_status'),
 ]
