@@ -745,8 +745,9 @@ def team_page(request):
             'is_leader': team.leader == request.user,
         })
 
-    # No team - show create/join page
-    return render(request, 'students/team.html', {'student': student})
+    # No team - show create/join page (with optional pre-filled team code from invite link)
+    prefill_code = request.GET.get('team_code', '')
+    return render(request, 'students/team.html', {'student': student, 'prefill_code': prefill_code})
 
 
 @login_required

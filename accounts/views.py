@@ -39,6 +39,9 @@ def sign_in(request):
                 request.session.set_expiry(0)
             else:
                 request.session.set_expiry(1209600)  # 2 weeks
+            next_url = request.GET.get('next') or request.POST.get('next', '')
+            if next_url:
+                return redirect(next_url)
             return redirect('accounts:role_redirect')
         else:
             messages.error(request, 'Invalid email or password.')

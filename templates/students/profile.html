@@ -507,18 +507,6 @@
                                     <span class="error-message" data-error="grade"></span>
                                 </div>
                                 <div class="info-item">
-                                    <span class="info-label">Division</span>
-                                    <span class="info-value">{{ student.division|default:"Not set" }}</span>
-                                    <input type="text" class="form-control" value="{{ student.division|default:'' }}" data-field="division" style="display:none;">
-                                    <span class="error-message" data-error="division"></span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Roll Number</span>
-                                    <span class="info-value">{{ student.roll_number|default:"Not set" }}</span>
-                                    <input type="text" class="form-control" value="{{ student.roll_number|default:'' }}" data-field="roll_number" style="display:none;">
-                                    <span class="error-message" data-error="roll_number"></span>
-                                </div>
-                                <div class="info-item">
                                     <span class="info-label">Academic Year</span>
                                     <span class="info-value">{{ student.academic_year|default:"Not set" }}</span>
                                     <input type="text" class="form-control" value="{{ student.academic_year|default:'' }}" data-field="academic_year" placeholder="e.g. 2025-26" style="display:none;">

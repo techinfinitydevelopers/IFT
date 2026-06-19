@@ -364,6 +364,16 @@
                     </div>
                 </div>
 
+                {% if videos_total and videos_watched < videos_total %}
+                <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:12px;padding:14px 20px;margin-bottom:20px;display:flex;align-items:center;gap:12px;">
+                    <span class="material-symbols-outlined" style="color:#d97706;font-size:24px;">warning</span>
+                    <div>
+                        <p style="margin:0;font-size:0.875rem;font-weight:600;color:#92400e;">Complete all mandatory videos before submitting your idea</p>
+                        <p style="margin:2px 0 0;font-size:0.75rem;color:#a16207;">{{ videos_watched }}/{{ videos_total }} videos completed. All team members must also complete the videos.</p>
+                    </div>
+                </div>
+                {% endif %}
+
                 <!-- Top Grid -->
                 <div class="row g-4 mb-4">
                     <!-- Submission Card -->

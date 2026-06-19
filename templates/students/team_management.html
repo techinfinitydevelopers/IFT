@@ -359,12 +359,6 @@
                                         <h3 class="fs-5 fw-bold mb-1" style="color:var(--text-dark);">Team Roster</h3>
                                         <p class="small mb-0" style="color:var(--text-muted);">{{ team.member_count }}/3 Members ({{ team.slots_available }} slot{{ team.slots_available|pluralize }} available)</p>
                                     </div>
-                                    {% if is_leader and not team.is_full %}
-                                    <button class="btn-primary-custom d-inline-flex align-items-center gap-2" id="inviteMemberBtn">
-                                        <span class="material-symbols-outlined" style="font-size:20px;">person_add</span>
-                                        Invite Member
-                                    </button>
-                                    {% endif %}
                                 </div>
 
                                 <!-- Member List -->
@@ -453,26 +447,6 @@
         </main>
     </div>
 
-    <!-- Invite Member Modal -->
-    <div class="modal-overlay" id="inviteModal">
-        <div class="modal-content-custom">
-            <div class="modal-header-custom">
-                <h2 class="modal-title">Invite Team Member</h2>
-                <button class="modal-close-btn" id="closeModalBtn">
-                    <span class="material-symbols-outlined" style="font-size:24px;">close</span>
-                </button>
-            </div>
-            <div class="form-group">
-                <label class="form-label-modal">Email Address</label>
-                <input type="email" class="form-input-modal" id="inviteEmailInput" placeholder="Enter team member's email" />
-                <p class="form-helper">An invitation will be sent to this email address.</p>
-            </div>
-            <div class="modal-footer-custom">
-                <button type="button" class="btn-secondary-custom" id="cancelModalBtn">Cancel</button>
-                <button type="button" class="btn-primary-custom" id="sendInviteBtn">Send Invitation</button>
-            </div>
-        </div>
-    </div>
 
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
@@ -527,12 +501,18 @@
             });
         }
 
+        // Build invite message
+        function getInviteMessage() {
+            const code = document.getElementById('teamCodeValue').textContent.trim();
+            const joinLink = window.location.origin + '/team/?team_code=' + code;
+            return 'Hey! 👋\nI\'ve joined India\'s Future Tycoons (IFT) and would love for you to join my team!\n\nLet\'s build ideas, learn from industry experts, and get showcased on a national stage.\n\nUse this invite code to join my team:\n' + code + '\n\nOr click here to join directly:\n' + joinLink + '\n\nLearn more: https://indiafuturetycoons.com/\n\nHope to see you on the team! 🚀';
+        }
+
         // Copy Team Code
         const copyBtn = document.getElementById('copyCodeBtn');
         if (copyBtn) {
             copyBtn.addEventListener('click', function() {
-                const code = document.getElementById('teamCodeValue').textContent.trim();
-                navigator.clipboard.writeText(code).then(function() {
+                navigator.clipboard.writeText(getInviteMessage()).then(function() {
                     const orig = copyBtn.innerHTML;
                     copyBtn.innerHTML = '<span class="material-symbols-outlined" style="font-size:20px;">check</span>';
                     copyBtn.style.backgroundColor = '#22c55e';
@@ -542,7 +522,7 @@
                         copyBtn.style.backgroundColor = '';
                         copyBtn.style.color = '';
                     }, 2000);
-                    showToast('Team code copied!', 'success');
+                    showToast('Invite message copied!', 'success');
                 }).catch(function() { showToast('Failed to copy', 'error'); });
             });
         }
@@ -551,96 +531,17 @@
         const shareBtn = document.getElementById('shareLinkBtn');
         if (shareBtn) {
             shareBtn.addEventListener('click', function() {
-                const code = document.getElementById('teamCodeValue').textContent.trim();
-                const shareText = 'Join my team on India\'s Future Tycoon! Use code: ' + code;
+                const msg = getInviteMessage();
                 if (navigator.share) {
-                    navigator.share({ title: 'Join My Team - IFT', text: shareText }).catch(function() {});
+                    navigator.share({ title: 'Join My Team - India\'s Future Tycoons', text: msg }).catch(function() {});
                 } else {
-                    navigator.clipboard.writeText(shareText).then(function() {
-                        showToast('Share text copied!', 'success');
+                    navigator.clipboard.writeText(msg).then(function() {
+                        showToast('Invite message copied!', 'success');
                     }).catch(function() { showToast('Failed to copy', 'error'); });
                 }
             });
         }
 
-        // Invite Modal
-        const modal = document.getElementById('inviteModal');
-        const inviteBtn = document.getElementById('inviteMemberBtn');
-        const closeBtn = document.getElementById('closeModalBtn');
-        const cancelBtn = document.getElementById('cancelModalBtn');
-        const sendInviteBtn = document.getElementById('sendInviteBtn');
-        const inviteEmailInput = document.getElementById('inviteEmailInput');
-
-        function openModal() {
-            if (modal) modal.classList.add('active');
-            if (inviteEmailInput) { inviteEmailInput.value = ''; inviteEmailInput.focus(); }
-        }
-        function closeModal() { if (modal) modal.classList.remove('active'); }
-
-        if (inviteBtn) inviteBtn.addEventListener('click', openModal);
-        if (closeBtn) closeBtn.addEventListener('click', closeModal);
-        if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
-        if (modal) modal.addEventListener('click', function(e) { if (e.target === modal) closeModal(); });
-
-        // Send Invitation via AJAX
-        if (sendInviteBtn) {
-            sendInviteBtn.addEventListener('click', function() {
-                var email = inviteEmailInput ? inviteEmailInput.value.trim() : '';
-                if (!email) {
-                    showToast('Please enter an email address.', 'error');
-                    return;
-                }
-                sendInviteBtn.disabled = true;
-                sendInviteBtn.textContent = 'Sending...';
-
-                fetch('{% url "students:invite_member" %}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': getCSRF()
-                    },
-                    body: JSON.stringify({ email: email })
-                })
-                .then(function(r) { return r.json(); })
-                .then(function(res) {
-                    if (res.success) {
-                        showToast(res.message, 'success');
-                        closeModal();
-                        setTimeout(function() { location.reload(); }, 800);
-                    } else {
-                        showToast(res.message || 'Error sending invite.', 'error');
-                    }
-                    sendInviteBtn.disabled = false;
-                    sendInviteBtn.textContent = 'Send Invitation';
-                })
-                .catch(function() {
-                    showToast('Network error.', 'error');
-                    sendInviteBtn.disabled = false;
-                    sendInviteBtn.textContent = 'Send Invitation';
-                });
-            });
-        }
-
-        // Resend invite (same as invite for now)
-        window.resendInvite = function(email) {
-            fetch('{% url "students:invite_member" %}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCSRF()
-                },
-                body: JSON.stringify({ email: email })
-            })
-            .then(function(r) { return r.json(); })
-            .then(function(res) {
-                if (res.success) {
-                    showToast('Invitation resent to ' + email, 'success');
-                } else {
-                    showToast(res.message || 'Error resending invite.', 'error');
-                }
-            })
-            .catch(function() { showToast('Network error.', 'error'); });
-        };
 
         // Three-dot menu toggle
         window.toggleMenu = function(btn) {
