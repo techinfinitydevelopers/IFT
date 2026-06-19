@@ -474,15 +474,28 @@
                             </div>
                         </div>
                         {% else %}
-                        <div class="team-card">
-                            <div class="team-card-overlay"></div>
-                            <div class="team-card-content" style="justify-content:center;align-items:center;text-align:center;">
-                                <span class="material-symbols-outlined" style="font-size:48px;color:#475569;margin-bottom:8px;">group_add</span>
-                                <p style="font-size:1.125rem;font-weight:700;margin-bottom:4px;">Create Your Team</p>
-                                <p style="font-size:0.85rem;color:#94a3b8;margin-bottom:16px;">Form a team to collaborate on your idea</p>
-                                <a href="{% url 'students:team_page' %}" style="background:#fff;color:var(--primary);padding:8px 24px;border-radius:8px;font-weight:600;font-size:0.85rem;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
-                                    <span class="material-symbols-outlined" style="font-size:18px;">add</span> Create Team
-                                </a>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;height:100%;min-height:260px;">
+                            <div class="team-card" style="min-height:auto;">
+                                <div class="team-card-overlay"></div>
+                                <div class="team-card-content" style="justify-content:center;align-items:center;text-align:center;">
+                                    <span class="material-symbols-outlined" style="font-size:40px;color:#475569;margin-bottom:8px;">group_add</span>
+                                    <p style="font-size:1rem;font-weight:700;margin-bottom:4px;">Create Team</p>
+                                    <p style="font-size:0.8rem;color:#94a3b8;margin-bottom:14px;">Start a new team and invite members</p>
+                                    <a href="{% url 'students:team_page' %}" style="background:#fff;color:var(--primary);padding:8px 20px;border-radius:8px;font-weight:600;font-size:0.8rem;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
+                                        <span class="material-symbols-outlined" style="font-size:16px;">add</span> Create Team
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="team-card" style="min-height:auto;">
+                                <div class="team-card-overlay"></div>
+                                <div class="team-card-content" style="justify-content:center;align-items:center;text-align:center;">
+                                    <span class="material-symbols-outlined" style="font-size:40px;color:#475569;margin-bottom:8px;">login</span>
+                                    <p style="font-size:1rem;font-weight:700;margin-bottom:4px;">Join Team</p>
+                                    <p style="font-size:0.8rem;color:#94a3b8;margin-bottom:14px;">Have a team code? Join an existing team</p>
+                                    <a href="{% url 'students:team_page' %}" style="background:transparent;color:#fff;padding:8px 20px;border-radius:8px;font-weight:600;font-size:0.8rem;text-decoration:none;display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(255,255,255,0.3);">
+                                        <span class="material-symbols-outlined" style="font-size:16px;">vpn_key</span> Join Team
+                                    </a>
+                                </div>
                             </div>
                         </div>
                         {% endif %}
