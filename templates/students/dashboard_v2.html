@@ -512,77 +512,6 @@
                     </div>
                 </div>
 
-                <!-- Bottom Grid -->
-                <div class="row g-4">
-                    <!-- Important Dates Timeline -->
-                    <div class="col-12">
-                        <div class="timeline-card">
-                            <div class="timeline-header">
-                                <h3 class="timeline-title mb-0">Important Dates</h3>
-                            </div>
-                            <div class="timeline-container">
-                                {% if phases %}
-                                <div class="timeline-line"></div>
-
-                                {% for phase in phases %}
-                                <div class="timeline-item {% if phase.status == 'completed' %}timeline-item-past{% endif %}">
-                                    {% if phase.status == 'completed' %}
-                                    <div class="timeline-icon timeline-icon-past">
-                                        <span class="material-symbols-outlined" style="font-size: 18px; color: #64748b;">check</span>
-                                    </div>
-                                    <div class="timeline-content w-100">
-                                        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
-                                            <div>
-                                                <p class="timeline-event-title mb-1">{{ phase.name }}</p>
-                                                <p class="timeline-desc mb-0">{{ phase.description|default:"Completed" }}</p>
-                                            </div>
-                                            <span class="timeline-date">{{ phase.end_date|date:"M d, Y" }}</span>
-                                        </div>
-                                    </div>
-                                    {% elif phase.status == 'active' %}
-                                    <div class="timeline-icon timeline-icon-current">
-                                        <span class="material-symbols-outlined" style="font-size: 18px;">edit</span>
-                                    </div>
-                                    <div class="timeline-content timeline-content-current w-100">
-                                        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
-                                            <div>
-                                                <p class="timeline-event-title timeline-event-title-current mb-1">{{ phase.name }}</p>
-                                                <p class="timeline-desc mb-0">{{ phase.description|default:"Currently active" }}</p>
-                                            </div>
-                                            <div class="d-flex flex-column align-items-end gap-1">
-                                                <span class="timeline-date timeline-date-current">{{ phase.end_date|date:"M d, Y" }}</span>
-                                                <span class="deadline-badge">UPCOMING</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {% else %}
-                                    <div class="timeline-icon timeline-icon-future">
-                                        <span class="material-symbols-outlined" style="font-size: 18px; color: #94a3b8;">emoji_events</span>
-                                    </div>
-                                    <div class="timeline-content w-100">
-                                        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
-                                            <div>
-                                                <p class="timeline-event-title mb-1">{{ phase.name }}</p>
-                                                <p class="timeline-desc mb-0">{{ phase.description|default:"Coming soon" }}</p>
-                                            </div>
-                                            <span class="timeline-date">{{ phase.start_date|date:"M d, Y" }}</span>
-                                        </div>
-                                    </div>
-                                    {% endif %}
-                                </div>
-                                {% endfor %}
-                                {% else %}
-                                <div class="text-center py-4" style="color: var(--text-muted);">
-                                    <span class="material-symbols-outlined mb-2" style="font-size: 40px; color: #cbd5e1;">calendar_today</span>
-                                    <p class="mb-0">No phases announced yet.</p>
-                                </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
                 <!-- Achievements & Badges -->
                 <div class="row g-4" style="margin-top:0;">
                     <div class="col-12">
@@ -652,38 +581,75 @@
                     </div>
                 </div>
 
-                <!-- Recent Activity (Dynamic) -->
+                <!-- Important Dates Timeline -->
                 <div class="row g-4" style="margin-top:0;">
                     <div class="col-12">
-                        <div class="card-custom" style="padding:24px;">
-                            <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
-                                <span class="material-symbols-outlined" style="color:var(--primary);">history</span>
-                                Recent Activity
-                            </h3>
-                            <div style="display:flex;flex-direction:column;gap:4px;">
-                                {% for notif in recent_activity %}
-                                <div style="display:flex;align-items:flex-start;gap:12px;padding:10px 12px;border-radius:10px;transition:background 0.15s;">
-                                    <div style="width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;{% if notif.notification_type == 'team' %}background:rgba(22,163,74,0.1);{% elif notif.notification_type == 'submission' %}background:rgba(94,42,151,0.1);{% elif notif.notification_type == 'announcement' %}background:rgba(59,130,246,0.1);{% else %}background:rgba(245,158,11,0.1);{% endif %}">
-                                        <span class="material-symbols-outlined" style="font-size:18px;{% if notif.notification_type == 'team' %}color:#16a34a;{% elif notif.notification_type == 'submission' %}color:var(--primary);{% elif notif.notification_type == 'announcement' %}color:#3b82f6;{% else %}color:#f59e0b;{% endif %}">{{ notif.icon }}</span>
+                        <div class="timeline-card">
+                            <div class="timeline-header">
+                                <h3 class="timeline-title mb-0">Important Dates</h3>
+                            </div>
+                            <div class="timeline-container">
+                                {% if phases %}
+                                <div class="timeline-line"></div>
+                                {% for phase in phases %}
+                                <div class="timeline-item {% if phase.status == 'completed' %}timeline-item-past{% endif %}">
+                                    {% if phase.status == 'completed' %}
+                                    <div class="timeline-icon timeline-icon-past">
+                                        <span class="material-symbols-outlined" style="font-size: 18px; color: #64748b;">check</span>
                                     </div>
-                                    <div>
-                                        <p style="font-weight:600;font-size:0.8125rem;margin:0;">{{ notif.title }}</p>
-                                        {% if notif.message %}<p style="font-size:0.75rem;color:#94a3b8;margin:0;">{{ notif.message|truncatewords:15 }}</p>{% endif %}
-                                        <p style="font-size:0.65rem;color:#cbd5e1;margin:2px 0 0;">{{ notif.created_at|timesince }} ago</p>
+                                    <div class="timeline-content w-100">
+                                        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
+                                            <div>
+                                                <p class="timeline-event-title mb-1">{{ phase.name }}</p>
+                                                <p class="timeline-desc mb-0">{{ phase.description|default:"Completed" }}</p>
+                                            </div>
+                                            <span class="timeline-date">{{ phase.end_date|date:"M d, Y" }}</span>
+                                        </div>
                                     </div>
-                                </div>
-                                {% empty %}
-                                <div style="text-align:center;padding:24px;color:#94a3b8;">
-                                    <span class="material-symbols-outlined" style="font-size:32px;color:#cbd5e1;">inbox</span>
-                                    <p style="margin:8px 0 0;font-size:0.8125rem;">No recent activity yet</p>
+                                    {% elif phase.status == 'active' %}
+                                    <div class="timeline-icon timeline-icon-current">
+                                        <span class="material-symbols-outlined" style="font-size: 18px;">edit</span>
+                                    </div>
+                                    <div class="timeline-content timeline-content-current w-100">
+                                        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
+                                            <div>
+                                                <p class="timeline-event-title timeline-event-title-current mb-1">{{ phase.name }}</p>
+                                                <p class="timeline-desc mb-0">{{ phase.description|default:"Currently active" }}</p>
+                                            </div>
+                                            <div class="d-flex flex-column align-items-end gap-1">
+                                                <span class="timeline-date timeline-date-current">{{ phase.end_date|date:"M d, Y" }}</span>
+                                                <span class="deadline-badge">UPCOMING</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% else %}
+                                    <div class="timeline-icon timeline-icon-future">
+                                        <span class="material-symbols-outlined" style="font-size: 18px; color: #94a3b8;">emoji_events</span>
+                                    </div>
+                                    <div class="timeline-content w-100">
+                                        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
+                                            <div>
+                                                <p class="timeline-event-title mb-1">{{ phase.name }}</p>
+                                                <p class="timeline-desc mb-0">{{ phase.description|default:"Coming soon" }}</p>
+                                            </div>
+                                            <span class="timeline-date">{{ phase.start_date|date:"M d, Y" }}</span>
+                                        </div>
+                                    </div>
+                                    {% endif %}
                                 </div>
                                 {% endfor %}
+                                {% else %}
+                                <div class="text-center py-4" style="color: var(--text-muted);">
+                                    <span class="material-symbols-outlined mb-2" style="font-size: 40px; color: #cbd5e1;">calendar_today</span>
+                                    <p class="mb-0">No phases announced yet.</p>
+                                </div>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Recommended Learning Videos -->
+                <!-- Mandatory Learning Videos -->
                 <div class="row g-4" style="margin-top:0;">
                     <div class="col-12">
                         <div class="card-custom" style="padding:24px;">
@@ -724,6 +690,37 @@
                                 {% empty %}
                                 <div class="col-12">
                                     <p style="color:#94a3b8;text-align:center;padding:2rem;">No videos available yet.</p>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity (Dynamic) -->
+                <div class="row g-4" style="margin-top:0;">
+                    <div class="col-12">
+                        <div class="card-custom" style="padding:24px;">
+                            <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+                                <span class="material-symbols-outlined" style="color:var(--primary);">history</span>
+                                Recent Activity
+                            </h3>
+                            <div style="display:flex;flex-direction:column;gap:4px;">
+                                {% for notif in recent_activity %}
+                                <div style="display:flex;align-items:flex-start;gap:12px;padding:10px 12px;border-radius:10px;transition:background 0.15s;">
+                                    <div style="width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;{% if notif.notification_type == 'team' %}background:rgba(22,163,74,0.1);{% elif notif.notification_type == 'submission' %}background:rgba(94,42,151,0.1);{% elif notif.notification_type == 'announcement' %}background:rgba(59,130,246,0.1);{% else %}background:rgba(245,158,11,0.1);{% endif %}">
+                                        <span class="material-symbols-outlined" style="font-size:18px;{% if notif.notification_type == 'team' %}color:#16a34a;{% elif notif.notification_type == 'submission' %}color:var(--primary);{% elif notif.notification_type == 'announcement' %}color:#3b82f6;{% else %}color:#f59e0b;{% endif %}">{{ notif.icon }}</span>
+                                    </div>
+                                    <div>
+                                        <p style="font-weight:600;font-size:0.8125rem;margin:0;">{{ notif.title }}</p>
+                                        {% if notif.message %}<p style="font-size:0.75rem;color:#94a3b8;margin:0;">{{ notif.message|truncatewords:15 }}</p>{% endif %}
+                                        <p style="font-size:0.65rem;color:#cbd5e1;margin:2px 0 0;">{{ notif.created_at|timesince }} ago</p>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div style="text-align:center;padding:24px;color:#94a3b8;">
+                                    <span class="material-symbols-outlined" style="font-size:32px;color:#cbd5e1;">inbox</span>
+                                    <p style="margin:8px 0 0;font-size:0.8125rem;">No recent activity yet</p>
                                 </div>
                                 {% endfor %}
                             </div>
