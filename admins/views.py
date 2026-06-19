@@ -2605,6 +2605,9 @@ def halloffame_create(request):
             season=data.get('season', 'Season 5').strip(),
             is_active=data.get('is_active', 'true') in ['true', 'True', True, '1'],
         )
+        if request.FILES.get('photo'):
+            entry.photo = request.FILES['photo']
+            entry.save(update_fields=['photo'])
         return JsonResponse({'success': True, 'message': f'Entry #{entry.rank} created!', 'redirect': '/super-admin/hall-of-fame/'})
 
     return render(request, 'admins/halloffame/halloffame_create.html')
@@ -2640,6 +2643,8 @@ def halloffame_edit(request, entry_id):
         entry.rank = int(data.get('rank', entry.rank))
         entry.season = data.get('season', entry.season).strip()
         entry.is_active = data.get('is_active', 'true') in ['true', 'True', True, '1']
+        if request.FILES.get('photo'):
+            entry.photo = request.FILES['photo']
         entry.save()
         return JsonResponse({'success': True, 'message': f'Entry #{entry.rank} updated!', 'redirect': '/super-admin/hall-of-fame/'})
 

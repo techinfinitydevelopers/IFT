@@ -118,6 +118,7 @@ class Phase(models.Model):
 
 
 class HallOfFameEntry(models.Model):
+    photo = models.ImageField(upload_to='halloffame/', blank=True, null=True, help_text="Student/team photo (optional)")
     student_name = models.CharField(max_length=300)
     school_name = models.CharField(max_length=300)
     idea_title = models.CharField(max_length=300)

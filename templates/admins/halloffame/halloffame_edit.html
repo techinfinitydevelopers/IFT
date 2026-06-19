@@ -597,6 +597,20 @@
                 </div>
 
                 <div class="row g-3 mt-1">
+                    <div class="col-12">
+                        <label class="field-label" for="entryPhoto">Student/Team Photo (optional)</label>
+                        {% if entry.photo %}
+                        <div style="margin-bottom:8px;">
+                            <img src="{{ entry.photo.url }}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:2px solid var(--border-light);">
+                            <small style="color:var(--text-muted);margin-left:8px;">Current photo</small>
+                        </div>
+                        {% endif %}
+                        <input type="file" id="entryPhoto" class="form-input" accept="image/*" style="padding:8px;" />
+                        <small style="color:var(--text-muted);font-size:0.75rem;">Upload new photo to replace. Leave empty to keep current.</small>
+                    </div>
+                </div>
+
+                <div class="row g-3 mt-1">
                     <div class="col-md-6">
                         <label class="field-label" for="entryStudentName">Student Name <span style="color:#ef4444;">*</span></label>
                         <input type="text" id="entryStudentName" class="form-input" value="{{ entry.student_name }}" />
@@ -820,13 +834,18 @@ function submitEntry() {
     const payload = buildPayload();
     const csrfToken = '{{ csrf_token }}';
 
+    const formData = new FormData();
+    Object.keys(payload).forEach(k => {
+        if (k === 'tags') formData.append(k, JSON.stringify(payload[k]));
+        else formData.append(k, payload[k]);
+    });
+    const photoFile = document.getElementById('entryPhoto').files[0];
+    if (photoFile) formData.append('photo', photoFile);
+
     fetch('{% url "admins:halloffame_edit" entry.id %}', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrfToken
-        },
-        body: JSON.stringify(payload)
+        headers: { 'X-CSRFToken': csrfToken },
+        body: formData
     })
     .then(r => r.json())
     .then(data => {
