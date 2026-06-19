@@ -2554,3 +2554,105 @@ def reports_view(request):
     context['evaluator_count'] = total_evaluators
 
     return render(request, 'admins/reports.html', context)
+
+
+# ─── Hall of Fame ────────────────────────────────────────────────────────
+
+@login_required
+@user_passes_test(is_staff_or_superuser)
+def halloffame_list(request):
+    from admins.models import HallOfFameEntry
+    season = request.GET.get('season', '')
+    entries = HallOfFameEntry.objects.all()
+    seasons = HallOfFameEntry.objects.values_list('season', flat=True).distinct().order_by('-season')
+    if season:
+        entries = entries.filter(season=season)
+    context = {
+        'entries': entries,
+        'seasons': seasons,
+        'selected_season': season,
+    }
+    return render(request, 'admins/halloffame/halloffame_list.html', context)
+
+
+@login_required
+@user_passes_test(is_staff_or_superuser)
+def halloffame_create(request):
+    from admins.models import HallOfFameEntry
+    if request.method == 'POST':
+        import json
+        if request.content_type == 'application/json':
+            data = json.loads(request.body)
+        else:
+            data = request.POST
+
+        tags = data.get('tags', '[]')
+        if isinstance(tags, str):
+            try:
+                tags = json.loads(tags)
+            except:
+                tags = [t.strip() for t in tags.split(',') if t.strip()]
+
+        entry = HallOfFameEntry.objects.create(
+            student_name=data.get('student_name', '').strip(),
+            school_name=data.get('school_name', '').strip(),
+            idea_title=data.get('idea_title', '').strip(),
+            idea_description=data.get('idea_description', '').strip(),
+            problem_statement=data.get('problem_statement', '').strip(),
+            proposed_solution=data.get('proposed_solution', '').strip(),
+            tags=tags,
+            rank=int(data.get('rank', 0)),
+            season=data.get('season', 'Season 5').strip(),
+            is_active=data.get('is_active', 'true') in ['true', 'True', True, '1'],
+        )
+        return JsonResponse({'success': True, 'message': f'Entry #{entry.rank} created!', 'redirect': '/super-admin/hall-of-fame/'})
+
+    return render(request, 'admins/halloffame/halloffame_create.html')
+
+
+@login_required
+@user_passes_test(is_staff_or_superuser)
+def halloffame_edit(request, entry_id):
+    from admins.models import HallOfFameEntry
+    entry = get_object_or_404(HallOfFameEntry, id=entry_id)
+
+    if request.method == 'POST':
+        import json
+        if request.content_type == 'application/json':
+            data = json.loads(request.body)
+        else:
+            data = request.POST
+
+        tags = data.get('tags', '[]')
+        if isinstance(tags, str):
+            try:
+                tags = json.loads(tags)
+            except:
+                tags = [t.strip() for t in tags.split(',') if t.strip()]
+
+        entry.student_name = data.get('student_name', entry.student_name).strip()
+        entry.school_name = data.get('school_name', entry.school_name).strip()
+        entry.idea_title = data.get('idea_title', entry.idea_title).strip()
+        entry.idea_description = data.get('idea_description', entry.idea_description).strip()
+        entry.problem_statement = data.get('problem_statement', entry.problem_statement).strip()
+        entry.proposed_solution = data.get('proposed_solution', entry.proposed_solution).strip()
+        entry.tags = tags
+        entry.rank = int(data.get('rank', entry.rank))
+        entry.season = data.get('season', entry.season).strip()
+        entry.is_active = data.get('is_active', 'true') in ['true', 'True', True, '1']
+        entry.save()
+        return JsonResponse({'success': True, 'message': f'Entry #{entry.rank} updated!', 'redirect': '/super-admin/hall-of-fame/'})
+
+    context = {'entry': entry}
+    return render(request, 'admins/halloffame/halloffame_edit.html', context)
+
+
+@login_required
+@user_passes_test(is_staff_or_superuser)
+def halloffame_delete(request, entry_id):
+    from admins.models import HallOfFameEntry
+    if request.method == 'POST':
+        entry = get_object_or_404(HallOfFameEntry, id=entry_id)
+        entry.delete()
+        return JsonResponse({'success': True, 'message': 'Entry deleted!'})
+    return JsonResponse({'error': 'POST required'}, status=405)

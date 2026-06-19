@@ -50,6 +50,12 @@ urlpatterns = [
     path('content/<int:content_id>/delete/', views.content_delete, name='content_delete'),
     path('content/<int:content_id>/toggle-status/', views.content_toggle_status, name='content_toggle_status'),
 
+    # Hall of Fame
+    path('hall-of-fame/', views.halloffame_list, name='halloffame_list'),
+    path('hall-of-fame/create/', views.halloffame_create, name='halloffame_create'),
+    path('hall-of-fame/<int:entry_id>/edit/', views.halloffame_edit, name='halloffame_edit'),
+    path('hall-of-fame/<int:entry_id>/delete/', views.halloffame_delete, name='halloffame_delete'),
+
     # Schedule & Timeline
     path('schedule/', views.schedule_view, name='schedule'),
     path('schedule/create/', views.phase_create, name='phase_create'),

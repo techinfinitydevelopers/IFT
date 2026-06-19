@@ -115,3 +115,24 @@ class Phase(models.Model):
 
     class Meta:
         ordering = ['order', 'start_date']
+
+
+class HallOfFameEntry(models.Model):
+    student_name = models.CharField(max_length=300)
+    school_name = models.CharField(max_length=300)
+    idea_title = models.CharField(max_length=300)
+    idea_description = models.TextField(blank=True, help_text="Short description shown on card")
+    problem_statement = models.TextField(blank=True)
+    proposed_solution = models.TextField(blank=True)
+    tags = models.JSONField(default=list, help_text="List of SDG tag strings e.g. ['SDG 11 - Sustainable Cities']")
+    rank = models.PositiveIntegerField(help_text="1-24")
+    season = models.CharField(max_length=50, default='Season 5', help_text="e.g. Season 5")
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['rank']
+
+    def __str__(self):
+        return f"#{self.rank} - {self.student_name} ({self.season})"

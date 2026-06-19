@@ -1976,11 +1976,22 @@ def school_halloffame(request):
     top_3 = winners[:3]
     rest = winners[3:]
 
+    # Hall of Fame entries from admin-managed model
+    from admins.models import HallOfFameEntry
+    hof_entries = HallOfFameEntry.objects.filter(is_active=True)
+    hof_seasons = hof_entries.values_list('season', flat=True).distinct().order_by('-season')
+    hof_season = hof_seasons[0] if hof_seasons else ''
+    if hof_season:
+        hof_entries = hof_entries.filter(season=hof_season)
+
     context = {
         'school': school,
         'top_3': top_3,
         'rest': rest,
         'total_winners': len(winners),
+        'podium': list(hof_entries.filter(rank__lte=3).order_by('rank')),
+        'grid': list(hof_entries.filter(rank__gt=3).order_by('rank')),
+        'current_season': hof_season,
     }
     return render(request, 'students/school_halloffame.html', context)
 
@@ -2231,8 +2242,25 @@ def evaluator_profile(request):
 
 @login_required
 def student_halloffame(request):
-    """Student Hall of Fame — hardcoded season 1 winners."""
-    return render(request, 'students/halloffame.html')
+    """Student Hall of Fame — dynamic from HallOfFameEntry model."""
+    from admins.models import HallOfFameEntry
+    entries = HallOfFameEntry.objects.filter(is_active=True)
+    seasons = entries.values_list('season', flat=True).distinct().order_by('-season')
+    season = request.GET.get('season', '')
+    if not season and seasons:
+        season = seasons[0]
+    if season:
+        entries = entries.filter(season=season)
+
+    podium = list(entries.filter(rank__lte=3).order_by('rank'))
+    grid = list(entries.filter(rank__gt=3).order_by('rank'))
+
+    return render(request, 'students/halloffame.html', {
+        'podium': podium,
+        'grid': grid,
+        'seasons': seasons,
+        'current_season': season,
+    })
 
 
 @login_required
@@ -2264,10 +2292,21 @@ def evaluator_halloffame(request):
     top_3 = winners[:3]
     rest = winners[3:]
 
+    # Hall of Fame entries from admin-managed model
+    from admins.models import HallOfFameEntry
+    hof_entries = HallOfFameEntry.objects.filter(is_active=True)
+    hof_seasons = hof_entries.values_list('season', flat=True).distinct().order_by('-season')
+    hof_season = hof_seasons[0] if hof_seasons else ''
+    if hof_season:
+        hof_entries = hof_entries.filter(season=hof_season)
+
     context = {
         'top_3': top_3,
         'rest': rest,
         'total_winners': len(winners),
+        'podium': list(hof_entries.filter(rank__lte=3).order_by('rank')),
+        'grid': list(hof_entries.filter(rank__gt=3).order_by('rank')),
+        'current_season': hof_season,
     }
     return render(request, 'students/evaluator_halloffame.html', context)
 
