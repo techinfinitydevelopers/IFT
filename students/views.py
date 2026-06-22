@@ -2005,7 +2005,7 @@ def school_halloffame(request):
         'grid': list(hof_entries.filter(rank__gt=3).order_by('rank')),
         'current_season': hof_season,
     }
-    return render(request, 'students/school_halloffame.html', context)
+    return render(request, 'students/halloffame.html', context)
 
 
 @login_required
@@ -2320,7 +2320,7 @@ def evaluator_halloffame(request):
         'grid': list(hof_entries.filter(rank__gt=3).order_by('rank')),
         'current_season': hof_season,
     }
-    return render(request, 'students/evaluator_halloffame.html', context)
+    return render(request, 'students/halloffame.html', context)
 
 
 @login_required
