@@ -28,16 +28,16 @@ body {
 
 .auth-left {
     flex: 1;
-    background: var(--primary-light);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 3rem;
+    position: relative;
+    overflow: hidden;
 }
 
 .auth-left img {
-    max-width: 70%;
-    height: auto;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    inset: 0;
 }
 
 .auth-right {
