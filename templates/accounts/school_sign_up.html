@@ -26,7 +26,7 @@
     <!-- Phone -->
     <div class="form-group">
         <div class="icon"><iconify-icon icon="mdi:phone-outline"></iconify-icon></div>
-        <input type="text" class="form-control" name="contact_phone" placeholder="Phone Number" required value="{{ form.contact_phone.value|default:'' }}">
+        <input type="text" class="form-control" name="contact_phone" placeholder="School Coordinator Phone Number" required value="{{ form.contact_phone.value|default:'' }}">
         {% if form.contact_phone.errors %}<p class="field-error">{{ form.contact_phone.errors.0 }}</p>{% endif %}
     </div>
 
