@@ -819,37 +819,9 @@
                     </div>
                 </div>
 
-                <!-- Row 1: Grade-wise Participation + Completion Status -->
+                <!-- Row 1: Competition Progress -->
                 <div class="row g-4 mb-4">
-                    <!-- Grade-wise Participation -->
-                    <div class="col-12 col-lg-8">
-                        <div class="analytics-card">
-                            <div class="card-header-custom">
-                                <div>
-                                    <h2 class="card-title">Grade-wise Participation</h2>
-                                    <p class="card-subtitle">Number of students enrolled per grade</p>
-                                </div>
-                                <div class="trend-badge">
-                                    <span class="material-symbols-outlined" style="font-size: 18px;">school</span>
-                                    <span class="trend-value">{{ total_students }}</span>
-                                </div>
-                            </div>
-                            <div class="bar-chart-container">
-                                {% for grade in grade_participation %}
-                                <div class="bar-group">
-                                    <div class="bar"
-                                        style="height: {{ grade.height_pct }}%; background: linear-gradient(to top, {{ grade.color_start }}, {{ grade.color_end }});">
-                                        <div class="bar-label-top">{{ grade.count }}</div>
-                                    </div>
-                                    <span class="bar-label-bottom">Grade {{ grade.grade }}</span>
-                                </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Completion Status -->
-                    <div class="col-12 col-lg-4">
+                    <div class="col-12">
                         <div class="analytics-card">
                             <h2 class="card-title" style="margin-bottom: 24px;">Competition Progress</h2>
                             <div class="completion-grid">
