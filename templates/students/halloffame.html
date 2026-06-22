@@ -849,7 +849,7 @@
                     {% if podium %}
                     {% for entry in podium %}
                     <div class="podium-card {% if entry.rank == 1 %}podium-first{% elif entry.rank == 2 %}podium-second{% elif entry.rank == 3 %}podium-third{% endif %}"
-                         style="cursor:pointer;"
+                         style="cursor:pointer;order:{% if entry.rank == 1 %}2{% elif entry.rank == 2 %}1{% elif entry.rank == 3 %}3{% endif %};"
                          onclick="openDetailModal(this)"
                          data-name="{{ entry.student_name }}"
                          data-school="{{ entry.school_name }}"
