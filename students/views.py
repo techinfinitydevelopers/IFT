@@ -1936,11 +1936,11 @@ def school_reports(request):
         'shortlisted_pct': shortlisted_pct,
         'shortlisted_offset': shortlisted_offset,
         # Charts
-        'grade_participation': grade_participation,
-        'score_distribution': score_distribution,
+        'draft_count': draft_count,
+        'submitted_count': submitted_count,
+        'evaluated_count': evaluated_count,
+        'shortlisted_count': top_400,
         'categories': categories,
-        'grade_avg_scores': grade_avg_scores,
-        'top_performers': top_performers,
         'monthly_trend': monthly_trend,
         'monthly_max': monthly_max,
     }

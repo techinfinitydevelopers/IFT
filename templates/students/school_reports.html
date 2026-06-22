@@ -875,27 +875,59 @@
                     </div>
                 </div>
 
-                <!-- Row 2: Score Distribution + Category Breakdown -->
+                <!-- Row 2: Idea Status Pipeline + Category Breakdown -->
                 <div class="row g-4 mb-4">
-                    <!-- Score Distribution -->
+                    <!-- Idea Status Pipeline -->
                     <div class="col-12 col-md-7">
                         <div class="analytics-card">
                             <div class="card-header-custom">
                                 <div>
-                                    <h2 class="card-title">Score Distribution</h2>
-                                    <p class="card-subtitle">Distribution of total scores across evaluated ideas</p>
+                                    <h2 class="card-title">Idea Status Pipeline</h2>
+                                    <p class="card-subtitle">Journey of ideas from draft to shortlisted</p>
                                 </div>
                             </div>
-                            <div class="bar-chart-container" style="height: 180px;">
-                                {% for bucket in score_distribution %}
-                                <div class="bar-group">
-                                    <div class="bar"
-                                        style="height: {{ bucket.height_pct }}%; background: linear-gradient(to top, {{ bucket.color_start }}, {{ bucket.color_end }});">
-                                        <div class="bar-label-top" {% if bucket.label_bg %}style="background: {{ bucket.label_bg }};"{% endif %}>{{ bucket.count }}</div>
+                            <div style="display:flex;align-items:center;justify-content:center;gap:0;padding:24px 8px;">
+                                <!-- Draft -->
+                                <div style="text-align:center;flex:1;">
+                                    <div style="width:64px;height:64px;border-radius:50%;background:#fef3c7;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;">
+                                        <span class="material-symbols-outlined" style="color:#d97706;font-size:28px;">edit_note</span>
                                     </div>
-                                    <span class="bar-label-bottom">{{ bucket.range }}</span>
+                                    <p style="font-size:1.5rem;font-weight:800;color:var(--text-dark);margin:0;">{{ draft_count }}</p>
+                                    <p style="font-size:0.7rem;font-weight:600;color:var(--text-muted);margin:0;">Draft</p>
                                 </div>
-                                {% endfor %}
+                                <div style="flex:0 0 40px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;">
+                                    <span class="material-symbols-outlined" style="color:#cbd5e1;font-size:24px;">arrow_forward</span>
+                                </div>
+                                <!-- Submitted -->
+                                <div style="text-align:center;flex:1;">
+                                    <div style="width:64px;height:64px;border-radius:50%;background:#eff6ff;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;">
+                                        <span class="material-symbols-outlined" style="color:#2563eb;font-size:28px;">send</span>
+                                    </div>
+                                    <p style="font-size:1.5rem;font-weight:800;color:var(--text-dark);margin:0;">{{ submitted_count }}</p>
+                                    <p style="font-size:0.7rem;font-weight:600;color:var(--text-muted);margin:0;">Submitted</p>
+                                </div>
+                                <div style="flex:0 0 40px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;">
+                                    <span class="material-symbols-outlined" style="color:#cbd5e1;font-size:24px;">arrow_forward</span>
+                                </div>
+                                <!-- Evaluated -->
+                                <div style="text-align:center;flex:1;">
+                                    <div style="width:64px;height:64px;border-radius:50%;background:#f0fdf4;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;">
+                                        <span class="material-symbols-outlined" style="color:#16a34a;font-size:28px;">fact_check</span>
+                                    </div>
+                                    <p style="font-size:1.5rem;font-weight:800;color:var(--text-dark);margin:0;">{{ evaluated_count }}</p>
+                                    <p style="font-size:0.7rem;font-weight:600;color:var(--text-muted);margin:0;">Evaluated</p>
+                                </div>
+                                <div style="flex:0 0 40px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;">
+                                    <span class="material-symbols-outlined" style="color:#cbd5e1;font-size:24px;">arrow_forward</span>
+                                </div>
+                                <!-- Shortlisted -->
+                                <div style="text-align:center;flex:1;">
+                                    <div style="width:64px;height:64px;border-radius:50%;background:#fef2f2;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;">
+                                        <span class="material-symbols-outlined" style="color:#dc2626;font-size:28px;">emoji_events</span>
+                                    </div>
+                                    <p style="font-size:1.5rem;font-weight:800;color:var(--text-dark);margin:0;">{{ shortlisted_count }}</p>
+                                    <p style="font-size:0.7rem;font-weight:600;color:var(--text-muted);margin:0;">Shortlisted</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -942,72 +974,6 @@
                     </div>
                 </div>
 
-                <!-- Row 3: Grade-wise Avg Score + Top 5 Performers -->
-                <div class="row g-4 mb-4">
-                    <!-- Grade-wise Average Score -->
-                    <div class="col-12 col-md-5">
-                        <div class="analytics-card">
-                            <div class="card-header-custom">
-                                <div>
-                                    <h2 class="card-title">Avg Score by Grade</h2>
-                                    <p class="card-subtitle">Average combined score per grade</p>
-                                </div>
-                            </div>
-                            <div style="padding-top: 8px;">
-                                {% for grade in grade_avg_scores %}
-                                <div class="h-bar-item">
-                                    <div class="h-bar-header">
-                                        <span class="h-bar-label">Grade {{ grade.grade }}</span>
-                                        <span class="h-bar-value">{{ grade.avg_score }}/50</span>
-                                    </div>
-                                    <div class="h-bar-track">
-                                        <div class="h-bar-fill" style="width: {{ grade.width_pct }}%; background: {{ grade.color }};"></div>
-                                    </div>
-                                </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Top 5 Performers -->
-                    <div class="col-12 col-md-7">
-                        <div class="analytics-card">
-                            <div class="card-header-custom">
-                                <div>
-                                    <h2 class="card-title">Top 5 Performers</h2>
-                                    <p class="card-subtitle">Highest scoring ideas in the competition</p>
-                                </div>
-                            </div>
-                            <div class="table-responsive">
-                                <table class="top-table">
-                                    <thead>
-                                        <tr>
-                                            <th style="width: 50px;">Rank</th>
-                                            <th>Student</th>
-                                            <th>Team</th>
-                                            <th>Idea</th>
-                                            <th style="text-align: right;">Score</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for performer in top_performers %}
-                                        <tr>
-                                            <td>
-                                                <div class="rank-badge {% if forloop.counter == 1 %}gold{% elif forloop.counter == 2 %}silver{% elif forloop.counter == 3 %}bronze{% else %}default{% endif %}">{{ forloop.counter }}</div>
-                                            </td>
-                                            <td style="font-weight: 600;">{{ performer.student_name }}</td>
-                                            <td style="color: var(--text-muted);">{{ performer.team_name }}</td>
-                                            <td style="font-weight: 500;">{{ performer.idea_title }}</td>
-                                            <td style="text-align: right; font-weight: 700; color: {% if forloop.counter <= 3 %}var(--primary){% else %}var(--text-dark){% endif %};">
-                                                {{ performer.score }}</td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
                 <!-- Summary Stats -->
                 <div class="row g-3 mb-4">
