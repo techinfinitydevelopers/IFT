@@ -19,7 +19,7 @@
     <!-- Email -->
     <div class="form-group">
         <div class="icon"><iconify-icon icon="mage:email"></iconify-icon></div>
-        <input type="email" class="form-control" name="contact_email" placeholder="School Email" required value="{{ form.contact_email.value|default:'' }}">
+        <input type="email" class="form-control" name="contact_email" placeholder="School Coordinator Email ID" required value="{{ form.contact_email.value|default:'' }}">
         {% if form.contact_email.errors %}<p class="field-error">{{ form.contact_email.errors.0 }}</p>{% endif %}
     </div>
 
