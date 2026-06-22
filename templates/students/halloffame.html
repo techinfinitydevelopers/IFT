@@ -825,7 +825,7 @@
                                 <span class="material-symbols-outlined" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:16px;color:white;pointer-events:none;">expand_more</span>
                             </div>
                             {% endif %}
-                            <a href="{% url 'students:dashboard' %}" style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 1rem;border-radius:8px;border:1px solid rgba(255,255,255,0.2);color:white;text-decoration:none;font-size:0.8rem;font-weight:600;transition:all 0.3s ease;">
+                            <a href="{% if user_role == 'school' %}{% url 'students:school_dashboard' %}{% elif user_role == 'jury' %}{% url 'students:evaluator_dashboard' %}{% else %}{% url 'students:dashboard' %}{% endif %}" style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 1rem;border-radius:8px;border:1px solid rgba(255,255,255,0.2);color:white;text-decoration:none;font-size:0.8rem;font-weight:600;transition:all 0.3s ease;">
                                 <span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span>
                                 Back to Dashboard
                             </a>
