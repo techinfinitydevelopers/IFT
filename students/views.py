@@ -1507,6 +1507,7 @@ def school_students(request):
         team_name = membership.team.name if membership else ''
         idea = IdeaSubmission.objects.filter(student=s).exclude(status='draft').first()
         idea_title = (idea.title or idea.q3_solution_simple or '')[:40] if idea else ''
+        idea_desc = (idea.q3_solution_simple or idea.q2_exact_problem or '')[:80] if idea else ''
 
         # Get AI score
         ai_score = None
@@ -1542,6 +1543,7 @@ def school_students(request):
             'student_id': s.student_id,
             'team_name': team_name,
             'idea_title': idea_title,
+            'idea_desc': idea_desc,
             'ai_score': ai_score,
             'status': stu_status,
             'phone': s.phone,

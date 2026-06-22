@@ -596,12 +596,12 @@
                         <table class="custom-table">
                             <thead>
                                 <tr>
-                                    <th>Student Name</th>
-                                    <th>Class & Section</th>
-                                    <th>Team Name</th>
                                     <th>Idea Title</th>
+                                    <th>Student Name</th>
+                                    <th>Grade</th>
+                                    <th>Idea Description</th>
                                     <th>Status</th>
-                                    <th style="text-align: right;">Score</th>
+                                    <th style="text-align: right;">Result</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -609,14 +609,14 @@
                                 <tr data-name="{{ student.first_name }} {{ student.last_name }}"
                                     data-email="{{ student.email }}"
                                     data-grade="{{ student.grade }}"
-                                    data-division="{{ student.division }}"
                                     data-status="{{ student.status }}"
-                                    data-team="{{ student.team_name }}"
                                     data-idea="{{ student.idea_title }}"
+                                    data-desc="{{ student.idea_desc }}"
                                     data-score="{{ student.ai_score|default:'' }}"
                                     data-phone="{{ student.phone|default:'' }}"
                                     data-sid="{{ student.student_id }}"
                                     data-created="{{ student.created_at|date:'M d, Y' }}">
+                                    <td style="font-weight:600;">{% if student.idea_title %}{{ student.idea_title }}{% else %}<span style="color:var(--text-muted);">&mdash;</span>{% endif %}</td>
                                     <td>
                                         <div class="d-flex align-items-center gap-3">
                                             <div class="avatar-circle {% if student.ai_score %}primary{% else %}default{% endif %}">
@@ -628,9 +628,8 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td style="color: var(--text-muted);">{{ student.grade }}th {{ student.division }}</td>
-                                    <td style="font-weight: 500;">{% if student.team_name %}{{ student.team_name }}{% else %}<span style="color: var(--text-muted);">&mdash;</span>{% endif %}</td>
-                                    <td style="font-weight: 500;">{% if student.idea_title %}{{ student.idea_title }}{% else %}<span style="color: var(--text-muted);">&mdash;</span>{% endif %}</td>
+                                    <td style="color:var(--text-muted);">{{ student.grade }}</td>
+                                    <td style="font-size:0.8rem;color:var(--text-muted);max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{% if student.idea_desc %}{{ student.idea_desc }}{% else %}<span style="color:var(--text-muted);">&mdash;</span>{% endif %}</td>
                                     <td>
                                         {% if student.status == 'submitted' %}
                                         <span class="badge-status submitted">Submitted</span>
@@ -640,8 +639,8 @@
                                         <span class="badge-status no-team">No Team</span>
                                         {% endif %}
                                     </td>
-                                    <td style="text-align: right; {% if student.ai_score %}font-weight: 700; color: var(--primary);{% else %}color: var(--text-muted);{% endif %}">
-                                        {% if student.ai_score %}{{ student.ai_score }}{% else %}&mdash;{% endif %}
+                                    <td style="text-align:right;{% if student.ai_score %}font-weight:700;color:var(--primary);{% else %}color:var(--text-muted);{% endif %}">
+                                        {% if student.ai_score %}{{ student.ai_score }}/100{% else %}&mdash;{% endif %}
                                     </td>
                                 </tr>
                                 {% empty %}
