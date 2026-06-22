@@ -533,16 +533,25 @@ def school_dashboard(request):
         submission__student__school=school
     ).aggregate(avg=Avg('final_score'))['avg'] or 0
 
-    # Grade-wise student counts
-    grade_data = list(students.values('grade').annotate(count=Count('id')).order_by('grade'))
+    # SDG Track Distribution
+    all_ideas = IdeaSubmission.objects.filter(student__school=school).exclude(competition_track='')
+    track_data = list(all_ideas.values('competition_track').annotate(count=Count('id')).order_by('-count'))
+    track_display = {
+        'no-poverty': 'No Poverty', 'zero-hunger': 'Zero Hunger', 'good-health': 'Good Health',
+        'quality-education': 'Quality Education', 'gender-equality': 'Gender Equality',
+        'clean-water': 'Clean Water', 'clean-energy': 'Clean Energy',
+        'economic-growth': 'Economic Growth', 'industry-innovation': 'Industry & Innovation',
+        'reduced-inequalities': 'Reduced Inequalities', 'sustainable-cities': 'Sustainable Cities',
+        'responsible-consumption': 'Responsible Consumption', 'climate-action': 'Climate Action',
+        'life-below-water': 'Life Below Water', 'life-on-land': 'Life on Land',
+        'peace-justice': 'Peace & Justice', 'partnerships': 'Partnerships',
+    }
+    sdg_tracks = [{'name': track_display.get(t['competition_track'], t['competition_track']), 'count': t['count']} for t in track_data]
+    sdg_max = max((t['count'] for t in sdg_tracks), default=1)
 
-    # Max count for chart bar scaling
-    grade_max = max((g['count'] for g in grade_data), default=1)
-
-    # Top 5 ideas from this school by AI score
-    top_ideas = AIEvaluation.objects.filter(
-        submission__student__school=school
-    ).select_related('submission', 'submission__student__user').order_by('-final_score')[:5]
+    # Team Formation Status
+    students_in_teams = TeamMembership.objects.filter(student__school=school, status='active').values_list('student_id', flat=True).distinct().count()
+    solo_students = student_count - students_in_teams
 
     # Recent activity (last 5 submissions from this school)
     recent = IdeaSubmission.objects.filter(
@@ -565,9 +574,10 @@ def school_dashboard(request):
         'teams_count': teams_count,
         'ideas_count': ideas_count,
         'avg_score': round(avg_score, 1),
-        'grade_data': grade_data,
-        'grade_max': grade_max,
-        'top_ideas': top_ideas,
+        'sdg_tracks': sdg_tracks,
+        'sdg_max': sdg_max,
+        'students_in_teams': students_in_teams,
+        'solo_students': solo_students,
         'recent': recent,
         'announcements': announcements,
         'phases': phases,
