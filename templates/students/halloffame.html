@@ -180,10 +180,11 @@
 
         .podium-container {
             display: flex;
-            align-items: flex-end;
+            align-items: flex-start;
             justify-content: center;
             gap: 2rem;
             min-height: 400px;
+            padding-top: 2rem;
         }
 
         .podium-card {
@@ -198,7 +199,7 @@
         /* Second Place */
         .podium-second {
             width: 260px;
-            transform: translateY(2rem);
+            margin-top: 5rem;
         }
 
         /* First Place */
@@ -206,6 +207,7 @@
             width: 280px;
             position: relative;
             z-index: 10;
+            margin-top: 0;
         }
 
         .podium-first::before {
@@ -224,7 +226,7 @@
         /* Third Place */
         .podium-third {
             width: 260px;
-            transform: translateY(3rem);
+            margin-top: 6rem;
         }
 
         .podium-avatar-container {
@@ -335,6 +337,7 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             padding: 1.5rem;
             border-radius: 8px;
+            text-align: left;
         }
 
         .podium-first .podium-info {
