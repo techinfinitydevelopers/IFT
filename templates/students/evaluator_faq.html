@@ -1,4 +1,5 @@
 {% load static %}
+{% load hof_tags %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -448,7 +449,7 @@
                                 <p class="faq-question-text">{{ faq.title }}</p>
                                 <span class="material-symbols-outlined faq-chevron">expand_more</span>
                             </div>
-                            <div class="faq-answer">{{ faq.body|safe }}</div>
+                            <div class="faq-answer">{{ faq.body|md_to_html }}</div>
                         </div>
                         {% endif %}
                     {% endfor %}
@@ -463,7 +464,7 @@
                                 <p class="faq-question-text">{{ faq.title }}</p>
                                 <span class="material-symbols-outlined faq-chevron">expand_more</span>
                             </div>
-                            <div class="faq-answer">{{ faq.body|safe }}</div>
+                            <div class="faq-answer">{{ faq.body|md_to_html }}</div>
                         </div>
                         {% endif %}
                     {% endfor %}
