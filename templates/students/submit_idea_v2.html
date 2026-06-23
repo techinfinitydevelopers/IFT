@@ -566,6 +566,7 @@
         if (currentStep === 4) populateReview();
 
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (typeof updateNextBtnState === 'function') updateNextBtnState();
     }
 
     function validate(step) {
@@ -592,11 +593,33 @@
         return valid;
     }
 
+    function checkStepFilled(step) {
+        const fields = stepFields[step];
+        if (!fields || fields.length === 0) return true;
+        return fields.every(function(id) {
+            const el = document.getElementById(id);
+            return el && el.value.trim().length >= 20;
+        });
+    }
+
+    function updateNextBtnState() {
+        const nextBtn = document.getElementById('nextBtn');
+        if (currentStep < totalSteps) {
+            nextBtn.disabled = !checkStepFilled(currentStep);
+        }
+    }
+
+    // Listen for input on all textarea/select fields to enable/disable next
+    document.querySelectorAll('.form-textarea, select').forEach(function(el) {
+        el.addEventListener('input', updateNextBtnState);
+        el.addEventListener('change', updateNextBtnState);
+    });
+
     window.changeStep = function (dir) {
-        // Allow free navigation between steps (no validation on Next)
-        // Validation only happens on "Submit for Review"
+        if (dir > 0 && !checkStepFilled(currentStep)) return;
         currentStep = Math.max(1, Math.min(totalSteps, currentStep + dir));
         updateUI();
+        updateNextBtnState();
     };
 
     function populateReview() {
