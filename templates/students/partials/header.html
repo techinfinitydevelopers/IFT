@@ -37,7 +37,7 @@
             <h4 style="font-size:1rem;font-weight:700;margin:0;">Help & Support</h4>
             <button onclick="closeAllDropdowns()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);"><span class="material-symbols-outlined" style="font-size:20px;">close</span></button>
         </div>
-        <a href="#" class="dropdown-link"><span class="material-symbols-outlined" style="font-size:20px;color:var(--primary);">quiz</span> FAQ</a>
+        <a href="{% url 'students:student_faq' %}" class="dropdown-link"><span class="material-symbols-outlined" style="font-size:20px;color:var(--primary);">quiz</span> FAQ</a>
         <a href="#" class="dropdown-link"><span class="material-symbols-outlined" style="font-size:20px;color:var(--primary);">support_agent</span> Contact Support</a>
         <a href="#" class="dropdown-link"><span class="material-symbols-outlined" style="font-size:20px;color:var(--primary);">feedback</span> Send Feedback</a>
     </div>

@@ -2068,6 +2068,22 @@ def school_profile(request):
 
 
 @login_required
+def student_faq(request):
+    """Student FAQ page — shows published FAQs for students."""
+    from admins.models import Content
+    try:
+        student = request.user.student_profile
+    except:
+        student = None
+    faqs = Content.objects.filter(
+        status='published',
+        content_type='faq',
+        visibility__in=['all', 'students']
+    ).order_by('created_at')
+    return render(request, 'students/student_faq.html', {'student': student, 'faqs': faqs})
+
+
+@login_required
 def school_faq(request):
     """School FAQ page — shows published FAQs from Content model."""
     from students.models import School

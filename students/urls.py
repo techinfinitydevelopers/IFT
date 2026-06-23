@@ -24,6 +24,7 @@ urlpatterns = [
     path('team/remove-member/', views.remove_team_member, name='remove_team_member'),
     path('idea-corner/', views.idea_corner, name='idea_corner'),
     path('hall-of-fame/', views.student_halloffame, name='student_halloffame'),
+    path('faq/', views.student_faq, name='student_faq'),
     path('school/dashboard/', views.school_dashboard, name='school_dashboard'),
     path('school/students/', views.school_students, name='school_students'),
     path('school/teams/', views.school_teams, name='school_teams'),
