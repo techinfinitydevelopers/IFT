@@ -576,7 +576,7 @@
             const el = document.getElementById(id);
             if (el) {
                 const val = el.value.trim();
-                if (val.length < 20) {
+                if (val === '') {
                     el.style.borderColor = '#ef4444';
                     el.style.boxShadow = '0 0 0 3px rgba(239,68,68,0.1)';
                     valid = false;
@@ -587,7 +587,7 @@
             }
         });
         if (!valid) {
-            const firstInvalid = fields.find(id => document.getElementById(id)?.value.trim().length < 20);
+            const firstInvalid = fields.find(id => document.getElementById(id)?.value.trim() === '');
             if (firstInvalid) document.getElementById(firstInvalid).scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
         return valid;
@@ -599,13 +599,7 @@
         return fields.every(function(id) {
             const el = document.getElementById(id);
             if (!el) return false;
-            const val = el.value.trim();
-            // Select/dropdown — just needs a value selected
-            if (el.tagName === 'SELECT') return val !== '';
-            // Input (title) — min 3 chars
-            if (el.tagName === 'INPUT') return val.length >= 3;
-            // Textarea — min 20 chars
-            return val.length >= 20;
+            return el.value.trim() !== '';
         });
     }
 
