@@ -221,10 +221,10 @@
 
                             <div class="form-group">
                                 <label class="form-label" for="id_track">
-                                    Competition Track <span class="required">*</span>
+                                    SDG Category <span class="required">*</span>
                                 </label>
                                 <select class="form-textarea" style="min-height:auto;padding:12px 16px;" id="id_track" name="competition_track">
-                                    <option value="" disabled {% if not form.competition_track.value %}selected{% endif %}>Select a track</option>
+                                    <option value="" disabled {% if not form.competition_track.value %}selected{% endif %}>Select SDG Category</option>
                                     <option value="no-poverty" {% if form.competition_track.value == 'no-poverty' %}selected{% endif %}>No Poverty</option>
                                     <option value="zero-hunger" {% if form.competition_track.value == 'zero-hunger' %}selected{% endif %}>Zero Hunger</option>
                                     <option value="good-health" {% if form.competition_track.value == 'good-health' %}selected{% endif %}>Good Health and Well-Being</option>
