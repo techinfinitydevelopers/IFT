@@ -288,26 +288,6 @@ def submit_idea(request):
             messages.success(request, 'Draft saved successfully!')
             return redirect('students:dashboard')
 
-        # Check mandatory videos completion for team
-        from students.models import LearningVideo, VideoProgress, TeamMembership
-        mandatory_videos = LearningVideo.objects.filter(is_active=True, is_mandatory=True)
-        if mandatory_videos.exists():
-            # Check current student
-            watched = VideoProgress.objects.filter(student=student, watched=True, video__in=mandatory_videos).count()
-            if watched < mandatory_videos.count():
-                messages.error(request, 'Please complete all mandatory learning videos before submitting.')
-                return redirect('students:submit_idea')
-
-            # Check team members
-            membership = TeamMembership.objects.filter(student=student).first()
-            if membership and membership.role == 'leader':
-                for m in membership.team.memberships.filter(status='active').exclude(student=student):
-                    if m.student:
-                        m_watched = VideoProgress.objects.filter(student=m.student, watched=True, video__in=mandatory_videos).count()
-                        if m_watched < mandatory_videos.count():
-                            messages.error(request, f'Team member {m.student.user.get_full_name()} has not completed all mandatory videos.')
-                            return redirect('students:submit_idea')
-
         # Submit for Review — no validation, save all fields as draft
         if existing:
             submission = existing
@@ -365,10 +345,41 @@ def submit_idea(request):
         form = IdeaSubmissionForm(instance=existing) if existing else IdeaSubmissionForm()
 
     return render(request, 'students/submit_idea_v2.html', {
+    # Video completion data for popup
+    from students.models import LearningVideo, VideoProgress, TeamMembership
+    mandatory_videos = list(LearningVideo.objects.filter(is_active=True, is_mandatory=True).order_by('order'))
+    watched_ids = set(VideoProgress.objects.filter(student=student, watched=True).values_list('video_id', flat=True))
+    video_list = [{'id': v.id, 'title': v.title, 'youtube_url': v.youtube_url, 'youtube_id': v.youtube_id, 'watched': v.id in watched_ids} for v in mandatory_videos]
+    videos_total = len(video_list)
+    videos_watched = len([v for v in video_list if v['watched']])
+    all_videos_done = videos_watched >= videos_total
+
+    # Team members video status
+    team_video_status = []
+    membership = TeamMembership.objects.filter(student=student).first()
+    if membership:
+        for m in membership.team.memberships.filter(status='active').select_related('student__user'):
+            if m.student:
+                m_watched = VideoProgress.objects.filter(student=m.student, watched=True, video__in=mandatory_videos).count()
+                team_video_status.append({
+                    'name': m.student.user.get_full_name() or m.student.user.username,
+                    'role': m.role,
+                    'watched': m_watched,
+                    'total': videos_total,
+                    'complete': m_watched >= videos_total,
+                })
+        all_videos_done = all_videos_done and all(t['complete'] for t in team_video_status)
+
+    return render(request, 'students/submit_idea_v2.html', {
         'form': form,
         'is_edit': existing is not None,
         'saved_title': existing.title if existing else '',
         'saved_track': existing.competition_track if existing else '',
+        'video_list': video_list,
+        'videos_total': videos_total,
+        'videos_watched': videos_watched,
+        'all_videos_done': all_videos_done,
+        'team_video_status': team_video_status,
     })
 
 
