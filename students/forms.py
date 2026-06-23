@@ -55,6 +55,7 @@ class IdeaSubmissionForm(forms.ModelForm):
     class Meta:
         model = IdeaSubmission
         fields = [
+            'title', 'competition_track',
             'q1_target_group', 'q2_exact_problem', 'q3_solution_simple',
             'q4_differentiation', 'q5_build_steps', 'q6_resources',
             'q7_positive_change', 'q8_challenges', 'q9_team_fit',
