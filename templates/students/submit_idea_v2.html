@@ -216,7 +216,7 @@
                                 <label class="form-label" for="id_title">
                                     Project Title <span class="required">*</span>
                                 </label>
-                                <input type="text" class="form-textarea" style="min-height:auto;padding:12px 16px;" id="id_title" name="title" maxlength="200" placeholder="e.g. Solar-Powered Water Purification System" value="{{ form.title.value|default:'' }}">
+                                <input type="text" class="form-textarea" style="min-height:auto;padding:12px 16px;" id="id_title" name="title" maxlength="200" placeholder="e.g. Solar-Powered Water Purification System" value="{{ saved_title|default:'' }}">
                             </div>
 
                             <div class="form-group">
@@ -224,24 +224,24 @@
                                     SDG Category <span class="required">*</span>
                                 </label>
                                 <select class="form-textarea" style="min-height:auto;padding:12px 16px;" id="id_track" name="competition_track">
-                                    <option value="" disabled {% if not form.competition_track.value %}selected{% endif %}>Select SDG Category</option>
-                                    <option value="no-poverty" {% if form.competition_track.value == 'no-poverty' %}selected{% endif %}>No Poverty</option>
-                                    <option value="zero-hunger" {% if form.competition_track.value == 'zero-hunger' %}selected{% endif %}>Zero Hunger</option>
-                                    <option value="good-health" {% if form.competition_track.value == 'good-health' %}selected{% endif %}>Good Health and Well-Being</option>
-                                    <option value="quality-education" {% if form.competition_track.value == 'quality-education' %}selected{% endif %}>Quality Education</option>
-                                    <option value="gender-equality" {% if form.competition_track.value == 'gender-equality' %}selected{% endif %}>Gender Equality</option>
-                                    <option value="clean-water" {% if form.competition_track.value == 'clean-water' %}selected{% endif %}>Clean Water and Sanitation</option>
-                                    <option value="clean-energy" {% if form.competition_track.value == 'clean-energy' %}selected{% endif %}>Affordable and Clean Energy</option>
-                                    <option value="economic-growth" {% if form.competition_track.value == 'economic-growth' %}selected{% endif %}>Decent Work and Economic Growth</option>
-                                    <option value="industry-innovation" {% if form.competition_track.value == 'industry-innovation' %}selected{% endif %}>Industry, Innovation and Infrastructure</option>
-                                    <option value="reduced-inequalities" {% if form.competition_track.value == 'reduced-inequalities' %}selected{% endif %}>Reduced Inequalities</option>
-                                    <option value="sustainable-cities" {% if form.competition_track.value == 'sustainable-cities' %}selected{% endif %}>Sustainable Cities and Communities</option>
-                                    <option value="responsible-consumption" {% if form.competition_track.value == 'responsible-consumption' %}selected{% endif %}>Responsible Consumption and Production</option>
-                                    <option value="climate-action" {% if form.competition_track.value == 'climate-action' %}selected{% endif %}>Climate Action</option>
-                                    <option value="life-below-water" {% if form.competition_track.value == 'life-below-water' %}selected{% endif %}>Life Below Water</option>
-                                    <option value="life-on-land" {% if form.competition_track.value == 'life-on-land' %}selected{% endif %}>Life on Land</option>
-                                    <option value="peace-justice" {% if form.competition_track.value == 'peace-justice' %}selected{% endif %}>Peace, Justice and Strong Institutions</option>
-                                    <option value="partnerships" {% if form.competition_track.value == 'partnerships' %}selected{% endif %}>Partnerships for the Goals</option>
+                                    <option value="" disabled {% if not saved_track %}selected{% endif %}>Select SDG Category</option>
+                                    <option value="no-poverty" {% if saved_track == 'no-poverty' %}selected{% endif %}>No Poverty</option>
+                                    <option value="zero-hunger" {% if saved_track == 'zero-hunger' %}selected{% endif %}>Zero Hunger</option>
+                                    <option value="good-health" {% if saved_track == 'good-health' %}selected{% endif %}>Good Health and Well-Being</option>
+                                    <option value="quality-education" {% if saved_track == 'quality-education' %}selected{% endif %}>Quality Education</option>
+                                    <option value="gender-equality" {% if saved_track == 'gender-equality' %}selected{% endif %}>Gender Equality</option>
+                                    <option value="clean-water" {% if saved_track == 'clean-water' %}selected{% endif %}>Clean Water and Sanitation</option>
+                                    <option value="clean-energy" {% if saved_track == 'clean-energy' %}selected{% endif %}>Affordable and Clean Energy</option>
+                                    <option value="economic-growth" {% if saved_track == 'economic-growth' %}selected{% endif %}>Decent Work and Economic Growth</option>
+                                    <option value="industry-innovation" {% if saved_track == 'industry-innovation' %}selected{% endif %}>Industry, Innovation and Infrastructure</option>
+                                    <option value="reduced-inequalities" {% if saved_track == 'reduced-inequalities' %}selected{% endif %}>Reduced Inequalities</option>
+                                    <option value="sustainable-cities" {% if saved_track == 'sustainable-cities' %}selected{% endif %}>Sustainable Cities and Communities</option>
+                                    <option value="responsible-consumption" {% if saved_track == 'responsible-consumption' %}selected{% endif %}>Responsible Consumption and Production</option>
+                                    <option value="climate-action" {% if saved_track == 'climate-action' %}selected{% endif %}>Climate Action</option>
+                                    <option value="life-below-water" {% if saved_track == 'life-below-water' %}selected{% endif %}>Life Below Water</option>
+                                    <option value="life-on-land" {% if saved_track == 'life-on-land' %}selected{% endif %}>Life on Land</option>
+                                    <option value="peace-justice" {% if saved_track == 'peace-justice' %}selected{% endif %}>Peace, Justice and Strong Institutions</option>
+                                    <option value="partnerships" {% if saved_track == 'partnerships' %}selected{% endif %}>Partnerships for the Goals</option>
                                 </select>
                             </div>
                         </section>

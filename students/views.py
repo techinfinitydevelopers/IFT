@@ -364,7 +364,12 @@ def submit_idea(request):
     else:
         form = IdeaSubmissionForm(instance=existing) if existing else IdeaSubmissionForm()
 
-    return render(request, 'students/submit_idea_v2.html', {'form': form, 'is_edit': existing is not None})
+    return render(request, 'students/submit_idea_v2.html', {
+        'form': form,
+        'is_edit': existing is not None,
+        'saved_title': existing.title if existing else '',
+        'saved_track': existing.competition_track if existing else '',
+    })
 
 
 @login_required
