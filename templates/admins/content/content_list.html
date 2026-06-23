@@ -853,6 +853,7 @@
                                 <th style="width:50px;">#</th>
                                 <th>Title</th>
                                 <th>Status</th>
+                                <th>Visible To</th>
                                 <th>Author</th>
                                 <th>Created</th>
                                 <th>Updated</th>
@@ -880,6 +881,20 @@
                                     <span class="badge-status badge-{{ item.status }}">
                                         <span class="dot"></span>
                                         {{ item.status|capfirst }}
+                                    </span>
+                                </td>
+                                <td style="font-size:0.8125rem;">
+                                    <span style="padding:3px 10px;border-radius:12px;font-size:0.7rem;font-weight:600;
+                                        {% if item.visibility == 'all' %}background:#f0fdf4;color:#16a34a;
+                                        {% elif item.visibility == 'students' %}background:#eff6ff;color:#2563eb;
+                                        {% elif item.visibility == 'schools' %}background:#fef3c7;color:#d97706;
+                                        {% elif item.visibility == 'evaluators' %}background:#f3e8ff;color:#7c3aed;
+                                        {% else %}background:#f3f4f6;color:#6b7280;{% endif %}">
+                                        {% if item.visibility == 'all' %}For All
+                                        {% elif item.visibility == 'students' %}Students
+                                        {% elif item.visibility == 'schools' %}Schools
+                                        {% elif item.visibility == 'evaluators' %}Evaluators
+                                        {% else %}{{ item.visibility|capfirst }}{% endif %}
                                     </span>
                                 </td>
                                 <td style="font-size:0.8125rem;">{{ item.author.get_full_name|default:item.author.username }}</td>
