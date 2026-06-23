@@ -2068,6 +2068,15 @@ def school_profile(request):
 
 
 @login_required
+def learning_resources(request):
+    """Student Learning Resources page — 8 module videos."""
+    try:
+        student = request.user.student_profile
+    except:
+        student = None
+    return render(request, 'students/learning_resources.html', {'student': student})
+
+
 def student_faq(request):
     """Student FAQ page — shows published FAQs for students."""
     from admins.models import Content

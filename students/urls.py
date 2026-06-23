@@ -25,6 +25,7 @@ urlpatterns = [
     path('idea-corner/', views.idea_corner, name='idea_corner'),
     path('hall-of-fame/', views.student_halloffame, name='student_halloffame'),
     path('faq/', views.student_faq, name='student_faq'),
+    path('learning-resources/', views.learning_resources, name='learning_resources'),
     path('school/dashboard/', views.school_dashboard, name='school_dashboard'),
     path('school/students/', views.school_students, name='school_students'),
     path('school/teams/', views.school_teams, name='school_teams'),

@@ -24,7 +24,7 @@
             <span class="nav-text">Idea Submission</span>
         </a>
         {% endif %}
-        <a class="nav-item {% if active_page == 'resources' %}nav-item-active{% endif %}" href="#">
+        <a class="nav-item {% if active_page == 'resources' %}nav-item-active{% endif %}" href="{% url 'students:learning_resources' %}">
             <span class="material-symbols-outlined">menu_book</span>
             <span class="nav-text">Learning Resources</span>
         </a>
