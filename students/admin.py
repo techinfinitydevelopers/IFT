@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Student, IdeaSubmission, UploadedFile, TeamMember, LearningVideo, VideoProgress
+from .models import Student, IdeaSubmission, UploadedFile, TeamMember, LearningVideo, VideoProgress, School, Team, TeamMembership, IdeaSuggestion, Notification
 
 
 @admin.register(Student)
@@ -62,6 +62,37 @@ class TeamMemberAdmin(admin.ModelAdmin):
     list_display = ('name', 'submission', 'role', 'grade', 'school_name')
     search_fields = ('name', 'submission__title')
     list_filter = ('role',)
+
+
+@admin.register(School)
+class SchoolAdmin(admin.ModelAdmin):
+    list_display = ('name', 'board', 'city', 'state', 'status', 'is_active', 'created_at')
+    search_fields = ('name', 'city', 'contact_email', 'principal_name')
+    list_filter = ('board', 'status', 'is_active', 'state')
+
+
+@admin.register(Team)
+class TeamAdmin(admin.ModelAdmin):
+    list_display = ('name', 'team_code', 'leader', 'created_at')
+    search_fields = ('name', 'team_code')
+
+
+@admin.register(TeamMembership)
+class TeamMembershipAdmin(admin.ModelAdmin):
+    list_display = ('team', 'student', 'role', 'status')
+    list_filter = ('role', 'status')
+
+
+@admin.register(IdeaSuggestion)
+class IdeaSuggestionAdmin(admin.ModelAdmin):
+    list_display = ('submission', 'suggested_by', 'field_name', 'status', 'created_at')
+    list_filter = ('status',)
+
+
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ('user', 'title', 'notification_type', 'is_read', 'created_at')
+    list_filter = ('notification_type', 'is_read')
 
 
 @admin.register(LearningVideo)
