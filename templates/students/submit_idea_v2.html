@@ -535,7 +535,7 @@
 
     // Step fields for validation
     const stepFields = {
-        1: ['id_q1_target_group', 'id_q2_exact_problem', 'id_q3_solution_simple'],
+        1: ['id_title', 'id_track', 'id_q1_target_group', 'id_q2_exact_problem', 'id_q3_solution_simple'],
         2: ['id_q4_differentiation', 'id_q5_build_steps', 'id_q6_resources', 'id_q7_positive_change', 'id_q8_challenges'],
         3: ['id_q9_team_fit', 'id_q10_feedback', 'id_q11_creative_element', 'id_q12_pitch'],
         4: [],
@@ -598,7 +598,14 @@
         if (!fields || fields.length === 0) return true;
         return fields.every(function(id) {
             const el = document.getElementById(id);
-            return el && el.value.trim().length >= 20;
+            if (!el) return false;
+            const val = el.value.trim();
+            // Select/dropdown — just needs a value selected
+            if (el.tagName === 'SELECT') return val !== '';
+            // Input (title) — min 3 chars
+            if (el.tagName === 'INPUT') return val.length >= 3;
+            // Textarea — min 20 chars
+            return val.length >= 20;
         });
     }
 
@@ -609,8 +616,8 @@
         }
     }
 
-    // Listen for input on all textarea/select fields to enable/disable next
-    document.querySelectorAll('.form-textarea, select').forEach(function(el) {
+    // Listen for input on all form fields to enable/disable next
+    document.querySelectorAll('.form-textarea, select, input[type="text"]').forEach(function(el) {
         el.addEventListener('input', updateNextBtnState);
         el.addEventListener('change', updateNextBtnState);
     });
