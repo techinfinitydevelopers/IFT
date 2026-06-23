@@ -439,14 +439,8 @@
 
             {% if faqs %}
             <div class="row g-4">
-                <!-- Left Column: Evaluation Process -->
+                <!-- Left Column -->
                 <div class="col-lg-6">
-                    <div class="faq-section-header">
-                        <div class="faq-section-icon blue">
-                            <span class="material-symbols-outlined">info</span>
-                        </div>
-                        <h3 class="faq-section-title">Evaluation Process</h3>
-                    </div>
                     {% for faq in faqs %}
                         {% if forloop.counter|divisibleby:2 %}{% else %}
                         <div class="faq-item" data-faq-col="left">
@@ -454,20 +448,14 @@
                                 <p class="faq-question-text">{{ faq.title }}</p>
                                 <span class="material-symbols-outlined faq-chevron">expand_more</span>
                             </div>
-                            <div class="faq-answer">{{ faq.body|linebreaksbr }}</div>
+                            <div class="faq-answer">{{ faq.body|safe }}</div>
                         </div>
                         {% endif %}
                     {% endfor %}
                 </div>
 
-                <!-- Right Column: Your Role as Evaluator -->
+                <!-- Right Column -->
                 <div class="col-lg-6">
-                    <div class="faq-section-header">
-                        <div class="faq-section-icon green">
-                            <span class="material-symbols-outlined">shield</span>
-                        </div>
-                        <h3 class="faq-section-title">Your Role as Evaluator</h3>
-                    </div>
                     {% for faq in faqs %}
                         {% if forloop.counter|divisibleby:2 %}
                         <div class="faq-item" data-faq-col="right">
@@ -475,7 +463,7 @@
                                 <p class="faq-question-text">{{ faq.title }}</p>
                                 <span class="material-symbols-outlined faq-chevron">expand_more</span>
                             </div>
-                            <div class="faq-answer">{{ faq.body|linebreaksbr }}</div>
+                            <div class="faq-answer">{{ faq.body|safe }}</div>
                         </div>
                         {% endif %}
                     {% endfor %}
