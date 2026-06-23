@@ -344,7 +344,6 @@ def submit_idea(request):
     else:
         form = IdeaSubmissionForm(instance=existing) if existing else IdeaSubmissionForm()
 
-    return render(request, 'students/submit_idea_v2.html', {
     # Video completion data for popup
     from students.models import LearningVideo, VideoProgress, TeamMembership
     mandatory_videos = list(LearningVideo.objects.filter(is_active=True, is_mandatory=True).order_by('order'))
