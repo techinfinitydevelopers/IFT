@@ -46,6 +46,10 @@
             <span class="material-symbols-outlined">emoji_events</span>
             <span class="nav-text">Hall of Fame</span>
         </a>
+        <a class="nav-item {% if active_page == 'faq' %}nav-item-active{% endif %}" href="{% url 'students:student_faq' %}">
+            <span class="material-symbols-outlined" {% if active_page == 'faq' %}style="font-variation-settings: 'FILL' 1;"{% endif %}>quiz</span>
+            <span class="nav-text">FAQ</span>
+        </a>
     </nav>
     <div class="sidebar-footer p-3 mt-auto">
         <div class="user-profile">
