@@ -86,6 +86,8 @@ urlpatterns = [
 
     # Reports
     path('reports/', views.reports_view, name='reports'),
+    path('reports/export/students/', views.report_students_export, name='report_students_export'),
+    path('reports/export/schools/', views.report_schools_export, name='report_schools_export'),
 
     # Certificates
     path('certificates/', views.certificates_view, name='certificates'),

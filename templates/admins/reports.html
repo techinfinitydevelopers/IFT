@@ -720,6 +720,79 @@
                     </div>
                 </div>
 
+                <!-- ══ Report Builder (filter + Excel download) ══ -->
+                <div class="analytics-card" style="margin-bottom:24px;padding:20px 22px;">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+                        <span class="material-symbols-outlined" style="color:#5E2A97;">tune</span>
+                        <h3 style="font-size:1.05rem;font-weight:700;margin:0;">Report Builder</h3>
+                        <span style="font-size:0.75rem;color:#6b7280;">Apply filters, then download as Excel</span>
+                    </div>
+                    <form id="reportForm" method="get" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;align-items:end;">
+                        <div>
+                            <label style="font-size:0.7rem;font-weight:700;color:#6b7280;text-transform:uppercase;">Report Type</label>
+                            <select id="reportMode" class="rb-input">
+                                <option value="students">Students / Ideas</option>
+                                <option value="schools">Schools</option>
+                            </select>
+                        </div>
+                        <div><label class="rb-lbl">School</label>
+                            <select name="school" class="rb-input"><option value="">All</option>
+                                {% for s in report_schools %}<option value="{{ s.id }}">{{ s.name }}</option>{% endfor %}
+                            </select></div>
+                        <div class="rb-student"><label class="rb-lbl">Grade</label>
+                            <select name="grade" class="rb-input"><option value="">All</option>
+                                {% for g in "789" %}<option value="{{ g }}">Grade {{ g }}</option>{% endfor %}
+                                <option value="10">Grade 10</option><option value="11">Grade 11</option><option value="12">Grade 12</option>
+                            </select></div>
+                        <div class="rb-student"><label class="rb-lbl">Gender</label>
+                            <select name="gender" class="rb-input"><option value="">All</option><option value="male">Male</option><option value="female">Female</option></select></div>
+                        <div><label class="rb-lbl">Board</label>
+                            <select name="board" class="rb-input"><option value="">All</option><option>CBSE</option><option>ICSE</option><option>SSC</option><option>IB</option><option>IGCSE</option><option>Other</option></select></div>
+                        <div><label class="rb-lbl">City</label><input name="city" class="rb-input" placeholder="Any city"></div>
+                        <div><label class="rb-lbl">State</label><input name="state" class="rb-input" placeholder="Any state"></div>
+                        <div><label class="rb-lbl">Zone</label>
+                            <select name="zone" class="rb-input"><option value="">All</option><option>North</option><option>South</option><option>East</option><option>West</option><option>Central</option><option>North-East</option></select></div>
+                        <div class="rb-student"><label class="rb-lbl">SDG / Track</label>
+                            <select name="track" class="rb-input"><option value="">All</option>
+                                {% for val, label in report_tracks %}<option value="{{ val }}">{{ label }}</option>{% endfor %}
+                            </select></div>
+                        <div><label class="rb-lbl">Tata ClassEdge</label>
+                            <select name="tata" class="rb-input"><option value="">All</option><option value="true">Tata only</option><option value="false">Non-Tata only</option></select></div>
+                        <div class="rb-student"><label class="rb-lbl">Payment</label>
+                            <select name="paid" class="rb-input"><option value="">All</option><option value="true">Paid</option><option value="false">Non-paid</option></select></div>
+                        <div class="rb-student"><label class="rb-lbl">Idea Status</label>
+                            <select name="status" class="rb-input"><option value="">All</option><option value="published">Published (submitted)</option><option value="draft">Draft (unpublished)</option></select></div>
+                        <div class="rb-student"><label class="rb-lbl">Top Ranking</label>
+                            <select name="top" class="rb-input"><option value="">All</option><option value="400">Top 400</option><option value="100">Top 100</option><option value="12">Top 12</option></select></div>
+                        <div class="rb-student"><label class="rb-lbl">Evaluator</label>
+                            <select name="evaluator" class="rb-input"><option value="">All</option>
+                                {% for e in report_evaluators %}<option value="{{ e.id }}">{{ e.first_name }} {{ e.last_name }}</option>{% endfor %}
+                            </select></div>
+                        <div>
+                            <button type="submit" class="btn-export" style="width:100%;justify-content:center;">
+                                <span class="material-symbols-outlined" style="font-size:18px;">download</span> Download Excel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <style>
+                    .rb-lbl{font-size:0.7rem;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:2px;}
+                    .rb-input{width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:8px;font-size:0.82rem;font-family:inherit;background:#fff;}
+                    .rb-input:focus{outline:none;border-color:#5E2A97;}
+                </style>
+                <script>
+                    (function(){
+                        var form=document.getElementById('reportForm');
+                        var mode=document.getElementById('reportMode');
+                        function apply(){
+                            var schools=mode.value==='schools';
+                            document.querySelectorAll('.rb-student').forEach(function(el){el.style.display=schools?'none':'';});
+                            form.action='/super-admin/reports/export/'+mode.value+'/';
+                        }
+                        mode.addEventListener('change',apply); apply();
+                    })();
+                </script>
+
                 <!-- Top Row: Map & Completion Status -->
                 <div class="row g-4 mb-4">
                     <!-- Global Submission Density -->

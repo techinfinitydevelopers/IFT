@@ -3333,7 +3333,180 @@ def reports_view(request):
     context['student_count'] = all_students.count()
     context['evaluator_count'] = total_evaluators
 
+    # Dropdown data for the Report Builder filter form
+    context['report_schools'] = list(School.objects.order_by('name').values('id', 'name'))
+    context['report_evaluators'] = list(
+        User.objects.filter(profile__role='jury').order_by('first_name')
+        .values('id', 'first_name', 'last_name')
+    )
+    context['report_tracks'] = IdeaSubmission.TRACK_CHOICES
+
     return render(request, 'admins/reports.html', context)
+
+
+# ─── Report Excel Exports (filterable) ───────────────────────────────────
+
+_PUBLISHED_STATUSES = ['submitted', 'under_review', 'evaluated', 'reviewed']
+
+
+def _evaluator_for(submission):
+    """Latest evaluator assignment (name, score) for a submission, or (None, None)."""
+    ea = EvaluatorAssignment.objects.filter(
+        submission=submission).select_related('evaluator').order_by('-evaluated_on').first()
+    if not ea:
+        return '', ''
+    return (ea.evaluator.get_full_name() or ea.evaluator.username), (ea.score if ea.score is not None else '')
+
+
+@login_required
+@user_passes_test(is_staff_or_superuser)
+def report_students_export(request):
+    """Filtered Students/Ideas report as .xlsx. All filters are optional GET params."""
+    from admins.reports import xlsx_response
+
+    g = request.GET
+    subs = IdeaSubmission.objects.select_related(
+        'student', 'student__user', 'student__school'
+    ).prefetch_related('ai_evaluation')
+
+    # ---- filters ----
+    if g.get('school'):
+        subs = subs.filter(student__school_id=g['school'])
+    if g.get('grade'):
+        subs = subs.filter(student__grade=g['grade'])
+    if g.get('gender'):
+        subs = subs.filter(student__gender=g['gender'])
+    if g.get('board'):
+        subs = subs.filter(student__school__board=g['board'])
+    if g.get('city'):
+        subs = subs.filter(student__school__city__icontains=g['city'])
+    if g.get('state'):
+        subs = subs.filter(student__school__state__icontains=g['state'])
+    if g.get('track'):
+        subs = subs.filter(competition_track=g['track'])
+    if g.get('tata') in ('true', 'false'):
+        subs = subs.filter(student__school__is_tata_classedge=(g['tata'] == 'true'))
+    if g.get('paid') in ('true', 'false'):
+        subs = subs.filter(student__is_paid=(g['paid'] == 'true'))
+
+    status = g.get('status', '')
+    if status == 'draft':
+        subs = subs.filter(status='draft')
+    elif status in ('submitted', 'published'):
+        subs = subs.filter(status__in=_PUBLISHED_STATUSES)
+
+    top = g.get('top', '')
+    if top == '400':
+        subs = subs.filter(ai_evaluation__is_top_400=True)
+    elif top == '12':
+        subs = subs.filter(ai_evaluation__is_top_12=True)
+    elif top == '100':
+        subs = subs.filter(ai_evaluation__rank__lte=100, ai_evaluation__rank__gt=0)
+
+    if g.get('evaluator'):
+        subs = subs.filter(evaluator_assignments__evaluator_id=g['evaluator']).distinct()
+    if g.get('min_score'):
+        subs = subs.filter(ai_evaluation__final_score__gte=g['min_score'])
+    if g.get('max_score'):
+        subs = subs.filter(ai_evaluation__final_score__lte=g['max_score'])
+
+    subs = subs.order_by('-ai_evaluation__final_score', '-submitted_at')
+
+    if g.get('zone'):  # zone filter needs python-side state->zone mapping
+        want = g['zone'].strip().lower()
+        subs = [s for s in subs if _state_to_zone(_submission_state(s)).lower() == want]
+
+    headers = [
+        'Student Name', 'Gender', 'Grade', 'School', 'City', 'State', 'Zone', 'Board',
+        'Paid', 'Amount', 'Idea Title', 'SDG / Track', 'Submission Date', 'Status',
+        'AI Score', 'Evaluator Name', 'Evaluator Score', 'Top 400', 'Top 100', 'Top 12',
+        'Coordinator Name', 'Coordinator Mobile', 'Principal Name',
+    ]
+    rows = []
+    for s in subs:
+        st = s.student
+        school = st.school
+        try:
+            ev = s.ai_evaluation
+        except Exception:
+            ev = None
+        ev_name, ev_score = _evaluator_for(s)
+        rows.append([
+            st.user.get_full_name() or st.user.username,
+            st.get_gender_display() if st.gender else '',
+            st.grade,
+            st.school_display_name,
+            (school.city if school else st.city) or '',
+            _submission_state(s),
+            _state_to_zone(_submission_state(s)),
+            (school.board if school else st.school_board) or '',
+            'Yes' if st.is_paid else 'No',
+            int(st.payment_amount) if st.payment_amount else '',
+            s.title or '',
+            s.get_competition_track_display() if s.competition_track else '',
+            s.submitted_at.strftime('%Y-%m-%d') if s.submitted_at else '',
+            s.get_status_display(),
+            ev.final_score if ev else '',
+            ev_name, ev_score,
+            'Yes' if (ev and ev.is_top_400) else 'No',
+            'Yes' if (ev and ev.rank and 0 < ev.rank <= 100) else 'No',
+            'Yes' if (ev and ev.is_top_12) else 'No',
+            (school.designated_teacher_name if school else '') or '',
+            (school.designated_teacher_mobile if school else '') or '',
+            (school.principal_name if school else '') or '',
+        ])
+    return xlsx_response('students_report', headers, rows, 'Students')
+
+
+@login_required
+@user_passes_test(is_staff_or_superuser)
+def report_schools_export(request):
+    """Filtered Schools report as .xlsx with aggregated best score / top team."""
+    from admins.reports import xlsx_response
+    from django.db.models import Max, Count as _Count
+
+    g = request.GET
+    schools = School.objects.all()
+    if g.get('board'):
+        schools = schools.filter(board=g['board'])
+    if g.get('city'):
+        schools = schools.filter(city__icontains=g['city'])
+    if g.get('state'):
+        schools = schools.filter(state__icontains=g['state'])
+    if g.get('tata') in ('true', 'false'):
+        schools = schools.filter(is_tata_classedge=(g['tata'] == 'true'))
+    if g.get('status'):
+        schools = schools.filter(status=g['status'])
+    schools = schools.order_by('name')
+
+    if g.get('zone'):
+        want = g['zone'].strip().lower()
+        schools = [s for s in schools if _state_to_zone(s.state).lower() == want]
+
+    headers = [
+        'School Name', 'City', 'State', 'Zone', 'Board', 'Tata ClassEdge',
+        'Coordinator Name', 'Coordinator Mobile', 'Principal Name', 'Principal Email',
+        'Pin Code', 'Total Students', 'Paid Students', 'Submitted Ideas',
+        'Highest AI Score', 'Status',
+    ]
+    rows = []
+    for sc in schools:
+        students = Student.objects.filter(school=sc)
+        total_students = students.count()
+        paid_students = students.filter(is_paid=True).count()
+        submitted = IdeaSubmission.objects.filter(
+            student__school=sc, status__in=_PUBLISHED_STATUSES).count()
+        best = AIEvaluation.objects.filter(
+            submission__student__school=sc).aggregate(m=Max('final_score'))['m']
+        rows.append([
+            sc.name, sc.city, sc.state, _state_to_zone(sc.state), sc.board,
+            'Yes' if sc.is_tata_classedge else 'No',
+            sc.designated_teacher_name, sc.designated_teacher_mobile,
+            sc.principal_name, sc.principal_email, sc.pin_code,
+            total_students, paid_students, submitted,
+            best if best is not None else '', sc.get_status_display(),
+        ])
+    return xlsx_response('schools_report', headers, rows, 'Schools')
 
 
 # ─── Hall of Fame ────────────────────────────────────────────────────────
