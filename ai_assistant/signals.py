@@ -41,3 +41,7 @@ def _send_manual_milestone_emails(sender, instance, created, **kwargs):
         is_true = bool(getattr(instance, field))
         if is_true and not was_true:
             send_milestone_email(instance.submission.student, milestone)
+            if field == 'is_top_12':
+                # Hall of Fame / Pitch Ticket announces the same event (2-day
+                # Bootcamp + Grand Finale) — send it alongside the Top 12 email.
+                send_milestone_email(instance.submission.student, 'hall_of_fame')

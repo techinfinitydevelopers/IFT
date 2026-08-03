@@ -20,6 +20,7 @@
 
     <!-- Custom CSS -->
     <style>
+        button, .btn, a[class*="btn"], input[type="button"], input[type="submit"] { text-decoration: none; }
         :root {
             --primary: #5E2A97;
             --secondary: #DEDE50;
@@ -320,7 +321,7 @@
         .btn-icon-action {
             width: 32px; height: 32px; border-radius: 8px;
             border: 1px solid var(--border-light); background: white;
-            display: flex; align-items: center; justify-content: center;
+            display: inline-flex; align-items: center; justify-content: center;
             cursor: pointer; transition: all 0.2s; color: var(--text-muted);
         }
         .btn-icon-action:hover {
@@ -797,7 +798,7 @@
                                     {% if student.is_paid %}
                                     <span class="badge-status active">Paid{% if student.payment_amount %} &#8377;{{ student.payment_amount|floatformat:"0" }}{% endif %}</span>
                                     {% else %}
-                                    <span class="badge-status inactive">Non-paid</span>
+                                    <span class="badge-status inactive">Unpaid</span>
                                     {% endif %}
                                 </td>
                                 <td style="text-align: center; white-space:nowrap;">

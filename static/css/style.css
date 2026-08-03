@@ -250,6 +250,8 @@ a:hover {
 }
 
 /* Components: Buttons */
+button, .btn, a[class*="btn"], input[type="button"], input[type="submit"] { text-decoration: none; }
+
 .btn {
     display: inline-flex;
     align-items: center;

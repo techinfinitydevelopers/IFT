@@ -187,6 +187,7 @@ class MilestoneEmailLog(models.Model):
         ('top100', 'Top 100 Announcement'),
         ('zonal_pitch', 'Zonal Pitch Fest Invite'),
         ('top12', 'Top 12 Announcement'),
+        ('hall_of_fame', 'Hall of Fame / Pitch Ticket'),
     ]
 
     student = models.ForeignKey(
@@ -201,6 +202,27 @@ class MilestoneEmailLog(models.Model):
     class Meta:
         ordering = ['-sent_at']
         unique_together = ['student', 'milestone']
+
+
+class RecurringEmailLog(models.Model):
+    """Dedup record for weekly/recurring school-facing broadcasts (e.g. the
+    Teacher Mentorship Session reminder, sent every Wednesday). Keyed by
+    (school, email_key, sent_date) so the SAME day never double-sends (e.g. if
+    the cron runs twice), but the next occurrence (next Wednesday) sends fine
+    since the date differs.
+    """
+    school = models.ForeignKey(
+        School, on_delete=models.CASCADE, related_name='recurring_emails'
+    )
+    email_key = models.CharField(max_length=50)
+    sent_date = models.DateField()
+
+    def __str__(self):
+        return f"[{self.email_key}] {self.school} ({self.sent_date})"
+
+    class Meta:
+        ordering = ['-sent_date']
+        unique_together = ['school', 'email_key', 'sent_date']
 
 
 class HallOfFameEntry(models.Model):

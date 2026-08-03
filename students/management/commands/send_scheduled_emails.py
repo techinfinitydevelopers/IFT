@@ -16,8 +16,11 @@ running this command daily/repeatedly is always safe.
 Dates (edit here if the season's deadlines change):
 - Idea Submission Reminder + Idea Published: fire from IDEA_DEADLINE onward.
 - Resubmit Reminder: fires from RESUBMIT_DEADLINE onward.
+- Teacher Mentorship Session: fires every Wednesday between
+  TEACHER_SESSION_START and TEACHER_SESSION_END (the live sessions themselves
+  are every Friday; the reminder goes out the Wednesday before).
 """
-from datetime import date
+from datetime import date, timedelta
 
 from django.core.management.base import BaseCommand
 from django.utils import timezone
@@ -25,17 +28,22 @@ from django.utils import timezone
 IDEA_DEADLINE = date(2026, 10, 15)
 RESUBMIT_DEADLINE = date(2026, 11, 15)
 
+TEACHER_SESSION_START = date(2026, 8, 7)   # first Friday session
+TEACHER_SESSION_END = date(2026, 9, 25)    # last Friday session
+WEDNESDAY = 2  # date.weekday(): Monday=0 ... Sunday=6
+
 
 class Command(BaseCommand):
     help = 'Send date-gated milestone emails (idea reminder, idea published, resubmit reminder). Run daily via cron.'
 
     def handle(self, *args, **options):
-        from students.models import Student, IdeaSubmission
+        from students.models import Student, IdeaSubmission, School
         from ai_assistant.models import AIEvaluation
-        from students.milestone_emails import send_milestone_email
+        from students.milestone_emails import send_milestone_email, send_weekly_school_email
 
         today = timezone.localdate()
-        sent = {'idea_reminder': 0, 'idea_published': 0, 'resubmit_reminder': 0}
+        sent = {'idea_reminder': 0, 'idea_published': 0, 'resubmit_reminder': 0,
+                 'teacher_mentorship': 0}
 
         if today >= IDEA_DEADLINE:
             submitted_student_ids = set(
@@ -57,6 +65,15 @@ class Command(BaseCommand):
             for e in evals:
                 if send_milestone_email(e.submission.student, 'resubmit_reminder', background=False):
                     sent['resubmit_reminder'] += 1
+
+        if (today.weekday() == WEDNESDAY
+                and TEACHER_SESSION_START - timedelta(days=7) <= today <= TEACHER_SESSION_END):
+            subject = "IFT Teacher Mentorship Session Reminder"
+            for school in School.objects.filter(status='active'):
+                if send_weekly_school_email(
+                        school, 'teacher_mentorship', subject,
+                        'students/email_teacher_mentorship.html'):
+                    sent['teacher_mentorship'] += 1
 
         self.stdout.write(self.style.SUCCESS(
             f"send_scheduled_emails: {sent} (date={today})"

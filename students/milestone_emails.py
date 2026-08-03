@@ -50,6 +50,10 @@ MILESTONE_EMAILS = {
         'subject': "Congratulations! You've Entered The TOP 12",
         'template': 'students/email_top12.html',
     },
+    'hall_of_fame': {
+        'subject': "Claim Your Pitch Ticket! You're Officially A Part Of IFT's Hall Of Fame",
+        'template': 'students/email_hall_of_fame.html',
+    },
 }
 
 
@@ -83,3 +87,35 @@ def send_milestone_email(student, milestone, background=True):
         threading.Thread(target=_send_now, args=(student, milestone), daemon=True).start()
         return None
     return _send_now(student, milestone)
+
+
+def _school_email(school):
+    return (school.contact_email or school.principal_email
+            or (school.user.email if school.user else '') or '').strip()
+
+
+def send_weekly_school_email(school, email_key, subject, template, context=None):
+    """Send a recurring broadcast email to `school`, once per calendar day
+    (dedup via RecurringEmailLog keyed by (school, email_key, today)) — so a
+    weekly cron naturally re-sends next week, but a same-day double-run of the
+    cron never double-sends. Always synchronous (called from a management
+    command, which wants a definite sent/skipped count).
+    """
+    from django.utils import timezone
+    from admins.models import RecurringEmailLog
+    from accounts.emails import send_branded_email
+
+    today = timezone.localdate()
+    if RecurringEmailLog.objects.filter(
+            school=school, email_key=email_key, sent_date=today).exists():
+        return False
+    email = _school_email(school)
+    if not email:
+        return False
+    try:
+        send_branded_email(subject, email, template, {'school': school, **(context or {})})
+        RecurringEmailLog.objects.get_or_create(
+            school=school, email_key=email_key, sent_date=today)
+        return True
+    except Exception:
+        return False
