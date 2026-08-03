@@ -795,7 +795,7 @@
                                 </td>
                                 <td>
                                     {% if student.is_paid %}
-                                    <span class="badge-status active">Paid</span>
+                                    <span class="badge-status active">Paid{% if student.payment_amount %} &#8377;{{ student.payment_amount|floatformat:"0" }}{% endif %}</span>
                                     {% else %}
                                     <span class="badge-status inactive">Non-paid</span>
                                     {% endif %}
