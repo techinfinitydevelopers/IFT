@@ -622,10 +622,6 @@
                         </nav>
                     </div>
                     <div class="col-12 col-md-6 d-flex justify-content-md-end align-items-center gap-3 mt-3 mt-md-0">
-                        <button class="btn-secondary-custom" onclick="exportCSV()">
-                            <span class="material-symbols-outlined" style="font-size: 18px;">file_download</span>
-                            Export CSV
-                        </button>
                         <a href="{% url 'admins:onboard_student' %}" class="btn-primary-custom">
                             <span class="material-symbols-outlined" style="font-size: 18px;">person_add</span>
                             Onboard Student
@@ -1143,11 +1139,6 @@ document.addEventListener('keydown', function (e) {
         closeDetailsSidebar();
     }
 });
-
-// ══ Export CSV Placeholder ══
-function exportCSV() {
-    alert('CSV export feature coming soon.');
-}
 
 // ══ Toast ══
 function showToast(message, type) {
