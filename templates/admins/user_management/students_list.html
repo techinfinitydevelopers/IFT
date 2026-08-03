@@ -626,6 +626,10 @@
                         </nav>
                     </div>
                     <div class="col-12 col-md-6 d-flex justify-content-md-end align-items-center gap-3 mt-3 mt-md-0">
+                        <button class="btn-secondary-custom" style="border-color:#fecaca; color:#dc2626;" onclick="deleteTestData()">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">delete_sweep</span>
+                            Delete Test Data
+                        </button>
                         <a href="{% url 'admins:onboard_student' %}" class="btn-primary-custom">
                             <span class="material-symbols-outlined" style="font-size: 18px;">person_add</span>
                             Onboard Student
@@ -1189,6 +1193,35 @@ function deleteStudent(studentId, studentName) {
     .catch(function() {
         showToast('Network error. Please try again.', 'danger');
     });
+}
+
+// ══ Delete Test Data (students & schools named "test") ══
+function deleteTestData() {
+    var url = '/super-admin/user-management/delete-test-data/';
+    // Step 1: preview how many match.
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+            if (!d.success) { showToast('Could not check test data.', 'danger'); return; }
+            var total = (d.student_count || 0) + (d.school_count || 0);
+            if (total === 0) { showToast('No test data found.', 'success'); return; }
+            var msg = 'This will permanently DELETE ' + d.student_count + ' student(s) and ' +
+                d.school_count + ' school(s) whose name contains "test".\n\nThis CANNOT be undone. Continue?';
+            if (!confirm(msg)) return;
+            // Step 2: delete.
+            fetch(url, { method: 'POST', headers: { 'X-CSRFToken': '{{ csrf_token }}' } })
+                .then(function (r) { return r.json(); })
+                .then(function (res) {
+                    if (res.success) {
+                        showToast(res.message, 'success');
+                        setTimeout(function () { location.reload(); }, 1200);
+                    } else {
+                        showToast('Failed to delete test data.', 'danger');
+                    }
+                })
+                .catch(function () { showToast('Network error. Please try again.', 'danger'); });
+        })
+        .catch(function () { showToast('Network error. Please try again.', 'danger'); });
 }
 
 // ══ Bulk selection & bulk activate/deactivate/delete ══

@@ -1892,6 +1892,43 @@ def delete_school(request, school_id):
 
 @login_required
 @user_passes_test(is_staff_or_superuser)
+def delete_test_data(request):
+    """Delete every student & school whose NAME contains 'test' (dummy/test
+    accounts). GET returns a preview count; POST performs the deletion."""
+    from django.db.models import Q
+    kw = 'test'
+    students = Student.objects.filter(
+        Q(user__first_name__icontains=kw) | Q(user__last_name__icontains=kw) |
+        Q(user__username__icontains=kw)
+    ).select_related('user')
+    schools = School.objects.filter(name__icontains=kw)
+
+    s_count = students.count()
+    sc_count = schools.count()
+
+    if request.method == 'GET':
+        return JsonResponse({'success': True, 'student_count': s_count, 'school_count': sc_count})
+
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+
+    # Delete student login users (cascades to the Student profile).
+    user_ids = list(students.values_list('user_id', flat=True))
+    User.objects.filter(id__in=user_ids).delete()
+    # Delete schools + their login accounts.
+    for school in schools:
+        if school.user_id:
+            school.user.delete()
+        school.delete()
+
+    return JsonResponse({
+        'success': True,
+        'message': f'Deleted {s_count} test student(s) and {sc_count} test school(s).',
+    })
+
+
+@login_required
+@user_passes_test(is_staff_or_superuser)
 def reset_school_password(request, school_id):
     """Generate a new password for a school's login account and email it."""
     if request.method != 'POST':

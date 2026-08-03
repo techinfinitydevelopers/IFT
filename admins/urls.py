@@ -44,6 +44,7 @@ urlpatterns = [
     path('user-management/evaluator/<int:evaluator_id>/edit/', views.edit_evaluator, name='edit_evaluator'),
     path('user-management/school/<int:school_id>/edit/', views.edit_school, name='edit_school'),
     path('user-management/school/<int:school_id>/delete/', views.delete_school, name='delete_school'),
+    path('user-management/delete-test-data/', views.delete_test_data, name='delete_test_data'),
     path('user-management/school/<int:school_id>/reset-password/', views.reset_school_password, name='reset_school_password'),
     path('user-management/school/<int:school_id>/toggle-status/', views.toggle_school_status, name='toggle_school_status'),
     path('user-management/schools/bulk-toggle-status/', views.bulk_toggle_school_status, name='bulk_toggle_school_status'),
