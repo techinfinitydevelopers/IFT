@@ -20,4 +20,8 @@ RUN python manage.py collectstatic --noinput 2>/dev/null || true
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "python manage.py makemigrations --noinput && python manage.py migrate --noinput 2>&1 || (echo 'Normal migrate failed, faking pending...' && python manage.py migrate --fake --noinput && python manage.py migrate --noinput) && gunicorn ift_platform.wsgi --bind 0.0.0.0:8000"]
+# Apply migrations for real, then serve. No makemigrations at runtime and no
+# blind --fake fallback: faking marks migrations applied WITHOUT creating the
+# columns/tables, which silently drifts the DB schema and causes 500s
+# ("no such column") on any query touching the missing column.
+CMD ["sh", "-c", "python manage.py migrate --noinput && gunicorn ift_platform.wsgi --bind 0.0.0.0:8000 --timeout 60"]
