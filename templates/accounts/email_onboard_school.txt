@@ -1,6 +1,8 @@
-Welcome to India's Future Tycoons, {{ user.first_name }}!
+Dear Principal,
 
-Your school's account on the IFT platform has been created. You can now log in to register students and track their progress through the program.
+Congratulations! Your school has been successfully registered for India's First Entrepreneurship Search & Mentorship Program.
+
+Your students now have access to an exciting journey of innovation, learning, mentorship, and national recognition. Your school will also receive exclusive implementation resources, teacher support, and access to the IFT School Dashboard.
 
 Login Credentials:
 Email: {{ user.email }}
@@ -8,8 +10,12 @@ Password: {{ temp_password }}
 
 Login here: {{ login_url }}
 
-For your security, please change your password after your first login.
+Next Steps:
+- Nominate a teacher to lead the IFT program in your school.
+- Once the teacher is identified, they should log in to the School Dashboard and complete the available learning videos and implementation resources before the teacher training.
+- Our weekly Teacher Mentoring Sessions are conducted every Friday from 11:00 AM - 3:00 PM, where teachers will receive guidance, clarify doubts, and learn how to successfully implement the program in their schools.
 
-Best regards,
+We're excited to partner with you in nurturing the next generation of innovators and entrepreneurs. We look forward to seeing your students transform their ideas into impactful innovations!
+
+Warm regards,
 Team IFT
-https://indiafuturetycoons.com/

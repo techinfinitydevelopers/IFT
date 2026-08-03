@@ -89,6 +89,12 @@ class AIEvaluation(models.Model):
     rank = models.IntegerField(null=True, blank=True, help_text="Position in overall ranking")
     is_top_400 = models.BooleanField(default=False, help_text="Selected in Top 400")
 
+    # Later-stage milestones with no scoring formula — these are manual jury/
+    # admin selections (toggle in Django admin). Setting either to True fires
+    # the corresponding milestone email exactly once (see ai_assistant/signals.py).
+    is_top_12 = models.BooleanField(default=False, help_text="Manually selected as Top 12 (national finale)")
+    zonal_pitch_invited = models.BooleanField(default=False, help_text="Manually invited to the Zonal Pitch Fest")
+
     # ===== JUSTIFICATIONS =====
     uniqueness_justification = models.TextField(blank=True)
     ease_of_implementation_justification = models.TextField(blank=True)

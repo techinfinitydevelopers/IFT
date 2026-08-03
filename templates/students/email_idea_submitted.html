@@ -1,0 +1,14 @@
+{% extends "accounts/email_onboard_base.html" %}
+{% block greeting %}Congratulations!{% endblock %}
+{% block intro %}Your idea has been successfully submitted. The journey to becoming India's Future Tycoon begins now.<br><br>You can edit your idea by logging in to the dashboard.<br>Your idea will be auto-published after the last date of Idea Submission i.e. Oct 15.{% endblock %}
+{% block credentials %}{% endblock %}
+{% block content %}
+<tr>
+  <td style="padding:4px 32px 0 32px;">
+    <p style="margin:0; font-size:14px; font-weight:700; color:#1e1b2e;">Log In to view or edit your idea.</p>
+  </td>
+</tr>
+{% endblock %}
+{% block button_href %}https://www.indiafuturetycoons.com/accounts/sign-in/{% endblock %}
+{% block button_label %}Log In{% endblock %}
+{% block security_note %}{% endblock %}

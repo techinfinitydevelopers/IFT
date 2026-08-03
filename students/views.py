@@ -1242,6 +1242,17 @@ def create_team(request):
 
         create_notification(request.user, 'team', 'Team Created', f'Your team "{team_name}" has been created. Share code {code} to invite members.', 'group_add', '/team/', 'Manage Team')
 
+        try:
+            from accounts.emails import send_branded_email
+            send_branded_email(
+                'IFT Team Created Successfully!',
+                request.user.email,
+                'students/email_team_created.html',
+                {'user': request.user},
+            )
+        except Exception:
+            pass
+
         return JsonResponse({
             'success': True,
             'message': f'Team "{team_name}" created! Code: {code}',
@@ -1575,14 +1586,14 @@ def publish_idea(request, submission_id):
 
     create_notification(request.user, 'submission', 'Idea Published', 'Your idea has been published and submitted for review.', 'rocket_launch', '/my-idea/', 'View Idea')
 
-    # Send publish confirmation email
+    # Send idea-submission confirmation email
     try:
         from accounts.emails import send_branded_email
         send_branded_email(
-            'Your Idea Has Been Published - IFT Season 6',
+            'Your Idea Was Submitted Successfully!',
             request.user.email,
-            'students/email_idea_published.html',
-            {'user': request.user, 'login_url': f"{getattr(settings, 'SITE_URL', '')}/my-idea/"},
+            'students/email_idea_submitted.html',
+            {'user': request.user},
         )
     except:
         pass

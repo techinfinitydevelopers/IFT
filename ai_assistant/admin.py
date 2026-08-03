@@ -1,5 +1,20 @@
 from django.contrib import admin
-from .models import AISummary
+from .models import AISummary, AIEvaluation
+
+
+@admin.register(AIEvaluation)
+class AIEvaluationAdmin(admin.ModelAdmin):
+    """Top 12 / Zonal Pitch have no scoring formula — a staff member selects
+    them here by ticking the box. Saving (ticking + Save) is what fires the
+    one-time milestone email (see ai_assistant/signals.py)."""
+    list_display = ('submission', 'final_score', 'rank', 'is_top_400',
+                     'is_top_12', 'zonal_pitch_invited', 'is_disqualified')
+    list_editable = ('is_top_12', 'zonal_pitch_invited')
+    list_filter = ('is_top_400', 'is_top_12', 'zonal_pitch_invited', 'is_disqualified')
+    search_fields = ('submission__title', 'submission__student__user__email',
+                      'submission__student__user__first_name',
+                      'submission__student__user__last_name')
+    readonly_fields = ('final_score', 'rank')
 
 
 @admin.register(AISummary)

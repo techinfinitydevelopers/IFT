@@ -1,5 +1,17 @@
 # Build Log
 
+## 2026-08-03 — "Tata ClassEdge | ENpower Initiative" header banner (all roles)
+- Added a dismissible purple gradient banner ("**Tata ClassEdge** | **ENpower** Initiative", X to close) into the `<header class="top-header">` of every dashboard page across all 4 roles: student (1 shared partial `templates/students/partials/header.html` — covers all 16 pages that include it), school (11 own-header pages), evaluator (5 own-header pages), admin (26 own-header pages, incl. content/digital_resources/halloffame/user_management subfolders). 43 files total, inserted via a script matching the `<header class="top-header">` anchor (verified exactly 1 occurrence per file first).
+- Self-contained per insertion (inline `<style>`/`<script>` right next to the markup — these files have no shared CSS/JS to hook into): dismiss sets `localStorage.ift_banner_dismissed=1`, and a small inline script hides it on future loads. Two school pages (`school_halloffame.html`, `school_payments.html`) have no top-header at all and were skipped.
+- Verified: `manage.py check` clean; visually confirmed in-browser on admin (Analytics Command Center — matches the reference screenshot exactly), school, and evaluator dashboards; dismiss + persistence-across-reload confirmed via localStorage check.
+
+### 2026-08-03 follow-up: made permanent, reordered, weight fix
+- Removed the dismiss (X) button and its localStorage/JS entirely — banner is now always shown, no way to hide it, per client request.
+- Fixed ordering: banner was accidentally inserted BEFORE the hamburger/sidebar-toggle icon; swapped so hamburger comes first, banner after (matches the original reference screenshot: [hamburger][banner][bell][avatar]).
+- `.ift-branding-banner strong` font-weight 800 → 600.
+- `templates/admins/schedule.html` uses a different mobile-only hamburger pattern (`onclick` toggle, no shared `id="sidebarToggleBtn"`) — fixed by hand; the other 42 files were fixed via a script matching+reordering the two blocks.
+- Re-verified: `manage.py check` clean, 0 leftover dismiss references, 43/43 files at font-weight 600; visually confirmed correct order on student and admin dashboards.
+
 ## 2026-08-01 — Google Tag Manager added site-wide (same pattern as GA4)
 - Added `GoogleTagManagerMiddleware` to `ift_platform/middleware.py`, mirroring the existing `GoogleAnalyticsMiddleware` approach (site has no shared base template, so middleware is the only way to cover every page in one place). Injects the GTM head script (`GTM-PF4TLHG6`) right after `<head>`, and the noscript iframe right after the opening `<body>` tag, on every HTML response.
 - Registered in `MIDDLEWARE` in `ift_platform/settings.py`, right after `GoogleAnalyticsMiddleware`.

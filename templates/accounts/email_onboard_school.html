@@ -1,2 +1,25 @@
 {% extends "accounts/email_onboard_base.html" %}
-{% block intro %}Your school's account on the IFT platform has been created. You can now log in to register students and track their progress through the program.{% endblock %}
+{% block greeting %}Dear Principal,{% endblock %}
+{% block intro %}Congratulations! Your school has been successfully registered for India's First Entrepreneurship Search &amp; Mentorship Program.<br><br>Your students now have access to an exciting journey of innovation, learning, mentorship, and national recognition. Your school will also receive exclusive implementation resources, teacher support, and access to the IFT School Dashboard.{% endblock %}
+{% block content %}
+<tr>
+  <td style="padding:4px 32px 0 32px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f7f4fb; border-radius:8px; border:1px solid #ece6f5;">
+      <tr>
+        <td style="padding:18px 20px;">
+          <p style="margin:0 0 10px 0; font-size:13px; color:#8a8395;">NEXT STEPS</p>
+          <p style="margin:0 0 8px 0; font-size:14px; color:#1e1b2e;">&#8226; Nominate a teacher to lead the IFT program in your school.</p>
+          <p style="margin:0 0 8px 0; font-size:14px; color:#1e1b2e;">&#8226; Once the teacher is identified, they should log in to the School Dashboard and complete the available learning videos and implementation resources before the teacher training.</p>
+          <p style="margin:0; font-size:14px; color:#1e1b2e;">&#8226; Our weekly Teacher Mentoring Sessions are conducted every Friday from 11:00 AM &ndash; 3:00 PM, where teachers will receive guidance, clarify doubts, and learn how to successfully implement the program in their schools.</p>
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+  <td style="padding:20px 32px 0 32px;">
+    <p style="margin:0; font-size:14px; color:#1e1b2e;">We're excited to partner with you in nurturing the next generation of innovators and entrepreneurs. We look forward to seeing your students transform their ideas into impactful innovations!</p>
+  </td>
+</tr>
+{% endblock %}
+{% block footer %}Warm regards,<br>Team IFT{% endblock %}

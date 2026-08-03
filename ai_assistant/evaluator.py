@@ -904,7 +904,36 @@ def update_rankings():
         evaluation.is_top_400 = False
         evaluation.save(update_fields=['rank', 'is_top_400'])
 
+    _send_ranking_milestone_emails()
+
     return evaluations.count()
+
+
+def _send_ranking_milestone_emails():
+    """Fire Top 400 / Top 100 / School Winner emails for every currently
+    qualifying student. Safe to call every time rankings are recomputed —
+    MilestoneEmailLog (dedup) means each student only ever gets one email per
+    milestone, no matter how many times this runs."""
+    from students.milestone_emails import send_milestone_email
+
+    top400_evals = (AIEvaluation.objects.filter(is_top_400=True)
+                     .select_related('submission__student__user'))
+    for e in top400_evals:
+        send_milestone_email(e.submission.student, 'top400')
+
+    top100_evals = (AIEvaluation.objects.filter(
+                        is_disqualified=False, rank__isnull=False, rank__lte=100)
+                     .select_related('submission__student__school',
+                                      'submission__student__user'))
+    best_per_school = {}
+    for e in top100_evals:
+        send_milestone_email(e.submission.student, 'top100')
+        school = e.submission.student.school
+        if school and (school.id not in best_per_school
+                       or e.rank < best_per_school[school.id][0]):
+            best_per_school[school.id] = (e.rank, e.submission.student)
+    for _, student in best_per_school.values():
+        send_milestone_email(student, 'school_winner')
 
 
 def get_top_n(n=400):

@@ -72,8 +72,11 @@ def send_onboard_credentials(user, temp_password, role, extra_context=None):
         'logo_url': f"{site_url}{staticfiles_storage.url('images/email_logo.png')}",
         **(extra_context or {}),
     }
-    subject = f'Welcome to IFT Platform - Your {role.title()} Account'
     role_slug = role.lower()
+    ONBOARD_SUBJECTS = {
+        'school': "Welcome to IFT! Your School Is Successfully Registered",
+    }
+    subject = ONBOARD_SUBJECTS.get(role_slug, f'Welcome to IFT Platform - Your {role.title()} Account')
 
     try:
         html_message = render_to_string(f'accounts/email_onboard_{role_slug}.html', context)

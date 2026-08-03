@@ -170,6 +170,39 @@ class CertificateIssue(models.Model):
         ]
 
 
+class MilestoneEmailLog(models.Model):
+    """Dedup record for automated milestone/journey emails (Top 400, Top 100,
+    Top 12, School Winner, Zonal Pitch invite, submission/resubmit reminders).
+
+    One row per (student, milestone) — the sender checks this first so the
+    same email is never sent twice, even if the trigger runs repeatedly
+    (ranking recompute, daily cron, etc).
+    """
+    MILESTONE_CHOICES = [
+        ('idea_reminder', 'Idea Submission Reminder'),
+        ('idea_published', 'Idea Published'),
+        ('top400', 'Top 400 Announcement'),
+        ('resubmit_reminder', 'Resubmit Reminder'),
+        ('school_winner', 'School Winner Announcement'),
+        ('top100', 'Top 100 Announcement'),
+        ('zonal_pitch', 'Zonal Pitch Fest Invite'),
+        ('top12', 'Top 12 Announcement'),
+    ]
+
+    student = models.ForeignKey(
+        Student, on_delete=models.CASCADE, related_name='milestone_emails'
+    )
+    milestone = models.CharField(max_length=30, choices=MILESTONE_CHOICES)
+    sent_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"[{self.get_milestone_display()}] {self.student}"
+
+    class Meta:
+        ordering = ['-sent_at']
+        unique_together = ['student', 'milestone']
+
+
 class HallOfFameEntry(models.Model):
     photo = models.ImageField(upload_to='halloffame/', blank=True, null=True, help_text="Student/team photo (optional)")
     student_name = models.CharField(max_length=300)

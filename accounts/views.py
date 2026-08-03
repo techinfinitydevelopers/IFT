@@ -84,7 +84,7 @@ def sign_up(request):
             try:
                 from .emails import send_branded_email
                 send_branded_email(
-                    'Welcome to India\'s Future Tycoons - Season 6!',
+                    'IFT: Registered Successfully',
                     user.email,
                     'accounts/email_welcome_student.html',
                     {'user': user},

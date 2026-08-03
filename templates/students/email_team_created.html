@@ -1,0 +1,14 @@
+{% extends "accounts/email_onboard_base.html" %}
+{% block greeting %}Congratulations!{% endblock %}
+{% block intro %}You have successfully created a team.<br>Your team is now ready, start building your idea!{% endblock %}
+{% block credentials %}{% endblock %}
+{% block content %}
+<tr>
+  <td style="padding:4px 32px 0 32px;">
+    <p style="margin:0; font-size:14px; font-weight:700; color:#1e1b2e;">Log In &amp; start building your idea.</p>
+  </td>
+</tr>
+{% endblock %}
+{% block button_href %}https://www.indiafuturetycoons.com/accounts/sign-in/{% endblock %}
+{% block button_label %}Log In{% endblock %}
+{% block security_note %}{% endblock %}
