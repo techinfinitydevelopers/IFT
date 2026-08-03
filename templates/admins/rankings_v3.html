@@ -743,12 +743,6 @@
                 </div>
                 <div class="col-6 col-lg-2">
                     <div class="stat-card">
-                        <p class="stat-label">Normal</p>
-                        <h3 class="stat-value clr-amber">{{ normal_count }}</h3>
-                    </div>
-                </div>
-                <div class="col-6 col-lg-2">
-                    <div class="stat-card">
                         <p class="stat-label">Pending</p>
                         <h3 class="stat-value clr-blue">{{ pending_count }}</h3>
                         <button onclick="startBatchEvaluate()" class="btn-eval-mini">
@@ -779,18 +773,11 @@
                     {% if top_400_count %}
                     <div class="pipeline-segment top400" style="width: {% widthratio top_400_count total_evaluated 100 %}%;" title="Top 400: {{ top_400_count }}">{{ top_400_count }}</div>
                     {% endif %}
-                    {% if normal_count %}
-                    <div class="pipeline-segment normal-seg" style="width: {% widthratio normal_count total_evaluated 100 %}%;" title="Normal: {{ normal_count }}">{{ normal_count }}</div>
-                    {% endif %}
                 </div>
                 <div class="pipeline-legend">
                     <div class="pipeline-legend-item">
                         <span class="pipeline-legend-dot top400"></span>
                         Top 400 <span class="pipeline-legend-count">{{ top_400_count }}</span>
-                    </div>
-                    <div class="pipeline-legend-item">
-                        <span class="pipeline-legend-dot normal-seg"></span>
-                        Normal <span class="pipeline-legend-count">{{ normal_count }}</span>
                     </div>
                     {% if pending_count %}
                     <div class="pipeline-legend-item">
@@ -808,10 +795,6 @@
                     <button class="tab-btn active" onclick="showTab('top400', this)">
                         Top 400
                         <span class="tab-count">{{ top_400_count }}</span>
-                    </button>
-                    <button class="tab-btn" onclick="showTab('normal', this)">
-                        Normal
-                        <span class="tab-count">{{ normal_count }}</span>
                     </button>
                 </div>
 
@@ -888,74 +871,6 @@
                     {% endif %}
                 </div>
 
-                <!-- Normal Tab -->
-                <div id="normal" class="tab-panel">
-                    {% if normal_evaluations %}
-                    <div class="table-responsive">
-                    <table class="custom-table">
-                        <thead>
-                            <tr>
-                                <th style="width:150px;">AI Score</th>
-                                <th style="width:150px;">Evaluator</th>
-                                <th>Idea Title</th>
-                                <th>Team</th>
-                                <th style="text-align:center;width:60px;"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for e in normal_evaluations %}
-                            <tr>
-                                <td>
-                                    <div class="score-cell">
-                                        <span class="score-value {% if e.score >= 70 %}high{% elif e.score >= 50 %}medium{% else %}low{% endif %}">{{ e.score }}</span>
-                                        <div class="score-bar">
-                                            <div class="score-bar-fill {% if e.score >= 70 %}high{% elif e.score >= 50 %}medium{% else %}low{% endif %}" style="width:{{ e.score }}%;"></div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    {% if e.evaluator_score != None %}
-                                    <div class="score-cell">
-                                        <span class="score-value {% if e.evaluator_score >= 70 %}high{% elif e.evaluator_score >= 50 %}medium{% else %}low{% endif %}">{{ e.evaluator_score }}/100</span>
-                                        <div class="score-bar">
-                                            <div class="score-bar-fill {% if e.evaluator_score >= 70 %}high{% elif e.evaluator_score >= 50 %}medium{% else %}low{% endif %}" style="width:{% widthratio e.evaluator_score 100 100 %}%;"></div>
-                                        </div>
-                                    </div>
-                                    {% else %}
-                                    <span style="color:#94a3b8;font-size:0.8rem;">&mdash;</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <a href="{% url 'admins:submission_detail' e.id %}" class="idea-title" title="{{ e.title }}">{{ e.title }}</a>
-                                    {% if e.is_shortlisted %}
-                                    <span style="display:inline-flex;align-items:center;gap:2px;font-size:0.6rem;padding:1px 6px;border-radius:999px;background:#fef3c7;color:#d97706;font-weight:600;margin-left:4px;vertical-align:middle;">
-                                        <span class="material-symbols-outlined" style="font-size:11px;">star</span>
-                                        Shortlisted
-                                    </span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <p class="student-name">{{ e.name }}</p>
-                                    {% if e.school_name %}<p class="student-school">{{ e.school_name }}</p>{% endif %}
-                                </td>
-                                <td style="text-align:center;">
-                                    <a href="{% url 'admins:submission_detail' e.id %}" class="btn-view" title="View Details">
-                                        <span class="material-symbols-outlined">visibility</span>
-                                    </a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                    </div>
-                    {% else %}
-                    <div class="empty-state">
-                        <span class="material-symbols-outlined">format_list_numbered</span>
-                        <p>No normal evaluations yet</p>
-                        <p class="empty-sub">Submissions that don't make the top 400 will appear here</p>
-                    </div>
-                    {% endif %}
-                </div>
             </div>
 
         </div>
