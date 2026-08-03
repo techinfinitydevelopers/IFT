@@ -23,8 +23,15 @@ PROGRESS_TRACKER = {}
 
 
 def is_staff_or_superuser(user):
-    """Check if user is staff or superuser"""
-    return user.is_staff or user.is_superuser
+    """Admin-panel access: staff/superuser, or a read-only 'viewer' role.
+
+    Viewers can open every admin page but the ReadOnlyViewerMiddleware blocks
+    any write (POST/PUT/PATCH/DELETE), so they get look-but-don't-touch access.
+    """
+    if user.is_staff or user.is_superuser:
+        return True
+    profile = getattr(user, 'profile', None)
+    return bool(profile and profile.role == 'viewer')
 
 
 @login_required

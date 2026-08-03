@@ -2,6 +2,35 @@
 
 import re
 
+from django.http import HttpResponseForbidden
+
+# Write methods a read-only viewer must never perform.
+_UNSAFE_METHODS = {"POST", "PUT", "PATCH", "DELETE"}
+
+
+class ReadOnlyViewerMiddleware:
+    """Enforce read-only access for users with the 'viewer' role.
+
+    A viewer can open any page (GET), but any state-changing request
+    (POST/PUT/PATCH/DELETE) is rejected with 403 — look-but-don't-touch.
+    Authentication POSTs (login/logout) are unaffected because the user is
+    still anonymous at that point.
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if request.method in _UNSAFE_METHODS:
+            user = getattr(request, "user", None)
+            if user is not None and user.is_authenticated:
+                profile = getattr(user, "profile", None)
+                if profile is not None and profile.role == "viewer":
+                    return HttpResponseForbidden(
+                        "This is a read-only (viewer) account. Changes are not allowed."
+                    )
+        return self.get_response(request)
+
 GA_MEASUREMENT_ID = "G-VK29QNQ94H"
 GTM_CONTAINER_ID = "GTM-PF4TLHG6"
 
