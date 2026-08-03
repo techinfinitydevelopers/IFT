@@ -97,10 +97,20 @@ def admin_dashboard(request):
 
     # New KPI stats
     from accounts.models import UserProfile
+    from students.models import Team
     total_students = Student.objects.count()
     total_schools = School.objects.filter(status='active').count()
     total_evaluators = UserProfile.objects.filter(role='jury').count()
     total_participants = total_students + total_evaluators
+
+    # Additional dashboard metrics (all additive — no existing logic changed).
+    PUBLISHED_STATUSES = ['submitted', 'under_review', 'evaluated', 'reviewed']
+    total_schools_all = School.objects.count()               # all registered schools
+    total_teams = Team.objects.count()
+    published_ideas = IdeaSubmission.objects.filter(status__in=PUBLISHED_STATUSES).count()
+    unpublished_ideas = IdeaSubmission.objects.filter(status='draft').count()
+    paid_registrations = Student.objects.filter(is_paid=True).count()
+    unpaid_registrations = Student.objects.filter(is_paid=False).count()
 
     context = {
         'submissions': submissions_list,
@@ -112,6 +122,13 @@ def admin_dashboard(request):
         'total_students': total_students,
         'total_schools': total_schools,
         'total_evaluators': total_evaluators,
+        # New metrics
+        'total_schools_all': total_schools_all,
+        'total_teams': total_teams,
+        'published_ideas': published_ideas,
+        'unpublished_ideas': unpublished_ideas,
+        'paid_registrations': paid_registrations,
+        'unpaid_registrations': unpaid_registrations,
         'selected_category': category or '',
         'search_query': search_query or '',
         'page_obj': page_obj,

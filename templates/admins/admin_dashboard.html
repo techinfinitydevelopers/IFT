@@ -515,6 +515,67 @@
                         <div class="kpi-value">{{ total_evaluators }}</div>
                     </div>
                 </div>
+
+                <!-- Additional metrics -->
+                <div class="col-6 col-lg-2">
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <div class="kpi-icon teal"><span class="material-symbols-outlined">apartment</span></div>
+                        </div>
+                        <span class="kpi-label">Total Schools</span>
+                        <div class="kpi-value">{{ total_schools_all }}</div>
+                    </div>
+                </div>
+
+                <div class="col-6 col-lg-2">
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <div class="kpi-icon purple"><span class="material-symbols-outlined">diversity_3</span></div>
+                        </div>
+                        <span class="kpi-label">Total Teams</span>
+                        <div class="kpi-value">{{ total_teams }}</div>
+                    </div>
+                </div>
+
+                <div class="col-6 col-lg-2">
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <div class="kpi-icon green"><span class="material-symbols-outlined">task_alt</span></div>
+                        </div>
+                        <span class="kpi-label">Published Ideas</span>
+                        <div class="kpi-value">{{ published_ideas }}</div>
+                    </div>
+                </div>
+
+                <div class="col-6 col-lg-2">
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <div class="kpi-icon amber"><span class="material-symbols-outlined">draft</span></div>
+                        </div>
+                        <span class="kpi-label">Unpublished (Draft)</span>
+                        <div class="kpi-value">{{ unpublished_ideas }}</div>
+                    </div>
+                </div>
+
+                <div class="col-6 col-lg-2">
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <div class="kpi-icon green"><span class="material-symbols-outlined">payments</span></div>
+                        </div>
+                        <span class="kpi-label">Paid Registrations</span>
+                        <div class="kpi-value">{{ paid_registrations }}</div>
+                    </div>
+                </div>
+
+                <div class="col-6 col-lg-2">
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <div class="kpi-icon danger" style="background:rgba(220,38,38,0.1);color:#dc2626;"><span class="material-symbols-outlined">money_off</span></div>
+                        </div>
+                        <span class="kpi-label">Non-paid Registrations</span>
+                        <div class="kpi-value">{{ unpaid_registrations }}</div>
+                    </div>
+                </div>
             </div>
 
             <!-- Quick Actions -->
