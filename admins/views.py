@@ -1252,6 +1252,55 @@ def students_list(request):
 
 @login_required
 @user_passes_test(is_staff_or_superuser)
+def export_students_csv(request):
+    """Export students to CSV, honoring the same search/school/grade filters as the list view."""
+    search_query = request.GET.get('q', '').strip()
+    selected_school = request.GET.get('school', '')
+    selected_grade = request.GET.get('grade', '')
+
+    students = Student.objects.select_related('user').all()
+
+    if search_query:
+        students = students.filter(
+            Q(user__first_name__icontains=search_query) |
+            Q(user__last_name__icontains=search_query) |
+            Q(user__username__icontains=search_query) |
+            Q(student_id__icontains=search_query) |
+            Q(school_name__icontains=search_query) |
+            Q(phone__icontains=search_query)
+        )
+    if selected_school:
+        students = students.filter(school_name=selected_school)
+    if selected_grade:
+        students = students.filter(grade=selected_grade)
+
+    students = students.annotate(submission_count=Count('submissions')).order_by('school_name', 'user__first_name')
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="students_export.csv"'
+    writer = csv.writer(response)
+    writer.writerow([
+        'student_id', 'first_name', 'last_name', 'email', 'phone',
+        'school_name', 'grade', 'division', 'roll_number', 'academic_year',
+        'school_board', 'stream', 'gender', 'date_of_birth', 'nationality',
+        'parent_mobile', 'parent_email', 'address', 'city', 'state', 'pin_code',
+        'is_paid', 'submissions', 'status', 'joined',
+    ])
+    for s in students:
+        writer.writerow([
+            s.student_id, s.user.first_name, s.user.last_name, s.user.email, s.phone,
+            s.school_name, s.grade, s.division, s.roll_number, s.academic_year,
+            s.school_board, s.stream, s.gender, s.date_of_birth or '', s.nationality,
+            s.parent_mobile, s.parent_email, s.address, s.city, s.state, s.pin_code,
+            'yes' if s.is_paid else 'no', s.submission_count,
+            'active' if s.user.is_active else 'inactive',
+            s.created_at.strftime('%Y-%m-%d') if s.created_at else '',
+        ])
+    return response
+
+
+@login_required
+@user_passes_test(is_staff_or_superuser)
 def onboard_student(request):
     """Onboard a new student."""
     if request.method == 'POST':

@@ -635,6 +635,10 @@
                             <span class="material-symbols-outlined" style="font-size:16px;">upload_file</span>
                             Import CSV
                         </button>
+                        <a href="{% url 'admins:export_schools_csv' %}" class="btn-primary-custom" style="background:#f8fafc;color:var(--text-dark);box-shadow:none;border:1px solid var(--border-light);font-size:0.8rem;padding:8px 14px;">
+                            <span class="material-symbols-outlined" style="font-size:16px;">file_download</span>
+                            Export CSV
+                        </a>
                         <a href="{% url 'admins:onboard_school' %}" class="btn-primary-custom">
                             <span class="material-symbols-outlined" style="font-size:18px;">add_business</span>
                             Onboard School

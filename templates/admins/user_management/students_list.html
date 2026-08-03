@@ -630,6 +630,10 @@
                             <span class="material-symbols-outlined" style="font-size: 18px;">delete_sweep</span>
                             Delete Test Data
                         </button>
+                        <a href="{% url 'admins:export_students_csv' %}?q={{ search_query|urlencode }}&school={{ selected_school|urlencode }}&grade={{ selected_grade|urlencode }}" class="btn-secondary-custom">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">file_download</span>
+                            Export CSV
+                        </a>
                         <a href="{% url 'admins:onboard_student' %}" class="btn-primary-custom">
                             <span class="material-symbols-outlined" style="font-size: 18px;">person_add</span>
                             Onboard Student

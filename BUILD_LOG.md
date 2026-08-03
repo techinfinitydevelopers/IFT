@@ -12,6 +12,13 @@
 - `templates/admins/schedule.html` uses a different mobile-only hamburger pattern (`onclick` toggle, no shared `id="sidebarToggleBtn"`) — fixed by hand; the other 42 files were fixed via a script matching+reordering the two blocks.
 - Re-verified: `manage.py check` clean, 0 leftover dismiss references, 43/43 files at font-weight 600; visually confirmed correct order on student and admin dashboards.
 
+## 2026-08-02 — Students CSV export (Schools already had one) — re-added after conflicting removal
+- Checked both list pages per request: **Schools** already had a real working export (`export_schools_csv`, wired to a genuine URL). **Students** only had a JS placeholder button (`onclick="exportCSV()"` → `alert('CSV export feature coming soon.')`) — no backend endpoint existed.
+- Added `admins/views.py:export_students_csv`, mirroring `export_schools_csv`'s pattern: honors the same search/school/grade filters as `students_list`, one row per student (id, name, email, phone, school, grade, division, roll number, academic year, board, stream, gender, DOB, nationality, parent contact, address, payment status, submission count, account status, joined date).
+- Wired at `user-management/students/export/`. Replaced the placeholder button with a real link carrying the current filters as query params (same UX as Schools' export link). Removed the now-dead `exportCSV()` JS placeholder.
+- Verified via test client: 200, correct `Content-Type: text/csv` and `Content-Disposition` filename, correct header row. Confirmed in-browser the button renders as a real filtered link, not a JS handler.
+- **Conflict note:** while pushing, discovered a teammate (Prasad) had concurrently pushed a commit removing Export CSV from both list pages entirely, reasoning that export belongs on the Reports page instead. Investigated: the Reports page's "Export" is `window.print()` on an aggregate analytics dashboard — not a real per-row CSV. Flagged to the user; explicit decision was to keep this real export and override the removal. Re-applied the Students export button (this entry); Schools' export button was similarly restored on rebase.
+
 ## 2026-08-01 — Google Tag Manager added site-wide (same pattern as GA4)
 - Added `GoogleTagManagerMiddleware` to `ift_platform/middleware.py`, mirroring the existing `GoogleAnalyticsMiddleware` approach (site has no shared base template, so middleware is the only way to cover every page in one place). Injects the GTM head script (`GTM-PF4TLHG6`) right after `<head>`, and the noscript iframe right after the opening `<body>` tag, on every HTML response.
 - Registered in `MIDDLEWARE` in `ift_platform/settings.py`, right after `GoogleAnalyticsMiddleware`.
