@@ -722,6 +722,7 @@
                                 <th>Phone</th>
                                 <th>Submissions</th>
                                 <th>Status</th>
+                                <th>Payment</th>
                                 <th style="text-align: center;">Actions</th>
                             </tr>
                         </thead>
@@ -781,6 +782,13 @@
                                     <span class="badge-status active">Active</span>
                                     {% else %}
                                     <span class="badge-status inactive">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if student.is_paid %}
+                                    <span class="badge-status active">Paid</span>
+                                    {% else %}
+                                    <span class="badge-status inactive">Non-paid</span>
                                     {% endif %}
                                 </td>
                                 <td style="text-align: center; white-space:nowrap;">
