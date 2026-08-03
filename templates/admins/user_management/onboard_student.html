@@ -710,23 +710,6 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="division" class="form-label">Division</label>
-                            <select id="division" name="division" class="form-input">
-                                <option value="" disabled selected hidden>Select division</option>
-                                <option value="A">Division A</option>
-                                <option value="B">Division B</option>
-                                <option value="C">Division C</option>
-                                <option value="D">Division D</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="rollNumber" class="form-label">Roll Number <span class="required">*</span></label>
-                            <input type="text" id="rollNumber" name="roll_number" class="form-input" placeholder="Enter roll number" required>
-                            <span class="error-message" id="rollNumberError"></span>
-                        </div>
-
-                        <div class="form-group">
                             <label for="academicYear" class="form-label">Academic Year <span class="required">*</span></label>
                             <select id="academicYear" name="academic_year" class="form-input" required>
                                 <option value="" disabled selected hidden>Select academic year</option>
@@ -1228,8 +1211,6 @@
         if (schoolSel.options.length > 1) schoolSel.selectedIndex = 1;
         document.getElementById('schoolBranch').value = 'Main Campus';
         document.getElementById('studentClass').value = '8';
-        document.getElementById('division').value = 'A';
-        document.getElementById('rollNumber').value = '15';
         document.getElementById('academicYear').value = '2025-2026';
         document.getElementById('stream').value = 'na';
         document.getElementById('schoolBoard').value = 'CBSE';
