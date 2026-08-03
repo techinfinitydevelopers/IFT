@@ -819,6 +819,13 @@
                         <h1>Welcome, {{ school.designated_teacher_name|default:school.name }}</h1>
                         <p>IFT Program Overview for <span style="font-weight:600; color:var(--primary);">{{ school.name }}</span></p>
                     </div>
+                    <div class="col-12 col-md-6 mt-3 mt-md-0 text-md-end">
+                        <span style="display:inline-flex; align-items:center; gap:8px; background:#fff; border:1px solid var(--border-light); border-radius:999px; padding:8px 16px; box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+                            <span style="width:9px; height:9px; border-radius:50%; background:{% if active_phase %}#22c55e{% else %}#94a3b8{% endif %};"></span>
+                            <span style="font-size:0.68rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;">Season 6 &middot; Current Phase</span>
+                            <strong style="font-size:0.85rem; color:var(--primary);">{% if active_phase %}{{ active_phase.name }}{% else %}Not started{% endif %}</strong>
+                        </span>
+                    </div>
                 </div>
             </div>
 
@@ -905,7 +912,7 @@
             <div class="section-card" style="height:auto;">
                 <div class="section-header">
                     <h3 class="section-title">Competition Progress</h3>
-                    <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">IFT 2026 Season</span>
+                    <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">Season 6</span>
                 </div>
                 <div class="phase-progress">
                     {% for phase in phases %}
