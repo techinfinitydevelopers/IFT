@@ -762,32 +762,96 @@ def rankings_view(request):
 
 
 
+# Standard India Zonal Council grouping (state name -> zone).
+_STATE_ZONES = {
+    # North
+    'jammu and kashmir': 'North', 'jammu & kashmir': 'North', 'ladakh': 'North',
+    'himachal pradesh': 'North', 'punjab': 'North', 'haryana': 'North',
+    'rajasthan': 'North', 'delhi': 'North', 'new delhi': 'North', 'chandigarh': 'North',
+    # Central
+    'uttar pradesh': 'Central', 'uttarakhand': 'Central', 'madhya pradesh': 'Central',
+    'chhattisgarh': 'Central',
+    # East
+    'bihar': 'East', 'jharkhand': 'East', 'odisha': 'East', 'orissa': 'East',
+    'west bengal': 'East',
+    # West
+    'gujarat': 'West', 'goa': 'West', 'maharashtra': 'West',
+    'dadra and nagar haveli and daman and diu': 'West', 'daman and diu': 'West',
+    'dadra and nagar haveli': 'West',
+    # South
+    'andhra pradesh': 'South', 'telangana': 'South', 'karnataka': 'South',
+    'kerala': 'South', 'tamil nadu': 'South', 'puducherry': 'South',
+    'lakshadweep': 'South', 'andaman and nicobar islands': 'South',
+    # North-East
+    'assam': 'North-East', 'arunachal pradesh': 'North-East', 'manipur': 'North-East',
+    'meghalaya': 'North-East', 'mizoram': 'North-East', 'nagaland': 'North-East',
+    'tripura': 'North-East', 'sikkim': 'North-East',
+}
+
+
+def _state_to_zone(state):
+    """Map an Indian state name to its zone; 'Unknown' if not recognised."""
+    if not state:
+        return 'Unknown'
+    return _STATE_ZONES.get(state.strip().lower(), 'Unknown')
+
+
+def _submission_state(sub):
+    """Best available state for a submission's student/school."""
+    student = sub.student
+    if student.school and getattr(student.school, 'state', ''):
+        return student.school.state
+    return getattr(student, 'state', '') or ''
+
+
+def _submission_description(sub):
+    """Short idea description: AI summary, else the simple-solution / problem text."""
+    try:
+        if sub.ai_summary and sub.ai_summary.summary:
+            return sub.ai_summary.summary
+    except Exception:
+        pass
+    return (sub.q3_solution_simple or sub.q2_exact_problem or sub.problem_statement
+            or sub.description or '').strip()
+
+
 @login_required
 @user_passes_test(is_staff_or_superuser)
 def export_top_400(request):
-    """Export Top 400 submissions to CSV"""
+    """Export Top N submissions to CSV. N via ?n= (12, 100, 400; default 400)."""
     from ai_assistant.evaluator import get_top_n
-    
-    evaluations = get_top_n(400)
-    
+
+    try:
+        n = int(request.GET.get('n', 400))
+    except (TypeError, ValueError):
+        n = 400
+    if n not in (12, 100, 400):
+        n = 400
+
+    evaluations = get_top_n(n)
+
     response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="top_400_ideas.csv"'
-    
+    response['Content-Disposition'] = f'attachment; filename="top_{n}_ideas.csv"'
+
     writer = csv.writer(response)
     writer.writerow([
-        'Rank', 'Final Score', 'Title', 'Student Name', 'School',
+        'Rank', 'Idea Name', 'Idea Description', 'Student Name', 'School', 'Zone',
+        'Final Score',
         'Uniqueness', 'Ease of Implementation', 'Feasibility', 'Impact', 'Sustainability',
         'Conceptual Clarity', 'Empathy', 'Creativity', 'Communication', 'Flexible Thinking',
         'Coherence Failures', 'Disqualified', 'Confidence'
     ])
 
     for e in evaluations:
+        sub = e.submission
         writer.writerow([
             e.rank,
+            sub.title,
+            _submission_description(sub),
+            sub.student.user.get_full_name() or sub.student.user.username,
+            sub.student.school_name,
+            _state_to_zone(_submission_state(sub)),
             e.final_score,
-            e.submission.title,
-            e.submission.student.user.get_full_name() or e.submission.student.user.username,
-            e.submission.student.school_name,
             e.uniqueness_score,
             e.ease_of_implementation_score,
             e.feasibility_score,
@@ -802,7 +866,7 @@ def export_top_400(request):
             'Yes' if e.is_disqualified else 'No',
             e.confidence_level,
         ])
-    
+
     return response
 
 
