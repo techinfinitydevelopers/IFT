@@ -1498,6 +1498,44 @@ def reset_student_password(request, student_id):
 
 @login_required
 @user_passes_test(is_staff_or_superuser)
+def mark_student_paid(request, student_id):
+    """Manually reconcile a student's payment status.
+
+    For cases where Razorpay actually captured the payment but our record
+    never got updated (e.g. the user completed a UPI intent payment and
+    didn't cleanly return to the browser, so the client-side confirmation
+    never fired) — a Razorpay webhook now prevents this going forward, but
+    existing mismatches need a manual fix. Requires a transaction/payment ID
+    as a paper trail; does not call Razorpay's API.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+
+    student = get_object_or_404(Student, id=student_id)
+    txn_id = request.POST.get('transaction_id', '').strip()
+    amount = request.POST.get('amount', '').strip()
+
+    if not txn_id:
+        return JsonResponse({'success': False, 'message': 'A transaction/payment ID is required as a paper trail.'}, status=400)
+
+    student.is_paid = True
+    student.payment_transaction_id = txn_id
+    if amount:
+        try:
+            student.payment_amount = float(amount)
+        except ValueError:
+            pass
+    elif not student.payment_amount:
+        from students.views import _get_payment_amount
+        student.payment_amount = _get_payment_amount(student)
+    student.paid_at = timezone.now()
+    student.save(update_fields=['is_paid', 'payment_transaction_id', 'payment_amount', 'paid_at'])
+
+    return JsonResponse({'success': True, 'message': f'{student.user.first_name} {student.user.last_name} marked as paid.'})
+
+
+@login_required
+@user_passes_test(is_staff_or_superuser)
 def bulk_toggle_student_status(request):
     """Activate or deactivate multiple students' logins at once."""
     if request.method != 'POST':

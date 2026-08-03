@@ -740,6 +740,7 @@
                                 data-email="{{ student.user.email }}"
                                 data-username="{{ student.user.username }}"
                                 data-id="{{ student.student_id }}"
+                                data-pk="{{ student.id }}"
                                 data-school="{{ student.school_name }}"
                                 data-grade="{{ student.grade }}"
                                 data-phone="{{ student.phone }}"
@@ -1011,6 +1012,7 @@ function openDetailsSidebar(row) {
     const city = d.city || '';
     const state = d.state || '';
     const pin = d.pin || '';
+    const pk = d.pk || '';
     const isPaid = d.isPaid === 'true';
     const paymentAmount = d.paymentAmount || '';
     const paymentTxn = d.paymentTxn || '';
@@ -1079,6 +1081,10 @@ function openDetailsSidebar(row) {
     paymentGrid += item('Razorpay Order ID', razorpayOrder, 'font-family:monospace;font-size:0.8rem;');
     paymentGrid += item('Paid At', paidAt);
 
+    const markPaidButton = !isPaid
+        ? '<button class="btn-icon-action" style="width:auto;padding:6px 14px;gap:6px;color:#166534;border-color:#bbf7d0;" onclick="markStudentPaid(' + pk + ')"><span class="material-symbols-outlined" style="font-size:16px;">check_circle</span> Mark as Paid</button>'
+        : '';
+
     sidebarContent.innerHTML = `
         <!-- Profile Header -->
         <div class="detail-section">
@@ -1119,6 +1125,7 @@ function openDetailsSidebar(row) {
             <div class="detail-grid">
                 ${paymentGrid}
             </div>
+            ${markPaidButton ? '<div style="margin-top:12px;">' + markPaidButton + '</div>' : ''}
         </div>
 
         <!-- Activity Section -->
@@ -1173,6 +1180,30 @@ function resetStudentPassword(studentId) {
     .then(function(response) { return response.json(); })
     .then(function(data) {
         showToast(data.message || (data.success ? 'Password reset' : 'Failed to reset password'), data.success ? 'success' : 'danger');
+    })
+    .catch(function() {
+        showToast('Network error. Please try again.', 'danger');
+    });
+}
+
+function markStudentPaid(studentId) {
+    var txnId = prompt('Enter the Razorpay payment ID (paper trail) to mark this student as paid:');
+    if (!txnId || !txnId.trim()) return;
+    var amount = prompt('Amount paid in ₹ (leave blank to use the standard fee):', '');
+
+    var body = new URLSearchParams();
+    body.set('transaction_id', txnId.trim());
+    if (amount && amount.trim()) body.set('amount', amount.trim());
+
+    fetch('/super-admin/user-management/student/' + studentId + '/mark-paid/', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: body.toString(),
+    })
+    .then(function(response) { return response.json(); })
+    .then(function(data) {
+        showToast(data.message || (data.success ? 'Marked as paid' : 'Failed to update'), data.success ? 'success' : 'danger');
+        if (data.success) setTimeout(function() { location.reload(); }, 900);
     })
     .catch(function() {
         showToast('Network error. Please try again.', 'danger');

@@ -7,7 +7,7 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
-from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from django.core.mail import send_mail
 from .models import Student, IdeaSubmission, UploadedFile, School, IdeaLike, IdeaBookmark
 from .forms import StudentRegistrationForm, IdeaSubmissionForm
@@ -3300,3 +3300,90 @@ def verify_payment(request):
         pass
 
     return JsonResponse({'success': True, 'message': 'Payment verified!', 'redirect': '/dashboard/'})
+
+
+@csrf_exempt
+def razorpay_webhook(request):
+    """Server-to-server payment confirmation from Razorpay.
+
+    verify_payment() above only fires if the user's browser stays open and
+    the client-side JS 'success' callback completes — with Razorpay's UPI
+    intent flow (pay in a UPI app, then return to the browser), it's common
+    for the payment to succeed on Razorpay's side while the browser never
+    gets the callback (backgrounded, closed, network drop). This webhook is
+    the durable fix: Razorpay calls it directly regardless of what the
+    browser does, so a captured payment always gets recorded.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+
+    import razorpay
+    from django.conf import settings
+
+    webhook_secret = getattr(settings, 'RAZORPAY_WEBHOOK_SECRET', '')
+    signature = request.headers.get('X-Razorpay-Signature', '')
+    body = request.body
+
+    if webhook_secret:
+        client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+        try:
+            client.utility.verify_webhook_signature(body.decode('utf-8'), signature, webhook_secret)
+        except razorpay.errors.SignatureVerificationError:
+            return JsonResponse({'error': 'Invalid signature'}, status=400)
+    else:
+        print('[RAZORPAY WEBHOOK] Warning: RAZORPAY_WEBHOOK_SECRET not set, skipping signature verification', flush=True)
+
+    try:
+        event = json.loads(body)
+    except (ValueError, TypeError):
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    event_type = event.get('event', '')
+    if event_type not in ('payment.captured', 'order.paid'):
+        return JsonResponse({'success': True, 'ignored': event_type})
+
+    payment_entity = event.get('payload', {}).get('payment', {}).get('entity', {})
+    order_id = payment_entity.get('order_id', '')
+    payment_id = payment_entity.get('id', '')
+    amount_paise = payment_entity.get('amount', 0)
+
+    if not order_id:
+        return JsonResponse({'error': 'No order_id in payload'}, status=400)
+
+    try:
+        student = Student.objects.get(razorpay_order_id=order_id)
+    except Student.DoesNotExist:
+        print(f'[RAZORPAY WEBHOOK] No student found for order_id={order_id}', flush=True)
+        return JsonResponse({'success': True, 'message': 'No matching student'})
+
+    if student.is_paid:
+        return JsonResponse({'success': True, 'message': 'Already recorded'})
+
+    student.is_paid = True
+    student.payment_transaction_id = payment_id
+    student.payment_amount = amount_paise / 100
+    student.paid_at = timezone.now()
+    student.save(update_fields=['is_paid', 'payment_transaction_id', 'payment_amount', 'paid_at'])
+
+    create_notification(student.user, 'system', 'Payment Successful', f'Your registration fee of Rs {int(student.payment_amount)} has been received.', 'check_circle', '/dashboard/', 'Go to Dashboard')
+
+    try:
+        from accounts.emails import send_branded_email
+        school_name = student.school.name if student.school else student.school_name or 'N/A'
+        send_branded_email(
+            'Payment Successful - India\'s Future Tycoons',
+            student.user.email,
+            'students/email_payment_success.html',
+            {
+                'user': student.user,
+                'payment_amount': int(student.payment_amount),
+                'transaction_id': payment_id,
+                'school_name': school_name,
+                'login_url': f"{getattr(settings, 'SITE_URL', '')}/dashboard/",
+            },
+        )
+    except Exception:
+        pass
+
+    print(f'[RAZORPAY WEBHOOK] Payment recorded for student {student.id} via webhook (order_id={order_id})', flush=True)
+    return JsonResponse({'success': True, 'message': 'Payment recorded'})

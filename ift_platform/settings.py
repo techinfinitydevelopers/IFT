@@ -213,6 +213,7 @@ SITE_URL = os.getenv('SITE_URL', 'http://localhost:8002')
 # Razorpay Configuration
 RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID', '')
 RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET', '')
+RAZORPAY_WEBHOOK_SECRET = os.getenv('RAZORPAY_WEBHOOK_SECRET', '')
 
 # Web Push (VAPID) — browser/phone push notifications. Optional; if unset,
 # push is silently disabled and only in-app notifications are created.

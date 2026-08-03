@@ -33,6 +33,7 @@ urlpatterns = [
     path('user-management/student/<int:student_id>/edit/', views.edit_student, name='edit_student'),
     path('user-management/student/<int:student_id>/delete/', views.delete_student, name='delete_student'),
     path('user-management/student/<int:student_id>/reset-password/', views.reset_student_password, name='reset_student_password'),
+    path('user-management/student/<int:student_id>/mark-paid/', views.mark_student_paid, name='mark_student_paid'),
     path('user-management/students/bulk-toggle-status/', views.bulk_toggle_student_status, name='bulk_toggle_student_status'),
     path('user-management/students/bulk-delete/', views.bulk_delete_students, name='bulk_delete_students'),
     path('user-management/schools/', views.schools_list, name='schools_list'),
