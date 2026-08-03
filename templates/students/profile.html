@@ -380,7 +380,7 @@
                         <div class="profile-avatar-wrapper">
                             <div class="profile-avatar-large" id="profileAvatar">
                                 {% if student.photo %}
-                                <img src="{{ student.photo.url }}" alt="Profile photo" id="profileAvatarImg" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;">
+                                <img src="{{ student.photo.url }}" alt="Profile photo" id="profileAvatarImg" onerror="this.parentElement.innerHTML='{{ student.user.first_name|first|upper }}';" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;">
                                 {% else %}
                                 <span id="profileAvatarInitial">{{ student.user.first_name|first|upper }}</span>
                                 {% endif %}

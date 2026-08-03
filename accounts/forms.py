@@ -1,7 +1,7 @@
 import re
 from django import forms
 from django.contrib.auth.models import User
-from students.models import School
+from students.models import School, Student
 
 _NAME_RE = re.compile(r"^[A-Za-z][A-Za-z .'\-]{1,99}$")
 
@@ -69,7 +69,10 @@ class StudentSignUpForm(forms.Form):
         return _clean_person_name(self.cleaned_data.get('last_name'), 'Last name')
 
     def clean_phone(self):
-        return _clean_mobile(self.cleaned_data.get('phone'))
+        phone = _clean_mobile(self.cleaned_data.get('phone'))
+        if Student.objects.filter(phone=phone).exists():
+            raise forms.ValidationError('An account with this phone number already exists.')
+        return phone
 
 
 class SchoolSignUpForm(forms.Form):
