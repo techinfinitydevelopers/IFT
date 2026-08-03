@@ -540,8 +540,9 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label class="form-label">Designation</label>
+                                        <label class="form-label">Designation <span class="required">*</span></label>
                                         <input type="text" class="form-input" id="adminDesig" name="admin_designation" placeholder="e.g. IT Coordinator, Vice Principal">
+                                        <div class="error-msg" id="adminDesigErr">Designation is required</div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -706,6 +707,7 @@
             { id: 'schoolState', errId: 'schoolStateErr' },
             { id: 'principalName', errId: 'principalNameErr' },
             { id: 'adminName', errId: 'adminNameErr' },
+            { id: 'adminDesig', errId: 'adminDesigErr' },
             { id: 'adminPhone', errId: 'adminPhoneErr' },
         ];
         required.forEach(({ id, errId }) => {
