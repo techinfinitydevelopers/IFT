@@ -589,7 +589,7 @@
                         </div>
                         <div class="step" data-step="3">
                             <div class="step-icon">3</div>
-                            <div class="step-label">Contact</div>
+                            <div class="step-label">Contact Details</div>
                         </div>
                     </div>
                 </div>
@@ -769,8 +769,8 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="parentMobile" class="form-label">Parent/Guardian Mobile <span class="required">*</span></label>
-                            <input type="tel" id="parentMobile" name="parent_mobile" class="form-input" placeholder="+91 XXXXX XXXXX" required>
+                            <label for="parentMobile" class="form-label">Parent/Guardian Mobile</label>
+                            <input type="tel" id="parentMobile" name="parent_mobile" class="form-input" placeholder="+91 XXXXX XXXXX">
                             <span class="error-message" id="parentMobileError"></span>
                         </div>
 
@@ -778,12 +778,6 @@
                             <label for="parentEmail" class="form-label">Parent/Guardian Email <span class="required">*</span></label>
                             <input type="email" id="parentEmail" name="parent_email" class="form-input" placeholder="parent@email.com" required>
                             <span class="error-message" id="parentEmailError"></span>
-                        </div>
-
-                        <div class="form-group full-width">
-                            <label for="address" class="form-label">Address <span class="required">*</span></label>
-                            <textarea id="address" name="address" class="form-textarea" rows="2" placeholder="Enter full address" required></textarea>
-                            <span class="error-message" id="addressError"></span>
                         </div>
 
                         <div class="form-group">
@@ -1000,7 +994,14 @@
     };
 
     // Optional field validators (validate only if value present)
-    var optionalValidators = {};
+    var optionalValidators = {
+        // Parent/Guardian mobile is optional; validate format only if filled.
+        parentMobile: function (v) {
+            var c = v.replace(/\D/g, '');
+            if (c.length !== 10 || !/^[6-9]\d{9}$/.test(c)) return 'Invalid Indian mobile number';
+            return '';
+        },
+    };
 
     function showError(fieldId, msg) {
         var f = document.getElementById(fieldId);
@@ -1220,7 +1221,6 @@
         document.getElementById('studentEmail').value = 'arjun.patel@school.edu';
         document.getElementById('parentMobile').value = '9876543210';
         document.getElementById('parentEmail').value = 'parent.patel@gmail.com';
-        document.getElementById('address').value = '123 Green Avenue, Model Town';
         document.getElementById('city').value = 'Mumbai';
         document.getElementById('state').value = 'Maharashtra';
         document.getElementById('pinCode').value = '400001';
