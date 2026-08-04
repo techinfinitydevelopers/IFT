@@ -19,6 +19,10 @@ Dates (edit here if the season's deadlines change):
 - Teacher Mentorship Session: fires every Wednesday between
   TEACHER_SESSION_START and TEACHER_SESSION_END (the live sessions themselves
   are every Friday; the reminder goes out the Wednesday before).
+
+Also sends in-app/push notifications for scheduled Content (announcements/
+FAQs/training) — see admins/content_notifications.py: one reminder 2 days
+before scheduled_at, one on scheduled_at's date (which also auto-publishes it).
 """
 from datetime import date, timedelta
 
@@ -40,6 +44,7 @@ class Command(BaseCommand):
         from students.models import Student, IdeaSubmission, School
         from ai_assistant.models import AIEvaluation
         from students.milestone_emails import send_milestone_email, send_weekly_school_email
+        from admins.content_notifications import send_content_notifications
 
         today = timezone.localdate()
         sent = {'idea_reminder': 0, 'idea_published': 0, 'resubmit_reminder': 0,
@@ -75,6 +80,8 @@ class Command(BaseCommand):
                         'students/email_teacher_mentorship.html'):
                     sent['teacher_mentorship'] += 1
 
+        content_counts = send_content_notifications()
+
         self.stdout.write(self.style.SUCCESS(
-            f"send_scheduled_emails: {sent} (date={today})"
+            f"send_scheduled_emails: {sent} | content_notifications: {content_counts} (date={today})"
         ))
