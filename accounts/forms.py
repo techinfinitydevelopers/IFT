@@ -110,6 +110,18 @@ class SchoolSignUpForm(forms.Form):
     def clean_contact_phone(self):
         return _clean_mobile(self.cleaned_data.get('contact_phone'))
 
+    def clean(self):
+        cleaned_data = super().clean()
+        name = cleaned_data.get('school_name')
+        city = cleaned_data.get('city')
+        if name and city:
+            from students.models import School
+            if School.objects.filter(name__iexact=name.strip(), city__iexact=city.strip()).exists():
+                raise forms.ValidationError(
+                    'This school is already registered on IFT. Please sign in instead, or contact support if you believe this is an error.'
+                )
+        return cleaned_data
+
     def clean_pin_code(self):
         pin = re.sub(r'\s', '', self.cleaned_data.get('pin_code') or '')
         if not re.fullmatch(r'\d{6}', pin):

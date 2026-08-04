@@ -1917,6 +1917,9 @@ def onboard_school(request):
         if not all([name, board, city, state]):
             return JsonResponse({'success': False, 'message': 'Please fill in all required fields.'}, status=400)
 
+        if School.objects.filter(name__iexact=name, city__iexact=city).exists():
+            return JsonResponse({'success': False, 'message': f'A school named "{name}" in {city} is already registered.'}, status=400)
+
         school = School.objects.create(
             name=name,
             branch=branch,
