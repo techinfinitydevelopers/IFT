@@ -1653,6 +1653,25 @@ def toggle_school_status(request, school_id):
 
 @login_required
 @user_passes_test(is_staff_or_superuser)
+def toggle_school_tata_classedge(request, school_id):
+    """Flip a school's Tata ClassEdge flag — drives student payment amount
+    (₹1600 for Tata ClassEdge schools, ₹2500 otherwise, see students/views.py:_get_payment_amount)."""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+
+    school = get_object_or_404(School, id=school_id)
+    school.is_tata_classedge = not school.is_tata_classedge
+    school.save(update_fields=['is_tata_classedge'])
+
+    return JsonResponse({
+        'success': True,
+        'is_tata_classedge': school.is_tata_classedge,
+        'message': f'{school.name} marked as {"Tata ClassEdge" if school.is_tata_classedge else "Non-Tata ClassEdge"}!',
+    })
+
+
+@login_required
+@user_passes_test(is_staff_or_superuser)
 def bulk_toggle_school_status(request):
     """Activate or deactivate multiple schools at once from the admin panel."""
     if request.method != 'POST':

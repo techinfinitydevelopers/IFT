@@ -49,6 +49,7 @@ urlpatterns = [
     path('user-management/delete-test-data/', views.delete_test_data, name='delete_test_data'),
     path('user-management/school/<int:school_id>/reset-password/', views.reset_school_password, name='reset_school_password'),
     path('user-management/school/<int:school_id>/toggle-status/', views.toggle_school_status, name='toggle_school_status'),
+    path('user-management/school/<int:school_id>/toggle-tata-classedge/', views.toggle_school_tata_classedge, name='toggle_school_tata_classedge'),
     path('user-management/schools/bulk-toggle-status/', views.bulk_toggle_school_status, name='bulk_toggle_school_status'),
 
     # Evaluator Management
