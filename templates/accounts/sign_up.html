@@ -130,6 +130,21 @@
         <button type="button" id="schoolNotRegisteredClose" class="btn-primary" style="width:auto;padding:0.6rem 1.5rem;">Okay</button>
     </div>
 </div>
+
+<!-- Already-Present (duplicate email/phone) Modal -->
+<div id="duplicateAccountModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;align-items:center;justify-content:center;padding:1rem;">
+    <div style="background:#fff;border-radius:12px;max-width:460px;width:100%;padding:1.75rem;box-shadow:0 20px 40px rgba(0,0,0,0.2);text-align:center;">
+        <div style="font-size:2.5rem;line-height:1;margin-bottom:0.75rem;color:#EF4444;">
+            <iconify-icon icon="mdi:account-alert-outline"></iconify-icon>
+        </div>
+        <h2 style="font-size:1.15rem;font-weight:700;color:#222;margin:0 0 0.75rem;">Already Present in System</h2>
+        <p style="font-size:0.9rem;color:#555;line-height:1.55;margin:0 0 1.25rem;">{{ duplicate_message|default:"This email or phone number is already registered. Please sign in instead." }}</p>
+        <div style="display:flex;gap:0.6rem;justify-content:center;">
+            <button type="button" id="duplicateAccountClose" class="btn-primary" style="width:auto;padding:0.6rem 1.5rem;background:#fff;color:#5E2A97;border:1px solid #5E2A97;">Close</button>
+            <a href="{% url 'accounts:sign_in' %}" class="btn-primary" style="width:auto;padding:0.6rem 1.5rem;text-decoration:none;display:inline-flex;align-items:center;">Sign In</a>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
@@ -154,6 +169,13 @@ function openSchoolModal() { modal.style.display = 'flex'; }
 function closeSchoolModal() { modal.style.display = 'none'; }
 modalClose.addEventListener('click', closeSchoolModal);
 modal.addEventListener('click', function(e) { if (e.target === modal) closeSchoolModal(); });
+
+// Duplicate email/phone popup
+const dupModal = document.getElementById('duplicateAccountModal');
+if (dupModal) {
+    document.getElementById('duplicateAccountClose').addEventListener('click', function(){ dupModal.style.display = 'none'; });
+    dupModal.addEventListener('click', function(e){ if (e.target === dupModal) dupModal.style.display = 'none'; });
+}
 
 // Clear picked school id whenever the user edits the text after a selection.
 schoolSearch.addEventListener('input', function() {
@@ -201,5 +223,6 @@ signupForm.addEventListener('submit', function(e) {
 });
 
 {% if show_school_not_registered %}openSchoolModal();{% endif %}
+{% if duplicate_message %}dupModal.style.display = 'flex';{% endif %}
 </script>
 {% endblock %}

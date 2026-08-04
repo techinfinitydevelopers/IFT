@@ -1347,6 +1347,12 @@ def onboard_student(request):
         if not all([first_name, last_name, school_name, grade, student_email, student_mobile]):
             return JsonResponse({'success': False, 'message': 'Please fill in all required fields including student mobile and email.'}, status=400)
 
+        # Block duplicate email / phone (same rule as student self sign-up).
+        from accounts.forms import duplicate_account_message
+        dup = duplicate_account_message(student_email, student_mobile)
+        if dup:
+            return JsonResponse({'success': False, 'message': dup}, status=400)
+
         # Create user
         username = f"{first_name.lower()}.{last_name.lower()}.{roll_number or timezone.now().strftime('%H%M%S')}"
         base_username = username

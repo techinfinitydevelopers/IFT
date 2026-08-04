@@ -25,6 +25,33 @@ def _clean_mobile(value):
     return m
 
 
+def _normalize_mobile(value):
+    """Normalise a mobile to 10 digits without raising (for dedupe lookups)."""
+    m = re.sub(r'\D', '', value or '')
+    if len(m) == 12 and m.startswith('91'):
+        m = m[2:]
+    elif len(m) == 11 and m.startswith('0'):
+        m = m[1:]
+    return m
+
+
+def duplicate_account_message(email, phone):
+    """Return a user-facing message if this email or phone is already in the
+    system, else None. Shared by student self sign-up and admin onboarding so
+    both enrollment paths enforce the same uniqueness rule.
+
+    Email lives on User.email (case-insensitive); phone on Student.phone
+    (normalised 10-digit).
+    """
+    email = (email or '').strip()
+    if email and User.objects.filter(email__iexact=email).exists():
+        return 'This email is already present in the system. Please sign in instead.'
+    ph = _normalize_mobile(phone)
+    if ph and Student.objects.filter(phone=ph).exists():
+        return 'This phone number is already present in the system. Please sign in instead.'
+    return None
+
+
 class StudentSignUpForm(forms.Form):
     first_name = forms.CharField(max_length=150, widget=forms.TextInput(attrs={
         'placeholder': 'First Name',
@@ -58,8 +85,8 @@ class StudentSignUpForm(forms.Form):
 
     def clean_email(self):
         email = self.cleaned_data['email']
-        if User.objects.filter(email=email).exists():
-            raise forms.ValidationError('An account with this email already exists.')
+        if User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError('This email is already present in the system. Please sign in instead.')
         return email
 
     def clean_first_name(self):
@@ -71,7 +98,7 @@ class StudentSignUpForm(forms.Form):
     def clean_phone(self):
         phone = _clean_mobile(self.cleaned_data.get('phone'))
         if Student.objects.filter(phone=phone).exists():
-            raise forms.ValidationError('An account with this phone number already exists.')
+            raise forms.ValidationError('This phone number is already present in the system. Please sign in instead.')
         return phone
 
 

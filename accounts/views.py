@@ -56,6 +56,7 @@ def sign_up(request):
         return redirect('accounts:role_redirect')
 
     show_school_not_registered = False
+    duplicate_message = None
     if request.method == 'POST':
         form = StudentSignUpForm(request.POST)
         if form.is_valid():
@@ -103,12 +104,19 @@ def sign_up(request):
             posted_school_name = request.POST.get('school_name_typed', '').strip()
             if 'school' in form.errors and (not posted_school or posted_school_name):
                 show_school_not_registered = True
+            # Surface duplicate email/phone as a popup, not just an inline error.
+            for fld in ('email', 'phone'):
+                errs = form.errors.get(fld, [])
+                if any('already' in e.lower() for e in errs):
+                    duplicate_message = errs[0]
+                    break
     else:
         form = StudentSignUpForm()
 
     return render(request, 'accounts/sign_up.html', {
         'form': form,
         'show_school_not_registered': show_school_not_registered,
+        'duplicate_message': duplicate_message,
     })
 
 
