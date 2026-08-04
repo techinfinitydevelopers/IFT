@@ -3372,56 +3372,61 @@ def report_students_export(request):
     from admins.reports import xlsx_response
 
     g = request.GET
-    subs = IdeaSubmission.objects.select_related(
-        'student', 'student__user', 'student__school'
-    ).prefetch_related('ai_evaluation')
+    # Iterate over STUDENTS (not submissions) so every registered student shows,
+    # even those who haven't submitted an idea yet. Idea columns stay blank /
+    # "Not Submitted" for them.
+    students = Student.objects.select_related('user', 'school').all()
 
-    # ---- filters ----
+    # ---- student-level filters ----
     if g.get('school'):
-        subs = subs.filter(student__school_id=g['school'])
+        students = students.filter(school_id=g['school'])
     if g.get('grade'):
-        subs = subs.filter(student__grade=g['grade'])
+        students = students.filter(grade=g['grade'])
     if g.get('gender'):
-        subs = subs.filter(student__gender=g['gender'])
+        students = students.filter(gender=g['gender'])
     if g.get('board'):
-        subs = subs.filter(student__school__board=g['board'])
+        students = students.filter(school__board=g['board'])
     if g.get('city'):
-        subs = subs.filter(student__school__city__icontains=g['city'])
+        students = students.filter(school__city__icontains=g['city'])
     if g.get('state'):
-        subs = subs.filter(student__school__state__icontains=g['state'])
-    if g.get('track'):
-        subs = subs.filter(competition_track=g['track'])
+        students = students.filter(school__state__icontains=g['state'])
     if g.get('tata') in ('true', 'false'):
-        subs = subs.filter(student__school__is_tata_classedge=(g['tata'] == 'true'))
+        students = students.filter(school__is_tata_classedge=(g['tata'] == 'true'))
     if g.get('paid') in ('true', 'false'):
-        subs = subs.filter(student__is_paid=(g['paid'] == 'true'))
+        students = students.filter(is_paid=(g['paid'] == 'true'))
 
+    # ---- submission-level filters: keep only students with a matching submission ----
+    sub_q = Q()
     status = g.get('status', '')
     if status == 'draft':
-        subs = subs.filter(status='draft')
+        sub_q &= Q(submissions__status='draft')
     elif status in ('submitted', 'published'):
-        subs = subs.filter(status__in=_PUBLISHED_STATUSES)
-
+        sub_q &= Q(submissions__status__in=_PUBLISHED_STATUSES)
+    if g.get('track'):
+        sub_q &= Q(submissions__competition_track=g['track'])
     top = g.get('top', '')
     if top == '400':
-        subs = subs.filter(ai_evaluation__is_top_400=True)
+        sub_q &= Q(submissions__ai_evaluation__is_top_400=True)
     elif top == '12':
-        subs = subs.filter(ai_evaluation__is_top_12=True)
+        sub_q &= Q(submissions__ai_evaluation__is_top_12=True)
     elif top == '100':
-        subs = subs.filter(ai_evaluation__rank__lte=100, ai_evaluation__rank__gt=0)
-
+        sub_q &= Q(submissions__ai_evaluation__rank__gt=0, submissions__ai_evaluation__rank__lte=100)
     if g.get('evaluator'):
-        subs = subs.filter(evaluator_assignments__evaluator_id=g['evaluator']).distinct()
+        sub_q &= Q(submissions__evaluator_assignments__evaluator_id=g['evaluator'])
     if g.get('min_score'):
-        subs = subs.filter(ai_evaluation__final_score__gte=g['min_score'])
+        sub_q &= Q(submissions__ai_evaluation__final_score__gte=g['min_score'])
     if g.get('max_score'):
-        subs = subs.filter(ai_evaluation__final_score__lte=g['max_score'])
+        sub_q &= Q(submissions__ai_evaluation__final_score__lte=g['max_score'])
+    if sub_q:
+        students = students.filter(sub_q).distinct()
 
-    subs = subs.order_by('-ai_evaluation__final_score', '-submitted_at')
+    students = students.order_by('user__first_name', 'user__last_name')
 
+    students_list = list(students)
     if g.get('zone'):  # zone filter needs python-side state->zone mapping
         want = g['zone'].strip().lower()
-        subs = [s for s in subs if _state_to_zone(_submission_state(s)).lower() == want]
+        students_list = [st for st in students_list
+                         if _state_to_zone((st.school.state if st.school else st.state)).lower() == want]
 
     headers = [
         'Student Name', 'Gender', 'Grade', 'School', 'City', 'State', 'Zone', 'Board',
@@ -3430,29 +3435,35 @@ def report_students_export(request):
         'Coordinator Name', 'Coordinator Mobile', 'Principal Name',
     ]
     rows = []
-    for s in subs:
-        st = s.student
+    for st in students_list:
         school = st.school
-        try:
-            ev = s.ai_evaluation
-        except Exception:
-            ev = None
-        ev_name, ev_score = _evaluator_for(s)
+        # Best submission to display (highest score / most recent), if any.
+        s = st.submissions.order_by(
+            '-ai_evaluation__final_score', '-submitted_at', '-created_at').first()
+        if s:
+            try:
+                ev = s.ai_evaluation
+            except Exception:
+                ev = None
+            ev_name, ev_score = _evaluator_for(s)
+        else:
+            ev, ev_name, ev_score = None, '', ''
+        state = (school.state if school else st.state) or ''
         rows.append([
             st.user.get_full_name() or st.user.username,
             st.get_gender_display() if st.gender else '',
             st.grade,
             st.school_display_name,
             (school.city if school else st.city) or '',
-            _submission_state(s),
-            _state_to_zone(_submission_state(s)),
+            state,
+            _state_to_zone(state),
             (school.board if school else st.school_board) or '',
             'Yes' if st.is_paid else 'No',
             int(st.payment_amount) if st.payment_amount else '',
-            s.title or '',
-            s.get_competition_track_display() if s.competition_track else '',
-            s.submitted_at.strftime('%Y-%m-%d') if s.submitted_at else '',
-            s.get_status_display(),
+            (s.title if s else '') or '',
+            (s.get_competition_track_display() if (s and s.competition_track) else ''),
+            (s.submitted_at.strftime('%Y-%m-%d') if (s and s.submitted_at) else ''),
+            (s.get_status_display() if s else 'Not Submitted'),
             ev.final_score if ev else '',
             ev_name, ev_score,
             'Yes' if (ev and ev.is_top_400) else 'No',
