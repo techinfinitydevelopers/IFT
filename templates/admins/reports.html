@@ -768,12 +768,25 @@
                             <select name="evaluator" class="rb-input"><option value="">All</option>
                                 {% for e in report_evaluators %}<option value="{{ e.id }}">{{ e.first_name }} {{ e.last_name }}</option>{% endfor %}
                             </select></div>
-                        <div>
-                            <button type="submit" class="btn-export" style="width:100%;justify-content:center;">
-                                <span class="material-symbols-outlined" style="font-size:18px;">download</span> Download Excel
+                        <div style="display:flex;gap:8px;">
+                            <button type="button" id="rbPreviewBtn" class="btn-filter" style="flex:1;justify-content:center;">
+                                <span class="material-symbols-outlined" style="font-size:18px;">visibility</span> Preview
+                            </button>
+                            <button type="submit" class="btn-export" style="flex:1;justify-content:center;">
+                                <span class="material-symbols-outlined" style="font-size:18px;">download</span> Excel
                             </button>
                         </div>
                     </form>
+                    <!-- Preview results -->
+                    <div id="rbPreviewWrap" style="display:none;margin-top:18px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                            <span id="rbPreviewCount" style="font-size:0.8rem;font-weight:700;color:#5E2A97;"></span>
+                            <button type="button" id="rbPreviewClose" class="btn-filter" style="padding:4px 12px;font-size:0.75rem;">Close preview</button>
+                        </div>
+                        <div style="overflow:auto;max-height:460px;border:1px solid #e5e7eb;border-radius:10px;">
+                            <table id="rbPreviewTable" style="width:100%;border-collapse:collapse;font-size:0.72rem;white-space:nowrap;"></table>
+                        </div>
+                    </div>
                 </div>
                 <style>
                     .rb-lbl{font-size:0.7rem;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:2px;}
@@ -784,12 +797,38 @@
                     (function(){
                         var form=document.getElementById('reportForm');
                         var mode=document.getElementById('reportMode');
+                        function baseUrl(){ return '/super-admin/reports/export/'+mode.value+'/'; }
                         function apply(){
                             var schools=mode.value==='schools';
                             document.querySelectorAll('.rb-student').forEach(function(el){el.style.display=schools?'none':'';});
-                            form.action='/super-admin/reports/export/'+mode.value+'/';
+                            form.action=baseUrl();
                         }
                         mode.addEventListener('change',apply); apply();
+
+                        var previewBtn=document.getElementById('rbPreviewBtn');
+                        var wrap=document.getElementById('rbPreviewWrap');
+                        var tbl=document.getElementById('rbPreviewTable');
+                        var countEl=document.getElementById('rbPreviewCount');
+                        document.getElementById('rbPreviewClose').addEventListener('click',function(){ wrap.style.display='none'; });
+                        previewBtn.addEventListener('click',function(){
+                            var params=new URLSearchParams(new FormData(form)); params.set('preview','1');
+                            previewBtn.textContent='Loading...';
+                            fetch(baseUrl()+'?'+params.toString())
+                                .then(function(r){return r.json();})
+                                .then(function(d){
+                                    var h='<thead><tr>'+d.headers.map(function(x){return '<th style="position:sticky;top:0;background:#5E2A97;color:#fff;padding:8px 10px;text-align:left;font-weight:600;">'+x+'</th>';}).join('')+'</tr></thead><tbody>';
+                                    if(!d.rows.length){ h+='<tr><td style="padding:16px;text-align:center;color:#888;" colspan="'+d.headers.length+'">No records match these filters.</td></tr>'; }
+                                    d.rows.slice(0,200).forEach(function(row,ri){
+                                        h+='<tr style="background:'+(ri%2?'#faf9fc':'#fff')+';">'+row.map(function(c){return '<td style="padding:7px 10px;border-bottom:1px solid #f0f0f0;">'+(c===null||c===undefined?'':String(c))+'</td>';}).join('')+'</tr>';
+                                    });
+                                    h+='</tbody>';
+                                    tbl.innerHTML=h;
+                                    countEl.textContent=d.count+' record(s)'+(d.count>200?' (showing first 200)':'');
+                                    wrap.style.display='block';
+                                })
+                                .catch(function(){ alert('Preview failed. Please try again.'); })
+                                .finally(function(){ previewBtn.innerHTML='<span class="material-symbols-outlined" style="font-size:18px;">visibility</span> Preview'; });
+                        });
                     })();
                 </script>
 

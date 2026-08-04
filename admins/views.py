@@ -3462,6 +3462,8 @@ def report_students_export(request):
             (school.designated_teacher_mobile if school else '') or '',
             (school.principal_name if school else '') or '',
         ])
+    if g.get('preview'):
+        return JsonResponse({'headers': headers, 'rows': rows, 'count': len(rows)})
     return xlsx_response('students_report', headers, rows, 'Students')
 
 
@@ -3513,6 +3515,8 @@ def report_schools_export(request):
             total_students, paid_students, submitted,
             best if best is not None else '', sc.get_status_display(),
         ])
+    if g.get('preview'):
+        return JsonResponse({'headers': headers, 'rows': rows, 'count': len(rows)})
     return xlsx_response('schools_report', headers, rows, 'Schools')
 
 
