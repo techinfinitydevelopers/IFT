@@ -212,3 +212,17 @@
 - Test client (temp superuser, deleted after): reports page 200, students/schools previews 200 (JSON), xlsx exports 200 (spreadsheet content-type), `?zone=northeast` filter 200.
 
 **Notes:** No DB/migration change — pure data + helper, additive, zero break risk. All existing `_state_to_zone` callers keep working (signature preserved). Not committed yet.
+
+---
+
+## 2026-08-05 — Dashboard KPI cards clickable (drill-down to details)
+
+**Why:** Super Admin dashboard KPI cards were static; client wanted to click a number and see the underlying records.
+
+**Changes:**
+- `templates/admins/admin_dashboard.html` — wrapped 11 of 12 KPI cards in `<a class="kpi-link">` to existing list pages: Total Participants/Students → students_list; Idea Submissions/Published → all_submissions; Pending → all_submissions?status=submitted; Unpublished → all_submissions?status=draft; Schools/Total Schools → schools_list; Evaluators → evaluators_list; Paid → students_list?paid=true; Unpaid → students_list?paid=false. Added `.kpi-link` CSS (invisible wrapper). **Total Teams** left non-clickable (no teams list page exists).
+- `admins/views.py` `students_list` — added optional `?paid=true/false` filter (`is_paid`) + `selected_paid` context.
+
+**Verified (local, temp superuser):** dashboard 200, 11 kpi-links present, all 8 destination URLs 200 (incl. new paid filter). `manage.py check` clean.
+
+**Notes:** Additive only — no DB/model/migration change, existing pages/links unchanged. Zero break risk.

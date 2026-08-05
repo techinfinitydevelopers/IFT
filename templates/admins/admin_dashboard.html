@@ -194,6 +194,8 @@
             height: 100%; transition: all 0.2s ease; position: relative; overflow: hidden;
         }
         .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.08); }
+        .kpi-link { text-decoration: none; color: inherit; display: block; height: 100%; }
+        .kpi-link:hover { text-decoration: none; color: inherit; }
         .kpi-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
         .kpi-icon {
             width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center;
@@ -456,6 +458,7 @@
             <!-- KPI Grid -->
             <div class="row g-3 mb-4">
                 <div class="col-6 col-lg-2">
+                    <a href="{% url 'admins:students_list' %}" class="kpi-link">
                     <div class="kpi-card">
                         <div class="kpi-header">
                             <div class="kpi-icon purple"><span class="material-symbols-outlined">groups</span></div>
@@ -463,9 +466,11 @@
                         <span class="kpi-label">Total Participants</span>
                         <div class="kpi-value">{{ total_participants }}</div>
                     </div>
+                    </a>
                 </div>
 
                 <div class="col-6 col-lg-2">
+                    <a href="{% url 'admins:students_list' %}" class="kpi-link">
                     <div class="kpi-card">
                         <div class="kpi-header">
                             <div class="kpi-icon blue"><span class="material-symbols-outlined">school</span></div>
@@ -473,9 +478,11 @@
                         <span class="kpi-label">Students</span>
                         <div class="kpi-value">{{ total_students }}</div>
                     </div>
+                    </a>
                 </div>
 
                 <div class="col-6 col-lg-2">
+                    <a href="{% url 'admins:all_submissions' %}" class="kpi-link">
                     <div class="kpi-card">
                         <div class="kpi-header">
                             <div class="kpi-icon green"><span class="material-symbols-outlined">lightbulb</span></div>
@@ -487,9 +494,11 @@
                         <span class="kpi-label">Idea Submissions</span>
                         <div class="kpi-value">{{ total_submissions }}</div>
                     </div>
+                    </a>
                 </div>
 
                 <div class="col-6 col-lg-2">
+                    <a href="{% url 'admins:all_submissions' %}?status=submitted" class="kpi-link">
                     <div class="kpi-card">
                         <div class="kpi-header">
                             <div class="kpi-icon amber"><span class="material-symbols-outlined">pending_actions</span></div>
@@ -500,9 +509,11 @@
                         <span class="kpi-label">Pending Ideas</span>
                         <div class="kpi-value">{{ pending_count }}</div>
                     </div>
+                    </a>
                 </div>
 
                 <div class="col-6 col-lg-2">
+                    <a href="{% url 'admins:schools_list' %}" class="kpi-link">
                     <div class="kpi-card">
                         <div class="kpi-header">
                             <div class="kpi-icon teal"><span class="material-symbols-outlined">apartment</span></div>
@@ -510,9 +521,11 @@
                         <span class="kpi-label">Schools</span>
                         <div class="kpi-value">{{ total_schools }}</div>
                     </div>
+                    </a>
                 </div>
 
                 <div class="col-6 col-lg-2">
+                    <a href="{% url 'admins:evaluators_list' %}" class="kpi-link">
                     <div class="kpi-card">
                         <div class="kpi-header">
                             <div class="kpi-icon indigo"><span class="material-symbols-outlined">rate_review</span></div>
@@ -520,10 +533,12 @@
                         <span class="kpi-label">Evaluators</span>
                         <div class="kpi-value">{{ total_evaluators }}</div>
                     </div>
+                    </a>
                 </div>
 
                 <!-- Additional metrics -->
                 <div class="col-6 col-lg-2">
+                    <a href="{% url 'admins:schools_list' %}" class="kpi-link">
                     <div class="kpi-card">
                         <div class="kpi-header">
                             <div class="kpi-icon teal"><span class="material-symbols-outlined">apartment</span></div>
@@ -531,6 +546,7 @@
                         <span class="kpi-label">Total Schools</span>
                         <div class="kpi-value">{{ total_schools_all }}</div>
                     </div>
+                    </a>
                 </div>
 
                 <div class="col-6 col-lg-2">
@@ -544,6 +560,7 @@
                 </div>
 
                 <div class="col-6 col-lg-2">
+                    <a href="{% url 'admins:all_submissions' %}" class="kpi-link">
                     <div class="kpi-card">
                         <div class="kpi-header">
                             <div class="kpi-icon green"><span class="material-symbols-outlined">task_alt</span></div>
@@ -551,9 +568,11 @@
                         <span class="kpi-label">Published Ideas</span>
                         <div class="kpi-value">{{ published_ideas }}</div>
                     </div>
+                    </a>
                 </div>
 
                 <div class="col-6 col-lg-2">
+                    <a href="{% url 'admins:all_submissions' %}?status=draft" class="kpi-link">
                     <div class="kpi-card">
                         <div class="kpi-header">
                             <div class="kpi-icon amber"><span class="material-symbols-outlined">draft</span></div>
@@ -561,9 +580,11 @@
                         <span class="kpi-label">Unpublished (Draft)</span>
                         <div class="kpi-value">{{ unpublished_ideas }}</div>
                     </div>
+                    </a>
                 </div>
 
                 <div class="col-6 col-lg-2">
+                    <a href="{% url 'admins:students_list' %}?paid=true" class="kpi-link">
                     <div class="kpi-card">
                         <div class="kpi-header">
                             <div class="kpi-icon green"><span class="material-symbols-outlined">payments</span></div>
@@ -571,9 +592,11 @@
                         <span class="kpi-label">Paid Registrations</span>
                         <div class="kpi-value">{{ paid_registrations }}</div>
                     </div>
+                    </a>
                 </div>
 
                 <div class="col-6 col-lg-2">
+                    <a href="{% url 'admins:students_list' %}?paid=false" class="kpi-link">
                     <div class="kpi-card">
                         <div class="kpi-header">
                             <div class="kpi-icon danger" style="background:rgba(220,38,38,0.1);color:#dc2626;"><span class="material-symbols-outlined">money_off</span></div>
@@ -581,6 +604,7 @@
                         <span class="kpi-label">Unpaid Registrations</span>
                         <div class="kpi-value">{{ unpaid_registrations }}</div>
                     </div>
+                    </a>
                 </div>
             </div>
 
