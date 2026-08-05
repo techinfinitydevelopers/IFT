@@ -12,6 +12,14 @@
     <div class="col-6 col-lg-3"><div class="kpi"><div class="lbl">In Progress</div><div class="val">{{ counts.in_progress }}</div></div></div>
     <div class="col-6 col-lg-3"><div class="kpi"><div class="lbl">Resolved</div><div class="val">{{ counts.resolved }}</div></div></div>
     <div class="col-6 col-lg-3"><div class="kpi"><div class="lbl">Closed</div><div class="val">{{ counts.closed }}</div></div></div>
+    <div class="col-6 col-lg-3">
+        <a href="?tab={{ tab }}&overdue=1" style="text-decoration:none;">
+            <div class="kpi" style="{% if counts.overdue %}border-color:#fecaca;background:#fff5f5;{% endif %}">
+                <div class="lbl" style="{% if counts.overdue %}color:#b91c1c;{% endif %}">Overdue (Beyond SLA)</div>
+                <div class="val" style="{% if counts.overdue %}color:#b91c1c;{% endif %}">{{ counts.overdue }}</div>
+            </div>
+        </a>
+    </div>
 </div>
 
 <!-- Tabs -->
@@ -19,6 +27,13 @@
     <a href="?tab=student" class="tab-btn {% if tab != 'school' %}active{% endif %}" style="text-decoration:none;">Student Tickets</a>
     <a href="?tab=school" class="tab-btn {% if tab == 'school' %}active{% endif %}" style="text-decoration:none;">School / Teacher Tickets</a>
 </div>
+
+{% if overdue_only %}
+<div class="mb-3" style="font-size:0.82rem;">
+    <span style="background:#fee2e2;color:#b91c1c;border-radius:999px;padding:4px 12px;font-weight:600;">Showing overdue only</span>
+    <a href="?tab={{ tab }}" style="margin-left:8px;color:#5E2A97;text-decoration:none;">Clear</a>
+</div>
+{% endif %}
 
 <!-- Filters -->
 <form method="get" class="d-flex flex-wrap gap-2 mb-3">
@@ -54,7 +69,10 @@
                     <td class="py-3 px-3">{{ t.created_by.get_full_name|default:t.created_by.username }}</td>
                     <td class="py-3 px-3">{{ t.subject|truncatechars:40 }}</td>
                     <td class="py-3 px-3"><span class="prio prio-{{ t.priority }}">{{ t.get_priority_display }}</span></td>
-                    <td class="py-3 px-3"><span class="badge-status st-{{ t.status_badge_class }}">{{ t.get_status_display }}</span></td>
+                    <td class="py-3 px-3">
+                        <span class="badge-status st-{{ t.status_badge_class }}">{{ t.get_status_display }}</span>
+                        {% if t.is_overdue %}<span class="badge-status" style="background:#fee2e2;color:#b91c1c;">Overdue</span>{% endif %}
+                    </td>
                     <td class="py-3 px-3">{{ t.created_at|date:"d M Y" }}</td>
                     <td class="py-3 px-3">{{ t.assigned_to.get_full_name|default:"—" }}</td>
                 </tr>

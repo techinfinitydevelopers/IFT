@@ -18,6 +18,7 @@
                 <div class="text-end">
                     <span class="badge-status st-{{ ticket.status_badge_class }}">{{ ticket.get_status_display }}</span>
                     <span class="prio prio-{{ ticket.priority }}">{{ ticket.get_priority_display }}</span>
+                    {% if ticket.is_overdue %}<span class="badge-status" style="background:#fee2e2;color:#b91c1c;">Overdue</span>{% endif %}
                 </div>
             </div>
             <hr style="margin:14px 0;border-color:#eee;">
@@ -41,10 +42,11 @@
         <h3 style="font-size:0.92rem;font-weight:700;margin:0 0 10px;">Conversation</h3>
         <div class="d-flex flex-column gap-2 mb-3">
             {% for msg in messages_thread %}
-            <div class="card-box" style="padding:14px 16px;{% if msg.author_id == ticket.created_by_id %}background:#faf7fd;{% else %}border-left:3px solid #5E2A97;{% endif %}">
+            <div class="card-box" style="padding:14px 16px;{% if msg.is_internal %}background:#fffbeb;border-left:3px solid #f59e0b;{% elif msg.author_id == ticket.created_by_id %}background:#faf7fd;{% else %}border-left:3px solid #5E2A97;{% endif %}">
                 <div style="font-size:0.78rem;color:#666;margin-bottom:4px;">
                     <strong style="color:#333;">{{ msg.author.get_full_name|default:msg.author.username|default:"User" }}</strong>
-                    {% if msg.author_id != ticket.created_by_id %}<span style="background:#ede9fe;color:#6d28d9;border-radius:999px;padding:1px 8px;font-size:0.68rem;margin-left:4px;">Support</span>{% endif %}
+                    {% if msg.is_internal %}<span style="background:#fef3c7;color:#b45309;border-radius:999px;padding:1px 8px;font-size:0.68rem;margin-left:4px;">🔒 Internal note</span>
+                    {% elif msg.author_id != ticket.created_by_id %}<span style="background:#ede9fe;color:#6d28d9;border-radius:999px;padding:1px 8px;font-size:0.68rem;margin-left:4px;">Support</span>{% endif %}
                     · {{ msg.created_at|date:"d M Y, H:i" }}
                 </div>
                 <p style="font-size:0.86rem;white-space:pre-wrap;margin:0;">{{ msg.body }}</p>
@@ -57,7 +59,7 @@
             {% empty %}<p style="font-size:0.84rem;color:#999;">No replies yet.</p>{% endfor %}
         </div>
 
-        <div class="card-box">
+        <div class="card-box mb-3">
             <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="reply">
@@ -66,6 +68,18 @@
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-2">
                     <input type="file" name="attachment" accept="image/*,.pdf,.doc,.docx" style="font-size:0.8rem;">
                     <button type="submit" class="btn-primary-ift"><span class="material-symbols-outlined" style="font-size:18px;">send</span> Send Reply</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="card-box" style="background:#fffbeb;border-color:#fde68a;">
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="note">
+                <label style="font-size:0.8rem;font-weight:600;color:#b45309;">🔒 Internal note (not visible to user)</label>
+                <textarea name="body" class="form-input-ift" rows="2" required placeholder="Add a private note for the support team..."></textarea>
+                <div class="text-end mt-2">
+                    <button type="submit" class="btn-primary-ift" style="background:#b45309;"><span class="material-symbols-outlined" style="font-size:18px;">sticky_note_2</span> Add Note</button>
                 </div>
             </form>
         </div>
@@ -123,6 +137,45 @@
                 <button type="submit" class="btn-primary-ift w-100" style="justify-content:center;background:#b45309;"><span class="material-symbols-outlined" style="font-size:18px;">restart_alt</span> Reopen Ticket</button>
             </form>
             {% endif %}
+        </div>
+
+        <!-- Merge duplicate -->
+        {% if merge_candidates %}
+        <div class="card-box mb-3">
+            <div style="font-size:0.8rem;font-weight:700;color:#444;margin-bottom:8px;">Merge Duplicate</div>
+            <form method="post" onsubmit="return confirm('Merge this ticket into the selected one? Its conversation moves over and this ticket is closed.');">
+                {% csrf_token %}<input type="hidden" name="action" value="merge">
+                <select name="merge_into" class="form-input-ift mb-2" required>
+                    <option value="">Select target ticket…</option>
+                    {% for c in merge_candidates %}<option value="{{ c.id }}">{{ c.ticket_number }} — {{ c.subject|truncatechars:32 }}</option>{% endfor %}
+                </select>
+                <button type="submit" class="btn-primary-ift w-100" style="justify-content:center;background:#475569;"><span class="material-symbols-outlined" style="font-size:18px;">merge</span> Merge</button>
+            </form>
+        </div>
+        {% endif %}
+
+        <!-- Timeline -->
+        <div class="card-box mb-3">
+            <div style="font-size:0.8rem;font-weight:700;color:#444;margin-bottom:10px;">Timeline</div>
+            <div style="position:relative;">
+                {% for e in events %}
+                <div style="display:flex;gap:10px;padding-bottom:12px;">
+                    <span class="material-symbols-outlined" style="font-size:18px;color:#5E2A97;flex-shrink:0;">{{ e.icon }}</span>
+                    <div style="font-size:0.78rem;">
+                        <div><strong style="text-transform:capitalize;">{{ e.verb }}</strong>{% if e.detail %} — {{ e.detail|truncatechars:50 }}{% endif %}</div>
+                        <div style="color:#999;">{{ e.actor.get_full_name|default:e.actor.username|default:"—" }} · {{ e.created_at|date:"d M Y, H:i" }}</div>
+                    </div>
+                </div>
+                {% empty %}<p style="font-size:0.8rem;color:#999;margin:0;">No activity yet.</p>{% endfor %}
+            </div>
+        </div>
+
+        <!-- Delete -->
+        <div class="card-box">
+            <form method="post" onsubmit="return confirm('Permanently delete this ticket? This cannot be undone.');">
+                {% csrf_token %}<input type="hidden" name="action" value="delete">
+                <button type="submit" class="btn-primary-ift w-100" style="justify-content:center;background:#dc2626;"><span class="material-symbols-outlined" style="font-size:18px;">delete</span> Delete Ticket</button>
+            </form>
         </div>
     </div>
 </div>

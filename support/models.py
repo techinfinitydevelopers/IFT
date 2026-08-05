@@ -1,5 +1,14 @@
+from datetime import timedelta
+
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
+
+# SLA response window (in hours) by priority. Overdue = unresolved past this.
+SLA_HOURS = {'urgent': 8, 'high': 24, 'medium': 48, 'low': 72}
+# A resolved/closed ticket may be reopened by the user within this many days.
+REOPEN_WINDOW_DAYS = 7
+_OPEN_STATES = ('open', 'in_progress', 'waiting_user', 'reopened')
 
 
 class Ticket(models.Model):
@@ -50,6 +59,10 @@ class Ticket(models.Model):
     resolution_note = models.TextField(blank=True)
     resolved_at = models.DateTimeField(null=True, blank=True)
 
+    # Set when this ticket is merged as a duplicate into another ticket.
+    merged_into = models.ForeignKey(
+        'self', on_delete=models.SET_NULL, null=True, blank=True, related_name='merged_from')
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -67,8 +80,22 @@ class Ticket(models.Model):
             super().save(update_fields=['ticket_number'])
 
     @property
+    def sla_due_at(self):
+        return self.created_at + timedelta(hours=SLA_HOURS.get(self.priority, 48))
+
+    @property
+    def is_overdue(self):
+        return self.status in _OPEN_STATES and timezone.now() > self.sla_due_at
+
+    @property
     def can_reopen(self):
-        return self.status in ('resolved', 'closed')
+        """User may reopen a resolved/closed ticket within the reopen window."""
+        if self.status not in ('resolved', 'closed'):
+            return False
+        ref = self.resolved_at or self.updated_at
+        if ref is None:
+            return True
+        return timezone.now() <= ref + timedelta(days=REOPEN_WINDOW_DAYS)
 
     @property
     def status_badge_class(self):
@@ -114,3 +141,30 @@ class TicketAttachment(models.Model):
 
     def __str__(self):
         return self.original_name or (self.file.name if self.file else 'attachment')
+
+
+class TicketEvent(models.Model):
+    """An audit-trail entry for a ticket's action timeline."""
+
+    ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name='events')
+    actor = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='ticket_events')
+    # e.g. created, assigned, replied, status, priority, resolved, reopened, closed, merged, note
+    verb = models.CharField(max_length=20)
+    detail = models.CharField(max_length=300, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f'{self.ticket_id}:{self.verb}'
+
+    @property
+    def icon(self):
+        return {
+            'created': 'add_circle', 'assigned': 'person', 'replied': 'reply',
+            'status': 'sync', 'priority': 'flag', 'resolved': 'task_alt',
+            'reopened': 'restart_alt', 'closed': 'lock', 'merged': 'merge',
+            'note': 'sticky_note_2',
+        }.get(self.verb, 'radio_button_checked')

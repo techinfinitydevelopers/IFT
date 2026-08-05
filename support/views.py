@@ -5,9 +5,17 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
-from .models import Ticket, TicketMessage, TicketAttachment
+from .models import Ticket, TicketMessage, TicketAttachment, TicketEvent
 
 User = get_user_model()
+
+
+def _log(ticket, actor, verb, detail=''):
+    """Record an entry in the ticket's action timeline. Never breaks a request."""
+    try:
+        TicketEvent.objects.create(ticket=ticket, actor=actor, verb=verb, detail=detail[:300])
+    except Exception:
+        pass
 
 
 # ── helpers ──────────────────────────────────────────────────────────────────
@@ -86,6 +94,7 @@ def raise_ticket(request):
                 description=description, status='open',
             )
             _save_attachment(request, ticket)
+            _log(ticket, request.user, 'created', subject)
             url = f'/super-admin/tickets/{ticket.id}/'
             for admin in _superadmins():
                 _notify(admin, f'New ticket {ticket.ticket_number}',
@@ -111,6 +120,7 @@ def ticket_detail(request, ticket_id):
         if action == 'reopen' and ticket.can_reopen:
             ticket.status = 'reopened'
             ticket.save(update_fields=['status', 'updated_at'])
+            _log(ticket, request.user, 'reopened')
             target = ticket.assigned_to
             url = f'/super-admin/tickets/{ticket.id}/'
             for admin in ([target] if target else _superadmins()):
@@ -124,6 +134,7 @@ def ticket_detail(request, ticket_id):
                 msg = TicketMessage.objects.create(
                     ticket=ticket, author=request.user, body=body)
                 _save_attachment(request, ticket, message=msg)
+                _log(ticket, request.user, 'replied', body[:120])
                 # user replied → move an admin-side state back into the queue
                 if ticket.status in ('resolved', 'waiting_user'):
                     ticket.status = 'reopened' if ticket.status == 'resolved' else 'in_progress'
@@ -150,7 +161,8 @@ def admin_tickets(request):
     status = request.GET.get('status', '')
     priority = request.GET.get('priority', '')
 
-    base = Ticket.objects.select_related('created_by', 'assigned_to')
+    base = Ticket.objects.select_related('created_by', 'assigned_to').filter(merged_into__isnull=True)
+    overdue_count = sum(1 for t in base if t.is_overdue)
     counts = {
         'total': base.count(),
         'student': base.filter(creator_type='student').count(),
@@ -159,6 +171,7 @@ def admin_tickets(request):
         'in_progress': base.filter(status='in_progress').count(),
         'resolved': base.filter(status='resolved').count(),
         'closed': base.filter(status='closed').count(),
+        'overdue': overdue_count,
     }
 
     tickets = base.filter(creator_type=('school' if tab == 'school' else 'student'))
@@ -166,10 +179,14 @@ def admin_tickets(request):
         tickets = tickets.filter(status=status)
     if priority:
         tickets = tickets.filter(priority=priority)
+    tickets = list(tickets)
+    if request.GET.get('overdue') == '1':
+        tickets = [t for t in tickets if t.is_overdue]
 
     return render(request, 'admins/tickets/list.html', {
         'counts': counts, 'tickets': tickets, 'tab': tab,
         'status': status, 'priority': priority,
+        'overdue_only': request.GET.get('overdue') == '1',
         'status_choices': Ticket.STATUS_CHOICES,
         'priority_choices': Ticket.PRIORITY_CHOICES,
     })
@@ -194,15 +211,25 @@ def admin_ticket_detail(request, ticket_id):
                 if ticket.status in ('open', 'reopened'):
                     ticket.status = 'in_progress'
                 ticket.save(update_fields=['status', 'updated_at'])
+                _log(ticket, request.user, 'replied', body[:120])
                 _notify(owner, f'Reply on {ticket.ticket_number}', body[:80], url)
                 _email(owner.email, f'Reply on your ticket {ticket.ticket_number}', body, url)
                 messages.success(request, 'Reply sent to user.')
+
+        elif action == 'note':
+            body = (request.POST.get('body') or '').strip()
+            if body:
+                TicketMessage.objects.create(
+                    ticket=ticket, author=request.user, body=body, is_internal=True)
+                _log(ticket, request.user, 'note', body[:120])
+                messages.success(request, 'Internal note added (not visible to the user).')
 
         elif action == 'status':
             new_status = request.POST.get('status')
             if new_status in dict(Ticket.STATUS_CHOICES):
                 ticket.status = new_status
                 ticket.save(update_fields=['status', 'updated_at'])
+                _log(ticket, request.user, 'status', ticket.get_status_display())
                 _notify(owner, f'Ticket {ticket.ticket_number} updated',
                         f'Status: {ticket.get_status_display()}', url)
                 messages.success(request, 'Status updated.')
@@ -212,6 +239,7 @@ def admin_ticket_detail(request, ticket_id):
             if new_priority in dict(Ticket.PRIORITY_CHOICES):
                 ticket.priority = new_priority
                 ticket.save(update_fields=['priority', 'updated_at'])
+                _log(ticket, request.user, 'priority', ticket.get_priority_display())
                 messages.success(request, 'Priority updated.')
 
         elif action == 'assign':
@@ -223,6 +251,8 @@ def admin_ticket_detail(request, ticket_id):
             if ticket.status == 'open':
                 ticket.status = 'in_progress'
             ticket.save(update_fields=['assigned_to', 'status', 'updated_at'])
+            _log(ticket, request.user, 'assigned',
+                 ticket.assigned_to.get_full_name() if ticket.assigned_to else 'Unassigned')
             messages.success(request, 'Ticket assigned.')
 
         elif action == 'resolve':
@@ -231,6 +261,7 @@ def admin_ticket_detail(request, ticket_id):
             ticket.resolution_note = note
             ticket.resolved_at = timezone.now()
             ticket.save(update_fields=['status', 'resolution_note', 'resolved_at', 'updated_at'])
+            _log(ticket, request.user, 'resolved', note[:120])
             _notify(owner, f'Ticket {ticket.ticket_number} resolved',
                     note[:80] or 'Your issue has been resolved.', url)
             _email(owner.email, f'Your ticket {ticket.ticket_number} has been resolved',
@@ -241,14 +272,44 @@ def admin_ticket_detail(request, ticket_id):
         elif action == 'reopen':
             ticket.status = 'reopened'
             ticket.save(update_fields=['status', 'updated_at'])
+            _log(ticket, request.user, 'reopened')
             _notify(owner, f'Ticket {ticket.ticket_number} reopened', ticket.subject, url)
             messages.success(request, 'Ticket reopened.')
 
+        elif action == 'merge':
+            target_id = request.POST.get('merge_into')
+            target = Ticket.objects.filter(id=target_id).exclude(id=ticket.id).first()
+            if target:
+                # Move this ticket's conversation + attachments onto the target.
+                ticket.messages.update(ticket=target)
+                ticket.attachments.update(ticket=target)
+                ticket.merged_into = target
+                ticket.status = 'closed'
+                ticket.save(update_fields=['merged_into', 'status', 'updated_at'])
+                _log(target, request.user, 'merged', f'{ticket.ticket_number} merged in')
+                _log(ticket, request.user, 'merged', f'Merged into {target.ticket_number}')
+                messages.success(request, f'Ticket merged into {target.ticket_number}.')
+                return redirect('admins:admin_ticket_detail', ticket_id=target.id)
+            messages.error(request, 'Select a valid ticket to merge into.')
+
+        elif action == 'delete':
+            num = ticket.ticket_number
+            ticket.delete()
+            messages.success(request, f'Ticket {num} deleted.')
+            return redirect('admins:admin_tickets')
+
         return redirect('admins:admin_ticket_detail', ticket_id=ticket.id)
+
+    # Candidate tickets to merge INTO: same creator, not already merged, not this one.
+    merge_candidates = Ticket.objects.filter(
+        created_by=ticket.created_by, merged_into__isnull=True
+    ).exclude(id=ticket.id).order_by('-created_at')[:50]
 
     return render(request, 'admins/tickets/detail.html', {
         'ticket': ticket,
         'messages_thread': ticket.messages.select_related('author'),
+        'events': ticket.events.select_related('actor'),
+        'merge_candidates': merge_candidates,
         'status_choices': Ticket.STATUS_CHOICES,
         'priority_choices': Ticket.PRIORITY_CHOICES,
         'assignees': _superadmins().order_by('first_name'),

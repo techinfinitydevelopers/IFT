@@ -264,3 +264,17 @@
 **Verified (local, throwaway users, cleaned up):** raise→TKT-000001, admin bell, admin list+tabs, admin reply→auto in_progress+student bell, assign/priority/status, resolve→resolved+resolved_at+email(result=1)+note visible to user, user reopen→reopened, school ticket→creator_type=school in school tab, access control (student→admin tickets 302, other's ticket 404). All 7 auto-edited admin pages still render 200. `manage.py check` clean.
 
 **Phase 2 (deferred):** SLA/overdue card, internal notes UI, merge duplicates, delete, rich-text, action timeline, configurable reopen window.
+
+---
+
+## 2026-08-05 — Raise a Ticket support module (Phase 2)
+
+**Added on top of Phase 1:**
+- **Models** (`support/models.py`, migration `0002`): `Ticket.merged_into` FK (duplicate merge); `TicketEvent` (action timeline: created/assigned/replied/status/priority/resolved/reopened/merged/note, with icon). SLA helpers: `SLA_HOURS` (urgent 8/high 24/medium 48/low 72), `sla_due_at`, `is_overdue`; `REOPEN_WINDOW_DAYS=7` enforced in `can_reopen`.
+- **Admin detail** (`support/views.py` + `templates/admins/tickets/detail.html`): internal notes (`is_internal`, private form, hidden from user, distinct yellow style); merge duplicate (dropdown of same-user tickets → moves conversation+attachments, closes source, redirects to target); delete ticket (confirm); action **Timeline** panel; every action now logs a `TicketEvent`.
+- **Admin list** (`list.html`): **Overdue (Beyond SLA)** card (clickable → `?overdue=1` filter) + per-row Overdue chip; merged tickets excluded from list/counts.
+- **User reopen** now respects the 7-day window via `can_reopen`.
+
+**Verified (local, throwaway users, cleaned up):** created→event logged; internal note added + user cannot see it; overdue detection (urgent 48h) + card + chip + filter; merge (t2→t1, closed, msgs moved, hidden); timeline renders; reopen window fresh=yes / 8-days=no; delete works. Browser UI check (student + admin, all pages) — internal note form, merge dropdown, timeline, delete, 8 KPI cards incl. Overdue all render. `manage.py check` clean.
+
+**Still deferred:** rich-text editor (textareas keep line breaks via pre-wrap), SLA in true *working* hours (currently calendar hours).
