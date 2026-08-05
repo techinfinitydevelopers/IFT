@@ -749,8 +749,14 @@
                             <select name="gender" class="rb-input"><option value="">All</option><option value="male">Male</option><option value="female">Female</option></select></div>
                         <div><label class="rb-lbl">Board</label>
                             <select name="board" class="rb-input"><option value="">All</option><option>CBSE</option><option>ICSE</option><option>SSC</option><option>IB</option><option>IGCSE</option><option>Other</option></select></div>
-                        <div><label class="rb-lbl">City</label><input name="city" class="rb-input" placeholder="Any city"></div>
-                        <div><label class="rb-lbl">State</label><input name="state" class="rb-input" placeholder="Any state"></div>
+                        <div><label class="rb-lbl">City</label>
+                            <select name="city" class="rb-input"><option value="">All</option>
+                                {% for c in report_cities %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
+                            </select></div>
+                        <div><label class="rb-lbl">State</label>
+                            <select name="state" class="rb-input"><option value="">All</option>
+                                {% for st in report_states %}<option value="{{ st }}">{{ st }}</option>{% endfor %}
+                            </select></div>
                         <div><label class="rb-lbl">Zone</label>
                             <select name="zone" class="rb-input"><option value="">All</option><option>North</option><option>South</option><option>East</option><option>West</option><option>Central</option><option>Northeast</option></select></div>
                         <div class="rb-student"><label class="rb-lbl">SDG / Track</label>

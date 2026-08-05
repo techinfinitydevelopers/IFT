@@ -3364,6 +3364,19 @@ def reports_view(request):
     )
     context['report_tracks'] = IdeaSubmission.TRACK_CHOICES
 
+    # Distinct cities / states available (from schools + students) for dropdowns
+    def _distinct(field):
+        vals = set()
+        for v in School.objects.values_list(field, flat=True):
+            if v and v.strip():
+                vals.add(v.strip())
+        for v in Student.objects.values_list(field, flat=True):
+            if v and v.strip():
+                vals.add(v.strip())
+        return sorted(vals, key=str.lower)
+    context['report_cities'] = _distinct('city')
+    context['report_states'] = _distinct('state')
+
     return render(request, 'admins/reports.html', context)
 
 
