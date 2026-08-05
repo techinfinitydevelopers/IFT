@@ -1,0 +1,62 @@
+{% extends 'highlights/base_school.html' %}
+{% block page_title %}Upload Highlight{% endblock %}
+{% block heading %}Upload IFTx Highlight{% endblock %}
+{% block content %}
+<div style="max-width:760px;">
+    <a href="{% url 'students:my_highlights' %}" style="font-size:0.82rem;color:#666;text-decoration:none;display:inline-flex;align-items:center;gap:4px;margin-bottom:14px;">
+        <span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span> Back to Highlights
+    </a>
+    <div class="card-box">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row g-3 mb-3">
+                <div class="col-md-8">
+                    <label class="form-label-ift">Event Title <span style="color:#dc2626;">*</span></label>
+                    <input type="text" name="title" class="form-input-ift" required maxlength="300" placeholder="e.g. IFTx Innovation Fair 2026">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label-ift">Date of Event <span style="color:#dc2626;">*</span></label>
+                    <input type="date" name="event_date" class="form-input-ift" required>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label-ift">Summary of the activity</label>
+                <textarea name="summary" class="form-input-ift" rows="4" placeholder="Brief summary of what happened at the event..."></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label-ift">Media — Photos / Videos / PPT / PDF / Doc</label>
+                <input type="file" name="media" class="form-input-ift" multiple
+                       accept="image/*,video/*,.ppt,.pptx,.pdf,.doc,.docx">
+                <p style="font-size:0.72rem;color:#888;margin-top:6px;">
+                    Limits per file — Video: {{ max_mb.video }} MB · PPT/PDF: {{ max_mb.ppt }} MB · Images/Docs: {{ max_mb.image }} MB.
+                    You can select multiple files.
+                </p>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label-ift">Participating students (optional)</label>
+                <div id="studentRows">
+                    <div class="d-flex gap-2 mb-2 student-row">
+                        <input type="text" name="student_name" class="form-input-ift" placeholder="Student name" style="flex:2;">
+                        <input type="text" name="student_grade" class="form-input-ift" placeholder="Grade" style="flex:1;">
+                    </div>
+                </div>
+                <button type="button" class="btn-primary-ift" style="background:#64748b;padding:6px 12px;font-size:0.78rem;" onclick="addStudentRow()">
+                    <span class="material-symbols-outlined" style="font-size:16px;">add</span> Add another student
+                </button>
+            </div>
+
+            <button type="submit" class="btn-primary-ift"><span class="material-symbols-outlined" style="font-size:18px;">upload</span> Upload Highlight</button>
+        </form>
+    </div>
+</div>
+<script>
+function addStudentRow() {
+    var wrap = document.getElementById('studentRows');
+    var row = wrap.querySelector('.student-row').cloneNode(true);
+    row.querySelectorAll('input').forEach(function(i){ i.value=''; });
+    wrap.appendChild(row);
+}
+</script>
+{% endblock %}

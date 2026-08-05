@@ -1,0 +1,69 @@
+{% extends 'highlights/base_school.html' %}
+{% block page_title %}{{ highlight.title }}{% endblock %}
+{% block heading %}IFTx Highlight{% endblock %}
+{% block content %}
+<div style="max-width:900px;">
+    <a href="{% url 'students:my_highlights' %}" style="font-size:0.82rem;color:#666;text-decoration:none;display:inline-flex;align-items:center;gap:4px;margin-bottom:14px;">
+        <span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span> Back to Highlights
+    </a>
+
+    <div class="card-box mb-3">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+            <div>
+                <h2 style="font-size:1.1rem;font-weight:700;margin:0 0 4px;">{{ highlight.title }}</h2>
+                <div style="font-size:0.8rem;color:#5E2A97;font-weight:600;">{{ highlight.event_date|date:"d M Y" }}</div>
+            </div>
+            {% if highlight.is_reviewed %}<span class="chip" style="background:#dcfce7;color:#15803d;">Reviewed by admin</span>{% endif %}
+        </div>
+        {% if highlight.summary %}<p style="font-size:0.88rem;white-space:pre-wrap;margin:12px 0 0;">{{ highlight.summary }}</p>{% endif %}
+    </div>
+
+    <!-- Media grid -->
+    <h3 style="font-size:0.92rem;font-weight:700;margin:0 0 10px;">Media ({{ highlight.media.count }})</h3>
+    <div class="row g-3 mb-3">
+        {% for m in highlight.media.all %}
+        <div class="col-6 col-md-4 col-lg-3">
+            <div class="card-box p-2" style="height:100%;">
+                <div style="height:120px;border-radius:8px;overflow:hidden;background:#f1f5f9;display:flex;align-items:center;justify-content:center;">
+                    {% if m.is_image %}
+                    <a href="{{ m.file.url }}" target="_blank" rel="noopener"><img src="{{ m.file.url }}" style="width:100%;height:120px;object-fit:cover;"></a>
+                    {% elif m.is_video %}
+                    <video src="{{ m.file.url }}" style="width:100%;height:120px;object-fit:cover;" controls></video>
+                    {% else %}
+                    <a href="{{ m.file.url }}" target="_blank" rel="noopener" style="text-align:center;text-decoration:none;color:#64748b;">
+                        <span class="material-symbols-outlined" style="font-size:40px;">description</span>
+                    </a>
+                    {% endif %}
+                </div>
+                <div style="font-size:0.72rem;color:#666;margin-top:6px;" class="text-truncate">{{ m.original_name|default:m.media_type }}</div>
+                <div style="font-size:0.68rem;color:#999;">{{ m.get_media_type_display|default:m.media_type }} · {{ m.size_mb }} MB</div>
+            </div>
+        </div>
+        {% empty %}<div class="col-12"><p style="font-size:0.84rem;color:#999;">No media uploaded.</p></div>{% endfor %}
+    </div>
+
+    <!-- Add more media -->
+    <div class="card-box mb-3">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <label class="form-label-ift">Add more media</label>
+            <div class="d-flex gap-2 flex-wrap align-items-center">
+                <input type="file" name="media" multiple accept="image/*,video/*,.ppt,.pptx,.pdf,.doc,.docx" style="font-size:0.82rem;">
+                <button type="submit" class="btn-primary-ift"><span class="material-symbols-outlined" style="font-size:18px;">add</span> Add</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Participants -->
+    {% if highlight.participants.all %}
+    <h3 style="font-size:0.92rem;font-weight:700;margin:0 0 10px;">Participating Students ({{ highlight.participants.count }})</h3>
+    <div class="card-box">
+        <div class="d-flex flex-wrap gap-2">
+            {% for p in highlight.participants.all %}
+            <span class="chip" style="background:#f1f5f9;color:#334155;">{{ p.student_name }}{% if p.grade %} · {{ p.grade }}{% endif %}</span>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

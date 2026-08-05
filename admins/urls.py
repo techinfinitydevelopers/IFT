@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 from support import views as support_views
+from highlights import views as highlights_views
 
 app_name = 'admins'
 
@@ -9,6 +10,10 @@ urlpatterns = [
     # Ticket Management
     path('tickets/', support_views.admin_tickets, name='admin_tickets'),
     path('tickets/<int:ticket_id>/', support_views.admin_ticket_detail, name='admin_ticket_detail'),
+    # IFTx Highlights
+    path('highlights/', highlights_views.admin_highlights, name='admin_highlights'),
+    path('highlights/export/', highlights_views.admin_highlights_export, name='admin_highlights_export'),
+    path('highlights/<int:highlight_id>/', highlights_views.admin_highlight_detail, name='admin_highlight_detail'),
     path('submissions/', views.all_submissions, name='all_submissions'),
     path('submissions/classic/', views.all_submissions_classic, name='all_submissions_classic'),
     path('submission/<int:submission_id>/', views.submission_detail, name='submission_detail'),

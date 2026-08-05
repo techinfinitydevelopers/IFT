@@ -290,3 +290,23 @@
 **Verified (local, throwaway users, cleaned up):** new student (joined after an announcement) → count 0, old announcement hidden; announcement posted after join → visible + counted; existing user (joined before announcements) → still sees all (no regression). `manage.py check` clean.
 
 **Note:** Only broadcast `Content` announcements are floored; per-user Notifications (ticket replies etc.) unaffected. First test run showed a false negative purely from a test-timing artifact (artificial date_joined vs real-time created_at); re-test with explicit timestamps passed all cases.
+
+---
+
+## 2026-08-05 — IFTx Highlights module (new tab, above FAQ in School Dashboard)
+
+**Feature (item 1 of the big request):** Schools/teachers upload IFTx event photos/videos/PPT/PDF/doc + summary + event date + participating students; super admin reviews/tracks with filters + Excel dump. Media on S3 (standard FileField).
+
+**New app `highlights/`** (registered in INSTALLED_APPS, migration `0001`):
+- Models: `IFTxHighlight` (school FK, created_by, title, event_date, summary, is_reviewed/reviewed_at), `HighlightMedia` (file `upload_to=iftx_highlights/%Y/%m/`, media_type, size_bytes), `HighlightParticipant` (student_name, grade). `MAX_MB` + `EXT_TYPE` maps drive per-type size limits.
+- Size limits enforced in upload view: video 250MB, PPT/PDF 25MB, images/docs 5MB (oversized/unsupported skipped with a message).
+- School views (`highlights/views.py`): `my_highlights`, `upload_highlight` (media + participant rows), `highlight_detail` (view + add media). Routes in `students/urls.py` `/iftx-highlights/*`.
+- Admin views: `admin_highlights` (KPI + filters: school, media type, event date range), `admin_highlight_detail` (media, participants, mark reviewed toggle), `admin_highlights_export` (Excel "dump" via admins.reports.xlsx_response). Routes in `admins/urls.py` `/super-admin/highlights/*`.
+- Templates: `templates/highlights/{base_school,my_highlights,upload_highlight,highlight_detail}.html`, `templates/admins/highlights/{base_admin,list,detail}.html`.
+- Nav: "IFTx Highlights" added ABOVE FAQ in school sidebar (school_dashboard.html + support/base_user.html school branch); "IFTx Highlights" added to 24 admin sidebar templates (scripted after Tickets) + tickets/base_admin.html manual.
+
+**Verified:** `manage.py check` clean. School e2e: list/upload/detail 200, upload creates highlight w/ media+participants+event_date, oversized doc rejected. Admin e2e: list 200, filters (school/media/date) correct, detail 200, mark-reviewed works, Excel dump 200 xlsx, school blocked from admin (302). All 10 existing admin pages still render 200 (nav insert safe). Browser UI check: school IFTx Highlights list + upload form + admin list all render cleanly with correct nav placement.
+
+**Zero break:** brand-new isolated app; only additive nav lines touch existing templates.
+
+**Still pending (next):** School Resources tab under Digital Resources; teacher video-seen tracking; Top-400 re-edit. Blocked: Zonal Report (Pinky→Hemant), Lock teacher RSS (Sushil Sir).

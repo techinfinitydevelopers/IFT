@@ -60,6 +60,8 @@ INSTALLED_APPS = [
     're_evaluation',
     # Support / Raise-a-Ticket module
     'support',
+    # IFTx Highlights module
+    'highlights',
 ]
 
 MIDDLEWARE = [

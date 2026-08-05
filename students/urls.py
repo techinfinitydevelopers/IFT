@@ -2,6 +2,7 @@ from django.urls import path
 from django.shortcuts import redirect
 from . import views
 from support import views as support_views
+from highlights import views as highlights_views
 
 app_name = 'students'
 
@@ -37,6 +38,10 @@ urlpatterns = [
     path('help/', support_views.my_tickets, name='my_tickets'),
     path('help/raise/', support_views.raise_ticket, name='raise_ticket'),
     path('help/ticket/<int:ticket_id>/', support_views.ticket_detail, name='ticket_detail'),
+    # IFTx Highlights (school/teacher)
+    path('iftx-highlights/', highlights_views.my_highlights, name='my_highlights'),
+    path('iftx-highlights/upload/', highlights_views.upload_highlight, name='upload_highlight'),
+    path('iftx-highlights/<int:highlight_id>/', highlights_views.highlight_detail, name='highlight_detail'),
     path('learning-resources/', views.learning_resources, name='learning_resources'),
     path('digital-resources/', views.digital_resources, name='digital_resources'),
     path('code-ai/', views.code_ai, name='code_ai'),

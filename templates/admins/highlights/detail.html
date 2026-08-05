@@ -1,0 +1,66 @@
+{% extends 'admins/highlights/base_admin.html' %}
+{% block page_title %}{{ highlight.title }}{% endblock %}
+{% block heading %}IFTx Highlight{% endblock %}
+{% block content %}
+<a href="{% url 'admins:admin_highlights' %}" style="font-size:0.82rem;color:#666;text-decoration:none;display:inline-flex;align-items:center;gap:4px;margin-bottom:14px;">
+    <span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span> Back to Highlights
+</a>
+
+<div class="row g-3">
+    <div class="col-lg-8">
+        <div class="card-box mb-3">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                <div>
+                    <h2 style="font-size:1.1rem;font-weight:700;margin:0 0 4px;">{{ highlight.title }}</h2>
+                    <div style="font-size:0.8rem;color:#5E2A97;font-weight:600;">{{ highlight.event_date|date:"d M Y" }}</div>
+                </div>
+                <form method="post">
+                    {% csrf_token %}<input type="hidden" name="action" value="toggle_reviewed">
+                    <button type="submit" class="btn-primary-ift" style="{% if highlight.is_reviewed %}background:#64748b;{% else %}background:#15803d;{% endif %}">
+                        <span class="material-symbols-outlined" style="font-size:18px;">{% if highlight.is_reviewed %}undo{% else %}task_alt{% endif %}</span>
+                        {% if highlight.is_reviewed %}Mark Not Reviewed{% else %}Mark Reviewed{% endif %}
+                    </button>
+                </form>
+            </div>
+            {% if highlight.summary %}<p style="font-size:0.88rem;white-space:pre-wrap;margin:12px 0 0;">{{ highlight.summary }}</p>{% endif %}
+        </div>
+
+        <h3 style="font-size:0.92rem;font-weight:700;margin:0 0 10px;">Media ({{ highlight.media.count }})</h3>
+        <div class="row g-3">
+            {% for m in highlight.media.all %}
+            <div class="col-6 col-md-4">
+                <div class="card-box p-2">
+                    <div style="height:130px;border-radius:8px;overflow:hidden;background:#f1f5f9;display:flex;align-items:center;justify-content:center;">
+                        {% if m.is_image %}<a href="{{ m.file.url }}" target="_blank" rel="noopener"><img src="{{ m.file.url }}" style="width:100%;height:130px;object-fit:cover;"></a>
+                        {% elif m.is_video %}<video src="{{ m.file.url }}" style="width:100%;height:130px;object-fit:cover;" controls></video>
+                        {% else %}<a href="{{ m.file.url }}" target="_blank" rel="noopener" style="color:#64748b;"><span class="material-symbols-outlined" style="font-size:40px;">description</span></a>{% endif %}
+                    </div>
+                    <div style="font-size:0.72rem;color:#666;margin-top:6px;" class="text-truncate">{{ m.original_name|default:m.media_type }}</div>
+                    <div style="font-size:0.68rem;color:#999;">{{ m.media_type }} · {{ m.size_mb }} MB</div>
+                </div>
+            </div>
+            {% empty %}<div class="col-12"><p style="font-size:0.84rem;color:#999;">No media.</p></div>{% endfor %}
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card-box mb-3">
+            <div style="font-size:0.8rem;font-weight:700;color:#444;margin-bottom:10px;">Details</div>
+            <div style="font-size:0.84rem;line-height:1.9;">
+                <div><strong>School:</strong> {{ highlight.school_name }}</div>
+                <div><strong>Uploaded by:</strong> {{ highlight.created_by.get_full_name|default:highlight.created_by.username|default:"—" }}</div>
+                <div><strong>Event date:</strong> {{ highlight.event_date|date:"d M Y" }}</div>
+                <div><strong>Uploaded on:</strong> {{ highlight.created_at|date:"d M Y, H:i" }}</div>
+                <div><strong>Status:</strong> {% if highlight.is_reviewed %}Reviewed{% else %}Pending review{% endif %}</div>
+            </div>
+        </div>
+
+        <div class="card-box">
+            <div style="font-size:0.8rem;font-weight:700;color:#444;margin-bottom:10px;">Participating Students ({{ highlight.participants.count }})</div>
+            {% for p in highlight.participants.all %}
+            <div style="font-size:0.84rem;padding:4px 0;border-bottom:1px solid #f5f5f5;">{{ p.student_name }}{% if p.grade %} <span style="color:#999;">· Grade {{ p.grade }}</span>{% endif %}</div>
+            {% empty %}<p style="font-size:0.82rem;color:#999;margin:0;">No students listed.</p>{% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

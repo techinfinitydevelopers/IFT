@@ -1,0 +1,75 @@
+{% extends 'admins/highlights/base_admin.html' %}
+{% block page_title %}IFTx Highlights{% endblock %}
+{% block heading %}IFTx Highlights{% endblock %}
+{% block content %}
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3"><div class="kpi"><div class="lbl">Total Highlights</div><div class="val">{{ highlights|length }}</div></div></div>
+    <div class="col-6 col-lg-3"><div class="kpi"><div class="lbl">Total Media Files</div><div class="val">{{ total_media }}</div></div></div>
+</div>
+
+<!-- Filters -->
+<form method="get" class="card-box mb-3">
+    <div class="row g-2 align-items-end">
+        <div class="col-6 col-md-3">
+            <label style="font-size:0.72rem;color:#666;">School</label>
+            <select name="school" class="form-input-ift w-100">
+                <option value="">All schools</option>
+                {% for s in schools %}<option value="{{ s.id }}" {% if s.id|stringformat:'s' == school_id %}selected{% endif %}>{{ s.name }}</option>{% endfor %}
+            </select>
+        </div>
+        <div class="col-6 col-md-2">
+            <label style="font-size:0.72rem;color:#666;">Media type</label>
+            <select name="media" class="form-input-ift w-100">
+                <option value="">All media</option>
+                {% for t in media_types %}<option value="{{ t }}" {% if t == media_type %}selected{% endif %}>{{ t|capfirst }}</option>{% endfor %}
+            </select>
+        </div>
+        <div class="col-6 col-md-2">
+            <label style="font-size:0.72rem;color:#666;">Event from</label>
+            <input type="date" name="from" value="{{ date_from }}" class="form-input-ift w-100">
+        </div>
+        <div class="col-6 col-md-2">
+            <label style="font-size:0.72rem;color:#666;">Event to</label>
+            <input type="date" name="to" value="{{ date_to }}" class="form-input-ift w-100">
+        </div>
+        <div class="col-12 col-md-3 d-flex gap-2">
+            <button type="submit" class="btn-primary-ift"><span class="material-symbols-outlined" style="font-size:18px;">filter_alt</span> Filter</button>
+            <a href="{% url 'admins:admin_highlights_export' %}?school={{ school_id }}&media={{ media_type }}&from={{ date_from }}&to={{ date_to }}" class="btn-primary-ift" style="background:#15803d;"><span class="material-symbols-outlined" style="font-size:18px;">download</span> Dump (Excel)</a>
+        </div>
+    </div>
+</form>
+
+<div class="card-box p-0" style="overflow:hidden;">
+    <div style="overflow-x:auto;">
+        <table class="table mb-0" style="min-width:900px;">
+            <thead style="background:#faf7fd;">
+                <tr style="font-size:0.72rem;color:#666;text-transform:uppercase;">
+                    <th class="py-3 px-3">Event Date</th>
+                    <th class="py-3 px-3">School</th>
+                    <th class="py-3 px-3">Title</th>
+                    <th class="py-3 px-3">Media</th>
+                    <th class="py-3 px-3">Students</th>
+                    <th class="py-3 px-3">Uploaded By</th>
+                    <th class="py-3 px-3">Reviewed</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for h in highlights %}
+                <tr style="font-size:0.84rem;cursor:pointer;" onclick="window.location='{% url 'admins:admin_highlight_detail' h.id %}'">
+                    <td class="py-3 px-3" style="color:#5E2A97;font-weight:600;">{{ h.event_date|date:"d M Y" }}</td>
+                    <td class="py-3 px-3">{{ h.school_name }}</td>
+                    <td class="py-3 px-3">{{ h.title|truncatechars:40 }}</td>
+                    <td class="py-3 px-3">{{ h.media.count }}</td>
+                    <td class="py-3 px-3">{{ h.participants.count }}</td>
+                    <td class="py-3 px-3">{{ h.created_by.get_full_name|default:h.created_by.username|default:"—" }}</td>
+                    <td class="py-3 px-3">{% if h.is_reviewed %}<span class="chip" style="background:#dcfce7;color:#15803d;">Yes</span>{% else %}<span class="chip" style="background:#fef3c7;color:#b45309;">Pending</span>{% endif %}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="text-center py-5" style="color:#999;">No highlights found for these filters.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
