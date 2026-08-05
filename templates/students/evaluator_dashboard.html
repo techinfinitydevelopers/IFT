@@ -454,8 +454,11 @@
                     <button class="header-icon-btn" id="fullscreenBtn">
                         <span class="material-symbols-outlined">fullscreen</span>
                     </button>
-                    <button class="header-icon-btn" id="notificationBtn">
+                    <button class="header-icon-btn" id="notificationBtn" style="position:relative;">
                         <span class="material-symbols-outlined">notifications</span>
+                        {% if unread_notification_count > 0 %}
+                        <span style="position:absolute;top:2px;right:2px;min-width:16px;height:16px;padding:0 4px;background:#ef4444;color:#fff;font-size:0.6rem;font-weight:700;line-height:16px;border-radius:99px;text-align:center;">{{ unread_notification_count }}</span>
+                        {% endif %}
                     </button>
                     <div class="header-avatar" id="profileAvatarBtn">
                         {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
@@ -498,9 +501,23 @@
                         <span class="material-symbols-outlined" style="font-size: 20px;">close</span>
                     </button>
                 </div>
-                <div style="padding: 2rem; text-align: center; color: var(--text-muted); font-size: 0.875rem;">
-                    <span class="material-symbols-outlined" style="font-size: 40px; color: #e2e8f0; display: block; margin-bottom: 0.5rem;">notifications_off</span>
-                    No new notifications
+                <div style="max-height: 420px; overflow-y: auto;">
+                    {% for item in header_notifications_combined %}
+                    <div style="display:flex;gap:12px;padding:14px 16px;border-bottom:1px solid #f8fafc;{% if not item.is_read %}background:#f5f0ff;{% endif %}">
+                        <span class="material-symbols-outlined" style="color:#5E2A97;font-size:20px;flex-shrink:0;">{{ item.icon }}</span>
+                        <div style="flex:1;min-width:0;">
+                            <p style="margin:0;font-size:0.85rem;font-weight:600;color:#0f172a;">{{ item.title }}</p>
+                            {% if item.message %}<p style="margin:2px 0 0 0;font-size:0.75rem;color:#64748b;">{{ item.message|truncatechars:90 }}</p>{% endif %}
+                        </div>
+                        {% if not item.is_read %}<span style="width:8px;height:8px;border-radius:50%;background:#5E2A97;flex-shrink:0;margin-top:4px;"></span>{% endif %}
+                    </div>
+                    {% endfor %}
+                    {% if not header_notifications_combined %}
+                    <div style="padding: 2rem; text-align: center; color: var(--text-muted); font-size: 0.875rem;">
+                        <span class="material-symbols-outlined" style="font-size: 40px; color: #e2e8f0; display: block; margin-bottom: 0.5rem;">notifications_off</span>
+                        No new notifications
+                    </div>
+                    {% endif %}
                 </div>
             </div>
 

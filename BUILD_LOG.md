@@ -226,3 +226,19 @@
 **Verified (local, temp superuser):** dashboard 200, 11 kpi-links present, all 8 destination URLs 200 (incl. new paid filter). `manage.py check` clean.
 
 **Notes:** Additive only — no DB/model/migration change, existing pages/links unchanged. Zero break risk.
+
+---
+
+## 2026-08-05 — Fix: announcements not showing in evaluator bell (end-to-end audit)
+
+**Reported:** Announcements "not working" — recipient bell should show announcements super admin targeted via visibility.
+
+**End-to-end audit result:** Backend + create flow are CORRECT. `content_create` saves visibility/status; `accounts/context_processors.unread_notification_count` gates by `status='published'` and `visibility in ['all', <role>]` (jury→evaluators). Verified via simulation: published+targeted announcement appears; schools-only and draft correctly hidden.
+
+**Actual bug:** The **evaluator dashboard bell was hardcoded** to "No new notifications" — `templates/students/evaluator_dashboard.html` never rendered `header_notifications_combined`/`unread_notification_count`, so evaluators never saw announcements targeted to "Evaluators Only" or "All Users". (Student & school bells were already wired via `students/partials/header.html` and `school_dashboard.html`.)
+
+**Fix:** Wired the evaluator bell — badge count on the button + loop over `header_notifications_combined` with unread highlight and empty-state fallback. No view/model/context change (data was already provided to the page).
+
+**Verified (local, temp jury user + announcements, cleaned up):** evaluator dashboard 200; evaluators-only + all-users announcements both render; badge shows; "No new notifications" gone. `manage.py check` clean.
+
+**Note (out of scope, minor):** Super Admin's own dashboard bell button has no dropdown panel at all — but super admin is the *sender*, not a typical recipient. Left as-is.
