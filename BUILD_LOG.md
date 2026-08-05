@@ -278,3 +278,15 @@
 **Verified (local, throwaway users, cleaned up):** created→event logged; internal note added + user cannot see it; overdue detection (urgent 48h) + card + chip + filter; merge (t2→t1, closed, msgs moved, hidden); timeline renders; reopen window fresh=yes / 8-days=no; delete works. Browser UI check (student + admin, all pages) — internal note form, merge dropdown, timeline, delete, 8 KPI cards incl. Overdue all render. `manage.py check` clean.
 
 **Still deferred:** rich-text editor (textareas keep line breaks via pre-wrap), SLA in true *working* hours (currently calendar hours).
+
+---
+
+## 2026-08-05 — New registrants don't see old announcements in the bell
+
+**Why:** A newly registered student/school saw all past published announcements in their notification bell (broadcast `Content`, not scoped to join date; new user's `announcements_read_at` is None so all counted as unread).
+
+**Fix:** `accounts/context_processors.py` `unread_notification_count` — floor the announcement queryset by `request.user.date_joined` (`content_qs.filter(created_at__gte=joined)`). Applies to both count and displayed list. One file, ~4 lines, no migration/registration change.
+
+**Verified (local, throwaway users, cleaned up):** new student (joined after an announcement) → count 0, old announcement hidden; announcement posted after join → visible + counted; existing user (joined before announcements) → still sees all (no regression). `manage.py check` clean.
+
+**Note:** Only broadcast `Content` announcements are floored; per-user Notifications (ticket replies etc.) unaffected. First test run showed a false negative purely from a test-timing artifact (artificial date_joined vs real-time created_at); re-test with explicit timestamps passed all cases.

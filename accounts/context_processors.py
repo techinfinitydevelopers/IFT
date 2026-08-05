@@ -43,6 +43,11 @@ def unread_notification_count(request):
             notif_count = Notification.objects.filter(user=request.user, is_read=False).count()
             # Only count announcements the user hasn't cleared yet.
             content_qs = Content.objects.filter(status='published', visibility__in=vis)
+            # A newly-registered user must not see announcements posted before they
+            # joined — floor everything by their account creation time.
+            joined = getattr(request.user, 'date_joined', None)
+            if joined:
+                content_qs = content_qs.filter(created_at__gte=joined)
             unread_content_qs = content_qs
             if read_at:
                 unread_content_qs = content_qs.filter(created_at__gt=read_at)
