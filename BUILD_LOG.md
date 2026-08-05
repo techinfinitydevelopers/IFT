@@ -194,3 +194,21 @@
 - Admin UI screenshot confirmed (all 4 cards).
 
 **Notes:** `top400.jpg` body text still says "School Champion" (client to confirm); nothing committed yet; LearningVideo/VideoProgress migration still out of scope.
+
+---
+
+## 2026-08-05 — Official India Zone/Region mapping for reports
+
+**Why:** Reports "Zone" column used a guessed `_STATE_ZONES` dict in `admins/views.py` that was WRONG vs the client's authoritative `India_Zone_Region_State_City_Mapping.xlsx`. Mismatches fixed: UP/Uttarakhand = North (was Central), Lakshadweep = North (was South), Andaman & Nicobar = Central (was South), zone label `North-East` → `Northeast`.
+
+**Changes:**
+- `admins/zones.py` (new) — official baked-in mapping from the Excel: `STATE_ZONE` (36 states/UTs), `CITY_ZONE` (169 cities), each → (region, zone). Helpers `resolve_zone(state, city='')` / `resolve_region(...)`. STATE-FIRST, city fallback (avoids Udaipur Rajasthan/Tripura collision). Normalisation drops `(NCT)` etc.; `_STATE_ALIASES`/`_CITY_ALIASES` for old names (Orissa, Bangalore, Gurgaon, Pondicherry, …). Region == Zone in this dataset; `resolve_region` kept for a future Zonal Report.
+- `admins/views.py` — removed hardcoded `_STATE_ZONES`; `_state_to_zone(state, city='')` now delegates to `zones.resolve_zone`; added `_submission_city(sub)`. Top-N CSV + students export + schools export now pass city for city-aware zone (column + zone filter).
+- `templates/admins/reports.html` — Zone filter dropdown `North-East` → `Northeast` to match new label.
+
+**Verified (local):**
+- `manage.py check` clean.
+- 18 assertions pass (UP→North, Uttarakhand→North, Maharashtra→West, Assam→Northeast, Kerala→South, Bihar→East, MP→Central, Lakshadweep→North, Andaman→Central; cities Gurugram→North, Indore→Central, Panaji→West; Delhi(NCT)→North; Rajasthan+Udaipur→North [state-first]; Bangalore alias→South; Pondicherry→South; junk→Unknown).
+- Test client (temp superuser, deleted after): reports page 200, students/schools previews 200 (JSON), xlsx exports 200 (spreadsheet content-type), `?zone=northeast` filter 200.
+
+**Notes:** No DB/migration change — pure data + helper, additive, zero break risk. All existing `_state_to_zone` callers keep working (signature preserved). Not committed yet.

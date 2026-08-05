@@ -769,38 +769,18 @@ def rankings_view(request):
 
 
 
-# Standard India Zonal Council grouping (state name -> zone).
-_STATE_ZONES = {
-    # North
-    'jammu and kashmir': 'North', 'jammu & kashmir': 'North', 'ladakh': 'North',
-    'himachal pradesh': 'North', 'punjab': 'North', 'haryana': 'North',
-    'rajasthan': 'North', 'delhi': 'North', 'new delhi': 'North', 'chandigarh': 'North',
-    # Central
-    'uttar pradesh': 'Central', 'uttarakhand': 'Central', 'madhya pradesh': 'Central',
-    'chhattisgarh': 'Central',
-    # East
-    'bihar': 'East', 'jharkhand': 'East', 'odisha': 'East', 'orissa': 'East',
-    'west bengal': 'East',
-    # West
-    'gujarat': 'West', 'goa': 'West', 'maharashtra': 'West',
-    'dadra and nagar haveli and daman and diu': 'West', 'daman and diu': 'West',
-    'dadra and nagar haveli': 'West',
-    # South
-    'andhra pradesh': 'South', 'telangana': 'South', 'karnataka': 'South',
-    'kerala': 'South', 'tamil nadu': 'South', 'puducherry': 'South',
-    'lakshadweep': 'South', 'andaman and nicobar islands': 'South',
-    # North-East
-    'assam': 'North-East', 'arunachal pradesh': 'North-East', 'manipur': 'North-East',
-    'meghalaya': 'North-East', 'mizoram': 'North-East', 'nagaland': 'North-East',
-    'tripura': 'North-East', 'sikkim': 'North-East',
-}
+# Official India Zone/Region mapping lives in admins/zones.py (from the
+# client's India_Zone_Region_State_City_Mapping.xlsx). _state_to_zone keeps its
+# signature for back-compat; an optional city makes the lookup city-aware.
+from . import zones as _zones
 
 
-def _state_to_zone(state):
-    """Map an Indian state name to its zone; 'Unknown' if not recognised."""
-    if not state:
-        return 'Unknown'
-    return _STATE_ZONES.get(state.strip().lower(), 'Unknown')
+def _state_to_zone(state, city=''):
+    """Map an Indian state (and optional city) to its official zone.
+
+    'Unknown' if not recognised. State-first, city as a fallback.
+    """
+    return _zones.resolve_zone(state, city)
 
 
 def _submission_state(sub):
@@ -809,6 +789,14 @@ def _submission_state(sub):
     if student.school and getattr(student.school, 'state', ''):
         return student.school.state
     return getattr(student, 'state', '') or ''
+
+
+def _submission_city(sub):
+    """Best available city for a submission's student/school."""
+    student = sub.student
+    if student.school and getattr(student.school, 'city', ''):
+        return student.school.city
+    return getattr(student, 'city', '') or ''
 
 
 def _submission_description(sub):
@@ -857,7 +845,7 @@ def export_top_400(request):
             _submission_description(sub),
             sub.student.user.get_full_name() or sub.student.user.username,
             sub.student.school_name,
-            _state_to_zone(_submission_state(sub)),
+            _state_to_zone(_submission_state(sub), _submission_city(sub)),
             e.final_score,
             e.uniqueness_score,
             e.ease_of_implementation_score,
@@ -3454,7 +3442,8 @@ def report_students_export(request):
     if g.get('zone'):  # zone filter needs python-side state->zone mapping
         want = g['zone'].strip().lower()
         students_list = [st for st in students_list
-                         if _state_to_zone((st.school.state if st.school else st.state)).lower() == want]
+                         if _state_to_zone((st.school.state if st.school else st.state),
+                                           (st.school.city if st.school else st.city)).lower() == want]
 
     headers = [
         'Student Name', 'Gender', 'Grade', 'School', 'City', 'State', 'Zone', 'Board',
@@ -3477,14 +3466,15 @@ def report_students_export(request):
         else:
             ev, ev_name, ev_score = None, '', ''
         state = (school.state if school else st.state) or ''
+        city = (school.city if school else st.city) or ''
         rows.append([
             st.user.get_full_name() or st.user.username,
             st.get_gender_display() if st.gender else '',
             st.grade,
             st.school_display_name,
-            (school.city if school else st.city) or '',
+            city,
             state,
-            _state_to_zone(state),
+            _state_to_zone(state, city),
             (school.board if school else st.school_board) or '',
             'Yes' if st.is_paid else 'No',
             int(st.payment_amount) if st.payment_amount else '',
@@ -3529,7 +3519,7 @@ def report_schools_export(request):
 
     if g.get('zone'):
         want = g['zone'].strip().lower()
-        schools = [s for s in schools if _state_to_zone(s.state).lower() == want]
+        schools = [s for s in schools if _state_to_zone(s.state, s.city).lower() == want]
 
     headers = [
         'School Name', 'City', 'State', 'Zone', 'Board', 'Tata ClassEdge',
@@ -3547,7 +3537,7 @@ def report_schools_export(request):
         best = AIEvaluation.objects.filter(
             submission__student__school=sc).aggregate(m=Max('final_score'))['m']
         rows.append([
-            sc.name, sc.city, sc.state, _state_to_zone(sc.state), sc.board,
+            sc.name, sc.city, sc.state, _state_to_zone(sc.state, sc.city), sc.board,
             'Yes' if sc.is_tata_classedge else 'No',
             sc.designated_teacher_name, sc.designated_teacher_mobile,
             sc.principal_name, sc.principal_email, sc.pin_code,
