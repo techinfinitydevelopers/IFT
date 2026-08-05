@@ -32,6 +32,10 @@
             <span class="material-symbols-outlined">folder_zip</span>
             <span class="nav-text">Digital Resources</span>
         </a>
+        <a class="nav-item {% if active_page == 'code_ai' %}nav-item-active{% endif %}" href="{% url 'students:code_ai' %}">
+            <span class="material-symbols-outlined" {% if active_page == 'code_ai' %}style="font-variation-settings: 'FILL' 1;"{% endif %}>smart_toy</span>
+            <span class="nav-text">Code AI</span>
+        </a>
         {% if student_has_submission %}
         <a class="nav-item {% if active_page == 'my_idea' %}nav-item-active{% endif %}" href="{% url 'students:my_idea' %}">
             <span class="material-symbols-outlined" {% if active_page == 'my_idea' %}style="font-variation-settings: 'FILL' 1;"{% endif %}>description</span>

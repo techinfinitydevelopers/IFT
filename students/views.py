@@ -2721,6 +2721,12 @@ def digital_resources(request):
     return render(request, 'students/digital_resources.html', {'student': student, 'resources': resources})
 
 
+@login_required
+def code_ai(request):
+    """Static Code AI page — Code.org 'How AI Makes Decisions' module for students."""
+    return render(request, 'students/code_ai.html')
+
+
 def student_faq(request):
     """Student FAQ page — shows published FAQs for students."""
     from admins.models import Content

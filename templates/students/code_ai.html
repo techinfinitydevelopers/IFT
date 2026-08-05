@@ -1,0 +1,237 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Code AI - IFT Student Portal</title>
+    <link rel="icon" type="image/png" href="{% static 'images/New-Final-ift-logo.png' %}">
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <style>
+        button, .btn, a[class*="btn"], input[type="button"], input[type="submit"] { text-decoration: none; }
+        :root {
+            --primary: #5E2A97; --primary-hover: #7B3FB5; --secondary: #DEDE50;
+            --primary-light: #E8D4F0; --background-light: #F7F7F7; --surface-light: #FFFFFF;
+            --border-light: #EEEEEE; --text-dark: #222222; --text-muted: #666666; --text-light: #999999;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--background-light); color: var(--text-dark); overflow: hidden; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .main-container { display: flex; height: 100vh; width: 100%; }
+
+        .sidebar { width: 280px; background: #FFFFFF; border-right: 1px solid #EEEEEE; height: 100vh; display: flex; flex-direction: column; position: sticky; top: 0; transition: all 0.3s ease; z-index: 20; overflow-y: auto; overflow-x: hidden; }
+        .sidebar.collapsed { width: 80px; }
+        .sidebar.collapsed .nav-text, .sidebar.collapsed .user-info { opacity: 0; width: 0; overflow: hidden; white-space: nowrap; }
+        .sidebar.collapsed .logo-img { width: 50px; height: 50px; margin: 0 auto; background-position: center; }
+        .sidebar.collapsed .nav-item { justify-content: center; padding-left: 1.7rem; }
+        .sidebar.collapsed .user-avatar { margin: 0 auto; }
+        .sidebar.collapsed .logout-btn { display: none; }
+        .sidebar-header { border-bottom: 1px solid #F7F7F7; }
+        .logo-img { width: 250px; height: 95px; background-size: contain; background-position: left center; background-repeat: no-repeat; flex-shrink: 0; }
+        .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; border-radius: 0.5rem; text-decoration: none; color: #222; transition: all 0.2s; cursor: pointer; margin-bottom: 0.25rem; }
+        .nav-item:hover { background: #F7F7F7; }
+        .nav-item .material-symbols-outlined { font-size: 24px; color: #666; }
+        .nav-item.nav-item-active { background: rgba(94,42,151,0.1); color: #5E2A97; }
+        .nav-item.nav-item-active .material-symbols-outlined { color: #5E2A97; font-variation-settings: 'FILL' 1; }
+        .nav-text { font-size: 0.875rem; font-weight: 500; }
+        .sidebar-footer { border-top: 1px solid #EEEEEE; margin-top: auto; }
+        .user-profile { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; border-radius: 0.5rem; }
+        .user-avatar { width: 2.5rem; height: 2.5rem; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 1rem; border: 2px solid #EEE; flex-shrink: 0; }
+        .user-info { flex: 1; }
+        .user-name { font-size: 0.875rem; font-weight: 700; margin: 0; }
+        .user-role { font-size: 0.75rem; color: #666; margin: 0; }
+        .logout-btn { background: none; border: none; color: #666; cursor: pointer; padding: 0.5rem; border-radius: 0.375rem; display: flex; align-items: center; text-decoration: none; }
+        .logout-btn:hover { background: rgba(94,42,151,0.1); color: #5E2A97; }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 15; }
+        .sidebar-overlay.active { display: block; }
+
+        {% include 'students/partials/header_css.html' %}
+
+        .main-content { flex: 1; display: flex; flex-direction: column; height: 100%; overflow-y: auto; }
+        .content-wrapper { flex: 1; max-width: 1080px; margin: 0 auto; padding: 32px 40px 60px; width: 100%; }
+
+        /* ===== Code AI hero ===== */
+        .cai-hero {
+            position: relative; overflow: hidden;
+            background: linear-gradient(135deg, #5E2A97 0%, #7B3FB5 55%, #9C5FD6 100%);
+            border-radius: 28px; padding: 44px 40px; color: #fff;
+            box-shadow: 0 18px 40px rgba(94,42,151,0.28);
+        }
+        .cai-hero::before {
+            content: ""; position: absolute; top: -60px; right: -40px;
+            width: 220px; height: 220px; background: rgba(222,222,80,0.25); border-radius: 50%;
+        }
+        .cai-hero::after {
+            content: ""; position: absolute; bottom: -80px; left: -30px;
+            width: 180px; height: 180px; background: rgba(255,255,255,0.08); border-radius: 50%;
+        }
+        .cai-hero-inner { position: relative; z-index: 2; display: flex; align-items: center; gap: 28px; flex-wrap: wrap; }
+        .cai-robot {
+            width: 110px; height: 110px; flex-shrink: 0; border-radius: 26px;
+            background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.35);
+            display: flex; align-items: center; justify-content: center;
+            animation: floaty 3s ease-in-out infinite;
+        }
+        .cai-robot .material-symbols-outlined { font-size: 64px; color: #fff; }
+        @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .cai-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: var(--secondary); color: #3d1a63; font-weight: 800;
+            font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.14em;
+            padding: 6px 16px; border-radius: 999px; margin-bottom: 12px;
+        }
+        .cai-title { font-size: 2.5rem; font-weight: 800; line-height: 1.1; margin-bottom: 10px; }
+        .cai-title span { color: var(--secondary); }
+        .cai-subtitle { font-size: 1.05rem; opacity: 0.92; max-width: 620px; }
+
+        /* ===== highlight cards ===== */
+        .cai-highlights { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 28px 0; }
+        .cai-chip {
+            background: #fff; border: 1px solid var(--border-light); border-radius: 18px;
+            padding: 20px; text-align: center; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .cai-chip:hover { transform: translateY(-4px); box-shadow: 0 12px 26px rgba(94,42,151,0.12); }
+        .cai-chip-icon {
+            width: 54px; height: 54px; margin: 0 auto 12px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .cai-chip-icon .material-symbols-outlined { font-size: 30px; }
+        .cai-chip.c1 .cai-chip-icon { background: rgba(94,42,151,0.12); color: #5E2A97; }
+        .cai-chip.c2 .cai-chip-icon { background: rgba(222,222,80,0.28); color: #8a7a12; }
+        .cai-chip.c3 .cai-chip-icon { background: rgba(46,196,182,0.15); color: #17a398; }
+        .cai-chip h4 { font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
+        .cai-chip p { font-size: 0.82rem; color: var(--text-muted); margin: 0; }
+
+        /* ===== description card ===== */
+        .cai-card {
+            background: #fff; border: 1px solid var(--border-light); border-radius: 20px;
+            padding: 28px 30px; margin-bottom: 24px;
+        }
+        .cai-card h3 { font-size: 1.25rem; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .cai-card h3 .material-symbols-outlined { color: var(--primary); }
+        .cai-card p { font-size: 0.95rem; line-height: 1.75; color: #444; }
+
+        /* ===== CTA buttons ===== */
+        .cai-cta-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
+        .cai-btn {
+            flex: 1; min-width: 240px; display: flex; align-items: center; justify-content: center; gap: 10px;
+            padding: 18px 24px; border-radius: 16px; font-weight: 700; font-size: 1.05rem;
+            transition: transform 0.15s, box-shadow 0.2s; cursor: pointer; border: none;
+        }
+        .cai-btn .material-symbols-outlined { font-size: 24px; }
+        .cai-btn-primary { background: linear-gradient(135deg, #5E2A97, #7B3FB5); color: #fff; box-shadow: 0 10px 24px rgba(94,42,151,0.3); }
+        .cai-btn-primary:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(94,42,151,0.42); color: #fff; }
+        .cai-btn-secondary { background: #fff; color: var(--primary); border: 2px solid var(--primary); }
+        .cai-btn-secondary:hover { transform: translateY(-3px); background: var(--primary-light); color: var(--primary); }
+
+        /* ===== support banner ===== */
+        .cai-support {
+            display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+            background: linear-gradient(135deg, rgba(94,42,151,0.06), rgba(222,222,80,0.10));
+            border: 1px dashed rgba(94,42,151,0.35); border-radius: 18px; padding: 22px 26px;
+        }
+        .cai-support-icon {
+            width: 48px; height: 48px; border-radius: 12px; background: #fff; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center; color: var(--primary);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
+        .cai-support-text { flex: 1; min-width: 200px; }
+        .cai-support-text h4 { font-size: 1rem; font-weight: 700; margin-bottom: 2px; }
+        .cai-support-text p { font-size: 0.85rem; color: var(--text-muted); margin: 0; }
+        .cai-support-btn {
+            display: inline-flex; align-items: center; gap: 8px; background: var(--primary); color: #fff;
+            padding: 12px 20px; border-radius: 12px; font-weight: 600; font-size: 0.9rem;
+        }
+        .cai-support-btn:hover { background: var(--primary-hover); color: #fff; }
+
+        @media (max-width: 991px) {
+            .content-wrapper { padding: 20px 16px 48px; }
+            .cai-highlights { grid-template-columns: 1fr; }
+            .cai-title { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        {% with active_page='code_ai' %}
+            {% include 'students/partials/sidebar.html' %}
+        {% endwith %}
+
+        <div class="main-content">
+            {% include 'students/partials/header.html' %}
+
+            <div class="content-wrapper">
+                <!-- HERO -->
+                <div class="cai-hero">
+                    <div class="cai-hero-inner">
+                        <div class="cai-robot">
+                            <span class="material-symbols-outlined">smart_toy</span>
+                        </div>
+                        <div>
+                            <span class="cai-badge"><span class="material-symbols-outlined" style="font-size:14px;">bolt</span> Code AI</span>
+                            <h1 class="cai-title">How AI Makes <span>Decisions</span> 🤖</h1>
+                            <p class="cai-subtitle">Peek behind the screen and discover how artificial intelligence really thinks, learns from data, and makes choices, all through fun, hands-on lessons made just for you!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- HIGHLIGHTS -->
+                <div class="cai-highlights">
+                    <div class="cai-chip c1">
+                        <div class="cai-chip-icon"><span class="material-symbols-outlined">psychology</span></div>
+                        <h4>Understand AI</h4>
+                        <p>Learn how AI analyzes training data to make smart decisions.</p>
+                    </div>
+                    <div class="cai-chip c2">
+                        <div class="cai-chip-icon"><span class="material-symbols-outlined">balance</span></div>
+                        <h4>Spot the Bias</h4>
+                        <p>Explore how data can make AI fair or unfair, and why it matters.</p>
+                    </div>
+                    <div class="cai-chip c3">
+                        <div class="cai-chip-icon"><span class="material-symbols-outlined">devices</span></div>
+                        <h4>Real-Life Impact</h4>
+                        <p>See how AI tools shape the apps and choices in your daily life.</p>
+                    </div>
+                </div>
+
+                <!-- COURSE DESCRIPTION -->
+                <div class="cai-card">
+                    <h3><span class="material-symbols-outlined">menu_book</span> About This Course</h3>
+                    <p>Dive into the exciting world of artificial intelligence with CodeAI's innovative module, <strong>"How AI Makes Decisions."</strong> This module is named to highlight its focus on unraveling the processes that AI systems use to analyze training data and make decisions. In this course, AI concepts are broken down into engaging lessons that focus on the critical role data plays in making AI work behind the scenes. Each lesson provides opportunities to learn and reflect about AI, bias, and the impact of AI tools on daily life.</p>
+                </div>
+
+                <!-- CTA BUTTONS -->
+                <div class="cai-cta-row">
+                    <a class="cai-btn cai-btn-primary" href="https://studio.code.org/join/MYHDRT" target="_blank" rel="noopener">
+                        <span class="material-symbols-outlined">rocket_launch</span> Start Learning on Code.org
+                    </a>
+                    <a class="cai-btn cai-btn-secondary" href="{% static 'codeai/CodeAI-Step-by-Step-Guide.pdf' %}" target="_blank" rel="noopener" download>
+                        <span class="material-symbols-outlined">picture_as_pdf</span> Download Step-by-Step Guide
+                    </a>
+                </div>
+
+                <!-- SUPPORT -->
+                <div class="cai-support">
+                    <div class="cai-support-icon"><span class="material-symbols-outlined">support_agent</span></div>
+                    <div class="cai-support-text">
+                        <h4>Need help getting started?</h4>
+                        <p>Stuck somewhere? The Code.org team is happy to help you out. Just send them an email.</p>
+                    </div>
+                    <a class="cai-support-btn" href="mailto:support@code.org?subject=CodeAI%20Course%20Support%20-%20IFT%20Student">
+                        <span class="material-symbols-outlined">mail</span> Email Code.org Support
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% include 'students/partials/header_js.html' %}
+</body>
+</html>
