@@ -91,8 +91,16 @@
             {% else %}
             <a class="nav-item" href="{% url 'students:dashboard' %}"><span class="material-symbols-outlined">dashboard</span><span class="nav-text">Dashboard</span></a>
             <a class="nav-item" href="{% url 'students:student_profile' %}"><span class="material-symbols-outlined">person</span><span class="nav-text">My Profile</span></a>
+            {% if not student_has_submission %}
+            <a class="nav-item" href="{% url 'students:submit_idea' %}"><span class="material-symbols-outlined">lightbulb</span><span class="nav-text">Idea Submission</span></a>
+            {% endif %}
             <a class="nav-item" href="{% url 'students:learning_resources' %}"><span class="material-symbols-outlined">menu_book</span><span class="nav-text">Learning Resources</span></a>
             <a class="nav-item" href="{% url 'students:digital_resources' %}"><span class="material-symbols-outlined">folder_zip</span><span class="nav-text">Digital Resources</span></a>
+            <a class="nav-item" href="{% url 'students:code_ai' %}"><span class="material-symbols-outlined">smart_toy</span><span class="nav-text">Code AI</span></a>
+            {% if student_has_submission %}
+            <a class="nav-item" href="{% url 'students:my_idea' %}"><span class="material-symbols-outlined">description</span><span class="nav-text">My Idea</span></a>
+            {% endif %}
+            <a class="nav-item" href="{% url 'students:team_page' %}"><span class="material-symbols-outlined">groups</span><span class="nav-text">Team</span></a>
             <a class="nav-item" href="{% url 'students:idea_corner' %}"><span class="material-symbols-outlined">forum</span><span class="nav-text">Idea Corner</span></a>
             <a class="nav-item" href="{% url 'students:student_halloffame' %}"><span class="material-symbols-outlined">emoji_events</span><span class="nav-text">Hall of Fame</span></a>
             <a class="nav-item" href="{% url 'students:student_faq' %}"><span class="material-symbols-outlined">quiz</span><span class="nav-text">FAQ</span></a>
