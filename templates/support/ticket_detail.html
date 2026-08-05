@@ -1,0 +1,96 @@
+{% extends 'support/base_user.html' %}
+{% block page_title %}{{ ticket.ticket_number }}{% endblock %}
+{% block heading %}{{ ticket.ticket_number }}{% endblock %}
+{% block content %}
+<div style="max-width:860px;">
+    <a href="{% url 'students:my_tickets' %}" style="font-size:0.82rem;color:#666;text-decoration:none;display:inline-flex;align-items:center;gap:4px;margin-bottom:14px;">
+        <span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span> Back to My Tickets
+    </a>
+
+    <!-- Ticket header -->
+    <div class="card-box mb-3">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+            <div>
+                <h2 style="font-size:1.05rem;font-weight:700;margin:0 0 4px;">{{ ticket.subject }}</h2>
+                <div style="font-size:0.8rem;color:#666;">{{ ticket.ticket_number }} · {{ ticket.get_category_display }} · Created {{ ticket.created_at|date:"d M Y, H:i" }}</div>
+            </div>
+            <div class="text-end">
+                <span class="badge-status st-{{ ticket.status_badge_class }}">{{ ticket.get_status_display }}</span>
+                <span class="prio prio-{{ ticket.priority }}">{{ ticket.get_priority_display }}</span>
+            </div>
+        </div>
+        <hr style="margin:14px 0;border-color:#eee;">
+        <p style="font-size:0.88rem;white-space:pre-wrap;margin:0;">{{ ticket.description }}</p>
+        <div style="font-size:0.8rem;color:#666;margin-top:10px;">Assigned to: <strong>{{ ticket.assigned_to.get_full_name|default:"Not yet assigned" }}</strong></div>
+
+        {% if ticket.attachments.all %}
+        <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px;">
+            {% for a in ticket.attachments.all %}{% if not a.message_id %}
+            <a href="{{ a.file.url }}" target="_blank" rel="noopener" style="font-size:0.78rem;background:#f5f0ff;color:#5E2A97;border-radius:6px;padding:6px 10px;text-decoration:none;display:inline-flex;align-items:center;gap:4px;">
+                <span class="material-symbols-outlined" style="font-size:16px;">attach_file</span>{{ a.original_name|default:"attachment"|truncatechars:26 }}
+            </a>{% endif %}{% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    {% if ticket.resolution_note %}
+    <div class="card-box mb-3" style="border-color:#bbf7d0;background:#f0fdf4;">
+        <div style="font-weight:700;font-size:0.85rem;color:#15803d;margin-bottom:4px;display:flex;align-items:center;gap:6px;"><span class="material-symbols-outlined" style="font-size:18px;">task_alt</span> Resolution</div>
+        <p style="font-size:0.86rem;white-space:pre-wrap;margin:0;">{{ ticket.resolution_note }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Conversation -->
+    <h3 style="font-size:0.92rem;font-weight:700;margin:0 0 10px;">Conversation</h3>
+    <div class="d-flex flex-column gap-2 mb-3">
+        {% for msg in messages_thread %}
+        <div class="card-box" style="padding:14px 16px;{% if msg.author_id == request.user.id %}border-left:3px solid #5E2A97;{% else %}background:#faf7fd;{% endif %}">
+            <div style="font-size:0.78rem;color:#666;margin-bottom:4px;">
+                <strong style="color:#333;">{{ msg.author.get_full_name|default:msg.author.username|default:"Support" }}</strong>
+                {% if msg.author_id != request.user.id %}<span style="background:#ede9fe;color:#6d28d9;border-radius:999px;padding:1px 8px;font-size:0.68rem;margin-left:4px;">Support</span>{% endif %}
+                · {{ msg.created_at|date:"d M Y, H:i" }}
+            </div>
+            <p style="font-size:0.86rem;white-space:pre-wrap;margin:0;">{{ msg.body }}</p>
+            {% if msg.attachments.all %}
+            <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;">
+                {% for a in msg.attachments.all %}
+                <a href="{{ a.file.url }}" target="_blank" rel="noopener" style="font-size:0.76rem;background:#f1f5f9;color:#334155;border-radius:6px;padding:4px 8px;text-decoration:none;">📎 {{ a.original_name|default:"file"|truncatechars:24 }}</a>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        {% empty %}
+        <p style="font-size:0.84rem;color:#999;">No replies yet.</p>
+        {% endfor %}
+    </div>
+
+    <!-- Reply / Reopen -->
+    {% if ticket.status == 'closed' %}
+        {% if ticket.can_reopen %}
+        <form method="post" action="{% url 'students:ticket_detail' ticket.id %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="reopen">
+            <button type="submit" class="btn-primary-ift"><span class="material-symbols-outlined" style="font-size:18px;">restart_alt</span> Reopen Ticket</button>
+        </form>
+        {% endif %}
+    {% else %}
+    <div class="card-box">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="reply">
+            <label class="form-label-ift">Add a reply</label>
+            <textarea name="body" class="form-input-ift" rows="3" required placeholder="Type your reply..."></textarea>
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-2">
+                <input type="file" name="attachment" accept="image/*,.pdf,.doc,.docx" style="font-size:0.8rem;">
+                <div class="d-flex gap-2">
+                    {% if ticket.can_reopen %}
+                    <button type="submit" name="action" value="reopen" class="btn-primary-ift" style="background:#b45309;"><span class="material-symbols-outlined" style="font-size:18px;">restart_alt</span> Reopen</button>
+                    {% endif %}
+                    <button type="submit" class="btn-primary-ift"><span class="material-symbols-outlined" style="font-size:18px;">send</span> Send Reply</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

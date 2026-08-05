@@ -58,6 +58,10 @@
             <span class="material-symbols-outlined" {% if active_page == 'faq' %}style="font-variation-settings: 'FILL' 1;"{% endif %}>quiz</span>
             <span class="nav-text">FAQ</span>
         </a>
+        <a class="nav-item {% if active_page == 'help' %}nav-item-active{% endif %}" href="{% url 'students:my_tickets' %}">
+            <span class="material-symbols-outlined" {% if active_page == 'help' %}style="font-variation-settings: 'FILL' 1;"{% endif %}>support_agent</span>
+            <span class="nav-text">Help</span>
+        </a>
     </nav>
     <div class="sidebar-footer p-3 mt-auto">
         <div class="user-profile">

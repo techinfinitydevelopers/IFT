@@ -242,3 +242,25 @@
 **Verified (local, temp jury user + announcements, cleaned up):** evaluator dashboard 200; evaluators-only + all-users announcements both render; badge shows; "No new notifications" gone. `manage.py check` clean.
 
 **Note (out of scope, minor):** Super Admin's own dashboard bell button has no dropdown panel at all — but super admin is the *sender*, not a typical recipient. Left as-is.
+
+---
+
+## 2026-08-05 — Raise a Ticket / Support module (Phase 1)
+
+**Feature:** Full support-ticket system. Students & Schools raise tickets ("Help" tab under FAQ); Super Admin manages (reply, assign, status, priority, resolve, reopen). Attachments via S3 (standard FileField), bell + email notifications.
+
+**New app `support/`** (registered in INSTALLED_APPS):
+- Models: `Ticket` (number `TKT-000001` auto via save-after-pk, category/priority/status/assigned_to/resolution_note/resolved_at), `TicketMessage` (thread, is_internal reserved for Phase 2), `TicketAttachment` (`FileField upload_to='tickets/%Y/%m/'`). Migration `0001_initial`.
+- Views: user side `my_tickets`/`raise_ticket`/`ticket_detail` (owner-only); admin side `admin_tickets` (cards + student/school tabs + status/priority filters) / `admin_ticket_detail` (reply, status, priority, assign, resolve, reopen). Helpers: `_notify` (students.push.notify), `_email` (send_branded_email → new `templates/accounts/email_generic.html`), `is_staff_or_superuser`.
+
+**URLs:** `students/urls.py` → `/help/`, `/help/raise/`, `/help/ticket/<id>/`. `admins/urls.py` → `/super-admin/tickets/`, `/super-admin/tickets/<id>/`.
+
+**Templates:** `templates/support/{base_user,my_tickets,raise_ticket,ticket_detail}.html` (role-aware sidebar: student vs school, no change to originals), `templates/admins/tickets/{base_admin,list,detail}.html`.
+
+**Sidebars:** "Help" nav added to `students/partials/sidebar.html` + `school_dashboard.html` (after FAQ). "Tickets" nav added to 24 admin sidebar templates (scripted insert after Reports) + reports.html manual.
+
+**Notifications flow:** create → bell to all superadmins; user reply → bell to assignee/admins; admin reply → bell + email to user; resolve → bell + email w/ resolution note; reopen → back to admin queue.
+
+**Verified (local, throwaway users, cleaned up):** raise→TKT-000001, admin bell, admin list+tabs, admin reply→auto in_progress+student bell, assign/priority/status, resolve→resolved+resolved_at+email(result=1)+note visible to user, user reopen→reopened, school ticket→creator_type=school in school tab, access control (student→admin tickets 302, other's ticket 404). All 7 auto-edited admin pages still render 200. `manage.py check` clean.
+
+**Phase 2 (deferred):** SLA/overdue card, internal notes UI, merge duplicates, delete, rich-text, action timeline, configurable reopen window.

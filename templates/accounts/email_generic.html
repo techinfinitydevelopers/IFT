@@ -1,0 +1,8 @@
+{% extends "accounts/email_onboard_base.html" %}
+{% block greeting %}{{ title|default:"Update from IFT Support" }}{% endblock %}
+{% block intro %}{{ body|linebreaksbr }}{% endblock %}
+{% block credentials %}{% endblock %}
+{% block content %}{% endblock %}
+{% block button_href %}{{ action_url|default:login_url }}{% endblock %}
+{% block button_label %}{{ button_label|default:"Open IFT" }}{% endblock %}
+{% block security_note %}{% endblock %}

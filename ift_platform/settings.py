@@ -58,6 +58,8 @@ INSTALLED_APPS = [
     'ai_assistant',
     # Re-Evaluation module (remove this line + re_evaluation/ folder to uninstall)
     're_evaluation',
+    # Support / Raise-a-Ticket module
+    'support',
 ]
 
 MIDDLEWARE = [

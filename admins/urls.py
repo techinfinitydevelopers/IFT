@@ -1,10 +1,14 @@
 from django.urls import path
 from . import views
+from support import views as support_views
 
 app_name = 'admins'
 
 urlpatterns = [
     path('', views.admin_dashboard, name='dashboard'),
+    # Ticket Management
+    path('tickets/', support_views.admin_tickets, name='admin_tickets'),
+    path('tickets/<int:ticket_id>/', support_views.admin_ticket_detail, name='admin_ticket_detail'),
     path('submissions/', views.all_submissions, name='all_submissions'),
     path('submissions/classic/', views.all_submissions_classic, name='all_submissions_classic'),
     path('submission/<int:submission_id>/', views.submission_detail, name='submission_detail'),

@@ -1,6 +1,7 @@
 from django.urls import path
 from django.shortcuts import redirect
 from . import views
+from support import views as support_views
 
 app_name = 'students'
 
@@ -32,6 +33,10 @@ urlpatterns = [
     path('push/subscribe/', views.push_subscribe, name='push_subscribe'),
     path('hall-of-fame/', views.student_halloffame, name='student_halloffame'),
     path('faq/', views.student_faq, name='student_faq'),
+    # Raise a Ticket / Help (shared by students & schools)
+    path('help/', support_views.my_tickets, name='my_tickets'),
+    path('help/raise/', support_views.raise_ticket, name='raise_ticket'),
+    path('help/ticket/<int:ticket_id>/', support_views.ticket_detail, name='ticket_detail'),
     path('learning-resources/', views.learning_resources, name='learning_resources'),
     path('digital-resources/', views.digital_resources, name='digital_resources'),
     path('code-ai/', views.code_ai, name='code_ai'),

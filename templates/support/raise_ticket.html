@@ -1,0 +1,42 @@
+{% extends 'support/base_user.html' %}
+{% block page_title %}Raise a Ticket{% endblock %}
+{% block heading %}Raise a Ticket{% endblock %}
+{% block content %}
+<div style="max-width:720px;">
+    <a href="{% url 'students:my_tickets' %}" style="font-size:0.82rem;color:#666;text-decoration:none;display:inline-flex;align-items:center;gap:4px;margin-bottom:14px;">
+        <span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span> Back to My Tickets
+    </a>
+    <div class="card-box">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label-ift">Subject <span style="color:#dc2626;">*</span></label>
+                <input type="text" name="subject" class="form-input-ift" required maxlength="300" placeholder="Brief summary of your issue">
+            </div>
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label class="form-label-ift">Category <span style="color:#dc2626;">*</span></label>
+                    <select name="category" class="form-input-ift" required>
+                        {% for val, label in categories %}<option value="{{ val }}">{{ label }}</option>{% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label-ift">Priority <span style="color:#dc2626;">*</span></label>
+                    <select name="priority" class="form-input-ift" required>
+                        {% for val, label in priorities %}<option value="{{ val }}" {% if val == 'medium' %}selected{% endif %}>{{ label }}</option>{% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label-ift">Description <span style="color:#dc2626;">*</span></label>
+                <textarea name="description" class="form-input-ift" rows="6" required placeholder="Describe your issue in detail"></textarea>
+            </div>
+            <div class="mb-4">
+                <label class="form-label-ift">Attachment (optional) — Image / PDF / DOC</label>
+                <input type="file" name="attachment" class="form-input-ift" accept="image/*,.pdf,.doc,.docx">
+            </div>
+            <button type="submit" class="btn-primary-ift"><span class="material-symbols-outlined" style="font-size:18px;">send</span> Submit Ticket</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
