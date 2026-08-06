@@ -113,6 +113,7 @@ def admin_dashboard(request):
     # Additional dashboard metrics (all additive — no existing logic changed).
     PUBLISHED_STATUSES = ['submitted', 'under_review', 'evaluated', 'reviewed']
     total_schools_all = School.objects.count()               # all registered schools
+    total_tc_schools = School.objects.filter(is_tata_classedge=True).count()  # Tata ClassEdge schools
     total_teams = Team.objects.count()
     published_ideas = IdeaSubmission.objects.filter(status__in=PUBLISHED_STATUSES).count()
     unpublished_ideas = IdeaSubmission.objects.filter(status='draft').count()
@@ -131,6 +132,7 @@ def admin_dashboard(request):
         'total_evaluators': total_evaluators,
         # New metrics
         'total_schools_all': total_schools_all,
+        'total_tc_schools': total_tc_schools,
         'total_teams': total_teams,
         'published_ideas': published_ideas,
         'unpublished_ideas': unpublished_ideas,

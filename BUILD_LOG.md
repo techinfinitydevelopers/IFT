@@ -360,3 +360,10 @@ Clarification recorded: rayaan@/pinky@ are watchers (both receive every mail), n
 `templates/students/dashboard_v2.html` "Your Journey & Badges": the Quick Starter badge ("Started your journey") was gated on `team or latest_submission`, so it stayed locked/greyed for a freshly registered student. Made it always unlocked (any student on the dashboard is registered). Other badges (Team Builder, Idea Spark, Innovator, Problem Solver, Pitch Star) keep their progress-based conditions. Verified: fresh student (no team/idea) → Quick Starter shows unlocked yellow, dashboard 200.
 
 Note: this is the STUDENT journey badge; the earlier school-dashboard Quick Starter (Silver/Gold/Excellence group) is separate and unchanged.
+
+---
+
+## 2026-08-06 — Dashboard: replace Students KPI with "Total TC Schools" + Active Schools label
+
+- `admins/views.py` admin_dashboard: added `total_tc_schools = School.objects.filter(is_tata_classedge=True).count()`.
+- `admin_dashboard.html`: the "Students" KPI card is now **"Total TC Schools"** (value `total_tc_schools`, verified icon, links to schools list). The "Schools" card relabeled to **"Active Schools"** (count already status='active'). Sidebar "Students" nav + "Total Participants" card (which includes students) unchanged.
