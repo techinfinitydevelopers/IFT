@@ -90,20 +90,18 @@
         {% if form.gender.errors %}<p class="field-error">{{ form.gender.errors.0 }}</p>{% endif %}
     </div>
 
-    <!-- Phone -->
-    <div class="form-group">
-        <div class="icon">
-            <iconify-icon icon="mdi:phone-outline"></iconify-icon>
+    <!-- Phone + Send OTP -->
+    <div style="display:flex; gap:10px; align-items:stretch; margin-bottom:0.4rem;">
+        <div class="form-group" style="flex:1; margin-bottom:0;">
+            <div class="icon">
+                <iconify-icon icon="mdi:phone-outline"></iconify-icon>
+            </div>
+            <input type="tel" class="form-control" id="phone" name="phone" placeholder="10-digit mobile number" inputmode="numeric" maxlength="10" pattern="[6-9][0-9]{9}" title="10-digit mobile number" required value="{{ form.phone.value|default:'' }}">
         </div>
-        <input type="tel" class="form-control" id="phone" name="phone" placeholder="10-digit mobile number" inputmode="numeric" maxlength="10" pattern="[6-9][0-9]{9}" title="10-digit mobile number" required value="{{ form.phone.value|default:'' }}">
-        {% if form.phone.errors %}<p class="field-error">{{ form.phone.errors.0 }}</p>{% endif %}
+        <button type="button" id="sendOtpBtn" style="flex-shrink:0; background:#5E2A97;color:#fff;border:none;border-radius:8px;padding:0 20px;font-size:0.85rem;font-weight:600;cursor:pointer;white-space:nowrap;">Send OTP</button>
     </div>
-
-    <!-- Send OTP -->
-    <div style="margin:-0.5rem 0 1rem; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-        <button type="button" id="sendOtpBtn" style="background:#5E2A97;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:0.85rem;font-weight:600;cursor:pointer;">Send OTP</button>
-        <span id="otpMsg" style="font-size:0.8rem;"></span>
-    </div>
+    {% if form.phone.errors %}<p class="field-error">{{ form.phone.errors.0 }}</p>{% endif %}
+    <div style="margin:0 0 1rem;"><span id="otpMsg" style="font-size:0.8rem;"></span></div>
 
     <!-- OTP -->
     <div class="form-group" id="otpGroup" style="display:{% if otp_error %}block{% else %}none{% endif %};">
