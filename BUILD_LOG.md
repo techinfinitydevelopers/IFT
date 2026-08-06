@@ -317,3 +317,15 @@
 **Zero break:** brand-new isolated app; only additive nav lines touch existing templates.
 
 **Still pending (next):** School Resources tab under Digital Resources; teacher video-seen tracking; Top-400 re-edit. Blocked: Zonal Report (Pinky→Hemant), Lock teacher RSS (Sushil Sir).
+
+---
+
+## 2026-08-05 — Ticket watcher emails (rayaan@ + pinky@ get every event)
+
+**Why:** Two internal addresses must receive a full email for every support-ticket event.
+
+**Changes:**
+- `ift_platform/settings.py` — `TICKET_NOTIFY_EMAILS = ['rayaan@enlearning.in','pinky@enlearning.in']` (env `TICKET_NOTIFY_EMAILS` overridable).
+- `support/views.py` — new `_notify_watchers(ticket, event_label, detail)` (branded ZeptoMail to the list, full ticket snapshot: number/subject/category/priority/status/raised-by/assignee + event detail + admin link; try/except fail-safe). Called on: create, user reply, user reopen, admin reply, internal note (included per client), status, priority, assign, resolve, admin reopen, merge.
+
+**Verified (locmem outbox, throwaway users, cleaned up):** all 9 events send an email to BOTH watchers with the ticket number in the body; owner's existing emails unchanged; `manage.py check` clean. Additive only — no model/migration/template change.

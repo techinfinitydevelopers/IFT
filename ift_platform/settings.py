@@ -215,6 +215,11 @@ else:
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@indiafuturetycoons.com')
 ZEPTOMAIL_API_KEY = os.getenv('ZEPTOMAIL_API_KEY', '')
 SITE_URL = os.getenv('SITE_URL', 'http://localhost:8002')
+# Internal addresses that receive an email for every support-ticket event.
+# Override via env (comma-separated) without a code change.
+TICKET_NOTIFY_EMAILS = [e.strip() for e in os.getenv(
+    'TICKET_NOTIFY_EMAILS',
+    'rayaan@enlearning.in,pinky@enlearning.in').split(',') if e.strip()]
 # Razorpay Configuration
 RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID', '')
 RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET', '')

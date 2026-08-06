@@ -54,6 +54,44 @@ def _email(to, subject, body, action_url=''):
         pass
 
 
+def _notify_watchers(ticket, event_label, detail=''):
+    """Email a full ticket snapshot to the internal watcher addresses on every
+    ticket event. Fully fail-safe — never breaks the ticket action."""
+    try:
+        from django.conf import settings
+        from accounts.emails import send_branded_email
+        recipients = getattr(settings, 'TICKET_NOTIFY_EMAILS', [])
+        if not recipients:
+            return
+        owner = ticket.created_by
+        raised_by = (owner.get_full_name() or owner.username) if owner else '—'
+        raised_email = owner.email if owner else '—'
+        assigned = ticket.assigned_to.get_full_name() if ticket.assigned_to else 'Not assigned'
+        url = f'/super-admin/tickets/{ticket.id}/'
+        lines = [
+            f'Event: {event_label}',
+        ]
+        if detail:
+            lines.append(f'Detail: {detail}')
+        lines += [
+            '',
+            f'Ticket: {ticket.ticket_number}',
+            f'Subject: {ticket.subject}',
+            f'Category: {ticket.get_category_display()}',
+            f'Priority: {ticket.get_priority_display()}',
+            f'Status: {ticket.get_status_display()}',
+            f'Raised by: {raised_by} ({raised_email}) — {ticket.get_creator_type_display()}',
+            f'Assigned to: {assigned}',
+        ]
+        body = '\n'.join(lines)
+        subject = f'[{ticket.ticket_number}] {event_label} — {ticket.subject}'
+        send_branded_email(subject, recipients, 'accounts/email_generic.html',
+                           {'title': subject, 'body': body,
+                            'action_url': url, 'button_label': 'View Ticket'})
+    except Exception:
+        pass
+
+
 def _save_attachment(request, ticket, message=None):
     f = request.FILES.get('attachment')
     if f:
@@ -95,6 +133,7 @@ def raise_ticket(request):
             )
             _save_attachment(request, ticket)
             _log(ticket, request.user, 'created', subject)
+            _notify_watchers(ticket, 'New ticket raised', subject)
             url = f'/super-admin/tickets/{ticket.id}/'
             for admin in _superadmins():
                 _notify(admin, f'New ticket {ticket.ticket_number}',
@@ -121,6 +160,7 @@ def ticket_detail(request, ticket_id):
             ticket.status = 'reopened'
             ticket.save(update_fields=['status', 'updated_at'])
             _log(ticket, request.user, 'reopened')
+            _notify_watchers(ticket, 'Reopened by user')
             target = ticket.assigned_to
             url = f'/super-admin/tickets/{ticket.id}/'
             for admin in ([target] if target else _superadmins()):
@@ -135,6 +175,7 @@ def ticket_detail(request, ticket_id):
                     ticket=ticket, author=request.user, body=body)
                 _save_attachment(request, ticket, message=msg)
                 _log(ticket, request.user, 'replied', body[:120])
+                _notify_watchers(ticket, 'New reply from user', body)
                 # user replied → move an admin-side state back into the queue
                 if ticket.status in ('resolved', 'waiting_user'):
                     ticket.status = 'reopened' if ticket.status == 'resolved' else 'in_progress'
@@ -214,6 +255,7 @@ def admin_ticket_detail(request, ticket_id):
                 _log(ticket, request.user, 'replied', body[:120])
                 _notify(owner, f'Reply on {ticket.ticket_number}', body[:80], url)
                 _email(owner.email, f'Reply on your ticket {ticket.ticket_number}', body, url)
+                _notify_watchers(ticket, 'Support replied', body)
                 messages.success(request, 'Reply sent to user.')
 
         elif action == 'note':
@@ -222,6 +264,7 @@ def admin_ticket_detail(request, ticket_id):
                 TicketMessage.objects.create(
                     ticket=ticket, author=request.user, body=body, is_internal=True)
                 _log(ticket, request.user, 'note', body[:120])
+                _notify_watchers(ticket, 'Internal note added', body)
                 messages.success(request, 'Internal note added (not visible to the user).')
 
         elif action == 'status':
@@ -232,6 +275,7 @@ def admin_ticket_detail(request, ticket_id):
                 _log(ticket, request.user, 'status', ticket.get_status_display())
                 _notify(owner, f'Ticket {ticket.ticket_number} updated',
                         f'Status: {ticket.get_status_display()}', url)
+                _notify_watchers(ticket, f'Status changed to {ticket.get_status_display()}')
                 messages.success(request, 'Status updated.')
 
         elif action == 'priority':
@@ -240,6 +284,7 @@ def admin_ticket_detail(request, ticket_id):
                 ticket.priority = new_priority
                 ticket.save(update_fields=['priority', 'updated_at'])
                 _log(ticket, request.user, 'priority', ticket.get_priority_display())
+                _notify_watchers(ticket, f'Priority changed to {ticket.get_priority_display()}')
                 messages.success(request, 'Priority updated.')
 
         elif action == 'assign':
@@ -251,8 +296,9 @@ def admin_ticket_detail(request, ticket_id):
             if ticket.status == 'open':
                 ticket.status = 'in_progress'
             ticket.save(update_fields=['assigned_to', 'status', 'updated_at'])
-            _log(ticket, request.user, 'assigned',
-                 ticket.assigned_to.get_full_name() if ticket.assigned_to else 'Unassigned')
+            _assignee_label = ticket.assigned_to.get_full_name() if ticket.assigned_to else 'Unassigned'
+            _log(ticket, request.user, 'assigned', _assignee_label)
+            _notify_watchers(ticket, f'Assigned to {_assignee_label}')
             messages.success(request, 'Ticket assigned.')
 
         elif action == 'resolve':
@@ -267,6 +313,7 @@ def admin_ticket_detail(request, ticket_id):
             _email(owner.email, f'Your ticket {ticket.ticket_number} has been resolved',
                    note or 'Our team has resolved your issue. If you are still facing '
                    'the problem, you can reopen the ticket from your dashboard.', url)
+            _notify_watchers(ticket, 'Resolved', note)
             messages.success(request, 'Ticket marked as resolved. User notified.')
 
         elif action == 'reopen':
@@ -274,6 +321,7 @@ def admin_ticket_detail(request, ticket_id):
             ticket.save(update_fields=['status', 'updated_at'])
             _log(ticket, request.user, 'reopened')
             _notify(owner, f'Ticket {ticket.ticket_number} reopened', ticket.subject, url)
+            _notify_watchers(ticket, 'Reopened by admin')
             messages.success(request, 'Ticket reopened.')
 
         elif action == 'merge':
@@ -288,6 +336,7 @@ def admin_ticket_detail(request, ticket_id):
                 ticket.save(update_fields=['merged_into', 'status', 'updated_at'])
                 _log(target, request.user, 'merged', f'{ticket.ticket_number} merged in')
                 _log(ticket, request.user, 'merged', f'Merged into {target.ticket_number}')
+                _notify_watchers(ticket, f'Merged into {target.ticket_number}')
                 messages.success(request, f'Ticket merged into {target.ticket_number}.')
                 return redirect('admins:admin_ticket_detail', ticket_id=target.id)
             messages.error(request, 'Select a valid ticket to merge into.')
