@@ -1,0 +1,8 @@
+{% extends "accounts/email_onboard_base.html" %}
+{% block greeting %}Hi{% if school.designated_teacher_name %} {{ school.designated_teacher_name }}{% endif %},{% endblock %}
+{% block intro %}Some of your students have registered for IFT but haven't completed their payment yet. Log in to your dashboard to identify these students and encourage them to activate their IFT journey by completing the payment.{% endblock %}
+{% block credentials %}{% endblock %}
+{% block content %}{% endblock %}
+{% block button_href %}https://www.indiafuturetycoons.com/school/dashboard/{% endblock %}
+{% block button_label %}Log In to Your School Dashboard{% endblock %}
+{% block security_note %}{% endblock %}

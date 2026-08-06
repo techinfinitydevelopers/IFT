@@ -98,6 +98,28 @@ def _school_email(school):
             or (school.user.email if school.user else '') or '').strip()
 
 
+def send_once_school_email(school, email_key, subject, template, context=None):
+    """Send a school-facing email at most ONCE ever (dedup via RecurringEmailLog,
+    ignoring the date column) — for one-time nudges like the payment reminder.
+    Returns True if sent, False if skipped. Never raises."""
+    from django.utils import timezone
+    from admins.models import RecurringEmailLog
+    from accounts.emails import send_branded_email
+
+    if RecurringEmailLog.objects.filter(school=school, email_key=email_key).exists():
+        return False
+    email = _school_email(school)
+    if not email:
+        return False
+    try:
+        send_branded_email(subject, email, template, {'school': school, **(context or {})})
+        RecurringEmailLog.objects.get_or_create(
+            school=school, email_key=email_key, sent_date=timezone.localdate())
+        return True
+    except Exception:
+        return False
+
+
 def send_weekly_school_email(school, email_key, subject, template, context=None):
     """Send a recurring broadcast email to `school`, once per calendar day
     (dedup via RecurringEmailLog keyed by (school, email_key, today)) — so a

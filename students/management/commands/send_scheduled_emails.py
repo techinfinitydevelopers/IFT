@@ -43,12 +43,14 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         from students.models import Student, IdeaSubmission, School
         from ai_assistant.models import AIEvaluation
-        from students.milestone_emails import send_milestone_email, send_weekly_school_email
+        from students.milestone_emails import (
+            send_milestone_email, send_weekly_school_email, send_once_school_email)
         from admins.content_notifications import send_content_notifications
 
         today = timezone.localdate()
         sent = {'idea_reminder': 0, 'idea_published': 0, 'resubmit_reminder': 0,
-                 'teacher_mentorship': 0, 'payment_reminder': 0}
+                 'teacher_mentorship': 0, 'payment_reminder': 0,
+                 'school_payment_reminder': 0}
 
         # Payment reminder -> students who registered >= 2 days ago and still
         # haven't paid. Once per student (MilestoneEmailLog dedup).
@@ -57,6 +59,20 @@ class Command(BaseCommand):
                   .select_related('user')):
             if send_milestone_email(s, 'payment_reminder', background=False):
                 sent['payment_reminder'] += 1
+
+        # School payment reminder -> active schools that have at least one
+        # unpaid student. Once per school (dedup ignoring date).
+        unpaid_school_ids = set(
+            Student.objects.filter(is_paid=False, school__isnull=False)
+            .values_list('school_id', flat=True)
+        )
+        if unpaid_school_ids:
+            for school in School.objects.filter(status='active', id__in=unpaid_school_ids):
+                if send_once_school_email(
+                        school, 'school_payment_reminder',
+                        'Help Your Students Start Their IFT Journey',
+                        'students/email_school_payment_reminder.html'):
+                    sent['school_payment_reminder'] += 1
 
         if today >= IDEA_DEADLINE:
             submitted_student_ids = set(
