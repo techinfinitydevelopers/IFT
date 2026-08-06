@@ -35,8 +35,21 @@
     <!-- Phone -->
     <div class="form-group">
         <div class="icon"><iconify-icon icon="mdi:phone-outline"></iconify-icon></div>
-        <input type="tel" class="form-control" name="contact_phone" placeholder="10-digit mobile number" inputmode="numeric" maxlength="10" pattern="[6-9][0-9]{9}" title="10-digit mobile number" required value="{{ form.contact_phone.value|default:'' }}">
+        <input type="tel" class="form-control" id="phone" name="contact_phone" placeholder="10-digit mobile number" inputmode="numeric" maxlength="10" pattern="[6-9][0-9]{9}" title="10-digit mobile number" required value="{{ form.contact_phone.value|default:'' }}">
         {% if form.contact_phone.errors %}<p class="field-error">{{ form.contact_phone.errors.0 }}</p>{% endif %}
+    </div>
+
+    <!-- Send OTP -->
+    <div style="margin:-0.5rem 0 1rem; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+        <button type="button" id="sendOtpBtn" style="background:#5E2A97;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:0.85rem;font-weight:600;cursor:pointer;">Send OTP</button>
+        <span id="otpMsg" style="font-size:0.8rem;"></span>
+    </div>
+
+    <!-- OTP -->
+    <div class="form-group" id="otpGroup" style="display:{% if otp_error %}block{% else %}none{% endif %};">
+        <div class="icon"><iconify-icon icon="mdi:shield-key-outline"></iconify-icon></div>
+        <input type="text" class="form-control" id="otp" name="otp" placeholder="Enter 6-digit OTP" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" value="{{ form.data.otp|default:'' }}">
+        {% if otp_error %}<p class="field-error">{{ otp_error }}</p>{% endif %}
     </div>
 
     <!-- Address -->
@@ -95,8 +108,33 @@
     function digitsOnly(el){ if(el) el.addEventListener('input', function(){ this.value = this.value.replace(/\D/g,''); }); }
     function lettersOnly(el){ if(el) el.addEventListener('input', function(){ this.value = this.value.replace(/[^A-Za-z .'\-]/g,''); }); }
     digitsOnly(document.querySelector('input[name="contact_phone"]'));
+    digitsOnly(document.querySelector('input[name="otp"]'));
     digitsOnly(document.querySelector('input[name="pin_code"]'));
     lettersOnly(document.querySelector('input[name="coordinator_name"]'));
+})();
+
+// Phone OTP: send + reveal OTP field
+(function(){
+    var btn = document.getElementById('sendOtpBtn');
+    var phone = document.getElementById('phone');
+    var otpGroup = document.getElementById('otpGroup');
+    var otpMsg = document.getElementById('otpMsg');
+    if(!btn) return;
+    function csrf(){ var el = document.querySelector('input[name=csrfmiddlewaretoken]'); return el ? el.value : ''; }
+    btn.addEventListener('click', function(){
+        var p = (phone.value || '').replace(/\D/g,'');
+        if(p.length !== 10){ otpMsg.textContent = 'Enter a valid 10-digit number.'; otpMsg.style.color = '#d00'; return; }
+        btn.disabled = true; otpMsg.textContent = 'Sending OTP...'; otpMsg.style.color = '#666';
+        var fd = new FormData(); fd.append('phone', p); fd.append('csrfmiddlewaretoken', csrf());
+        fetch('{% url "accounts:send_otp" %}', { method:'POST', body: fd, headers: {'X-CSRFToken': csrf()} })
+            .then(function(r){ return r.json(); })
+            .then(function(d){
+                otpMsg.textContent = d.message; otpMsg.style.color = d.success ? '#188038' : '#d00';
+                if(d.success){ otpGroup.style.display = 'block'; btn.textContent = 'Resend OTP'; }
+                setTimeout(function(){ btn.disabled = false; }, d.success ? 30000 : 2000);
+            })
+            .catch(function(){ otpMsg.textContent = 'Failed to send OTP. Try again.'; otpMsg.style.color = '#d00'; btn.disabled = false; });
+    });
 })();
 function initAutocomplete() {
     var input = document.getElementById('schoolNameInput');

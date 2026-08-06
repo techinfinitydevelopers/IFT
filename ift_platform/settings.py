@@ -230,3 +230,11 @@ TCE_API_URL = os.getenv('TCE_API_URL', 'https://ce-ift.tataclassedge.com/schoolc
 TCE_API_TOKEN = os.getenv('TCE_API_TOKEN', '')
 TCE_PROXY_URL = os.getenv('TCE_PROXY_URL', '')
 TCE_PROXY_SECRET = os.getenv('TCE_PROXY_SECRET', '')
+
+# SMS / OTP (Sevenomedia gateway) — used for phone verification on sign-up.
+SMS_API_URL = os.getenv('SMS_API_URL', 'https://vas.sevenomedia.com/domestic/sendsms/bulksms_v2.php')
+SMS_API_KEY = os.getenv('SMS_API_KEY', '')
+SMS_SENDER = os.getenv('SMS_SENDER', 'ENLRNG')
+SMS_ENTITY_ID = os.getenv('SMS_ENTITY_ID', '')
+SMS_OTP_TEMPLATE_ID = os.getenv('SMS_OTP_TEMPLATE_ID', '')
+OTP_EXPIRY_SECONDS = int(os.getenv('OTP_EXPIRY_SECONDS', '600'))

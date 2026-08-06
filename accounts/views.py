@@ -60,6 +60,15 @@ def sign_up(request):
     if request.method == 'POST':
         form = StudentSignUpForm(request.POST)
         if form.is_valid():
+            from . import otp as otp_service
+            otp_ok, otp_err = otp_service.verify(request, form.cleaned_data.get('phone', ''), request.POST.get('otp', ''))
+            if not otp_ok:
+                return render(request, 'accounts/sign_up.html', {
+                    'form': form,
+                    'otp_error': otp_err,
+                    'show_school_not_registered': show_school_not_registered,
+                    'duplicate_message': duplicate_message,
+                })
             user = User.objects.create_user(
                 username=form.cleaned_data['email'],
                 email=form.cleaned_data['email'],
@@ -78,6 +87,7 @@ def sign_up(request):
                 gender=form.cleaned_data['gender'],
                 phone=form.cleaned_data.get('phone', ''),
             )
+            otp_service.clear(request)
             login(request, user)
             messages.success(request, 'Account created successfully!')
 
@@ -156,6 +166,10 @@ def school_sign_up(request):
     if request.method == 'POST':
         form = SchoolSignUpForm(request.POST)
         if form.is_valid():
+            from . import otp as otp_service
+            otp_ok, otp_err = otp_service.verify(request, form.cleaned_data.get('contact_phone', ''), request.POST.get('otp', ''))
+            if not otp_ok:
+                return render(request, 'accounts/school_sign_up.html', {'form': form, 'otp_error': otp_err})
             temp_password = secrets.token_urlsafe(8)
             email = form.cleaned_data['contact_email']
 
@@ -219,12 +233,22 @@ def school_sign_up(request):
             from .emails import send_onboard_credentials
             send_onboard_credentials(user, temp_password, 'School')
 
+            otp_service.clear(request)
             messages.success(request, 'School registered! Check your email for login credentials.')
             return redirect('accounts:sign_in')
     else:
         form = SchoolSignUpForm()
 
     return render(request, 'accounts/school_sign_up.html', {'form': form})
+
+
+def send_otp_api(request):
+    """Send a phone-verification OTP for sign-up (student/school)."""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'POST only'}, status=405)
+    from . import otp as otp_service
+    ok, err = otp_service.generate_and_send(request, request.POST.get('phone', ''))
+    return JsonResponse({'success': ok, 'message': err or 'OTP sent to your mobile number.'})
 
 
 def school_search_api(request):
