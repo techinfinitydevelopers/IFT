@@ -36,12 +36,15 @@ def _seasonal_phases():
     for i, p in enumerate(phases):
         if p.start_date and p.start_date <= today:
             current_idx = i
+    import re
     _icon = {'completed': 'check', 'active': 'bolt', 'upcoming': 'schedule'}
     _icon_css = {'completed': 'past', 'active': 'current', 'upcoming': 'future'}
     for i, p in enumerate(phases):
         p.status = 'completed' if i < current_idx else ('active' if i == current_idx else 'upcoming')
         p.icon = _icon[p.status]
         p.icon_css = _icon_css[p.status]
+        # Short label for the compact header badge (before first comma/&/bracket).
+        p.short_name = re.split(r'[,(&]', p.name)[0].strip()
         # Human date label: single date for milestones, a range otherwise.
         if p.start_date and p.end_date:
             if p.start_date == p.end_date:
