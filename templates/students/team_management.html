@@ -506,7 +506,13 @@
         function getInviteMessage() {
             const code = document.getElementById('teamCodeValue').textContent.trim();
             const joinLink = window.location.origin + '/team/?team_code=' + code;
-            return 'Hey! 👋\nI\'ve joined India\'s Future Tycoons (IFT) and would love for you to join my team!\n\nLet\'s build ideas, learn from industry experts, and get showcased on a national stage.\n\nUse this invite code to join my team:\n' + code + '\n\nOr click here to join directly:\n' + joinLink + '\n\nLearn more: https://indiafuturetycoons.com/\n\nHope to see you on the team! 🚀';
+            return 'Hey! 👋\n\n' +
+                'I\'ve joined India\'s Future Tycoons (IFT). This is an exciting program for young innovators like us to learn, build & pitch ideas that can make a real impact! We get support from experts and unlock amazing opportunities every step of the way! The winners stand a chance to pitch their ideas in NFTE (New York), secure seed funding, meet startup founders & a lot more!\n\n' +
+                'Join my team & together we can build something exciting!\n\n' +
+                'Use this invite code to join my team:\n' + code + '\n\n' +
+                'Or click here to join directly:\n' + joinLink + '\n\n' +
+                'Learn more about India\'s Future Tycoons: https://indiafuturetycoons.com/\n\n' +
+                'Hope to see you on the team! 🚀';
         }
 
         // Copy Team Code
