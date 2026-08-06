@@ -48,7 +48,15 @@ class Command(BaseCommand):
 
         today = timezone.localdate()
         sent = {'idea_reminder': 0, 'idea_published': 0, 'resubmit_reminder': 0,
-                 'teacher_mentorship': 0}
+                 'teacher_mentorship': 0, 'payment_reminder': 0}
+
+        # Payment reminder -> students who registered >= 2 days ago and still
+        # haven't paid. Once per student (MilestoneEmailLog dedup).
+        payment_cutoff = timezone.now() - timedelta(days=2)
+        for s in (Student.objects.filter(is_paid=False, created_at__lte=payment_cutoff)
+                  .select_related('user')):
+            if send_milestone_email(s, 'payment_reminder', background=False):
+                sent['payment_reminder'] += 1
 
         if today >= IDEA_DEADLINE:
             submitted_student_ids = set(

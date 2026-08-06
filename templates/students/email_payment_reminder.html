@@ -1,0 +1,18 @@
+{% extends "accounts/email_onboard_base.html" %}
+{% block greeting %}Hi{% if user.first_name %} {{ user.first_name }}{% endif %},{% endblock %}
+{% block intro %}You're almost there! Complete your payment to unlock the IFT platform and start building, learning, and submitting your idea.{% endblock %}
+{% block credentials %}{% endblock %}
+{% block content %}{% endblock %}
+{% block button %}
+<tr>
+  <td style="padding:24px 32px 6px 32px;" align="center">
+    <a href="https://www.indiafuturetycoons.com/payment/" style="display:inline-block; background-color:#F5C542; color:#2A1245; text-decoration:none; font-weight:700; font-size:14px; padding:12px 30px; border-radius:24px;">Complete Payment &amp; Start Your Journey</a>
+  </td>
+</tr>
+<tr>
+  <td style="padding:8px 32px 8px 32px;" align="center">
+    <a href="https://www.indiafuturetycoons.com/accounts/sign-in/" style="display:inline-block; background-color:#ffffff; color:#5E2A97; text-decoration:none; font-weight:700; font-size:14px; padding:11px 34px; border-radius:24px; border:1px solid #5E2A97;">Log In</a>
+  </td>
+</tr>
+{% endblock %}
+{% block security_note %}{% endblock %}

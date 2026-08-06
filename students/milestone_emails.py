@@ -18,6 +18,10 @@ Trigger points:
 import threading
 
 MILESTONE_EMAILS = {
+    'payment_reminder': {
+        'subject': "You're One Step Away from Starting Your IFT Journey!",
+        'template': 'students/email_payment_reminder.html',
+    },
     'idea_reminder': {
         'subject': 'Submit your IFT idea today!',
         'template': 'students/email_idea_reminder.html',
