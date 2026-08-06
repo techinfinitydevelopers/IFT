@@ -336,3 +336,11 @@
 
 - **Registration images:** `Student registration.jpeg` → `/sign-up` and `School registration.jpeg` → `/school-sign-up`, shown via the auth `left_image` block (`static/images/auth/{student,school}-registration.jpg`; `templates/accounts/sign_up.html` + `school_sign_up.html`, added `{% load static %}`). Verified both load 200.
 - **Badge unlock fix:** per the registration-milestones image ("20/30/40+ Student Registrations → Silver/Gold/Excellence"), changed school badge metric from `paid_count` → `student_count` (total registrations) in `students/views.py` school_dashboard; updated `school_dashboard.html` labels "registered & paid" → "student registrations". Thresholds/names already matched (20/30/40, Silver/Gold/Excellence Trophy).
+
+---
+
+## 2026-08-06 — Quick Starter school badge (unlocks on first registration)
+
+- `students/views.py` school_dashboard `badge_tiers`: prepended `{'key':'quickstart','name':'Quick Starter Badge','threshold':1,'icon':'rocket_launch'}` → unlocks at student_count>=1.
+- `school_dashboard.html`: badge medallion now shows `tier.icon` (Material symbol) when a tier has no image, else the image — avoids missing-`{% static %}` 500 risk. Badge grid → `col-sm-6 col-lg-3` (4-across).
+- Verified: logic (0→locked, 1→Quick Starter only, 25→+Silver); school dashboard renders 200 with icon. Later: drop `static/images/badge_quickstart.png` and switch tier to `image` to replace the icon.

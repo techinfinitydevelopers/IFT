@@ -917,6 +917,7 @@ def school_dashboard(request):
     # ---- School participation badges (based on total student registrations) ----
     badge_metric = student_count  # all registered students of the school
     badge_tiers = [
+        {'key': 'quickstart', 'name': 'Quick Starter Badge', 'threshold': 1, 'icon': 'rocket_launch'},
         {'key': 'silver', 'name': 'Silver IFT Participation Badge', 'threshold': 20, 'image': 'images/badge_silver.png'},
         {'key': 'gold', 'name': 'Gold IFT Participation Badge', 'threshold': 30, 'image': 'images/badge_gold.png'},
         {'key': 'excellence', 'name': 'IFT School Excellence Trophy', 'threshold': 40, 'image': 'images/badge_excellence.png'},

@@ -988,7 +988,7 @@
                         </div>
                         <div class="row g-3 badge-grid">
                             {% for tier in badge_tiers %}
-                            <div class="col-12 col-md-4">
+                            <div class="col-12 col-sm-6 col-lg-3">
                                 <div class="badge-card {% if tier.achieved %}badge-card--unlocked{% endif %}">
                                     {% if tier.achieved %}
                                     <span class="badge-status-pill badge-status-pill--unlocked">
@@ -1001,7 +1001,11 @@
                                     {% endif %}
 
                                     <div class="badge-medallion {% if not tier.achieved %}badge-medallion--locked{% endif %}">
+                                        {% if tier.image %}
                                         <img src="{% static tier.image %}" alt="{{ tier.name }}">
+                                        {% else %}
+                                        <span class="material-symbols-outlined" style="font-size:52px;color:#5E2A97;">{{ tier.icon }}</span>
+                                        {% endif %}
                                     </div>
 
                                     <p class="badge-name">{{ tier.name }}</p>
