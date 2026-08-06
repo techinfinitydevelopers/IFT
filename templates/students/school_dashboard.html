@@ -984,7 +984,7 @@
                     <div class="section-card" style="height:auto;">
                         <div class="section-header">
                             <h3 class="section-title">School &amp; Teacher Benefits</h3>
-                            <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">{{ badge_metric }} student registrations</span>
+                            <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">{{ badge_metric }} paid students</span>
                         </div>
                         <div class="row g-3 badge-grid">
                             {% for tier in badge_tiers %}
@@ -1009,7 +1009,7 @@
                                     </div>
 
                                     <p class="badge-name">{{ tier.name }}</p>
-                                    <p class="badge-req">{{ tier.threshold }}+ student registrations</p>
+                                    <p class="badge-req">{{ tier.threshold }}+ paid students</p>
 
                                     <div class="badge-progress-row">
                                         <div class="badge-progress-track">
@@ -1020,7 +1020,7 @@
 
                                     <p class="badge-footnote">
                                         {% if tier.achieved %}
-                                        <span style="color:#b8860b; font-weight:700;">Achieved</span> &middot; {{ badge_metric }}/{{ tier.threshold }} students
+                                        <span style="color:#b8860b; font-weight:700;">Achieved</span> &middot; {{ badge_metric }}/{{ tier.threshold }} paid students
                                         {% else %}
                                         {{ badge_metric }}/{{ tier.threshold }} &middot; <strong style="color:var(--text-dark);">{{ tier.remaining }} more</strong> to unlock
                                         {% endif %}
