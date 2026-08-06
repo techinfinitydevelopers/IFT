@@ -74,7 +74,7 @@
                         {% if t.is_overdue %}<span class="badge-status" style="background:#fee2e2;color:#b91c1c;">Overdue</span>{% endif %}
                     </td>
                     <td class="py-3 px-3">{{ t.created_at|date:"d M Y" }}</td>
-                    <td class="py-3 px-3">{{ t.assigned_to.get_full_name|default:"—" }}</td>
+                    <td class="py-3 px-3">{{ t.assignee_label }}</td>
                 </tr>
                 {% empty %}
                 <tr><td colspan="7" class="text-center py-5" style="color:#999;">No tickets found.</td></tr>

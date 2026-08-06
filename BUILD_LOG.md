@@ -373,3 +373,12 @@ Note: this is the STUDENT journey badge; the earlier school-dashboard Quick Star
 ## 2026-08-06 — Help (ticket) tab on all school sidebars
 
 The Raise-a-Ticket / Help system already worked for schools (school users create school-type tickets; verified end-to-end), but the "Help" nav tab was only on school_dashboard. Added the Help nav-item (→ students:my_tickets) after FAQ on every school page that has the standard sidebar: school_digital_resources, school_faq, school_learning_resources, school_profile, school_reports, school_results, school_students, school_submissions, school_submission_detail, school_teams (school_dashboard already had it). school_halloffame + school_payments use a different full-page layout (no sidebar) — left as-is. Verified: school pages render 200 with the Help link.
+
+---
+
+## 2026-08-06 — Assign tickets to support emails (rayaan@/pinky@) with full-detail mail
+
+- `support/models.py` + migration `0003`: `Ticket.assigned_email` (EmailField) for assigning to an external support email with no login; `assignee_label` property (user name or email or "Not assigned").
+- `support/views.py`: refactored the snapshot into `_ticket_snapshot` + `_send_snapshot`; assign action now accepts `email:<addr>` values → sets assigned_email and sends that address a direct full-detail mail ("You have been assigned ticket …" with student/school/issue/description). User-id assignment still works and also mails that user. `_notify_watchers` reuses the shared snapshot; watcher_emails passed to the detail context.
+- `templates/admins/tickets/detail.html`: assign dropdown now has a "Support team (email)" optgroup listing TICKET_NOTIFY_EMAILS. list.html + user ticket_detail.html show `assignee_label`.
+- Verified (locmem): both emails in dropdown; assign→email sets it, assignee gets direct mail containing student name + school + description; list shows email assignee; unassign clears. Watcher emails to both still fire on every event.

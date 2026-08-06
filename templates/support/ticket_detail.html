@@ -21,7 +21,7 @@
         </div>
         <hr style="margin:14px 0;border-color:#eee;">
         <p style="font-size:0.88rem;white-space:pre-wrap;margin:0;">{{ ticket.description }}</p>
-        <div style="font-size:0.8rem;color:#666;margin-top:10px;">Assigned to: <strong>{{ ticket.assigned_to.get_full_name|default:"Not yet assigned" }}</strong></div>
+        <div style="font-size:0.8rem;color:#666;margin-top:10px;">Assigned to: <strong>{{ ticket.assignee_label }}</strong></div>
 
         {% if ticket.attachments.all %}
         <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px;">

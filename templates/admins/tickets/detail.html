@@ -121,6 +121,11 @@
                 <select name="assigned_to" class="form-input-ift mb-2" onchange="this.form.submit()">
                     <option value="">— Unassigned —</option>
                     {% for u in assignees %}<option value="{{ u.id }}" {% if u.id == ticket.assigned_to_id %}selected{% endif %}>{{ u.get_full_name|default:u.username }}</option>{% endfor %}
+                    {% if watcher_emails %}
+                    <optgroup label="Support team (email)">
+                        {% for e in watcher_emails %}<option value="email:{{ e }}" {% if e == ticket.assigned_email %}selected{% endif %}>{{ e }}</option>{% endfor %}
+                    </optgroup>
+                    {% endif %}
                 </select>
             </form>
 

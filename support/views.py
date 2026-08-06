@@ -54,55 +54,62 @@ def _email(to, subject, body, action_url=''):
         pass
 
 
-def _notify_watchers(ticket, event_label, detail=''):
-    """Email a full ticket snapshot to the internal watcher addresses on every
-    ticket event. Fully fail-safe — never breaks the ticket action."""
+def _ticket_snapshot(ticket, event_label, detail=''):
+    """Build (subject, body, url) with the full ticket context — student/school,
+    the issue and description — shared by watcher + assignee emails."""
+    owner = ticket.created_by
+    raised_by = (owner.get_full_name() or owner.username) if owner else '—'
+    raised_email = owner.email if owner else '—'
+    # School name — from the student's school, or the school user's own name.
+    school_name = '—'
+    if owner:
+        stu = getattr(owner, 'student_profile', None)
+        sch = getattr(owner, 'school_profile', None)
+        if stu is not None:
+            school_name = getattr(stu, 'school_name', '') or (
+                getattr(getattr(stu, 'school', None), 'name', '') or '—')
+        elif sch is not None:
+            school_name = getattr(sch, 'name', '') or '—'
+    url = f'/super-admin/tickets/{ticket.id}/'
+    lines = [f'Event: {event_label}']
+    if detail:
+        lines.append(f'Detail: {detail}')
+    lines += [
+        '',
+        f'Ticket: {ticket.ticket_number}',
+        f'Subject: {ticket.subject}',
+        f'Category: {ticket.get_category_display()}',
+        f'Priority: {ticket.get_priority_display()}',
+        f'Status: {ticket.get_status_display()}',
+        f'Raised by: {raised_by} ({raised_email}) — {ticket.get_creator_type_display()}',
+        f'School: {school_name}',
+        f'Assigned to: {ticket.assignee_label}',
+        '',
+        f'Problem / Description:\n{ticket.description}',
+    ]
+    subject = f'[{ticket.ticket_number}] {event_label} — {ticket.subject}'
+    return subject, '\n'.join(lines), url
+
+
+def _send_snapshot(to, ticket, event_label, detail=''):
+    """Email the full ticket snapshot to `to` (str or list). Fail-safe."""
     try:
-        from django.conf import settings
-        from accounts.emails import send_branded_email
-        recipients = getattr(settings, 'TICKET_NOTIFY_EMAILS', [])
-        if not recipients:
+        if not to:
             return
-        owner = ticket.created_by
-        raised_by = (owner.get_full_name() or owner.username) if owner else '—'
-        raised_email = owner.email if owner else '—'
-        # School name — from the student's school, or the school user's own name.
-        school_name = '—'
-        if owner:
-            stu = getattr(owner, 'student_profile', None)
-            sch = getattr(owner, 'school_profile', None)
-            if stu is not None:
-                school_name = getattr(stu, 'school_name', '') or (
-                    getattr(getattr(stu, 'school', None), 'name', '') or '—')
-            elif sch is not None:
-                school_name = getattr(sch, 'name', '') or '—'
-        assigned = ticket.assigned_to.get_full_name() if ticket.assigned_to else 'Not assigned'
-        url = f'/super-admin/tickets/{ticket.id}/'
-        lines = [
-            f'Event: {event_label}',
-        ]
-        if detail:
-            lines.append(f'Detail: {detail}')
-        lines += [
-            '',
-            f'Ticket: {ticket.ticket_number}',
-            f'Subject: {ticket.subject}',
-            f'Category: {ticket.get_category_display()}',
-            f'Priority: {ticket.get_priority_display()}',
-            f'Status: {ticket.get_status_display()}',
-            f'Raised by: {raised_by} ({raised_email}) — {ticket.get_creator_type_display()}',
-            f'School: {school_name}',
-            f'Assigned to: {assigned}',
-            '',
-            f'Problem / Description:\n{ticket.description}',
-        ]
-        body = '\n'.join(lines)
-        subject = f'[{ticket.ticket_number}] {event_label} — {ticket.subject}'
-        send_branded_email(subject, recipients, 'accounts/email_generic.html',
+        from accounts.emails import send_branded_email
+        subject, body, url = _ticket_snapshot(ticket, event_label, detail)
+        send_branded_email(subject, to, 'accounts/email_generic.html',
                            {'title': subject, 'body': body,
                             'action_url': url, 'button_label': 'View Ticket'})
     except Exception:
         pass
+
+
+def _notify_watchers(ticket, event_label, detail=''):
+    """Email a full ticket snapshot to the internal watcher addresses on every
+    ticket event. Fully fail-safe — never breaks the ticket action."""
+    from django.conf import settings
+    _send_snapshot(getattr(settings, 'TICKET_NOTIFY_EMAILS', []), ticket, event_label, detail)
 
 
 def _save_attachment(request, ticket, message=None):
@@ -301,17 +308,29 @@ def admin_ticket_detail(request, ticket_id):
                 messages.success(request, 'Priority updated.')
 
         elif action == 'assign':
-            assignee_id = request.POST.get('assigned_to')
-            if assignee_id:
-                ticket.assigned_to = User.objects.filter(id=assignee_id).first()
+            val = (request.POST.get('assigned_to') or '').strip()
+            notify_email = ''
+            if val.startswith('email:'):
+                # Assign to an external support email (rayaan@/pinky@ etc.)
+                notify_email = val[6:]
+                ticket.assigned_to = None
+                ticket.assigned_email = notify_email
+            elif val:
+                ticket.assigned_to = User.objects.filter(id=val).first()
+                ticket.assigned_email = ''
+                notify_email = ticket.assigned_to.email if ticket.assigned_to else ''
             else:
                 ticket.assigned_to = None
+                ticket.assigned_email = ''
             if ticket.status == 'open':
                 ticket.status = 'in_progress'
-            ticket.save(update_fields=['assigned_to', 'status', 'updated_at'])
-            _assignee_label = ticket.assigned_to.get_full_name() if ticket.assigned_to else 'Unassigned'
-            _log(ticket, request.user, 'assigned', _assignee_label)
-            _notify_watchers(ticket, f'Assigned to {_assignee_label}')
+            ticket.save(update_fields=['assigned_to', 'assigned_email', 'status', 'updated_at'])
+            _log(ticket, request.user, 'assigned', ticket.assignee_label)
+            _notify_watchers(ticket, f'Assigned to {ticket.assignee_label}')
+            # Send the assigned person the full issue + details directly.
+            if notify_email:
+                _send_snapshot(notify_email, ticket,
+                               f'You have been assigned ticket {ticket.ticket_number}')
             messages.success(request, 'Ticket assigned.')
 
         elif action == 'resolve':
@@ -367,6 +386,7 @@ def admin_ticket_detail(request, ticket_id):
         created_by=ticket.created_by, merged_into__isnull=True
     ).exclude(id=ticket.id).order_by('-created_at')[:50]
 
+    from django.conf import settings
     return render(request, 'admins/tickets/detail.html', {
         'ticket': ticket,
         'messages_thread': ticket.messages.select_related('author'),
@@ -375,4 +395,5 @@ def admin_ticket_detail(request, ticket_id):
         'status_choices': Ticket.STATUS_CHOICES,
         'priority_choices': Ticket.PRIORITY_CHOICES,
         'assignees': _superadmins().order_by('first_name'),
+        'watcher_emails': getattr(settings, 'TICKET_NOTIFY_EMAILS', []),
     })

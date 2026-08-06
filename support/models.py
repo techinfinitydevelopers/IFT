@@ -55,6 +55,8 @@ class Ticket(models.Model):
     assigned_to = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
         related_name='tickets_assigned')
+    # Assign to an external support email (e.g. rayaan@/pinky@) that has no login.
+    assigned_email = models.EmailField(blank=True)
 
     resolution_note = models.TextField(blank=True)
     resolved_at = models.DateTimeField(null=True, blank=True)
@@ -86,6 +88,12 @@ class Ticket(models.Model):
     @property
     def is_overdue(self):
         return self.status in _OPEN_STATES and timezone.now() > self.sla_due_at
+
+    @property
+    def assignee_label(self):
+        if self.assigned_to:
+            return self.assigned_to.get_full_name() or self.assigned_to.username
+        return self.assigned_email or 'Not assigned'
 
     @property
     def can_reopen(self):
