@@ -344,3 +344,11 @@
 - `students/views.py` school_dashboard `badge_tiers`: prepended `{'key':'quickstart','name':'Quick Starter Badge','threshold':1,'icon':'rocket_launch'}` → unlocks at student_count>=1.
 - `school_dashboard.html`: badge medallion now shows `tier.icon` (Material symbol) when a tier has no image, else the image — avoids missing-`{% static %}` 500 risk. Badge grid → `col-sm-6 col-lg-3` (4-across).
 - Verified: logic (0→locked, 1→Quick Starter only, 25→+Silver); school dashboard renders 200 with icon. Later: drop `static/images/badge_quickstart.png` and switch tier to `image` to replace the icon.
+
+---
+
+## 2026-08-06 — Ticket watcher emails: add student's school + full description
+
+Enhanced `_notify_watchers` (support/views.py) snapshot to include the student's **School** name (from student_profile.school_name / school user's own name) and the full **Problem / Description** text, in addition to the existing Ticket#/Subject/Category/Priority/Status/Raised-by/Assigned-to. Both rayaan@ + pinky@ still get every event. Verified via locmem: mail to both, contains student name + school name + full description.
+
+Clarification recorded: rayaan@/pinky@ are watchers (both receive every mail), not assignees; "Assigned to" is a separate field shown in the mail.

@@ -66,6 +66,16 @@ def _notify_watchers(ticket, event_label, detail=''):
         owner = ticket.created_by
         raised_by = (owner.get_full_name() or owner.username) if owner else '—'
         raised_email = owner.email if owner else '—'
+        # School name — from the student's school, or the school user's own name.
+        school_name = '—'
+        if owner:
+            stu = getattr(owner, 'student_profile', None)
+            sch = getattr(owner, 'school_profile', None)
+            if stu is not None:
+                school_name = getattr(stu, 'school_name', '') or (
+                    getattr(getattr(stu, 'school', None), 'name', '') or '—')
+            elif sch is not None:
+                school_name = getattr(sch, 'name', '') or '—'
         assigned = ticket.assigned_to.get_full_name() if ticket.assigned_to else 'Not assigned'
         url = f'/super-admin/tickets/{ticket.id}/'
         lines = [
@@ -81,7 +91,10 @@ def _notify_watchers(ticket, event_label, detail=''):
             f'Priority: {ticket.get_priority_display()}',
             f'Status: {ticket.get_status_display()}',
             f'Raised by: {raised_by} ({raised_email}) — {ticket.get_creator_type_display()}',
+            f'School: {school_name}',
             f'Assigned to: {assigned}',
+            '',
+            f'Problem / Description:\n{ticket.description}',
         ]
         body = '\n'.join(lines)
         subject = f'[{ticket.ticket_number}] {event_label} — {ticket.subject}'
