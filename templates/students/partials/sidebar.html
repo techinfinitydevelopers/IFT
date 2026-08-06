@@ -28,10 +28,6 @@
             <span class="material-symbols-outlined">menu_book</span>
             <span class="nav-text">Learning Resources</span>
         </a>
-        <a class="nav-item {% if active_page == 'digital_resources' %}nav-item-active{% endif %}" href="{% url 'students:digital_resources' %}">
-            <span class="material-symbols-outlined">folder_zip</span>
-            <span class="nav-text">Digital Resources</span>
-        </a>
         <a class="nav-item {% if active_page == 'code_ai' %}nav-item-active{% endif %}" href="{% url 'students:code_ai' %}">
             <span class="material-symbols-outlined" {% if active_page == 'code_ai' %}style="font-variation-settings: 'FILL' 1;"{% endif %}>smart_toy</span>
             <span class="nav-text">Code AI</span>
