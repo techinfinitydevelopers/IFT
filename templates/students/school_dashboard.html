@@ -1513,6 +1513,38 @@
 })();
 </script>
 
+    <!-- Teacher Mentoring reminder popup -->
+    <div id="mentoringModal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; padding:1rem;">
+        <div style="background:#fff; border-radius:18px; max-width:440px; width:100%; padding:34px 28px 28px; position:relative; box-shadow:0 20px 50px rgba(0,0,0,0.25); text-align:center;">
+            <button type="button" id="mentoringClose" aria-label="Close" style="position:absolute; top:14px; right:14px; background:none; border:none; cursor:pointer; color:#94a3b8; display:flex; padding:4px;">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+            <div style="width:64px; height:64px; margin:0 auto 16px; border-radius:16px; background:rgba(94,42,151,0.1); display:flex; align-items:center; justify-content:center;">
+                <span class="material-symbols-outlined" style="font-size:34px; color:#5E2A97;">smart_display</span>
+            </div>
+            <h3 style="font-size:1.25rem; font-weight:700; color:#1a1f2e; margin:0 0 10px;">Get Ready for Your Teacher Mentoring Session</h3>
+            <p style="font-size:0.9rem; color:#555; line-height:1.6; margin:0 0 22px;">Complete all the learning videos before attending any of the Friday Teacher Mentoring Sessions. This will help you participate confidently in discussions, activities, and Q&amp;A.</p>
+            <a href="{% url 'students:school_learning_resources' %}" style="display:inline-flex; align-items:center; gap:8px; background:#5E2A97; color:#fff; text-decoration:none; padding:12px 26px; border-radius:12px; font-weight:600; font-size:0.92rem;">
+                <span class="material-symbols-outlined" style="font-size:20px;">play_circle</span> Start Watching
+            </a>
+        </div>
+    </div>
+    <script>
+    (function(){
+        var modal = document.getElementById('mentoringModal');
+        if(!modal) return;
+        var closeBtn = document.getElementById('mentoringClose');
+        function openModal(){ modal.style.display = 'flex'; }
+        function closeModal(){ modal.style.display = 'none'; }
+        closeBtn.addEventListener('click', closeModal);
+        modal.addEventListener('click', function(e){ if(e.target === modal) closeModal(); });
+        // Show a few seconds after landing, once per browser session.
+        if(!sessionStorage.getItem('mentoringPopupShown')){
+            setTimeout(function(){ openModal(); sessionStorage.setItem('mentoringPopupShown','1'); }, 3000);
+        }
+    })();
+    </script>
+
     {% include 'partials/launch_confetti.html' %}
 </body>
 </html>
