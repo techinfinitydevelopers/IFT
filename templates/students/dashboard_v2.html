@@ -612,7 +612,7 @@
                                                 <p class="timeline-event-title mb-1">{{ phase.name }}</p>
                                                 <p class="timeline-desc mb-0">{{ phase.description|default:"Completed" }}</p>
                                             </div>
-                                            <span class="timeline-date">{{ phase.end_date|date:"M d, Y" }}</span>
+                                            <span class="timeline-date">{{ phase.date_label }}</span>
                                         </div>
                                     </div>
                                     {% elif phase.status == 'active' %}
@@ -626,7 +626,7 @@
                                                 <p class="timeline-desc mb-0">{{ phase.description|default:"Currently active" }}</p>
                                             </div>
                                             <div class="d-flex flex-column align-items-end gap-1">
-                                                <span class="timeline-date timeline-date-current">{{ phase.end_date|date:"M d, Y" }}</span>
+                                                <span class="timeline-date timeline-date-current">{{ phase.date_label }}</span>
                                                 <span class="deadline-badge">UPCOMING</span>
                                             </div>
                                         </div>
@@ -641,7 +641,7 @@
                                                 <p class="timeline-event-title mb-1">{{ phase.name }}</p>
                                                 <p class="timeline-desc mb-0">{{ phase.description|default:"Coming soon" }}</p>
                                             </div>
-                                            <span class="timeline-date">{{ phase.start_date|date:"M d, Y" }}</span>
+                                            <span class="timeline-date">{{ phase.date_label }}</span>
                                         </div>
                                     </div>
                                     {% endif %}

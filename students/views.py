@@ -22,6 +22,36 @@ def _get_payment_amount(student):
     return 2500
 
 
+def _seasonal_phases():
+    """Return (phases, active_phase) with each phase's `status` computed live
+    from today's date. The current phase is the LATEST phase that has already
+    started (start_date <= today); everything before it is 'completed', the rest
+    'upcoming'. This avoids gaps between milestone dates and never goes stale.
+    Returns active_phase=None only before the very first phase starts."""
+    from admins.models import Phase
+    from django.utils import timezone
+    phases = list(Phase.objects.all().order_by('order'))
+    today = timezone.localdate()
+    current_idx = -1
+    for i, p in enumerate(phases):
+        if p.start_date and p.start_date <= today:
+            current_idx = i
+    for i, p in enumerate(phases):
+        p.status = 'completed' if i < current_idx else ('active' if i == current_idx else 'upcoming')
+        # Human date label: single date for milestones, a range otherwise.
+        if p.start_date and p.end_date:
+            if p.start_date == p.end_date:
+                p.date_label = p.start_date.strftime('%d %b %Y')
+            elif p.start_date.year == p.end_date.year:
+                p.date_label = f"{p.start_date.strftime('%d %b')} – {p.end_date.strftime('%d %b %Y')}"
+            else:
+                p.date_label = f"{p.start_date.strftime('%d %b %Y')} – {p.end_date.strftime('%d %b %Y')}"
+        else:
+            p.date_label = ''
+    active_phase = phases[current_idx] if current_idx >= 0 else None
+    return phases, active_phase
+
+
 def create_notification(user, notification_type, title, message='', icon='notifications', action_url='', action_label=''):
     """Helper to create an in-app notification (also fires a web push)."""
     from students.push import notify
@@ -258,13 +288,11 @@ def dashboard(request):
         except:
             pass
 
-    # Active phases (from Phase model)
-    phases = []
+    # Phases/timeline — status computed live from today's date.
     try:
-        from admins.models import Phase
-        phases = list(Phase.objects.all().order_by('order')[:5])
-    except:
-        pass
+        phases, active_phase = _seasonal_phases()
+    except Exception:
+        phases, active_phase = [], None
 
     # Recent activity from notifications
     from students.models import Notification
@@ -310,7 +338,7 @@ def dashboard(request):
         'ai_score': ai_score,
         'ai_rank': ai_rank,
         'phases': phases,
-        'active_phase': next((p for p in phases if p.status == 'active'), None),
+        'active_phase': active_phase,
         'team_role': team_role,
         'announcements': announcements,
         'recent_activity': recent_activity,
@@ -807,8 +835,8 @@ def school_dashboard(request):
         visibility__in=['all', 'schools']
     ).order_by('-created_at')[:5]
 
-    # Phases for competition progress
-    phases = list(Phase.objects.all().order_by('order')[:6])
+    # Phases for competition progress — status computed live from today's date.
+    phases, active_phase = _seasonal_phases()
 
     # ---- Grade-wise submissions (this school) ----
     grade_qs = ideas.values('student__grade').annotate(count=Count('id')).order_by('student__grade')
@@ -905,7 +933,7 @@ def school_dashboard(request):
         'recent': recent,
         'announcements': announcements,
         'phases': phases,
-        'active_phase': next((p for p in phases if p.status == 'active'), None),
+        'active_phase': active_phase,
         'grade_data': grade_data,
         'paid_count': paid_count,
         'unpaid_count': unpaid_count,
