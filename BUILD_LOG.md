@@ -352,3 +352,11 @@
 Enhanced `_notify_watchers` (support/views.py) snapshot to include the student's **School** name (from student_profile.school_name / school user's own name) and the full **Problem / Description** text, in addition to the existing Ticket#/Subject/Category/Priority/Status/Raised-by/Assigned-to. Both rayaan@ + pinky@ still get every event. Verified via locmem: mail to both, contains student name + school name + full description.
 
 Clarification recorded: rayaan@/pinky@ are watchers (both receive every mail), not assignees; "Assigned to" is a separate field shown in the mail.
+
+---
+
+## 2026-08-06 — Student journey "Quick Starter" badge unlocks on registration
+
+`templates/students/dashboard_v2.html` "Your Journey & Badges": the Quick Starter badge ("Started your journey") was gated on `team or latest_submission`, so it stayed locked/greyed for a freshly registered student. Made it always unlocked (any student on the dashboard is registered). Other badges (Team Builder, Idea Spark, Innovator, Problem Solver, Pitch Star) keep their progress-based conditions. Verified: fresh student (no team/idea) → Quick Starter shows unlocked yellow, dashboard 200.
+
+Note: this is the STUDENT journey badge; the earlier school-dashboard Quick Starter (Silver/Gold/Excellence group) is separate and unchanged.
