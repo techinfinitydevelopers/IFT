@@ -911,8 +911,8 @@ def school_dashboard(request):
             'mode': c.event_mode or 'Online',
         })
 
-    # ---- School participation badges (based on registered + paid students) ----
-    badge_metric = paid_count  # registered students who have paid
+    # ---- School participation badges (based on total student registrations) ----
+    badge_metric = student_count  # all registered students of the school
     badge_tiers = [
         {'key': 'silver', 'name': 'Silver IFT Participation Badge', 'threshold': 20, 'image': 'images/badge_silver.png'},
         {'key': 'gold', 'name': 'Gold IFT Participation Badge', 'threshold': 30, 'image': 'images/badge_gold.png'},

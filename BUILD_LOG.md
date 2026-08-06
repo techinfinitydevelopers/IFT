@@ -329,3 +329,10 @@
 - `support/views.py` — new `_notify_watchers(ticket, event_label, detail)` (branded ZeptoMail to the list, full ticket snapshot: number/subject/category/priority/status/raised-by/assignee + event detail + admin link; try/except fail-safe). Called on: create, user reply, user reopen, admin reply, internal note (included per client), status, priority, assign, resolve, admin reopen, merge.
 
 **Verified (locmem outbox, throwaway users, cleaned up):** all 9 events send an email to BOTH watchers with the ticket number in the body; owner's existing emails unchanged; `manage.py check` clean. Additive only — no model/migration/template change.
+
+---
+
+## 2026-08-06 — Registration page images + badge unlock = total registrations
+
+- **Registration images:** `Student registration.jpeg` → `/sign-up` and `School registration.jpeg` → `/school-sign-up`, shown via the auth `left_image` block (`static/images/auth/{student,school}-registration.jpg`; `templates/accounts/sign_up.html` + `school_sign_up.html`, added `{% load static %}`). Verified both load 200.
+- **Badge unlock fix:** per the registration-milestones image ("20/30/40+ Student Registrations → Silver/Gold/Excellence"), changed school badge metric from `paid_count` → `student_count` (total registrations) in `students/views.py` school_dashboard; updated `school_dashboard.html` labels "registered & paid" → "student registrations". Thresholds/names already matched (20/30/40, Silver/Gold/Excellence Trophy).
