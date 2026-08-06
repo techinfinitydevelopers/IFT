@@ -773,12 +773,12 @@
                             <h1>Reports & Analytics</h1>
                             <p>Program Insights for <span class="school-name">{{ school.name }}</span></p>
                         </div>
-                        <div class="d-flex gap-3">
+                        <div class="d-flex gap-3" id="reportToolbar">
                             <button class="btn-secondary-custom" onclick="window.print()">
                                 <span class="material-symbols-outlined" style="font-size: 18px;">print</span>
                                 Print
                             </button>
-                            <button class="btn-secondary-custom" onclick="exportReport()">
+                            <button class="btn-secondary-custom" id="exportPdfBtn" onclick="exportReport()">
                                 <span class="material-symbols-outlined" style="font-size: 18px;">file_download</span>
                                 Export PDF
                             </button>
@@ -1034,11 +1034,27 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <script>
-        // Export Report -> browser print / Save as PDF (print CSS hides chrome).
+        // Export Report -> generate a PDF of the report and download it directly.
         function exportReport() {
-            window.print();
+            var el = document.querySelector('.content-wrapper');
+            if (!el || typeof html2pdf === 'undefined') { window.print(); return; }  // fallback
+            var btn = document.getElementById('exportPdfBtn');
+            var oldHtml = btn ? btn.innerHTML : '';
+            if (btn) { btn.disabled = true; btn.innerHTML = 'Generating…'; }
+            function restore() { if (btn) { btn.disabled = false; btn.innerHTML = oldHtml; } }
+            var name = ('{{ school.name|escapejs }}' || 'School').replace(/[^a-zA-Z0-9]+/g, '-');
+            html2pdf().set({
+                margin: 8,
+                filename: 'IFT-Report-' + name + '.pdf',
+                image: { type: 'jpeg', quality: 0.95 },
+                html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff',
+                    ignoreElements: function (node) { return node.id === 'reportToolbar'; } },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak: { mode: ['css', 'legacy'] }
+            }).from(el).save().then(restore).catch(restore);
         }
 
         // Sidebar & Header interactivity
