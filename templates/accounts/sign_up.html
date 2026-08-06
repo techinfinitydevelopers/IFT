@@ -1,6 +1,11 @@
 {% extends "accounts/auth_base.html" %}
+{% load static %}
 
 {% block title %}Sign Up - IFT{% endblock %}
+
+{% block left_image %}
+<img src="{% static 'images/auth/student-registration.jpg' %}" alt="Student growth opportunities">
+{% endblock %}
 
 {% block content %}
 <h1>Create your Account</h1>

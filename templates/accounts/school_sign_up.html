@@ -1,6 +1,11 @@
 {% extends "accounts/auth_base.html" %}
+{% load static %}
 
 {% block title %}Register School - IFT{% endblock %}
+
+{% block left_image %}
+<img src="{% static 'images/auth/school-registration.jpg' %}" alt="Programs for principals and teachers">
+{% endblock %}
 
 {% block content %}
 <h1>Register your School</h1>
