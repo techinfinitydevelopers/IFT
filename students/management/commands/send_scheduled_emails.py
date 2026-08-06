@@ -16,9 +16,8 @@ running this command daily/repeatedly is always safe.
 Dates (edit here if the season's deadlines change):
 - Idea Submission Reminder + Idea Published: fire from IDEA_DEADLINE onward.
 - Resubmit Reminder: fires from RESUBMIT_DEADLINE onward.
-- Teacher Mentorship Session: fires every Wednesday between
-  TEACHER_SESSION_START and TEACHER_SESSION_END (the live sessions themselves
-  are every Friday; the reminder goes out the Wednesday before).
+(The weekly Teacher Mentoring invite has its OWN Thursday-11 AM cron —
+ see students/management/commands/send_teacher_mentoring.py.)
 
 Also sends in-app/push notifications for scheduled Content (announcements/
 FAQs/training) — see admins/content_notifications.py: one reminder 2 days
@@ -32,10 +31,6 @@ from django.utils import timezone
 IDEA_DEADLINE = date(2026, 10, 15)
 RESUBMIT_DEADLINE = date(2026, 11, 15)
 
-TEACHER_SESSION_START = date(2026, 8, 7)   # first Friday session
-TEACHER_SESSION_END = date(2026, 9, 25)    # last Friday session
-WEDNESDAY = 2  # date.weekday(): Monday=0 ... Sunday=6
-
 
 class Command(BaseCommand):
     help = 'Send date-gated milestone emails (idea reminder, idea published, resubmit reminder). Run daily via cron.'
@@ -43,14 +38,12 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         from students.models import Student, IdeaSubmission, School
         from ai_assistant.models import AIEvaluation
-        from students.milestone_emails import (
-            send_milestone_email, send_weekly_school_email, send_once_school_email)
+        from students.milestone_emails import send_milestone_email, send_once_school_email
         from admins.content_notifications import send_content_notifications
 
         today = timezone.localdate()
         sent = {'idea_reminder': 0, 'idea_published': 0, 'resubmit_reminder': 0,
-                 'teacher_mentorship': 0, 'payment_reminder': 0,
-                 'school_payment_reminder': 0}
+                 'payment_reminder': 0, 'school_payment_reminder': 0}
 
         # Payment reminder -> students who registered >= 2 days ago and still
         # haven't paid. Once per student (MilestoneEmailLog dedup).
@@ -94,15 +87,6 @@ class Command(BaseCommand):
             for e in evals:
                 if send_milestone_email(e.submission.student, 'resubmit_reminder', background=False):
                     sent['resubmit_reminder'] += 1
-
-        if (today.weekday() == WEDNESDAY
-                and TEACHER_SESSION_START - timedelta(days=7) <= today <= TEACHER_SESSION_END):
-            subject = "IFT Teacher Mentorship Session Reminder"
-            for school in School.objects.filter(status='active'):
-                if send_weekly_school_email(
-                        school, 'teacher_mentorship', subject,
-                        'students/email_teacher_mentorship.html'):
-                    sent['teacher_mentorship'] += 1
 
         content_counts = send_content_notifications()
 

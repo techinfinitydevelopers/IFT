@@ -1,6 +1,6 @@
 {% extends "accounts/email_onboard_base.html" %}
-{% block greeting %}Dear Sir/Madam,{% endblock %}
-{% block intro %}Greetings from ENpower!<br><br>As part of the IFT Program, we are conducting online Teacher Mentorship Sessions for all teachers assigned to the program.<br><br>The session is approximately 4 hours long and covers Design Thinking, Entrepreneurship, Idea Development, Student Mentoring, Innovation Frameworks, and Program Implementation. It is suitable for teachers from all subject backgrounds, and participants will receive an IFT Teacher Recognition Certificate upon successful completion.{% endblock %}
+{% block greeting %}Dear Principal/Teacher,{% endblock %}
+{% block intro %}Greetings from ENpower!<br><br>We are pleased to invite you to our <strong>Weekly IFT Teacher Mentoring &amp; Training Session</strong>.<br><br>These sessions are designed to help teachers confidently mentor students throughout their innovation journey, and are conducted by certified Design Thinking &amp; Entrepreneurship experts.{% endblock %}
 {% block credentials %}{% endblock %}
 {% block content %}
 <tr>
@@ -8,25 +8,29 @@
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f7f4fb; border-radius:8px; border:1px solid #ece6f5;">
       <tr>
         <td style="padding:18px 20px;">
-          <p style="margin:0 0 10px 0; font-size:13px; color:#8a8395;">SESSION DETAILS</p>
-          <p style="margin:0 0 6px 0; font-size:14px; color:#1e1b2e;"><strong>Starting From:</strong> 7th August 2026</p>
-          <p style="margin:0 0 6px 0; font-size:14px; color:#1e1b2e;"><strong>Day:</strong> Every Friday</p>
-          <p style="margin:0 0 6px 0; font-size:14px; color:#1e1b2e;"><strong>Time:</strong> 11:00 AM onwards</p>
-          <p style="margin:0 0 6px 0; font-size:14px; color:#1e1b2e;"><strong>Duration:</strong> Approximately 4 hours</p>
-          <p style="margin:0; font-size:14px; color:#1e1b2e;"><strong>Last Session:</strong> 25th September 2026</p>
+          <p style="margin:0 0 10px 0; font-size:12px; font-weight:700; color:#5E2A97; text-transform:uppercase; letter-spacing:0.06em;">Session Details</p>
+          <p style="margin:0 0 6px 0; font-size:14px; color:#1e1b2e;"><strong>Day:</strong> Every Friday (until 25th September 2026)</p>
+          <p style="margin:0 0 6px 0; font-size:14px; color:#1e1b2e;"><strong>Time:</strong> 11:00 AM – 3:00 PM</p>
+          <p style="margin:0; font-size:14px; color:#1e1b2e;"><strong>Mode:</strong> Online (Zoom)</p>
         </td>
       </tr>
     </table>
-  </td>
-</tr>
-<tr>
-  <td style="padding:20px 32px 0 32px;">
-    <p style="margin:0 0 14px 0; font-size:14px; color:#1e1b2e;">Teachers are free to attend any one Friday session as per their convenience.</p>
-    <p style="margin:0 0 14px 0; font-size:14px; color:#1e1b2e;">In the interest of making learning experiential and effective, we would encourage schools to identify one teacher for every twenty registrations.</p>
-    <p style="margin:0; font-size:14px; color:#1e1b2e;">We encourage all teachers assigned for IFT to make the most of this program.</p>
+    <p style="margin:12px 0 0 0; font-size:13px; color:#6b6577;">Teachers can choose any Friday or attend more than once if required.</p>
+
+    <p style="margin:18px 0 8px 0; font-size:14px; font-weight:700; color:#1e1b2e;">What will you learn?</p>
+    <ul style="margin:0; padding-left:20px; color:#444; font-size:14px; line-height:1.6;">
+      <li>Learn how to help students identify real-world problems and develop innovative solutions.</li>
+      <li>Gain practical strategies for conducting engaging, experiential ideation workshops with students.</li>
+      <li>Understand how to guide students through every stage of the IFT journey, including registration, idea submission, and more.</li>
+      <li>Get your questions answered through live mentoring and interactive discussions with expert facilitators.</li>
+    </ul>
+
+    <p style="margin:16px 0 0 0; font-size:13px; color:#6b6577;"><strong>Note:</strong> We recommend watching the IFT learning videos before joining the live session. This will help you participate more effectively, ask relevant questions, and make the most of the training.</p>
+    <p style="margin:12px 0 0 0; font-size:14px; color:#1e1b2e;">We strongly encourage at least one teacher from your school to attend the upcoming session.</p>
   </td>
 </tr>
 {% endblock %}
-{% block button %}{% endblock %}
+{% block button_href %}https://zoom.us/meeting/register/PsurYJn_RtCNGFy10crd4Q{% endblock %}
+{% block button_label %}Register for the Session{% endblock %}
 {% block security_note %}{% endblock %}
-{% block footer %}Regards,<br>Team ENpower{% endblock %}
+{% block footer %}Regards,<br>Team IFT{% endblock %}
