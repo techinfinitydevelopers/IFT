@@ -367,3 +367,9 @@ Note: this is the STUDENT journey badge; the earlier school-dashboard Quick Star
 
 - `admins/views.py` admin_dashboard: added `total_tc_schools = School.objects.filter(is_tata_classedge=True).count()`.
 - `admin_dashboard.html`: the "Students" KPI card is now **"Total TC Schools"** (value `total_tc_schools`, verified icon, links to schools list). The "Schools" card relabeled to **"Active Schools"** (count already status='active'). Sidebar "Students" nav + "Total Participants" card (which includes students) unchanged.
+
+---
+
+## 2026-08-06 — Help (ticket) tab on all school sidebars
+
+The Raise-a-Ticket / Help system already worked for schools (school users create school-type tickets; verified end-to-end), but the "Help" nav tab was only on school_dashboard. Added the Help nav-item (→ students:my_tickets) after FAQ on every school page that has the standard sidebar: school_digital_resources, school_faq, school_learning_resources, school_profile, school_reports, school_results, school_students, school_submissions, school_submission_detail, school_teams (school_dashboard already had it). school_halloffame + school_payments use a different full-page layout (no sidebar) — left as-is. Verified: school pages render 200 with the Help link.
