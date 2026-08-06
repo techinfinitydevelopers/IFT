@@ -95,7 +95,7 @@ def sign_up(request):
             try:
                 from .emails import send_branded_email
                 send_branded_email(
-                    'IFT: Registered Successfully',
+                    "Congratulations! You're One Step Closer To Starting Your IFT Journey!",
                     user.email,
                     'accounts/email_welcome_student.html',
                     {'user': user},
