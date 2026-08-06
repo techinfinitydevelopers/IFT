@@ -299,6 +299,15 @@
         .timeline-date { font-size: 0.75rem; font-weight: 700; background-color: #f1f5f9; color: #64748b; padding: 4px 12px; border-radius: 999px; white-space: nowrap; }
         .timeline-date-current { background-color: white; color: var(--primary); border: 1px solid rgba(94,42,151,0.2); }
         .deadline-badge { font-size: 10px; font-weight: 700; color: #f97316; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 4px; }
+        .status-pill { display:inline-flex; align-items:center; gap:5px; font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; padding:3px 10px; border-radius:999px; margin-top:5px; white-space:nowrap; }
+        .status-pill .dot { width:6px; height:6px; border-radius:50%; }
+        .status-completed { background:#dcfce7; color:#15803d; }
+        .status-ongoing { background:#5E2A97; color:#fff; }
+        .status-ongoing .dot { background:#c9f299; animation:pulseDot 1.4s ease-in-out infinite; }
+        .status-upcoming { background:#f1f5f9; color:#64748b; }
+        @keyframes pulseDot { 0%,100%{opacity:1;} 50%{opacity:0.35;} }
+        .timeline-icon-past { background:#dcfce7 !important; border:2px solid #86efac !important; }
+        .timeline-icon-past .material-symbols-outlined { color:#16a34a !important; }
 
         /* Submissions list card */
         .submissions-card {
@@ -602,49 +611,27 @@
                                 <div class="timeline-line"></div>
                                 {% for phase in phases %}
                                 <div class="timeline-item {% if phase.status == 'completed' %}timeline-item-past{% endif %}">
-                                    {% if phase.status == 'completed' %}
-                                    <div class="timeline-icon timeline-icon-past">
-                                        <span class="material-symbols-outlined" style="font-size: 18px; color: #64748b;">check</span>
+                                    <div class="timeline-icon timeline-icon-{{ phase.icon_css }}">
+                                        <span class="material-symbols-outlined" style="font-size:18px;">{{ phase.icon }}</span>
                                     </div>
-                                    <div class="timeline-content w-100">
+                                    <div class="timeline-content w-100 {% if phase.status == 'active' %}timeline-content-current{% endif %}">
                                         <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
                                             <div>
-                                                <p class="timeline-event-title mb-1">{{ phase.name }}</p>
-                                                <p class="timeline-desc mb-0">{{ phase.description|default:"Completed" }}</p>
-                                            </div>
-                                            <span class="timeline-date">{{ phase.date_label }}</span>
-                                        </div>
-                                    </div>
-                                    {% elif phase.status == 'active' %}
-                                    <div class="timeline-icon timeline-icon-current">
-                                        <span class="material-symbols-outlined" style="font-size: 18px;">edit</span>
-                                    </div>
-                                    <div class="timeline-content timeline-content-current w-100">
-                                        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
-                                            <div>
-                                                <p class="timeline-event-title timeline-event-title-current mb-1">{{ phase.name }}</p>
-                                                <p class="timeline-desc mb-0">{{ phase.description|default:"Currently active" }}</p>
+                                                <p class="timeline-event-title {% if phase.status == 'active' %}timeline-event-title-current{% endif %} mb-1">{{ phase.name }}</p>
+                                                <p class="timeline-desc mb-0">{{ phase.description }}</p>
                                             </div>
                                             <div class="d-flex flex-column align-items-end gap-1">
-                                                <span class="timeline-date timeline-date-current">{{ phase.date_label }}</span>
-                                                <span class="deadline-badge">UPCOMING</span>
+                                                <span class="timeline-date {% if phase.status == 'active' %}timeline-date-current{% endif %}">{{ phase.date_label }}</span>
+                                                {% if phase.status == 'completed' %}
+                                                <span class="status-pill status-completed">Completed</span>
+                                                {% elif phase.status == 'active' %}
+                                                <span class="status-pill status-ongoing"><span class="dot"></span>Ongoing{% if phase.days_left %} &middot; {{ phase.days_left }}d left{% endif %}</span>
+                                                {% else %}
+                                                <span class="status-pill status-upcoming">Upcoming</span>
+                                                {% endif %}
                                             </div>
                                         </div>
                                     </div>
-                                    {% else %}
-                                    <div class="timeline-icon timeline-icon-future">
-                                        <span class="material-symbols-outlined" style="font-size: 18px; color: #94a3b8;">emoji_events</span>
-                                    </div>
-                                    <div class="timeline-content w-100">
-                                        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
-                                            <div>
-                                                <p class="timeline-event-title mb-1">{{ phase.name }}</p>
-                                                <p class="timeline-desc mb-0">{{ phase.description|default:"Coming soon" }}</p>
-                                            </div>
-                                            <span class="timeline-date">{{ phase.date_label }}</span>
-                                        </div>
-                                    </div>
-                                    {% endif %}
                                 </div>
                                 {% endfor %}
                                 {% else %}
