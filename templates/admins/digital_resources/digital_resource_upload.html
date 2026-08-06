@@ -106,7 +106,7 @@
         </div>
         <nav class="flex-grow-1 px-3 d-flex flex-column gap-2 mt-3">
             <a class="nav-item" href="{% url 'admins:dashboard' %}"><span class="material-symbols-outlined">dashboard</span><span class="nav-text">Dashboard</span></a>
-            <a class="nav-item nav-item-active" href="{% url 'admins:digital_resources_list' %}"><span class="material-symbols-outlined">folder_zip</span><span class="nav-text">Marketing Collaboration</span></a>
+            <a class="nav-item nav-item-active" href="{% url 'admins:digital_resources_list' %}"><span class="material-symbols-outlined">folder_zip</span><span class="nav-text">Marketing Collaterals</span></a>
             <a class="nav-item" href="{% url 'admins:content_list' %}"><span class="material-symbols-outlined">article</span><span class="nav-text">Content</span></a>
         </nav>
         <div class="sidebar-footer p-3 mt-auto">
@@ -146,7 +146,7 @@
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb">
                             <li class="breadcrumb-item"><a href="{% url 'admins:dashboard' %}">Admin</a></li>
-                            <li class="breadcrumb-item"><a href="{% url 'admins:digital_resources_list' %}">Marketing Collaboration</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'admins:digital_resources_list' %}">Marketing Collaterals</a></li>
                             <li class="breadcrumb-item active">{% if edit_mode %}Edit{% else %}Upload{% endif %}</li>
                         </ol>
                     </nav>
