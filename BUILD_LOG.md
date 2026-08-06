@@ -1,5 +1,12 @@
 # Build Log
 
+## 2026-08-06 — Phone OTP verification on student & school sign-up (Sevenomedia SMS)
+- New `accounts/otp.py`: `generate_and_send(request, phone)` (6-digit OTP, stored in **session** for gunicorn-multi-worker reliability, 10-min expiry) + `verify(request, phone, code)`. Hits the Sevenomedia `bulksms_v2.php` gateway (apikey-based); success detected via `SUCCESS | <msg-id> | <mobile>` response.
+- Endpoint `POST /accounts/api/send-otp/` (`send_otp_api`). `sign_up` and `school_sign_up` views now call `otp.verify(...)` before creating the account and `otp.clear(...)` on success.
+- Templates `sign_up.html` + `school_sign_up.html`: "Send OTP" button, OTP field (revealed after send / on error), and AJAX JS. Phone stays mandatory on both self-signup forms. (Admin onboarding left as-is — OTP impractical when an admin enters someone else's number.)
+- Settings: `SMS_API_KEY/ENTITY_ID/OTP_TEMPLATE_ID/SENDER/API_URL` + `OTP_EXPIRY_SECONDS` from env. Sender `ENLRNG`, entity `1701159084703702132`, DLT OTP template `1777178593352822435` (registered + approved on SmartPing DLT).
+- Verified: real SMS delivered to 2 test numbers; local end-to-end (wrong/no OTP blocks account, correct OTP creates it) for both student & school; production send-OTP endpoint returns success (real OTP delivered from Railway). Env vars set on Railway main IFT + local `.env`.
+
 ## 2026-08-03 — Fix payments that succeed on Razorpay but never record on our side
 - **Reported case:** rituforai@gmail.com's own screenshot showed "₹1,600.00 Paid Successfully" (Payment Id `pay_TK4KQB7OQD53qx`, UPI, 31 Jul 2026 15:29:19 IST) but the admin panel showed NON-PAID.
 - **Root cause:** `students/views.py:verify_payment` was the *only* path that ever marked a student paid, and it only runs if the client-side Razorpay JS `handler` callback fires and completes a `fetch()` to our server. With Razorpay's UPI intent flow (pay in a UPI app, then return to the browser), it's common for the payment to capture successfully on Razorpay's side while the browser tab is backgrounded/closed/drops network before that callback completes — payment succeeds, our DB never hears about it. No server-side webhook existed at all.
