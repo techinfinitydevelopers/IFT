@@ -7,7 +7,7 @@
         <h2 style="font-size:1.1rem;font-weight:700;margin:0;">My Tickets</h2>
         <p style="font-size:0.85rem;color:#666;margin:2px 0 0;">Raise a query and track its progress.</p>
     </div>
-    <a href="{% url 'students:raise_ticket' %}" class="btn-primary-ift"><span class="material-symbols-outlined" style="font-size:18px;">add</span> Need A Help</a>
+    <a href="{% url 'students:raise_ticket' %}" class="btn-primary-ift"><span class="material-symbols-outlined" style="font-size:18px;">add</span> Need Help</a>
 </div>
 
 <div class="card-box p-0" style="overflow:hidden;">
@@ -40,7 +40,7 @@
                 {% empty %}
                 <tr><td colspan="8" class="text-center py-5" style="color:#999;">
                     <span class="material-symbols-outlined" style="font-size:40px;display:block;margin-bottom:6px;color:#ddd;">confirmation_number</span>
-                    No tickets yet. Click "Need A Help" to create one.
+                    No tickets yet. Click "Need Help" to create one.
                 </td></tr>
                 {% endfor %}
             </tbody>
