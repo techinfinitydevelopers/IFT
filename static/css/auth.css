@@ -22,8 +22,9 @@ body {
 }
 
 .auth-container {
-    min-height: 100vh;
+    height: 100vh;
     display: flex;
+    overflow: hidden; /* left image stays fixed; the form column scrolls on its own */
 }
 
 .auth-left {
@@ -347,6 +348,11 @@ a:hover {
 }
 
 @media (max-width: 991px) {
+    .auth-container {
+        height: auto;
+        min-height: 100vh;
+        overflow: visible; /* on mobile the page scrolls normally */
+    }
     .auth-left {
         display: none;
     }
