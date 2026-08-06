@@ -11,6 +11,10 @@ def launch_confetti(request):
     device clock. The once-per-user behaviour is handled client-side via
     localStorage in templates/partials/launch_confetti.html.
     """
+    # Temporarily disabled. Set _ENABLED = True to bring the confetti back.
+    _ENABLED = False
+    if not _ENABLED:
+        return {'launch_confetti_active': False}
     from datetime import datetime
     from django.utils import timezone
     try:
