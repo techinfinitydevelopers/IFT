@@ -426,6 +426,20 @@
                 <p class="page-subtitle">Watch these videos to prepare for your IFT journey</p>
             </div>
 
+            <!-- Teacher Mentoring Manual (PDF download) -->
+            <div style="display:flex; align-items:center; gap:18px; flex-wrap:wrap; background:linear-gradient(135deg,#5E2A97,#7B3FB5); color:#fff; border-radius:16px; padding:22px 26px; margin-bottom:28px; box-shadow:0 10px 28px rgba(94,42,151,0.25);">
+                <div style="width:56px; height:56px; border-radius:14px; background:rgba(255,255,255,0.15); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                    <span class="material-symbols-outlined" style="font-size:30px; color:#fff;">menu_book</span>
+                </div>
+                <div style="flex:1; min-width:220px;">
+                    <p style="margin:0 0 3px; font-size:1.05rem; font-weight:700;">Teacher Mentoring Manual</p>
+                    <p style="margin:0; font-size:0.85rem; opacity:0.92;">A complete guide for educators to mentor students through the IFT journey — a companion to the training videos below.</p>
+                </div>
+                <a href="{% static 'pdfs/IFT-Mentoring-Manual.pdf' %}" download style="display:inline-flex; align-items:center; gap:8px; background:#F5C542; color:#2A1245; text-decoration:none; font-weight:700; font-size:0.9rem; padding:12px 22px; border-radius:12px; white-space:nowrap; flex-shrink:0;">
+                    <span class="material-symbols-outlined" style="font-size:20px;">download</span> Download PDF
+                </a>
+            </div>
+
             <div class="row g-4">
                 {% for video in learning_videos %}
                 <div class="col-12 col-sm-6 col-lg-3">
