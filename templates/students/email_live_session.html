@@ -1,0 +1,23 @@
+{% extends "accounts/email_onboard_base.html" %}
+{% block greeting %}Dear Principal/Teacher,{% endblock %}
+{% block intro %}Greetings from ENpower!<br><br>Our Weekly IFT Teacher Mentoring &amp; Training Session is now <strong>LIVE</strong> and will continue until <strong>3:00 PM today</strong>.<br><br>If you haven't joined yet, there's still plenty of time to be a part of the session and gain valuable insights on mentoring students through their IFT innovation journey.{% endblock %}
+{% block credentials %}{% endblock %}
+{% block content %}
+<tr>
+  <td style="padding:4px 32px 0 32px;">
+    <p style="margin:0 0 8px 0; font-size:14px; font-weight:700; color:#1e1b2e;">Join us to:</p>
+    <ul style="margin:0; padding-left:20px; color:#444; font-size:14px; line-height:1.7;">
+      <li>Understand the complete IFT process</li>
+      <li>Learn how to guide students from idea to submission</li>
+      <li>Interact with Design Thinking &amp; Entrepreneurship experts</li>
+      <li>Get your questions answered live</li>
+    </ul>
+    <p style="margin:14px 0 0 0; font-size:14px; color:#1e1b2e;">We encourage a teacher from your school to attend.</p>
+    <p style="margin:14px 0 0 0; font-size:14px; color:#5E2A97; font-weight:700;">👉 Click below to join the session now</p>
+  </td>
+</tr>
+{% endblock %}
+{% block button_href %}https://zoom.us/j/97330361446{% endblock %}
+{% block button_label %}Join the Session Now{% endblock %}
+{% block security_note %}{% endblock %}
+{% block footer %}Regards,<br>Team IFT{% endblock %}
