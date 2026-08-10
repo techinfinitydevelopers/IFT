@@ -3611,12 +3611,63 @@ def _compute_zonal():
     return rows, totals
 
 
+def _zonal_detail_rows():
+    """One row per student with full detail + Zone, sorted by zone then school."""
+    from students.models import Student
+    ZORDER = {z: i for i, z in enumerate(
+        ['North', 'Central', 'West', 'East', 'South', 'Northeast', 'Unknown'])}
+    rows = []
+    students = Student.objects.select_related('user', 'school').prefetch_related(
+        'submissions', 'submissions__ai_evaluation')
+    for st in students:
+        school = st.school
+        state = (school.state if school else st.state) or ''
+        city = (school.city if school else st.city) or ''
+        zone = _state_to_zone(state, city)
+        sub = st.submissions.order_by(
+            '-ai_evaluation__final_score', '-submitted_at', '-created_at').first()
+        ev = None
+        if sub:
+            try:
+                ev = sub.ai_evaluation
+            except Exception:
+                ev = None
+        rows.append({
+            'zone': zone,
+            'cells': [
+                zone,
+                st.user.get_full_name() or st.user.username,
+                st.get_gender_display() if st.gender else '',
+                st.grade,
+                st.school_display_name,
+                state, city,
+                (school.board if school else st.school_board) or '',
+                'Yes' if st.is_paid else 'No',
+                int(st.payment_amount) if st.payment_amount else '',
+                (sub.title if sub else '') or '',
+                (sub.get_status_display() if sub else 'Not Submitted'),
+                ev.final_score if ev else '',
+                'Yes' if (ev and ev.is_top_400) else 'No',
+                (school.designated_teacher_name if school else '') or '',
+                (school.designated_teacher_mobile if school else '') or '',
+            ],
+        })
+    rows.sort(key=lambda r: (ZORDER.get(r['zone'], 99), r['cells'][4].lower(), r['cells'][1].lower()))
+    return [r['cells'] for r in rows]
+
+
 @login_required
 @user_passes_test(is_staff_or_superuser)
 def zonal_report(request):
     from admins.reports import xlsx_response
+    export = request.GET.get('export')
+    if export == 'detail':
+        headers = ['Zone', 'Student Name', 'Gender', 'Grade', 'School', 'State', 'City',
+                   'Board', 'Paid', 'Amount', 'Idea Title', 'Status', 'AI Score',
+                   'Top 400', 'Coordinator Name', 'Coordinator Mobile']
+        return xlsx_response('zonal_report_detailed', headers, _zonal_detail_rows(), 'Zonal Detail')
     rows, totals = _compute_zonal()
-    if request.GET.get('export'):
+    if export:
         headers = ['Zone', 'Active Schools', 'Students', 'Paid Students', 'Ideas Submitted', 'Top 400']
         data = [[r['zone'], r['schools'], r['students'], r['paid'], r['ideas'], r['top400']] for r in rows]
         data.append(['TOTAL', totals['schools'], totals['students'], totals['paid'], totals['ideas'], totals['top400']])

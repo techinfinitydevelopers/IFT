@@ -82,7 +82,10 @@
         <div class="content-wrapper">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
                 <p style="font-size:0.85rem;color:#666;margin:0;">Zone-wise summary across all schools & students (official India zone mapping).</p>
-                <a href="{% url 'admins:zonal_report' %}?export=1" class="btn-primary-ift"><span class="material-symbols-outlined" style="font-size:18px;">download</span> Download Excel</a>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="{% url 'admins:zonal_report' %}?export=1" class="btn-primary-ift" style="background:#64748b;"><span class="material-symbols-outlined" style="font-size:18px;">download</span> Summary (Excel)</a>
+                    <a href="{% url 'admins:zonal_report' %}?export=detail" class="btn-primary-ift"><span class="material-symbols-outlined" style="font-size:18px;">table_view</span> Detailed – per student (Excel)</a>
+                </div>
             </div>
 
             <!-- Totals -->

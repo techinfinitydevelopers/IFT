@@ -388,3 +388,9 @@ The Raise-a-Ticket / Help system already worked for schools (school users create
 ## 2026-08-06 — Zonal Report (Super Admin)
 
 New dedicated zone-wise report. `admins/views.py` `_compute_zonal()` + `zonal_report` view: buckets active schools, students, paid students, non-draft ideas and Top-400 by zone via `_state_to_zone` (state+city). Route `admins:zonal_report` at `/super-admin/reports/zonal/`; `?export=1` → Excel via `xlsx_response`. Template `templates/admins/zonal_report.html` (totals cards + per-zone table + TOTAL row + Download Excel). Discoverable via a "Zonal Report" button on the Reports page header. Verified: page 200, Excel headers + TOTAL row correct.
+
+---
+
+## 2026-08-06 — Zonal Report: detailed per-student export
+
+Added `_zonal_detail_rows()` + `?export=detail` to `zonal_report`: one row per student with Zone, Student Name, Gender, Grade, School, State, City, Board, Paid, Amount, Idea Title, Status, AI Score, Top 400, Coordinator Name/Mobile — sorted by zone then school. Page now has two buttons: "Summary (Excel)" and "Detailed – per student (Excel)". Verified both exports 200 with correct headers/rows.
