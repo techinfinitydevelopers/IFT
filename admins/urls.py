@@ -96,6 +96,7 @@ urlpatterns = [
 
     # Reports
     path('reports/', views.reports_view, name='reports'),
+    path('reports/zonal/', views.zonal_report, name='zonal_report'),
     path('reports/export/students/', views.report_students_export, name='report_students_export'),
     path('reports/export/schools/', views.report_schools_export, name='report_schools_export'),
 

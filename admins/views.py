@@ -3569,6 +3569,61 @@ def report_schools_export(request):
     return xlsx_response('schools_report', headers, rows, 'Schools')
 
 
+# ─── Zonal Report ────────────────────────────────────────────────────────
+
+def _compute_zonal():
+    """Per-zone summary: active schools, students, paid students, ideas, Top-400."""
+    from students.models import School, Student, IdeaSubmission
+    ZONES = ['North', 'Central', 'West', 'East', 'South', 'Northeast']
+    d = {z: {'zone': z, 'schools': 0, 'students': 0, 'paid': 0, 'ideas': 0, 'top400': 0} for z in ZONES}
+    d['Unknown'] = {'zone': 'Unknown', 'schools': 0, 'students': 0, 'paid': 0, 'ideas': 0, 'top400': 0}
+
+    def bucket(zone):
+        return d.get(zone, d['Unknown'])
+
+    for s in School.objects.filter(status='active'):
+        bucket(_state_to_zone(s.state, s.city))['schools'] += 1
+
+    for st in Student.objects.select_related('school'):
+        state = st.school.state if st.school else st.state
+        city = st.school.city if st.school else st.city
+        b = bucket(_state_to_zone(state, city))
+        b['students'] += 1
+        if st.is_paid:
+            b['paid'] += 1
+
+    subs = IdeaSubmission.objects.exclude(status='draft').select_related(
+        'student', 'student__school', 'ai_evaluation')
+    for sub in subs:
+        st = sub.student
+        state = st.school.state if st.school else st.state
+        city = st.school.city if st.school else st.city
+        b = bucket(_state_to_zone(state, city))
+        b['ideas'] += 1
+        ev = getattr(sub, 'ai_evaluation', None)
+        if ev and ev.is_top_400:
+            b['top400'] += 1
+
+    rows = [d[z] for z in ZONES]
+    if d['Unknown']['students'] or d['Unknown']['schools'] or d['Unknown']['ideas']:
+        rows.append(d['Unknown'])
+    totals = {k: sum(r[k] for r in rows) for k in ('schools', 'students', 'paid', 'ideas', 'top400')}
+    return rows, totals
+
+
+@login_required
+@user_passes_test(is_staff_or_superuser)
+def zonal_report(request):
+    from admins.reports import xlsx_response
+    rows, totals = _compute_zonal()
+    if request.GET.get('export'):
+        headers = ['Zone', 'Active Schools', 'Students', 'Paid Students', 'Ideas Submitted', 'Top 400']
+        data = [[r['zone'], r['schools'], r['students'], r['paid'], r['ideas'], r['top400']] for r in rows]
+        data.append(['TOTAL', totals['schools'], totals['students'], totals['paid'], totals['ideas'], totals['top400']])
+        return xlsx_response('zonal_report', headers, data, 'Zonal Report')
+    return render(request, 'admins/zonal_report.html', {'rows': rows, 'totals': totals})
+
+
 # ─── Hall of Fame ────────────────────────────────────────────────────────
 
 @login_required

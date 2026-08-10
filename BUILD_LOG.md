@@ -382,3 +382,9 @@ The Raise-a-Ticket / Help system already worked for schools (school users create
 - `support/views.py`: refactored the snapshot into `_ticket_snapshot` + `_send_snapshot`; assign action now accepts `email:<addr>` values → sets assigned_email and sends that address a direct full-detail mail ("You have been assigned ticket …" with student/school/issue/description). User-id assignment still works and also mails that user. `_notify_watchers` reuses the shared snapshot; watcher_emails passed to the detail context.
 - `templates/admins/tickets/detail.html`: assign dropdown now has a "Support team (email)" optgroup listing TICKET_NOTIFY_EMAILS. list.html + user ticket_detail.html show `assignee_label`.
 - Verified (locmem): both emails in dropdown; assign→email sets it, assignee gets direct mail containing student name + school + description; list shows email assignee; unassign clears. Watcher emails to both still fire on every event.
+
+---
+
+## 2026-08-06 — Zonal Report (Super Admin)
+
+New dedicated zone-wise report. `admins/views.py` `_compute_zonal()` + `zonal_report` view: buckets active schools, students, paid students, non-draft ideas and Top-400 by zone via `_state_to_zone` (state+city). Route `admins:zonal_report` at `/super-admin/reports/zonal/`; `?export=1` → Excel via `xlsx_response`. Template `templates/admins/zonal_report.html` (totals cards + per-zone table + TOTAL row + Download Excel). Discoverable via a "Zonal Report" button on the Reports page header. Verified: page 200, Excel headers + TOTAL row correct.
