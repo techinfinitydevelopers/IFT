@@ -1,0 +1,34 @@
+{% extends "accounts/email_onboard_base.html" %}
+{% block greeting %}Dear Principal/Teacher,{% endblock %}
+{% block intro %}Greetings from IFT!<br><br>We are pleased to invite you to our <strong>India's Future Tycoons (IFT) School Webinar</strong>, designed to help schools understand the IFT Entrepreneurship Ecosystem and how it can empower students to develop entrepreneurial thinking and future-ready skills.{% endblock %}
+{% block credentials %}{% endblock %}
+{% block content %}
+<tr>
+  <td style="padding:4px 32px 0 32px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f7f4fb; border-radius:8px; border:1px solid #ece6f5;">
+      <tr>
+        <td style="padding:18px 20px;">
+          <p style="margin:0 0 6px 0; font-size:14px; color:#1e1b2e;">📅 <strong>Date:</strong> 11th August 2026</p>
+          <p style="margin:0 0 6px 0; font-size:14px; color:#1e1b2e;">⏰ <strong>Time:</strong> 4:30 PM – 5:30 PM</p>
+          <p style="margin:0; font-size:14px; color:#1e1b2e;">🎓 <strong>For:</strong> Schools | Grades 7–12</p>
+        </td>
+      </tr>
+    </table>
+
+    <p style="margin:18px 0 8px 0; font-size:14px; font-weight:700; color:#1e1b2e;">During the webinar, discover:</p>
+    <ul style="margin:0; padding-left:20px; color:#444; font-size:14px; line-height:1.7;">
+      <li>How your school can participate in India's Future Tycoons</li>
+      <li>How IFT supports students in developing entrepreneurial ideas and skills</li>
+      <li>The resources and support available for schools, principals and teachers</li>
+      <li>How your school can be recognised for its participation and efforts</li>
+    </ul>
+
+    <p style="margin:16px 0 0 0; font-size:14px; color:#1e1b2e;">✨ Join us to discover how your school can be part of the journey to nurture India's next generation of entrepreneurs!</p>
+    <p style="margin:12px 0 0 0; font-size:14px; color:#6b6577;">We look forward to having you with us.</p>
+  </td>
+</tr>
+{% endblock %}
+{% block button_href %}https://zoom.us/meeting/register/WjOyBK-oRgu8ioqoLb3yqQ{% endblock %}
+{% block button_label %}Register for the Webinar{% endblock %}
+{% block security_note %}{% endblock %}
+{% block footer %}Warm regards,<br>Team IFT{% endblock %}
