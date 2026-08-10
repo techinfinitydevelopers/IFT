@@ -394,3 +394,11 @@ New dedicated zone-wise report. `admins/views.py` `_compute_zonal()` + `zonal_re
 ## 2026-08-06 — Zonal Report: detailed per-student export
 
 Added `_zonal_detail_rows()` + `?export=detail` to `zonal_report`: one row per student with Zone, Student Name, Gender, Grade, School, State, City, Board, Paid, Amount, Idea Title, Status, AI Score, Top 400, Coordinator Name/Mobile — sorted by zone then school. Page now has two buttons: "Summary (Excel)" and "Detailed – per student (Excel)". Verified both exports 200 with correct headers/rows.
+
+---
+
+## 2026-08-06 — Zonal Report: resolve zone via school name (fewer "Unknown")
+
+Many students have a `school_name` string but no linked `school` FK and no own state, so they fell into the Unknown zone. Added `_school_name_map()` + `_student_state_city()`: zone now resolves via linked school → student's own state/city → **school_name lookup** to the School's state/city. Used in both the summary and the detailed per-student export. Verified: an unlinked student (school_name only) now buckets into the correct zone (West via Maharashtra).
+
+Note: if the matched School itself has no state, it still shows Unknown — the school's State must be filled.

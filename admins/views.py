@@ -3571,12 +3571,36 @@ def report_schools_export(request):
 
 # ─── Zonal Report ────────────────────────────────────────────────────────
 
+def _school_name_map():
+    """Lower-cased school name -> (state, city) — fallback for students who have a
+    school_name string but no linked School FK / no own state."""
+    from students.models import School
+    m = {}
+    for s in School.objects.all():
+        if s.name:
+            m.setdefault(s.name.strip().lower(), (s.state or '', s.city or ''))
+    return m
+
+
+def _student_state_city(st, name_map):
+    """Best state/city for a student: linked school -> own fields -> school_name lookup."""
+    state = (st.school.state if st.school else st.state) or ''
+    city = (st.school.city if st.school else st.city) or ''
+    if not state:
+        nm = (getattr(st, 'school_name', '') or '').strip().lower()
+        if nm and nm in name_map:
+            state = state or name_map[nm][0]
+            city = city or name_map[nm][1]
+    return state, city
+
+
 def _compute_zonal():
     """Per-zone summary: active schools, students, paid students, ideas, Top-400."""
     from students.models import School, Student, IdeaSubmission
     ZONES = ['North', 'Central', 'West', 'East', 'South', 'Northeast']
     d = {z: {'zone': z, 'schools': 0, 'students': 0, 'paid': 0, 'ideas': 0, 'top400': 0} for z in ZONES}
     d['Unknown'] = {'zone': 'Unknown', 'schools': 0, 'students': 0, 'paid': 0, 'ideas': 0, 'top400': 0}
+    name_map = _school_name_map()
 
     def bucket(zone):
         return d.get(zone, d['Unknown'])
@@ -3585,8 +3609,7 @@ def _compute_zonal():
         bucket(_state_to_zone(s.state, s.city))['schools'] += 1
 
     for st in Student.objects.select_related('school'):
-        state = st.school.state if st.school else st.state
-        city = st.school.city if st.school else st.city
+        state, city = _student_state_city(st, name_map)
         b = bucket(_state_to_zone(state, city))
         b['students'] += 1
         if st.is_paid:
@@ -3595,9 +3618,7 @@ def _compute_zonal():
     subs = IdeaSubmission.objects.exclude(status='draft').select_related(
         'student', 'student__school', 'ai_evaluation')
     for sub in subs:
-        st = sub.student
-        state = st.school.state if st.school else st.state
-        city = st.school.city if st.school else st.city
+        state, city = _student_state_city(sub.student, name_map)
         b = bucket(_state_to_zone(state, city))
         b['ideas'] += 1
         ev = getattr(sub, 'ai_evaluation', None)
@@ -3617,12 +3638,12 @@ def _zonal_detail_rows():
     ZORDER = {z: i for i, z in enumerate(
         ['North', 'Central', 'West', 'East', 'South', 'Northeast', 'Unknown'])}
     rows = []
+    name_map = _school_name_map()
     students = Student.objects.select_related('user', 'school').prefetch_related(
         'submissions', 'submissions__ai_evaluation')
     for st in students:
         school = st.school
-        state = (school.state if school else st.state) or ''
-        city = (school.city if school else st.city) or ''
+        state, city = _student_state_city(st, name_map)
         zone = _state_to_zone(state, city)
         sub = st.submissions.order_by(
             '-ai_evaluation__final_score', '-submitted_at', '-created_at').first()
