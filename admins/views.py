@@ -3467,6 +3467,7 @@ def report_students_export(request):
 
     headers = [
         'Student Name', 'Gender', 'Grade', 'School', 'City', 'State', 'Zone', 'Board',
+        'Tata ClassEdge',
         'Paid', 'Amount', 'Idea Title', 'SDG / Track', 'Submission Date', 'Status',
         'AI Score', 'Evaluator Name', 'Evaluator Score', 'Top 400', 'Top 100', 'Top 12',
         'Coordinator Name', 'Coordinator Mobile', 'Principal Name',
@@ -3496,6 +3497,7 @@ def report_students_export(request):
             state,
             _state_to_zone(state, city),
             (school.board if school else st.school_board) or '',
+            'Yes' if (school and school.is_tata_classedge) else 'No',
             'Yes' if st.is_paid else 'No',
             int(st.payment_amount) if (st.is_paid and st.payment_amount) else '',
             (s.title if s else '') or '',

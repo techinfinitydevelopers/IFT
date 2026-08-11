@@ -418,3 +418,9 @@ Sent from local against prod (public DB URL + prod ZeptoMail creds). Tomorrow's 
 ## 2026-08-11 — Reports export: fix "Amount" showing for unpaid students
 
 Super Admin Reports export was showing a payment Amount (₹1600/₹2500) even for students who had NOT paid — `payment_amount` is the *assigned* fee (set at registration regardless of payment), and the export printed it whenever it was non-zero. Result: report readers thought ~105 students had paid when only 20 actually had. Fixed in `admins/views.py`: Amount column now shows only when `is_paid=True` (else blank), in both the Students report (`report_students_export`) and the Zonal detailed export (`_zonal_detail_rows`). Verified on prod: Paid=No rows with an Amount dropped 105 → 0; the 20 genuinely-paid students still show their amount. Rest of the report pipeline (filters, counts, zone bucketing, xlsx writer) reviewed and correct.
+
+---
+
+## 2026-08-11 — Students report export: add "Tata ClassEdge" column
+
+Students report (Report Builder, mode=Students) had no column showing whether a student's school is a Tata ClassEdge (TCE) partner — only the Schools report did. Added a "Tata ClassEdge" (Yes/No) column right after "Board" in `report_students_export`, reading `school.is_tata_classedge`. Verified on prod: column present, 24 headers with all rows aligned, Yes=131/No=50.
