@@ -402,3 +402,19 @@ Added `_zonal_detail_rows()` + `?export=detail` to `zonal_report`: one row per s
 Many students have a `school_name` string but no linked `school` FK and no own state, so they fell into the Unknown zone. Added `_school_name_map()` + `_student_state_city()`: zone now resolves via linked school → student's own state/city → **school_name lookup** to the School's state/city. Used in both the summary and the detailed per-student export. Verified: an unlinked student (school_name only) now buckets into the correct zone (West via Maharashtra).
 
 Note: if the matched School itself has no state, it still shows Unknown — the school's State must be filled.
+
+---
+
+## 2026-08-11 — Webinar invite broadcast to all schools (throttled + retry-safe)
+
+Emailed the "IFT School Webinar" invite (11th Aug, 4:30 PM; zoom register link) to all active schools. New `students/management/commands/send_webinar_invite.py` (per-calendar-day dedup via `RecurringEmailLog` key `webinar_invite`, THROTTLED 0.5s, RETRY-SAFE — logs only on send success so failures retry) + template `templates/students/email_webinar_invite.html`.
+
+Fixed a partial-send: first blast marked all as sent even on gateway rate-limit failures (old `send_weekly_school_email` logged on failure too). Rewrote retry-safe, cleared that day's logs, re-sent. The Aug 10 re-send crashed mid-way on a Postgres connection drop → only 141/237 logged. On Aug 11 sent to the 96 schools missing an Aug-10 log (skipping the 141 already delivered): sent=96 failed=0. Final verify: 237/237 active schools have a webinar_invite log — still_missing=0.
+
+Sent from local against prod (public DB URL + prod ZeptoMail creds). Tomorrow's 3 PM reminder: user sends manually via `python manage.py send_webinar_invite` (new calendar day → goes to all).
+
+---
+
+## 2026-08-11 — Reports export: fix "Amount" showing for unpaid students
+
+Super Admin Reports export was showing a payment Amount (₹1600/₹2500) even for students who had NOT paid — `payment_amount` is the *assigned* fee (set at registration regardless of payment), and the export printed it whenever it was non-zero. Result: report readers thought ~105 students had paid when only 20 actually had. Fixed in `admins/views.py`: Amount column now shows only when `is_paid=True` (else blank), in both the Students report (`report_students_export`) and the Zonal detailed export (`_zonal_detail_rows`). Verified on prod: Paid=No rows with an Amount dropped 105 → 0; the 20 genuinely-paid students still show their amount. Rest of the report pipeline (filters, counts, zone bucketing, xlsx writer) reviewed and correct.
