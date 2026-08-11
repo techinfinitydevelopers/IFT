@@ -3407,11 +3407,19 @@ def report_students_export(request):
     """Filtered Students/Ideas report as .xlsx. All filters are optional GET params."""
     from admins.reports import xlsx_response
 
+    from django.db.models import Prefetch
     g = request.GET
     # Iterate over STUDENTS (not submissions) so every registered student shows,
     # even those who haven't submitted an idea yet. Idea columns stay blank /
     # "Not Submitted" for them.
-    students = Student.objects.select_related('user', 'school').all()
+    # Prefetch submissions (+ their AI evaluation) already ordered best-first, so
+    # the per-student "best submission" lookup below hits cache instead of one
+    # extra query per student (that N+1 timed out on prod with cross-region DB).
+    _best_sub_qs = IdeaSubmission.objects.select_related('ai_evaluation').order_by(
+        '-ai_evaluation__final_score', '-submitted_at', '-created_at')
+    students = (Student.objects.select_related('user', 'school')
+                .prefetch_related(Prefetch('submissions', queryset=_best_sub_qs))
+                .all())
 
     # ---- student-level filters ----
     if g.get('school'):
@@ -3476,8 +3484,9 @@ def report_students_export(request):
     for st in students_list:
         school = st.school
         # Best submission to display (highest score / most recent), if any.
-        s = st.submissions.order_by(
-            '-ai_evaluation__final_score', '-submitted_at', '-created_at').first()
+        # submissions are prefetched already-ordered, so [0] is the best — no query.
+        _subs = list(st.submissions.all())
+        s = _subs[0] if _subs else None
         if s:
             try:
                 ev = s.ai_evaluation
@@ -3549,21 +3558,27 @@ def report_schools_export(request):
         'Pin Code', 'Total Students', 'Paid Students', 'Submitted Ideas',
         'Highest AI Score', 'Status',
     ]
+    # Bulk aggregates in a few queries — avoids per-school N+1, which times out
+    # on prod (app<->DB cross-region latency × 4 queries × hundreds of schools).
+    tot_map = dict(Student.objects.values('school')
+                   .annotate(c=_Count('id')).values_list('school', 'c'))
+    paid_map = dict(Student.objects.filter(is_paid=True).values('school')
+                    .annotate(c=_Count('id')).values_list('school', 'c'))
+    sub_map = dict(IdeaSubmission.objects.filter(status__in=_PUBLISHED_STATUSES)
+                   .values('student__school')
+                   .annotate(c=_Count('id')).values_list('student__school', 'c'))
+    best_map = dict(AIEvaluation.objects.values('submission__student__school')
+                    .annotate(m=Max('final_score'))
+                    .values_list('submission__student__school', 'm'))
     rows = []
     for sc in schools:
-        students = Student.objects.filter(school=sc)
-        total_students = students.count()
-        paid_students = students.filter(is_paid=True).count()
-        submitted = IdeaSubmission.objects.filter(
-            student__school=sc, status__in=_PUBLISHED_STATUSES).count()
-        best = AIEvaluation.objects.filter(
-            submission__student__school=sc).aggregate(m=Max('final_score'))['m']
+        best = best_map.get(sc.id)
         rows.append([
             sc.name, sc.city, sc.state, _state_to_zone(sc.state, sc.city), sc.board,
             'Yes' if sc.is_tata_classedge else 'No',
             sc.designated_teacher_name, sc.designated_teacher_mobile,
             sc.principal_name, sc.principal_email, sc.pin_code,
-            total_students, paid_students, submitted,
+            tot_map.get(sc.id, 0), paid_map.get(sc.id, 0), sub_map.get(sc.id, 0),
             best if best is not None else '', sc.get_status_display(),
         ])
     if g.get('preview'):

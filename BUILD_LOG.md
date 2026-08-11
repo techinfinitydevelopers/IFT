@@ -424,3 +424,14 @@ Super Admin Reports export was showing a payment Amount (₹1600/₹2500) even f
 ## 2026-08-11 — Students report export: add "Tata ClassEdge" column
 
 Students report (Report Builder, mode=Students) had no column showing whether a student's school is a Tata ClassEdge (TCE) partner — only the Schools report did. Added a "Tata ClassEdge" (Yes/No) column right after "Board" in `report_students_export`, reading `school.is_tata_classedge`. Verified on prod: column present, 24 headers with all rows aligned, Yes=131/No=50.
+
+---
+
+## 2026-08-11 — Reports export: fix timeout (N+1 queries) on Schools + Students
+
+School report preview/export was failing for the user — the Schools report ran ~4 DB queries PER school (total/paid students, submitted ideas, best score), so ~277 schools × 4 = ~1100 queries. With the prod app<->DB cross-region latency (~200ms/query), that exceeds the gunicorn worker timeout → request killed → preview/export "not working". Students report had the same N+1 (one submission lookup per student).
+
+Fix in `admins/views.py`:
+- `report_schools_export`: replaced per-school counts with 4 bulk aggregate queries (Student totals, paid totals, submitted-per-school, max score-per-school) keyed by school id.  1100 queries → 5, ~2s.
+- `report_students_export`: `prefetch_related(Prefetch('submissions', select_related ai_evaluation, ordered best-first))` so the per-student "best submission" lookup hits cache.  193 queries → 7, 50s → 2.4s.
+Verified on prod: counts match DB (0 mismatches), row counts intact, Amount-only-if-paid and Tata ClassEdge column preserved.
