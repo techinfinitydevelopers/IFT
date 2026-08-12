@@ -143,7 +143,7 @@ def role_redirect(request):
     except UserProfile.DoesNotExist:
         profile = UserProfile.objects.create(user=request.user, role='student')
 
-    if profile.is_superadmin or profile.is_viewer:
+    if profile.is_superadmin or profile.is_viewer or profile.is_tce:
         return redirect('admins:dashboard')
     elif profile.is_jury:
         return redirect('students:evaluator_dashboard')

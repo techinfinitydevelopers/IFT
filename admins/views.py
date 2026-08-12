@@ -31,7 +31,7 @@ def is_staff_or_superuser(user):
     if user.is_staff or user.is_superuser:
         return True
     profile = getattr(user, 'profile', None)
-    return bool(profile and profile.role == 'viewer')
+    return bool(profile and profile.role in ('viewer', 'tce'))
 
 
 @login_required

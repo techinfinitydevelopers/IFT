@@ -9,6 +9,7 @@ class UserProfile(models.Model):
         ('school', 'School'),
         ('superadmin', 'Super Admin'),
         ('viewer', 'Viewer (Read-only)'),
+        ('tce', 'TCE (Read-only, limited)'),
     ]
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
@@ -37,6 +38,10 @@ class UserProfile(models.Model):
     @property
     def is_viewer(self):
         return self.role == 'viewer'
+
+    @property
+    def is_tce(self):
+        return self.role == 'tce'
 
     @property
     def is_superadmin(self):

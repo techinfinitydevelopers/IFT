@@ -19,6 +19,9 @@ class Command(BaseCommand):
         parser.add_argument('email')
         parser.add_argument('password')
         parser.add_argument('--name', default='Viewer', help='Full name (optional)')
+        parser.add_argument('--role', default='viewer', choices=['viewer', 'tce'],
+                            help="'viewer' = full read-only view; 'tce' = read-only, "
+                                 "limited to Schools/Students/Submissions/Reports/Zonal.")
 
     def handle(self, *args, **opts):
         email = opts['email'].strip().lower()
@@ -38,9 +41,10 @@ class Command(BaseCommand):
         user.set_password(password)
         user.save()
 
-        UserProfile.objects.update_or_create(user=user, defaults={'role': 'viewer'})
+        role = opts['role']
+        UserProfile.objects.update_or_create(user=user, defaults={'role': role})
 
         action = 'Created' if created else 'Updated'
         self.stdout.write(self.style.SUCCESS(
-            f'{action} read-only viewer login: {email}'
+            f'{action} read-only {role} login: {email}'
         ))
