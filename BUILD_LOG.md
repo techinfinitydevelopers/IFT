@@ -1,5 +1,13 @@
 # Build Log
 
+## 2026-08-12 — Fix Railway auto-deploy (push to main now deploys)
+- **Symptom:** pushes to `techinfinitydevelopers/IFT` `main` did not deploy; Railway showed "Auto deploy unavailable" / "GitHub Repo not found", prod stuck on an old SHA. `techinfinitydevelopers` is a **personal** GitHub account (not an org).
+- **Root cause:** the Railway GitHub App (installation 132018388) had repo access to `mumbaidabbawala` only — **not** IFT — so Railway could not read the repo/branch to wire native auto-deploy.
+- **Fix:** GitHub → Settings → Installed GitHub Apps → Railway → Configure → added `techinfinitydevelopers/IFT` to "Repository access" + Save. Then Railway service Settings → Source → re-selected the repo via the pencil ("GitHub Repo not found" cleared, branch resolved to `main`) → clicked **Enable** on "Auto deploy". "Wait for CI" kept OFF (repo has no CI workflow, else Railway waits forever).
+- Removed the CLI-fallback workflow `.github/workflows/railway-deploy.yml` (was failing every push for lack of a `RAILWAY_TOKEN` secret and now redundant). Commit 05a6b59.
+- **Verified end-to-end:** pushing 05a6b59 auto-triggered a Railway build "via GitHub" that completed **Deployment successful** — prod now on latest `main`, which carries all the pending TCE-role code. See [[railway-deploy]] memory for the exact steps.
+- **Still pending (needs Railway Console, user to run — password not typed by me):** convert the existing read-only viewer account to the restricted `tce` role via `python manage.py create_viewer <email> <password> --name "TCE Team" --role tce`.
+
 ## 2026-08-06 — Phone OTP verification on student & school sign-up (Sevenomedia SMS)
 - New `accounts/otp.py`: `generate_and_send(request, phone)` (6-digit OTP, stored in **session** for gunicorn-multi-worker reliability, 10-min expiry) + `verify(request, phone, code)`. Hits the Sevenomedia `bulksms_v2.php` gateway (apikey-based); success detected via `SUCCESS | <msg-id> | <mobile>` response.
 - Endpoint `POST /accounts/api/send-otp/` (`send_otp_api`). `sign_up` and `school_sign_up` views now call `otp.verify(...)` before creating the account and `otp.clear(...)` on success.
