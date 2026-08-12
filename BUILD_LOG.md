@@ -441,3 +441,7 @@ Verified on prod: counts match DB (0 mismatches), row counts intact, Amount-only
 ## 2026-08-12 — Fix intermittent "Could not send OTP" on school/student signup
 
 Client reported schools couldn't register — "Could not send OTP right now" on Send OTP. The Sevenomedia gateway was actually returning SUCCESS ("SUCCESS | <uuid message-id> | <mobile>"), but `accounts/otp.py` classified success by substring-matching a set of 13xx error codes against the WHOLE response body. The random UUID message-id can contain a 4-digit chunk like "1310"/"1312", which falsely flipped a real SUCCESS to failure — so the OTP silently failed for a random subset of users each time (intermittent). Fixed: success is now decided by the FIRST pipe-delimited token == "SUCCESS" only; removed the buggy `_ERROR_CODES` substring check. Verified against the live gateway (real send returns SUCCESS) and offline against success bodies whose message-id contains error-code substrings.
+
+## 2026-08-06 — Dashboard: Total Payment (Students) KPI
+
+Added `total_payment_collected = Sum(payment_amount) for is_paid=True students` to admin_dashboard + a "Total Payment (Students)" KPI card (₹) linking to paid students. Completes the read-only TCE access set (Viewer role already covers schools/students/submissions/payments/zonal/TCE filter).

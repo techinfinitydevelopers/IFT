@@ -614,6 +614,18 @@
                     </div>
                     </a>
                 </div>
+
+                <div class="col-6 col-lg-2">
+                    <a href="{% url 'admins:students_list' %}?paid=true" class="kpi-link">
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <div class="kpi-icon green"><span class="material-symbols-outlined">account_balance_wallet</span></div>
+                        </div>
+                        <span class="kpi-label">Total Payment (Students)</span>
+                        <div class="kpi-value">&#8377;{{ total_payment_collected }}</div>
+                    </div>
+                    </a>
+                </div>
             </div>
 
             <!-- Quick Actions -->

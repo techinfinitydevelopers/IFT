@@ -119,6 +119,9 @@ def admin_dashboard(request):
     unpublished_ideas = IdeaSubmission.objects.filter(status='draft').count()
     paid_registrations = Student.objects.filter(is_paid=True).count()
     unpaid_registrations = Student.objects.filter(is_paid=False).count()
+    from django.db.models import Sum
+    total_payment_collected = Student.objects.filter(is_paid=True).aggregate(
+        t=Sum('payment_amount'))['t'] or 0
 
     context = {
         'submissions': submissions_list,
@@ -138,6 +141,7 @@ def admin_dashboard(request):
         'unpublished_ideas': unpublished_ideas,
         'paid_registrations': paid_registrations,
         'unpaid_registrations': unpaid_registrations,
+        'total_payment_collected': total_payment_collected,
         'selected_category': category or '',
         'search_query': search_query or '',
         'page_obj': page_obj,
