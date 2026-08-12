@@ -1,0 +1,41 @@
+name: Deploy to Railway
+
+# Auto-deploys the IFT service on every push to main by uploading the code
+# with the Railway CLI. This does NOT rely on Railway's native GitHub
+# connection (which is currently "unavailable"), so it works regardless.
+#
+# One-time setup (required):
+#   1. Railway -> Project Settings -> Tokens -> create a token for the
+#      "production" environment  (or Account -> Tokens).
+#   2. GitHub repo -> Settings -> Secrets and variables -> Actions ->
+#      New repository secret -> name: RAILWAY_TOKEN, value: <that token>.
+# Optional: set a repo variable RAILWAY_SERVICE if the service isn't "IFT".
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: {}   # lets you trigger a deploy manually from the Actions tab
+
+concurrency:
+  group: railway-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Railway CLI
+        run: npm i -g @railway/cli
+
+      - name: Deploy to Railway
+        run: railway up --service "${{ vars.RAILWAY_SERVICE || 'IFT' }}" --ci
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
