@@ -451,3 +451,5 @@ Added `total_payment_collected = Sum(payment_amount) for is_paid=True students` 
 ## 2026-08-06 — Restricted read-only "TCE" role
 
 New `tce` role (accounts/models.py + migration 0007, `is_tce`) — read-only AND limited to only: Dashboard, Schools list, Students list, Submissions, Reports/Zonal. `ReadOnlyViewerMiddleware` now: (a) 403s writes for viewer+tce; (b) for tce, redirects any other /super-admin/ page to the dashboard; (c) injects a script that hides non-allowed sidebar nav links (onboard, evaluators, content, certificates, digital resources, tickets, highlights, hall of fame, etc.). `is_staff_or_superuser` + role_redirect allow tce. `create_viewer` got a `--role {viewer,tce}` flag. Scoped to whichever account has role='tce' — the general `viewer` role (full read-only view) is unchanged. Verified: tce sees allowed pages (200), blocked pages 302→dashboard, writes 403, nav-hide injected only for tce.
+
+<!-- deploy test eea022b -->
