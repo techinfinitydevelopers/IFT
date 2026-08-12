@@ -18,11 +18,6 @@ _OTP_MESSAGE = (
     "Your OTP for India Future Tycoons verification is {otp}. "
     "Valid for 10 minutes. Do not share it with anyone. - ENLEARNING"
 )
-# Sevenomedia response codes that mean the send failed (13xx). 1300 = success.
-_ERROR_CODES = {
-    '1301', '1302', '1303', '1304', '1305', '1306', '1307', '1308', '1309',
-    '1310', '1311', '1312', '1313', '1314', '1315', '1316', '1325', '1326',
-}
 
 
 def normalize_mobile(phone):
@@ -64,10 +59,13 @@ def generate_and_send(request, phone):
         resp = requests.get(settings.SMS_API_URL, params=params, timeout=15)
         body = (resp.text or '').strip()
         print(f"[OTP] send -> {phone}: http={resp.status_code} body={body[:200]}", flush=True)
-        # Gateway returns "SUCCESS | <message-id> | <mobile>" on success,
-        # or a 13xx error code on failure.
-        ok = resp.status_code == 200 and 'SUCCESS' in body.upper() \
-            and not any(code in body for code in _ERROR_CODES)
+        # Gateway returns "SUCCESS | <message-id> | <mobile>" on success, or an
+        # error token (e.g. "1305 | ..." / "ERR_INTERNAL | ...") on failure.
+        # Only the FIRST token decides success — the message-id is a random UUID
+        # that can coincidentally contain a 13xx error-code substring, so we must
+        # NOT substring-match error codes against the whole body.
+        first_token = body.split('|', 1)[0].strip().upper()
+        ok = resp.status_code == 200 and first_token == 'SUCCESS'
         if ok:
             request.session[_SESSION_KEY] = {'phone': phone, 'otp': otp, 'ts': int(time.time())}
             request.session.modified = True

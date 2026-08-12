@@ -435,3 +435,9 @@ Fix in `admins/views.py`:
 - `report_schools_export`: replaced per-school counts with 4 bulk aggregate queries (Student totals, paid totals, submitted-per-school, max score-per-school) keyed by school id.  1100 queries → 5, ~2s.
 - `report_students_export`: `prefetch_related(Prefetch('submissions', select_related ai_evaluation, ordered best-first))` so the per-student "best submission" lookup hits cache.  193 queries → 7, 50s → 2.4s.
 Verified on prod: counts match DB (0 mismatches), row counts intact, Amount-only-if-paid and Tata ClassEdge column preserved.
+
+---
+
+## 2026-08-12 — Fix intermittent "Could not send OTP" on school/student signup
+
+Client reported schools couldn't register — "Could not send OTP right now" on Send OTP. The Sevenomedia gateway was actually returning SUCCESS ("SUCCESS | <uuid message-id> | <mobile>"), but `accounts/otp.py` classified success by substring-matching a set of 13xx error codes against the WHOLE response body. The random UUID message-id can contain a 4-digit chunk like "1310"/"1312", which falsely flipped a real SUCCESS to failure — so the OTP silently failed for a random subset of users each time (intermittent). Fixed: success is now decided by the FIRST pipe-delimited token == "SUCCESS" only; removed the buggy `_ERROR_CODES` substring check. Verified against the live gateway (real send returns SUCCESS) and offline against success bodies whose message-id contains error-code substrings.
