@@ -498,3 +498,9 @@ Verified: templates compile, URL resolves, and a live render (real school user +
 ## 2026-08-13 — School dashboard: "View All Notifications" link in notification dropdown
 
 The school notification bell dropdown had no footer link to the full notifications page (students had one via partials/header.html). Added a "View All Notifications" footer link in the school notification panel (`templates/students/school_dashboard.html`) pointing to `students:notifications_page` (that view is @login_required and role-aware, so it shows the school user's notifications + schools/all content). Verified template compiles and URL resolves to /notifications/.
+
+---
+
+## 2026-08-13 — School notifications page: role-aware chrome (fix 500s, avatar, bell)
+
+The /notifications/ page always rendered the STUDENT template, so a school user got the student sidebar/profile — navigating away 500'd (student links), the bottom-left showed a student email, the top-right avatar was wrong, and the bell showed no notifications. Made `notifications_page` role-aware: school users (profile.role == 'school') now render a new `templates/students/school_notifications.html` with the school chrome (correct sidebar, school-name avatar, working notification bell dropdown + badge from the context processor, Mark-all-read, View-All). Same `combined_notifications` data. Verified on prod (school user): 200, school links only, bell dropdown + badge present, avatar = school initial, list renders.

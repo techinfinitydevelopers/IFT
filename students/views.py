@@ -1967,6 +1967,14 @@ def notifications_page(request):
         'submission_count': notifications.filter(notification_type='submission').count(),
         'announcement_count': notifications.filter(notification_type='announcement').count() + announcement_content_count,
     }
+    # Role-aware chrome: school users get the school-styled notifications page
+    # (student template has the student sidebar/profile, which 500s for schools).
+    if getattr(getattr(request.user, 'profile', None), 'role', '') == 'school':
+        try:
+            context['school'] = request.user.school_profile
+        except Exception:
+            context['school'] = None
+        return render(request, 'students/school_notifications.html', context)
     return render(request, 'students/notifications.html', context)
 
 
