@@ -784,7 +784,7 @@
                 {% if combined_notifications %}
                 <div style="display:flex; flex-direction:column; gap:10px; max-width:900px;">
                     {% for item in combined_notifications %}
-                    {% if item.is_announcement %}<a href="{% url 'students:school_announcement_detail' item.content_id %}" class="section-card" style="display:block; text-decoration:none; color:inherit; padding:16px; {% if not item.is_read %}border-left:3px solid #5E2A97;{% endif %}">{% else %}<div class="section-card" style="padding:16px; {% if not item.is_read %}border-left:3px solid #5E2A97;{% endif %}">{% endif %}
+                    <div class="section-card notif-card" style="padding:16px; {% if item.is_announcement %}cursor:pointer;{% endif %} {% if not item.is_read %}border-left:3px solid #5E2A97;{% endif %}"{% if item.is_announcement %} data-href="{% url 'students:school_announcement_detail' item.content_id %}"{% endif %}>
                         <div style="display:flex; gap:14px; align-items:flex-start;">
                             <div style="width:40px; height:40px; border-radius:50%; background:rgba(94,42,151,0.1); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
                                 <span class="material-symbols-outlined" style="color:#5E2A97;">{{ item.icon }}</span>
@@ -796,7 +796,7 @@
                             </div>
                             {% if item.is_announcement %}<span class="material-symbols-outlined" style="font-size:20px; color:#cbb8e6; align-self:center;">chevron_right</span>{% elif not item.is_read %}<span style="width:8px; height:8px; border-radius:50%; background:#ef4444; flex-shrink:0; margin-top:6px;"></span>{% endif %}
                         </div>
-                    {% if item.is_announcement %}</a>{% else %}</div>{% endif %}
+                    </div>
                     {% endfor %}
                 </div>
                 {% else %}
@@ -916,6 +916,13 @@
             dd.addEventListener('click', function(e){ e.stopPropagation(); });
         }
     })();
+    // Announcement cards navigate to their detail page (inner links still work)
+    document.querySelectorAll('.notif-card[data-href]').forEach(function(card){
+        card.addEventListener('click', function(e){
+            if (e.target.closest('a')) return;   // let the zoom/link click through
+            window.location.href = card.getAttribute('data-href');
+        });
+    });
     </script>
 </body>
 

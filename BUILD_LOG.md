@@ -510,3 +510,9 @@ The /notifications/ page always rendered the STUDENT template, so a school user 
 ## 2026-08-13 — School notifications list: announcement items link to detail page
 
 On the school notifications page, announcement items now link to the individual announcement detail page (`students:school_announcement_detail`), matching the dashboard behaviour. Added `content_id` + `is_announcement` to the combined notification dicts (students/views.py) and wrapped announcement cards in a link (with a chevron affordance) in school_notifications.html. Non-announcement items (notifications, FAQs) stay non-clickable. Verified: announcement rows render a /school/announcement/<id>/ link.
+
+---
+
+## 2026-08-13 — Fix broken announcement card layout on school notifications
+
+Previous change wrapped the announcement notification card in an <a>, but the body is urlize'd (contains a Zoom link) → an <a> inside an <a> is invalid HTML, so the browser broke that card's layout (rendered unstyled). Reverted the card to a <div class="section-card notif-card"> with a data-href, and navigation is now handled by a click listener (which ignores clicks on inner links so the Zoom link still works). Layout restored; announcement cards remain clickable to the detail page.
