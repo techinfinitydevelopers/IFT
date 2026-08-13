@@ -492,3 +492,9 @@ Announcement cards on the school dashboard were not clickable and had no detail 
 - Template `templates/students/school_announcement_detail.html` — cloned from school_reports chrome (sidebar/header), body replaced with the full announcement (title, date, subtitle, body via urlize|linebreaksbr) + Back to Dashboard link.
 - Dashboard announcement cards wrapped in a link to the detail page (with a chevron affordance).
 Verified: templates compile, URL resolves, and a live render (real school user + announcement) returns 200 with the title shown.
+
+---
+
+## 2026-08-13 — School dashboard: "View All Notifications" link in notification dropdown
+
+The school notification bell dropdown had no footer link to the full notifications page (students had one via partials/header.html). Added a "View All Notifications" footer link in the school notification panel (`templates/students/school_dashboard.html`) pointing to `students:notifications_page` (that view is @login_required and role-aware, so it shows the school user's notifications + schools/all content). Verified template compiles and URL resolves to /notifications/.
