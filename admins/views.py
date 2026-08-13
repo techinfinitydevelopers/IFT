@@ -34,6 +34,25 @@ def is_staff_or_superuser(user):
     return bool(profile and profile.role in ('viewer', 'tce'))
 
 
+# Test/QA accounts (students or schools) whose data must NEVER appear in any
+# report export. Matched case-insensitively.
+REPORT_EXCLUDED_EMAILS = [
+    'milisheth1104@gmail.com',
+    'kunal.techinfinity@gmail.com',
+    'gefethibqyvxyyzdik@jbsze.net',
+]
+
+
+def _test_email_q(*fields):
+    """Q matching a row when ANY of the given email fields is a test account."""
+    from django.db.models import Q
+    q = Q()
+    for f in fields:
+        for e in REPORT_EXCLUDED_EMAILS:
+            q |= Q(**{f + '__iexact': e})
+    return q
+
+
 @login_required
 @user_passes_test(is_staff_or_superuser)
 def admin_dashboard(request):
@@ -830,6 +849,15 @@ def export_top_400(request):
         n = 400
 
     evaluations = get_top_n(n)
+    # Drop test/QA accounts from the ranking export.
+    _excl = {e.lower() for e in REPORT_EXCLUDED_EMAILS}
+    def _keep(ev):
+        try:
+            em = (ev.submission.student.user.email or '').lower()
+        except Exception:
+            em = ''
+        return em not in _excl
+    evaluations = [e for e in evaluations if _keep(e)]
 
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = f'attachment; filename="top_{n}_ideas.csv"'
@@ -1265,6 +1293,9 @@ def export_students_csv(request):
     selected_grade = request.GET.get('grade', '')
 
     students = Student.objects.select_related('user').all()
+    students = students.exclude(_test_email_q(
+        'user__email', 'school__user__email',
+        'school__contact_email', 'school__principal_email'))
 
     if search_query:
         students = students.filter(
@@ -1721,7 +1752,9 @@ def export_schools_csv(request):
         'total_students', 'school_type', 'medium', 'is_tata_classedge', 'status',
     ]
     writer.writerow(headers)
-    for s in School.objects.all().order_by('name'):
+    _schools = School.objects.all().exclude(
+        _test_email_q('user__email', 'contact_email', 'principal_email')).order_by('name')
+    for s in _schools:
         writer.writerow([
             s.name, s.branch, s.board, s.affiliation_number, s.address, s.city, s.state,
             s.pin_code, s.country, s.principal_name, s.principal_email,
@@ -3424,6 +3457,10 @@ def report_students_export(request):
     students = (Student.objects.select_related('user', 'school')
                 .prefetch_related(Prefetch('submissions', queryset=_best_sub_qs))
                 .all())
+    # Never include test/QA accounts (own email or their school's emails).
+    students = students.exclude(_test_email_q(
+        'user__email', 'school__user__email',
+        'school__contact_email', 'school__principal_email'))
 
     # ---- student-level filters ----
     if g.get('school'):
@@ -3545,6 +3582,9 @@ def report_schools_export(request):
 
     g = request.GET
     schools = School.objects.all()
+    # Never include test/QA school accounts.
+    schools = schools.exclude(_test_email_q(
+        'user__email', 'contact_email', 'principal_email'))
     if g.get('board'):
         schools = schools.filter(board=g['board'])
     if g.get('city'):
@@ -3636,18 +3676,23 @@ def _compute_zonal():
     def bucket(zone):
         return d.get(zone, d['Unknown'])
 
-    for s in School.objects.filter(status='active'):
+    for s in School.objects.filter(status='active').exclude(
+            _test_email_q('user__email', 'contact_email', 'principal_email')):
         bucket(_state_to_zone(s.state, s.city))['schools'] += 1
 
-    for st in Student.objects.select_related('school'):
+    _stud_excl = _test_email_q('user__email', 'school__user__email',
+                               'school__contact_email', 'school__principal_email')
+    for st in Student.objects.select_related('school').exclude(_stud_excl):
         state, city = _student_state_city(st, name_map)
         b = bucket(_state_to_zone(state, city))
         b['students'] += 1
         if st.is_paid:
             b['paid'] += 1
 
-    subs = IdeaSubmission.objects.exclude(status='draft').select_related(
-        'student', 'student__school', 'ai_evaluation')
+    subs = IdeaSubmission.objects.exclude(status='draft').exclude(
+        _test_email_q('student__user__email', 'student__school__user__email',
+                      'student__school__contact_email', 'student__school__principal_email')
+    ).select_related('student', 'student__school', 'ai_evaluation')
     for sub in subs:
         state, city = _student_state_city(sub.student, name_map)
         b = bucket(_state_to_zone(state, city))
@@ -3671,7 +3716,9 @@ def _zonal_detail_rows():
     rows = []
     name_map = _school_name_map()
     students = Student.objects.select_related('user', 'school').prefetch_related(
-        'submissions', 'submissions__ai_evaluation')
+        'submissions', 'submissions__ai_evaluation').exclude(_test_email_q(
+            'user__email', 'school__user__email',
+            'school__contact_email', 'school__principal_email'))
     for st in students:
         school = st.school
         state, city = _student_state_city(st, name_map)

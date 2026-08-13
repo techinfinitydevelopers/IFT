@@ -557,3 +557,9 @@ Mirrored the student change to school: added `school_notification_detail` view +
 ## 2026-08-13 — Bell dropdown items clickable to detail (student + school) + chevron cue
 
 The header notification bell dropdown items now open their detail page instead of just going to the notifications list: content announcements → announcement detail, notification-type announcements → notification detail, everything else → the notifications page. Added a chevron_right on each item as a visual "clickable" cue, and truncated long titles/messages. Context processor now includes id/content_id/is_announcement per combined item so the (role-specific) templates can build the right detail URL. Applied to student (partials/header.html) and school (school_dashboard.html notification panel + school_notifications.html #notifDropdown). Verified: chevrons render and an announcement item links to /school/announcement/<id>/.
+
+---
+
+## 2026-08-13 — Reports: exclude test/QA accounts from all exports
+
+Added `REPORT_EXCLUDED_EMAILS` (milisheth1104@gmail.com, kunal.techinfinity@gmail.com, gefethibqyvxyyzdik@jbsze.net) + `_test_email_q()` helper in admins/views.py. These test accounts (students or schools) are now excluded from every report download: Students report, Schools report, Zonal (summary + detailed), Top-N CSV, and the Students/Schools management CSV exports. Matched case-insensitively across the account's own email and (for students) their school's user/contact/principal emails. On-screen management LISTS are unchanged (admins still see test accounts there). Verified on prod: students report 296→295, schools report 346→344; all exports run.
