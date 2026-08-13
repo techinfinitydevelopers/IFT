@@ -530,3 +530,12 @@ Rebuilt the school notifications content to mirror the student page: filter tabs
 - Added action buttons on each notification card: "Open" (announcements → detail page) and "Mark as read" (real notifications only, when unread).
 - Announcement detail page back link changed from "Back to Dashboard" to "Back to All Notifications" (→ notifications page).
 - Bug fix: mark-as-read now only fires for real Notification rows (data-kind='notif'); content items (announcements/FAQs) have ids like "content-65" and previously 404'd against /notifications/<int>/read/. Card click and the button both guard on data-kind. Verified templates compile and render.
+
+---
+
+## 2026-08-13 — Student notifications: fix oversized bell dropdown + announcement detail page (parity with school)
+
+1. Bell dropdown box was stretching huge because long announcement titles had no width bound. Constrained `.notif-dropdown` to width 360px (max-height 480px, scroll) and made notif title/message truncate with ellipsis (header_css.html + header.html).
+2. Added student announcement detail page: view `student_announcement_detail` + URL `announcement/<int:pk>/` + template `student_announcement_detail.html` (student chrome, Back to All Notifications).
+3. Student notifications list now mirrors school: announcement cards are clickable to the detail page, with Open / Mark-as-read action buttons; card-click and mark-read are guarded to real notifications (data-kind='notif') so content items (ids like "content-65") no longer 404 against /notifications/<int>/read/.
+Verified: templates compile, URLs resolve, student render shows data-href/Open/Mark-as-read and the detail page renders with the student sidebar.

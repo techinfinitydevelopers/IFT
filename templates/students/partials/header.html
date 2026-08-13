@@ -69,9 +69,9 @@
             <div style="width:36px;height:36px;border-radius:50%;background:{% if item.notif_type == 'team' %}#dcfce7{% elif item.notif_type == 'submission' %}#fef3c7{% else %}#E8D4F0{% endif %};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                 <span class="material-symbols-outlined" style="font-size:18px;color:{% if item.notif_type == 'team' %}#16a34a{% elif item.notif_type == 'submission' %}#d97706{% else %}var(--primary){% endif %};">{{ item.icon }}</span>
             </div>
-            <div>
-                <p style="font-weight:600;font-size:0.875rem;margin:0;">{{ item.title }}</p>
-                <p style="font-size:0.8rem;color:var(--text-muted);margin:0;">{{ item.message|truncatechars:50 }}</p>
+            <div style="min-width:0;flex:1;">
+                <p style="font-weight:600;font-size:0.875rem;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ item.title }}</p>
+                <p style="font-size:0.8rem;color:var(--text-muted);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ item.message|truncatechars:50 }}</p>
                 <p style="font-size:0.7rem;color:#94a3b8;margin:2px 0 0;">{{ item.created_at|timesince }} ago</p>
             </div>
         </a>

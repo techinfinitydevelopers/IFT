@@ -1930,6 +1930,18 @@ def evaluator_assigned_ideas(request):
 
 
 @login_required
+def student_announcement_detail(request, pk):
+    """Student — full detail page for a single announcement."""
+    from admins.models import Content
+    from accounts.context_processors import _visibility_for_role
+    role = getattr(getattr(request.user, 'profile', None), 'role', 'student')
+    vis = _visibility_for_role(role)
+    ann = get_object_or_404(
+        Content, pk=pk, content_type='announcement', status='published', visibility__in=vis)
+    return render(request, 'students/student_announcement_detail.html', {'ann': ann})
+
+
+@login_required
 def notifications_page(request):
     """Notifications page."""
     from students.models import Notification

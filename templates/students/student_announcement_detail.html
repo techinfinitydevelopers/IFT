@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Notifications - IFT Student Portal</title>
+    <title>Announcement - IFT Student Portal</title>
     <link rel="icon" type="image/png" href="{% static 'images/New-Final-ift-logo.png' %}">
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com" rel="preconnect" />
@@ -221,92 +221,21 @@
             {% include 'students/partials/header.html' %}
 
             <div class="content-wrapper">
-                <!-- Page Header -->
-                <div class="page-header">
-                    <h1 class="page-title">Notifications</h1>
-                    <p class="page-subtitle">Stay updated with all your competition activities and announcements</p>
-                </div>
-
-                <!-- Filter Tabs -->
-                <div class="filter-tabs">
-                    <button class="filter-tab active" data-filter="all">
-                        <span>All</span>
-                        <span class="filter-count">{{ total }}</span>
-                    </button>
-                    <button class="filter-tab" data-filter="unread">
-                        <span>Unread</span>
-                        <span class="filter-count" id="unreadCount">{{ unread }}</span>
-                    </button>
-                    <button class="filter-tab" data-filter="team">
-                        <span>Team</span>
-                        <span class="filter-count">{{ team_count }}</span>
-                    </button>
-                    <button class="filter-tab" data-filter="submission">
-                        <span>Submissions</span>
-                        <span class="filter-count">{{ submission_count }}</span>
-                    </button>
-                    <button class="filter-tab" data-filter="announcement">
-                        <span>Announcements</span>
-                        <span class="filter-count">{{ announcement_count }}</span>
-                    </button>
-                    <button class="action-btn" id="markAllReadBtn">
-                        <span class="material-symbols-outlined">check_circle</span>
-                        Mark all as read
-                    </button>
-                </div>
-
-                <!-- Actions Bar -->
-                <div class="actions-bar">
-                    <div class="search-box">
-                        <span class="material-symbols-outlined search-icon">search</span>
-                        <input type="text" class="search-input" placeholder="Search notifications..." id="searchInput">
-                    </div>
-                </div>
-
-                <!-- Notifications List -->
-                <div class="notifications-list">
-                    {% for item in combined_notifications %}
-                    <div class="notification-card {% if not item.is_read %}unread{% endif %}"
-                         data-type="{{ item.notif_type }}"
-                         data-id="{{ item.id }}"
-                         data-kind="{{ item.type }}"{% if item.is_announcement %}
-                         data-href="{% url 'students:student_announcement_detail' item.content_id %}"{% endif %}>
-                        {% if not item.is_read %}
-                        <div class="notification-badge-unread"></div>
-                        {% endif %}
-                        <div class="notification-icon-wrapper {% if item.notif_type == 'team' %}success{% elif item.notif_type == 'submission' %}warning{% elif item.notif_type == 'announcement' %}info{% else %}primary{% endif %}">
-                            <span class="material-symbols-outlined">{{ item.icon }}</span>
+                <a href="{% url 'students:notifications_page' %}" style="display:inline-flex;align-items:center;gap:6px;color:#5E2A97;text-decoration:none;font-weight:600;font-size:0.85rem;margin-bottom:18px;">
+                    <span class="material-symbols-outlined" style="font-size:20px;">arrow_back</span> Back to All Notifications
+                </a>
+                <div style="max-width:860px;background:#fff;border:1px solid #EEE;border-radius:16px;padding:24px;">
+                    <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:16px;">
+                        <div style="width:48px;height:48px;border-radius:50%;background:rgba(94,42,151,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <span class="material-symbols-outlined" style="color:#5E2A97;">campaign</span>
                         </div>
-                        <div class="notification-content">
-                            <div class="notification-header">
-                                <h3 class="notification-title">{{ item.title }}</h3>
-                                <span class="notification-time">
-                                    <span class="material-symbols-outlined" style="font-size: 14px;">schedule</span>
-                                    {{ item.created_at|timesince }} ago
-                                </span>
-                            </div>
-                            {% if item.message %}
-                            <p class="notification-message">{{ item.message|truncatewords:20 }}</p>
-                            {% endif %}
-                            <div class="notification-actions">
-                                {% if item.is_announcement %}
-                                <a class="notification-action-btn primary" href="{% url 'students:student_announcement_detail' item.content_id %}"><span class="material-symbols-outlined">open_in_new</span> Open</a>
-                                {% endif %}
-                                {% if item.type == 'notif' and not item.is_read %}
-                                <button type="button" class="notification-action-btn secondary mark-read-btn"><span class="material-symbols-outlined">done</span> Mark as read</button>
-                                {% endif %}
-                            </div>
+                        <div style="flex:1;min-width:0;">
+                            <h1 style="font-size:1.4rem;font-weight:700;color:#1e1b2e;margin:0;line-height:1.3;">{{ ann.title }}</h1>
+                            <p style="font-size:0.75rem;color:#94a3b8;margin:6px 0 0;">{{ ann.created_at|date:"M d, Y" }} &middot; {{ ann.created_at|timesince }} ago</p>
                         </div>
                     </div>
-                    {% empty %}
-                    <div class="empty-state">
-                        <div class="empty-icon">
-                            <span class="material-symbols-outlined">notifications_off</span>
-                        </div>
-                        <h3 class="empty-title">No notifications yet</h3>
-                        <p class="empty-message">When you get notifications about teams, submissions, or announcements, they will appear here.</p>
-                    </div>
-                    {% endfor %}
+                    {% if ann.subtitle %}<p style="font-size:1rem;color:#5E2A97;font-weight:600;margin:0 0 18px;">{{ ann.subtitle }}</p>{% endif %}
+                    <div style="font-size:0.95rem;color:#333;line-height:1.8;">{{ ann.body|urlize|linebreaksbr }}</div>
                 </div>
             </div>
         </div>
@@ -356,41 +285,27 @@
             });
         }
 
-        // Mark a card's underlying notification as read (real notifications only —
-        // content items like announcements/FAQs have ids such as "content-65" and
-        // must NOT hit /notifications/<int>/read/).
-        function markCardRead(card) {
-            if (card.getAttribute('data-kind') !== 'notif') return;
-            if (!card.classList.contains('unread')) return;
-            const id = card.getAttribute('data-id');
-            fetch(`/notifications/${id}/read/`, {
-                method: 'POST',
-                headers: { 'X-CSRFToken': csrfToken, 'Content-Type': 'application/json' },
-            }).then(r => r.json()).then(data => {
-                if (data.success) {
-                    card.classList.remove('unread');
-                    const badge = card.querySelector('.notification-badge-unread');
-                    if (badge) badge.remove();
-                    const mb = card.querySelector('.mark-read-btn');
-                    if (mb) mb.remove();
-                    updateUnreadCount();
-                    decrementHeaderBadge();
-                    showToast('Notification marked as read', 'success');
-                }
-            }).catch(function(){});
-        }
-
-        // Card click: announcements open their detail page; others mark read
+        // Click card to mark as read
         notificationCards.forEach(card => {
             card.addEventListener('click', function(e) {
-                if (e.target.closest('a')) return;                        // inner links / Open button
                 if (e.target.closest('.notification-action-btn')) return;
-                const href = this.getAttribute('data-href');
-                if (href) { window.location.href = href; return; }        // announcement -> detail page
-                markCardRead(this);
+                if (!this.classList.contains('unread')) return;
+
+                const id = this.getAttribute('data-id');
+                fetch(`/notifications/${id}/read/`, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrfToken, 'Content-Type': 'application/json' },
+                }).then(r => r.json()).then(data => {
+                    if (data.success) {
+                        this.classList.remove('unread');
+                        const badge = this.querySelector('.notification-badge-unread');
+                        if (badge) badge.remove();
+                        updateUnreadCount();
+                        decrementHeaderBadge();
+                        showToast('Notification marked as read', 'success');
+                    }
+                });
             });
-            const mrb = card.querySelector('.mark-read-btn');
-            if (mrb) mrb.addEventListener('click', function(e){ e.stopPropagation(); markCardRead(card); });
         });
 
         // Mark all as read
