@@ -539,3 +539,9 @@ Rebuilt the school notifications content to mirror the student page: filter tabs
 2. Added student announcement detail page: view `student_announcement_detail` + URL `announcement/<int:pk>/` + template `student_announcement_detail.html` (student chrome, Back to All Notifications).
 3. Student notifications list now mirrors school: announcement cards are clickable to the detail page, with Open / Mark-as-read action buttons; card-click and mark-read are guarded to real notifications (data-kind='notif') so content items (ids like "content-65") no longer 404 against /notifications/<int>/read/.
 Verified: templates compile, URLs resolve, student render shows data-href/Open/Mark-as-read and the detail page renders with the student sidebar.
+
+---
+
+## 2026-08-13 — Student notifications: Open button on notification-type announcements too
+
+Some announcements arrive as a Notification (notification_type='announcement') rather than a published Content row (the Content copy may still be 'scheduled'), so they had no "Open" button while Content announcements did — inconsistent. Added `student_notification_detail` view + URL `notification/<int:pk>/` (reuses the announcement detail template by mapping the Notification's title/message onto an `ann` object; marks it read on open). The notifications list now shows an "Open" button + clickable card for notification-type announcements as well (→ notification detail), matching Content announcements. Verified: a student with both a content-announcement and a notif-announcement now shows an Open button on each.

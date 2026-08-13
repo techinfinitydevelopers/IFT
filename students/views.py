@@ -1930,6 +1930,26 @@ def evaluator_assigned_ideas(request):
 
 
 @login_required
+def student_notification_detail(request, pk):
+    """Student — detail page for a single (non-content) notification. Reuses the
+    announcement detail template by mapping the notification onto an `ann` object."""
+    from students.models import Notification
+    n = get_object_or_404(Notification, pk=pk, user=request.user)
+    if not n.is_read:
+        n.is_read = True
+        n.save(update_fields=['is_read'])
+
+    class _Ann:
+        pass
+    ann = _Ann()
+    ann.title = n.title
+    ann.subtitle = ''
+    ann.body = n.message or ''
+    ann.created_at = n.created_at
+    return render(request, 'students/student_announcement_detail.html', {'ann': ann})
+
+
+@login_required
 def student_announcement_detail(request, pk):
     """Student — full detail page for a single announcement."""
     from admins.models import Content
