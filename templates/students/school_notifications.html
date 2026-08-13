@@ -839,7 +839,7 @@
                 </div>
                 <div class="notifications-list">
                     {% for item in combined_notifications %}
-                    <div class="notification-card {% if not item.is_read %}unread{% endif %}" data-type="{{ item.notif_type }}" data-id="{{ item.id }}" data-kind="{{ item.type }}"{% if item.is_announcement %} data-href="{% url 'students:school_announcement_detail' item.content_id %}"{% endif %}>
+                    <div class="notification-card {% if not item.is_read %}unread{% endif %}" data-type="{{ item.notif_type }}" data-id="{{ item.id }}" data-kind="{{ item.type }}"{% if item.is_announcement %} data-href="{% url 'students:school_announcement_detail' item.content_id %}"{% elif item.type == 'notif' and item.notif_type == 'announcement' %} data-href="{% url 'students:school_notification_detail' item.id %}"{% endif %}>
                         {% if not item.is_read %}<div class="notification-badge-unread"></div>{% endif %}
                         <div class="notification-icon-wrapper {% if item.notif_type == 'team' %}success{% elif item.notif_type == 'submission' %}warning{% elif item.notif_type == 'announcement' %}info{% else %}primary{% endif %}">
                             <span class="material-symbols-outlined">{{ item.icon }}</span>
@@ -853,6 +853,8 @@
                             <div class="notification-actions">
                                 {% if item.is_announcement %}
                                 <a class="notification-action-btn primary" href="{% url 'students:school_announcement_detail' item.content_id %}"><span class="material-symbols-outlined">open_in_new</span> Open</a>
+                                {% elif item.type == 'notif' and item.notif_type == 'announcement' %}
+                                <a class="notification-action-btn primary" href="{% url 'students:school_notification_detail' item.id %}"><span class="material-symbols-outlined">open_in_new</span> Open</a>
                                 {% endif %}
                                 {% if item.type == 'notif' and not item.is_read %}
                                 <button type="button" class="notification-action-btn secondary mark-read-btn"><span class="material-symbols-outlined">done</span> Mark as read</button>

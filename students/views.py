@@ -2438,6 +2438,32 @@ def school_results(request):
 
 
 @login_required
+def school_notification_detail(request, pk):
+    """School — detail page for a single (non-content) notification. Reuses the
+    announcement detail template with the notification mapped onto an `ann` object."""
+    from students.models import School, Notification
+    try:
+        school = request.user.school_profile
+    except School.DoesNotExist:
+        return redirect('accounts:sign_in')
+    if school.status != 'active':
+        return redirect('students:school_dashboard')
+    n = get_object_or_404(Notification, pk=pk, user=request.user)
+    if not n.is_read:
+        n.is_read = True
+        n.save(update_fields=['is_read'])
+
+    class _Ann:
+        pass
+    ann = _Ann()
+    ann.title = n.title
+    ann.subtitle = ''
+    ann.body = n.message or ''
+    ann.created_at = n.created_at
+    return render(request, 'students/school_announcement_detail.html', {'ann': ann, 'school': school})
+
+
+@login_required
 def school_announcement_detail(request, pk):
     """School — full detail page for a single announcement."""
     from students.models import School

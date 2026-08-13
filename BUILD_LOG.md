@@ -545,3 +545,9 @@ Verified: templates compile, URLs resolve, student render shows data-href/Open/M
 ## 2026-08-13 — Student notifications: Open button on notification-type announcements too
 
 Some announcements arrive as a Notification (notification_type='announcement') rather than a published Content row (the Content copy may still be 'scheduled'), so they had no "Open" button while Content announcements did — inconsistent. Added `student_notification_detail` view + URL `notification/<int:pk>/` (reuses the announcement detail template by mapping the Notification's title/message onto an `ann` object; marks it read on open). The notifications list now shows an "Open" button + clickable card for notification-type announcements as well (→ notification detail), matching Content announcements. Verified: a student with both a content-announcement and a notif-announcement now shows an Open button on each.
+
+---
+
+## 2026-08-13 — School notifications: Open button on notification-type announcements (parity with student)
+
+Mirrored the student change to school: added `school_notification_detail` view + URL `school/notification/<int:pk>/` (reuses school_announcement_detail.html via a mapped `ann` object, marks read on open, keeps school chrome). school_notifications.html now shows an "Open" button + clickable card for notification-type announcements (→ school notification detail), alongside the existing Content-announcement Open. Verified the detail view renders with the school sidebar; list logic is identical to the student side.

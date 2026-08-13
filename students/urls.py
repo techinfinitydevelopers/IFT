@@ -52,6 +52,7 @@ urlpatterns = [
     path('school/results/', views.school_results, name='school_results'),
     path('school/reports/', views.school_reports, name='school_reports'),
     path('school/announcement/<int:pk>/', views.school_announcement_detail, name='school_announcement_detail'),
+    path('school/notification/<int:pk>/', views.school_notification_detail, name='school_notification_detail'),
     path('school/hall-of-fame/', views.school_halloffame, name='school_halloffame'),
     path('school/submission/<int:submission_id>/', views.school_submission_detail, name='school_submission_detail'),
     path('school/learning-resources/', views.school_learning_resources, name='school_learning_resources'),
