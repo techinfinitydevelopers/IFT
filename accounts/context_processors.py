@@ -60,11 +60,11 @@ def unread_notification_count(request):
             recent_content = list(content_qs.order_by('-created_at')[:5])
             combined = []
             for n in recent_notifs:
-                combined.append({'type': 'notif', 'title': n.title, 'message': n.message, 'icon': n.icon or 'notifications', 'is_read': n.is_read, 'created_at': n.created_at, 'notif_type': n.notification_type})
+                combined.append({'type': 'notif', 'id': n.id, 'content_id': None, 'is_announcement': False, 'title': n.title, 'message': n.message, 'icon': n.icon or 'notifications', 'is_read': n.is_read, 'created_at': n.created_at, 'notif_type': n.notification_type})
             icon_map = {'announcement': 'campaign', 'training': 'event', 'faq': 'quiz'}
             for c in recent_content:
                 c_read = bool(read_at and c.created_at <= read_at)
-                combined.append({'type': 'content', 'title': c.title, 'message': c.body or c.subtitle or '', 'icon': icon_map.get(c.content_type, 'campaign'), 'is_read': c_read, 'created_at': c.created_at, 'notif_type': c.content_type})
+                combined.append({'type': 'content', 'id': None, 'content_id': c.id, 'is_announcement': c.content_type == 'announcement', 'title': c.title, 'message': c.body or c.subtitle or '', 'icon': icon_map.get(c.content_type, 'campaign'), 'is_read': c_read, 'created_at': c.created_at, 'notif_type': c.content_type})
             combined.sort(key=lambda x: x['created_at'], reverse=True)
             return {
                 'unread_notification_count': notif_count + content_count,

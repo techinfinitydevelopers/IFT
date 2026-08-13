@@ -551,3 +551,9 @@ Some announcements arrive as a Notification (notification_type='announcement') r
 ## 2026-08-13 — School notifications: Open button on notification-type announcements (parity with student)
 
 Mirrored the student change to school: added `school_notification_detail` view + URL `school/notification/<int:pk>/` (reuses school_announcement_detail.html via a mapped `ann` object, marks read on open, keeps school chrome). school_notifications.html now shows an "Open" button + clickable card for notification-type announcements (→ school notification detail), alongside the existing Content-announcement Open. Verified the detail view renders with the school sidebar; list logic is identical to the student side.
+
+---
+
+## 2026-08-13 — Bell dropdown items clickable to detail (student + school) + chevron cue
+
+The header notification bell dropdown items now open their detail page instead of just going to the notifications list: content announcements → announcement detail, notification-type announcements → notification detail, everything else → the notifications page. Added a chevron_right on each item as a visual "clickable" cue, and truncated long titles/messages. Context processor now includes id/content_id/is_announcement per combined item so the (role-specific) templates can build the right detail URL. Applied to student (partials/header.html) and school (school_dashboard.html notification panel + school_notifications.html #notifDropdown). Verified: chevrons render and an announcement item links to /school/announcement/<id>/.

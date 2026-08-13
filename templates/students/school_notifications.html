@@ -799,14 +799,15 @@
                         <div style="padding:14px 16px;border-bottom:1px solid #f1f5f9;font-weight:700;color:#0f172a;">Notifications</div>
                         <div style="padding:8px;">
                             {% for item in header_notifications_combined %}
-                            <div style="padding:10px;border-radius:8px;display:flex;gap:10px;{% if not item.is_read %}background:rgba(94,42,151,0.05);{% endif %}">
+                            <a href="{% if item.is_announcement %}{% url 'students:school_announcement_detail' item.content_id %}{% elif item.type == 'notif' and item.notif_type == 'announcement' %}{% url 'students:school_notification_detail' item.id %}{% else %}{% url 'students:notifications_page' %}{% endif %}" style="text-decoration:none;color:inherit;padding:10px;border-radius:8px;display:flex;gap:10px;align-items:center;{% if not item.is_read %}background:rgba(94,42,151,0.05);{% endif %}">
                                 <span class="material-symbols-outlined" style="font-size:18px;color:#5E2A97;flex-shrink:0;">{{ item.icon }}</span>
                                 <div style="flex:1;min-width:0;">
-                                    <p style="margin:0;font-size:0.82rem;font-weight:600;color:#1e293b;">{{ item.title }}</p>
-                                    <p style="margin:2px 0 0;font-size:0.72rem;color:#64748b;">{{ item.message|truncatechars:50 }}</p>
+                                    <p style="margin:0;font-size:0.82rem;font-weight:600;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ item.title }}</p>
+                                    <p style="margin:2px 0 0;font-size:0.72rem;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ item.message|truncatechars:50 }}</p>
                                     <p style="margin:2px 0 0;font-size:0.62rem;color:#94a3b8;">{{ item.created_at|timesince }} ago</p>
                                 </div>
-                            </div>
+                                <span class="material-symbols-outlined" style="font-size:18px;color:#c4b0dd;flex-shrink:0;">chevron_right</span>
+                            </a>
                             {% empty %}
                             <p style="padding:16px;text-align:center;color:#94a3b8;font-size:0.85rem;">No notifications</p>
                             {% endfor %}

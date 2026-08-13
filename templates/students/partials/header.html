@@ -65,7 +65,7 @@
             <button onclick="closeAllDropdowns()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);"><span class="material-symbols-outlined" style="font-size:20px;">close</span></button>
         </div>
         {% for item in header_notifications_combined %}
-        <a href="{% url 'students:notifications_page' %}" class="notif-item" style="text-decoration:none;color:inherit;{% if not item.is_read %}background:#f5f0ff;{% endif %}">
+        <a href="{% if item.is_announcement %}{% url 'students:student_announcement_detail' item.content_id %}{% elif item.type == 'notif' and item.notif_type == 'announcement' %}{% url 'students:student_notification_detail' item.id %}{% else %}{% url 'students:notifications_page' %}{% endif %}" class="notif-item" style="text-decoration:none;color:inherit;align-items:center;{% if not item.is_read %}background:#f5f0ff;{% endif %}">
             <div style="width:36px;height:36px;border-radius:50%;background:{% if item.notif_type == 'team' %}#dcfce7{% elif item.notif_type == 'submission' %}#fef3c7{% else %}#E8D4F0{% endif %};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                 <span class="material-symbols-outlined" style="font-size:18px;color:{% if item.notif_type == 'team' %}#16a34a{% elif item.notif_type == 'submission' %}#d97706{% else %}var(--primary){% endif %};">{{ item.icon }}</span>
             </div>
@@ -74,6 +74,7 @@
                 <p style="font-size:0.8rem;color:var(--text-muted);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ item.message|truncatechars:50 }}</p>
                 <p style="font-size:0.7rem;color:#94a3b8;margin:2px 0 0;">{{ item.created_at|timesince }} ago</p>
             </div>
+            <span class="material-symbols-outlined" style="font-size:18px;color:#c4b0dd;flex-shrink:0;">chevron_right</span>
         </a>
         {% endfor %}
         {% if not header_notifications_combined %}
