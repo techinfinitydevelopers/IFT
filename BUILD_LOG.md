@@ -522,3 +522,11 @@ Previous change wrapped the announcement notification card in an <a>, but the bo
 ## 2026-08-13 — School notifications page: match student notification UI exactly
 
 Rebuilt the school notifications content to mirror the student page: filter tabs (All / Unread / Announcements) + Mark-all-read, search box, and the identical .notification-card styling (icon wrappers, unread highlight, hover) + JS (tab filter, search, click-to-mark-read, mark-all, toast). Kept the school chrome (sidebar/header/bell). Announcement cards carry data-href and navigate to the detail page on click (div card + click handler, so no nested-anchor breakage; inner Zoom links still work). Verified on prod: 200, filter-tabs/search/cards render, announcement data-href present, school sidebar intact.
+
+---
+
+## 2026-08-13 — School notifications: action buttons + back-to-notifications + bug fix
+
+- Added action buttons on each notification card: "Open" (announcements → detail page) and "Mark as read" (real notifications only, when unread).
+- Announcement detail page back link changed from "Back to Dashboard" to "Back to All Notifications" (→ notifications page).
+- Bug fix: mark-as-read now only fires for real Notification rows (data-kind='notif'); content items (announcements/FAQs) have ids like "content-65" and previously 404'd against /notifications/<int>/read/. Card click and the button both guard on data-kind. Verified templates compile and render.
