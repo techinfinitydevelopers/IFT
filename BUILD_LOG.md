@@ -475,3 +475,9 @@ Report Builder now has "Registered From" / "Registered To" date inputs (shown fo
 ## 2026-08-13 — Student dashboard: floating "Live Sessions" button + popup
 
 Added a fixed bottom-right floating button ("Live Sessions") on the student dashboard (`templates/students/dashboard_v2.html`, student-only). Clicking opens a Bootstrap modal listing 4 upcoming Zoom webinars with dates (Aug 15, Aug 29, Sep 19, Oct 3 2026 — 4:00 PM IST) and per-session "Register" buttons opening the Zoom registration links in a new tab. Responsive (icon-only on mobile). Template compiles clean.
+
+---
+
+## 2026-08-13 — School register page: replace left-side banner image
+
+Replaced `static/images/auth/school-registration.jpg` (left-side image on the school sign-up page) with the updated "Beyond Borders: Programs For Principals & Teachers" banner. Same filename, so no template change; collectstatic re-hashes on deploy for cache-busting.
