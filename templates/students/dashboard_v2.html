@@ -928,5 +928,61 @@
     }
     </script>
     {% include 'partials/launch_confetti.html' %}
+
+    <!-- ===== Live Sessions floating button + popup (students only) ===== -->
+    <style>
+      #liveSessionsFab{position:fixed;right:22px;bottom:22px;z-index:1050;display:inline-flex;
+        align-items:center;gap:8px;background:#5E2A97;color:#fff;border:none;border-radius:50px;
+        padding:12px 20px;font-family:'Poppins',sans-serif;font-weight:600;font-size:0.9rem;
+        box-shadow:0 8px 22px rgba(94,42,151,.35);cursor:pointer;transition:transform .15s,box-shadow .15s;}
+      #liveSessionsFab:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(94,42,151,.45);}
+      #liveSessionsFab .material-symbols-outlined{font-size:22px;}
+      .ls-item{display:flex;align-items:center;justify-content:space-between;gap:12px;
+        border:1px solid #ece6f5;background:#faf8fd;border-radius:12px;padding:14px 16px;margin-bottom:12px;}
+      .ls-date{font-family:'Poppins',sans-serif;font-weight:600;color:#1e1b2e;font-size:0.95rem;}
+      .ls-time{color:#6b6577;font-size:0.8rem;margin-top:2px;}
+      .ls-btn{background:#5E2A97;color:#fff;border:none;border-radius:8px;padding:8px 16px;
+        font-family:'Poppins',sans-serif;font-weight:600;font-size:0.82rem;text-decoration:none;white-space:nowrap;}
+      .ls-btn:hover{background:#4a1f7a;color:#fff;}
+      @media(max-width:480px){#liveSessionsFab span.ls-label{display:none;}#liveSessionsFab{padding:14px;}}
+    </style>
+
+    <button id="liveSessionsFab" data-bs-toggle="modal" data-bs-target="#liveSessionsModal" title="IFT Live Sessions">
+      <span class="material-symbols-outlined">video_camera_front</span>
+      <span class="ls-label">Live Sessions</span>
+    </button>
+
+    <div class="modal fade" id="liveSessionsModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border:none;border-radius:16px;overflow:hidden;font-family:'Poppins',sans-serif;">
+          <div class="modal-header" style="background:#5E2A97;color:#fff;border:none;">
+            <h5 class="modal-title" style="font-weight:700;font-size:1.05rem;">
+              <span class="material-symbols-outlined" style="vertical-align:middle;margin-right:6px;">event</span>
+              IFT Live Sessions
+            </h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body" style="padding:20px;">
+            <p style="color:#6b6577;font-size:0.85rem;margin:0 0 16px 0;">Register in advance for each session. Timings are in IST.</p>
+            <div class="ls-item">
+              <div><div class="ls-date">📅 Aug 15, 2026</div><div class="ls-time">⏰ 4:00 PM IST</div></div>
+              <a class="ls-btn" href="https://zoom.us/meeting/register/PdB4J6T5RAmN-vm0M5_zJw" target="_blank" rel="noopener">Register</a>
+            </div>
+            <div class="ls-item">
+              <div><div class="ls-date">📅 Aug 29, 2026</div><div class="ls-time">⏰ 4:00 PM IST</div></div>
+              <a class="ls-btn" href="https://zoom.us/meeting/register/NlQpHzRsQGiwG2LPQvd16w" target="_blank" rel="noopener">Register</a>
+            </div>
+            <div class="ls-item">
+              <div><div class="ls-date">📅 Sep 19, 2026</div><div class="ls-time">⏰ 4:00 PM IST</div></div>
+              <a class="ls-btn" href="https://zoom.us/meeting/register/XdcZlUkqSFCZVc3xr_XhUw" target="_blank" rel="noopener">Register</a>
+            </div>
+            <div class="ls-item" style="margin-bottom:0;">
+              <div><div class="ls-date">📅 Oct 3, 2026</div><div class="ls-time">⏰ 4:00 PM IST</div></div>
+              <a class="ls-btn" href="https://zoom.us/meeting/register/jaR6nKpRQK-GQaW1D1T-7A" target="_blank" rel="noopener">Register</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 </body>
 </html>

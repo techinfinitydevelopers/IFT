@@ -469,3 +469,9 @@ New `tce` role (accounts/models.py + migration 0007, `is_tce`) — read-only AND
 ## 2026-08-13 — Reports: add registration date-range filter (Students + Schools)
 
 Report Builder now has "Registered From" / "Registered To" date inputs (shown for both modes). `report_students_export` and `report_schools_export` filter on `created_at__date__gte/lte` (inclusive) using the student/school registration date. Verified on prod: Students 11–12 Aug = 133 (DB 133), Schools 11–12 Aug = 81 (DB 81), from-only ≥12 Aug = 40 (DB 40). Preview + Excel both carry the date params via the form; no JS change needed.
+
+---
+
+## 2026-08-13 — Student dashboard: floating "Live Sessions" button + popup
+
+Added a fixed bottom-right floating button ("Live Sessions") on the student dashboard (`templates/students/dashboard_v2.html`, student-only). Clicking opens a Bootstrap modal listing 4 upcoming Zoom webinars with dates (Aug 15, Aug 29, Sep 19, Oct 3 2026 — 4:00 PM IST) and per-session "Register" buttons opening the Zoom registration links in a new tab. Responsive (icon-only on mobile). Template compiles clean.
