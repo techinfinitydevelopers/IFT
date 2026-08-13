@@ -1953,7 +1953,7 @@ def notifications_page(request):
         combined.append({'type': 'notif', 'id': n.id, 'title': n.title, 'message': n.message, 'icon': n.icon or 'notifications', 'is_read': n.is_read, 'created_at': n.created_at, 'notif_type': n.notification_type, 'action_url': n.action_url})
     icon_map = {'announcement': 'campaign', 'training': 'event', 'faq': 'quiz'}
     for c in content_qs:
-        combined.append({'type': 'content', 'id': f'content-{c.id}', 'title': c.title, 'message': c.body or c.subtitle or '', 'icon': icon_map.get(c.content_type, 'campaign'), 'is_read': False, 'created_at': c.created_at, 'notif_type': c.content_type, 'action_url': ''})
+        combined.append({'type': 'content', 'id': f'content-{c.id}', 'content_id': c.id, 'is_announcement': c.content_type == 'announcement', 'title': c.title, 'message': c.body or c.subtitle or '', 'icon': icon_map.get(c.content_type, 'campaign'), 'is_read': False, 'created_at': c.created_at, 'notif_type': c.content_type, 'action_url': ''})
     combined.sort(key=lambda x: x['created_at'], reverse=True)
 
     content_count = content_qs.count()

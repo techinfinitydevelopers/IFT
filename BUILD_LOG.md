@@ -504,3 +504,9 @@ The school notification bell dropdown had no footer link to the full notificatio
 ## 2026-08-13 — School notifications page: role-aware chrome (fix 500s, avatar, bell)
 
 The /notifications/ page always rendered the STUDENT template, so a school user got the student sidebar/profile — navigating away 500'd (student links), the bottom-left showed a student email, the top-right avatar was wrong, and the bell showed no notifications. Made `notifications_page` role-aware: school users (profile.role == 'school') now render a new `templates/students/school_notifications.html` with the school chrome (correct sidebar, school-name avatar, working notification bell dropdown + badge from the context processor, Mark-all-read, View-All). Same `combined_notifications` data. Verified on prod (school user): 200, school links only, bell dropdown + badge present, avatar = school initial, list renders.
+
+---
+
+## 2026-08-13 — School notifications list: announcement items link to detail page
+
+On the school notifications page, announcement items now link to the individual announcement detail page (`students:school_announcement_detail`), matching the dashboard behaviour. Added `content_id` + `is_announcement` to the combined notification dicts (students/views.py) and wrapped announcement cards in a link (with a chevron affordance) in school_notifications.html. Non-announcement items (notifications, FAQs) stay non-clickable. Verified: announcement rows render a /school/announcement/<id>/ link.
