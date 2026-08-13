@@ -481,3 +481,14 @@ Added a fixed bottom-right floating button ("Live Sessions") on the student dash
 ## 2026-08-13 — School register page: replace left-side banner image
 
 Replaced `static/images/auth/school-registration.jpg` (left-side image on the school sign-up page) with the updated "Beyond Borders: Programs For Principals & Teachers" banner. Same filename, so no template change; collectstatic re-hashes on deploy for cache-busting.
+
+---
+
+## 2026-08-13 — School dashboard: clickable announcements + detail page
+
+Announcement cards on the school dashboard were not clickable and had no detail view. Added:
+- `school_announcement_detail(request, pk)` view (students/views.py) — resolves the school (active) and fetches the published, schools/all-visible Content announcement (404 otherwise).
+- URL `school/announcement/<int:pk>/` (name `students:school_announcement_detail`).
+- Template `templates/students/school_announcement_detail.html` — cloned from school_reports chrome (sidebar/header), body replaced with the full announcement (title, date, subtitle, body via urlize|linebreaksbr) + Back to Dashboard link.
+- Dashboard announcement cards wrapped in a link to the detail page (with a chevron affordance).
+Verified: templates compile, URL resolves, and a live render (real school user + announcement) returns 200 with the title shown.

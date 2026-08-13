@@ -2398,6 +2398,24 @@ def school_results(request):
 
 
 @login_required
+def school_announcement_detail(request, pk):
+    """School — full detail page for a single announcement."""
+    from students.models import School
+    from admins.models import Content
+    try:
+        school = request.user.school_profile
+    except School.DoesNotExist:
+        return redirect('accounts:sign_in')
+    if school.status != 'active':
+        return redirect('students:school_dashboard')
+    ann = get_object_or_404(
+        Content, pk=pk, content_type='announcement',
+        status='published', visibility__in=['all', 'schools'])
+    return render(request, 'students/school_announcement_detail.html',
+                  {'ann': ann, 'school': school})
+
+
+@login_required
 def school_reports(request):
     """School admin — reports & analytics for this school."""
     from students.models import School, Student, Team, TeamMembership, IdeaSubmission

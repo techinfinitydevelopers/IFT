@@ -1212,7 +1212,7 @@
                         </div>
                         {% if announcements %}
                         {% for ann in announcements %}
-                        <div class="ann-item">
+                        <a href="{% url 'students:school_announcement_detail' ann.id %}" class="ann-item" style="display:block; text-decoration:none; color:inherit; cursor:pointer;">
                             <div style="display:flex; align-items:flex-start; gap:12px;">
                                 <div style="width:32px; height:32px; border-radius:50%; background:rgba(94,42,151,0.1); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
                                     <span class="material-symbols-outlined" style="font-size:16px; color:var(--primary);">campaign</span>
@@ -1222,8 +1222,9 @@
                                     {% if ann.subtitle %}<p style="font-size:0.75rem; color:var(--text-muted); margin:0 0 4px;">{{ ann.subtitle }}</p>{% endif %}
                                     <p style="font-size:0.625rem; color:#94a3b8; margin:0;">{{ ann.created_at|timesince }} ago</p>
                                 </div>
+                                <span class="material-symbols-outlined" style="font-size:18px; color:#cbb8e6; align-self:center;">chevron_right</span>
                             </div>
-                        </div>
+                        </a>
                         {% endfor %}
                         {% else %}
                         <div style="text-align:center; padding:40px 0; color:var(--text-muted);">
