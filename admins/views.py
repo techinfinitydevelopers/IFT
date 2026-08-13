@@ -3442,6 +3442,11 @@ def report_students_export(request):
         students = students.filter(school__is_tata_classedge=(g['tata'] == 'true'))
     if g.get('paid') in ('true', 'false'):
         students = students.filter(is_paid=(g['paid'] == 'true'))
+    # ---- registration date range (inclusive) ----
+    if g.get('date_from'):
+        students = students.filter(created_at__date__gte=g['date_from'])
+    if g.get('date_to'):
+        students = students.filter(created_at__date__lte=g['date_to'])
 
     # ---- submission-level filters: keep only students with a matching submission ----
     sub_q = Q()
@@ -3550,6 +3555,11 @@ def report_schools_export(request):
         schools = schools.filter(is_tata_classedge=(g['tata'] == 'true'))
     if g.get('status'):
         schools = schools.filter(status=g['status'])
+    # ---- registration date range (inclusive) ----
+    if g.get('date_from'):
+        schools = schools.filter(created_at__date__gte=g['date_from'])
+    if g.get('date_to'):
+        schools = schools.filter(created_at__date__lte=g['date_to'])
     schools = schools.order_by('name')
 
     if g.get('zone'):

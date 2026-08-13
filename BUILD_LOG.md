@@ -463,3 +463,9 @@ New `tce` role (accounts/models.py + migration 0007, `is_tce`) — read-only AND
 <!-- deploy test eea022b -->
 
 <!-- deploy trigger after Wait-for-CI disabled -->
+
+---
+
+## 2026-08-13 — Reports: add registration date-range filter (Students + Schools)
+
+Report Builder now has "Registered From" / "Registered To" date inputs (shown for both modes). `report_students_export` and `report_schools_export` filter on `created_at__date__gte/lte` (inclusive) using the student/school registration date. Verified on prod: Students 11–12 Aug = 133 (DB 133), Schools 11–12 Aug = 81 (DB 81), from-only ≥12 Aug = 40 (DB 40). Preview + Excel both carry the date params via the form; no JS change needed.

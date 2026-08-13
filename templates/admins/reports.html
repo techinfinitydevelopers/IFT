@@ -770,6 +770,10 @@
                             </select></div>
                         <div><label class="rb-lbl">Zone</label>
                             <select name="zone" class="rb-input"><option value="">All</option><option>North</option><option>South</option><option>East</option><option>West</option><option>Central</option><option>Northeast</option></select></div>
+                        <div><label class="rb-lbl">Registered From</label>
+                            <input type="date" name="date_from" class="rb-input"></div>
+                        <div><label class="rb-lbl">Registered To</label>
+                            <input type="date" name="date_to" class="rb-input"></div>
                         <div class="rb-student"><label class="rb-lbl">SDG / Track</label>
                             <select name="track" class="rb-input"><option value="">All</option>
                                 {% for val, label in report_tracks %}<option value="{{ val }}">{{ label }}</option>{% endfor %}
