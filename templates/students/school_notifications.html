@@ -642,7 +642,50 @@
             .content-wrapper { padding: 0 !important; max-width: 100% !important; }
             body { background: #fff !important; }
         }
-    </style>
+    
+        /* --- Student-style notifications UI --- */
+        .content-wrapper { max-width: 1280px; margin: 0 auto; padding: 2rem 2.5rem; width: 100%; }
+        .page-header { margin-bottom: 2rem; }
+        .page-title { font-size: 2rem; font-weight: 700; color: #222; margin-bottom: 0.5rem; }
+        .page-subtitle { font-size: 1rem; color: #666; }
+        .filter-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .filter-tab { padding: 0.625rem 1.25rem; border-radius: 0.5rem; background: #fff; border: 1px solid #EEE; font-size: 0.875rem; font-weight: 600; color: #666; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 0.5rem; }
+        .filter-tab:hover { background: #F7F7F7; border-color: rgba(94,42,151,0.3); color: #222; }
+        .filter-tab.active { background: #5E2A97; border-color: #5E2A97; color: #fff; }
+        .filter-count { background: rgba(0,0,0,0.1); color: inherit; padding: 0.125rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 700; }
+        .filter-tab.active .filter-count { background: rgba(255,255,255,0.2); }
+        .actions-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; gap: 1rem; flex-wrap: wrap; }
+        .action-btn { padding: 0.625rem 1rem; border-radius: 0.5rem; background: #fff; border: 1px solid #EEE; font-size: 0.875rem; font-weight: 600; color: #222; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 0.5rem; }
+        .action-btn:hover { background: #5E2A97; border-color: #5E2A97; color: #fff; }
+        .action-btn .material-symbols-outlined { font-size: 18px; }
+        .search-box { position: relative; flex: 1; max-width: 320px; }
+        .search-input { width: 100%; padding: 0.625rem 1rem 0.625rem 2.75rem; border-radius: 0.5rem; border: 1px solid #EEE; font-size: 0.875rem; font-family: 'Poppins', sans-serif; outline: none; transition: all 0.2s ease; }
+        .search-input:focus { border-color: #5E2A97; box-shadow: 0 0 0 3px rgba(94,42,151,0.1); }
+        .search-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #666; pointer-events: none; }
+        .notifications-list { display: flex; flex-direction: column; gap: 0.75rem; }
+        .notification-card { background: #fff; border-radius: 0.75rem; border: 1px solid #EEE; padding: 1.25rem; transition: all 0.2s ease; cursor: pointer; display: flex; gap: 1rem; position: relative; margin-bottom: 10px; }
+        .notification-card:hover { border-color: rgba(94,42,151,0.3); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .notification-card.unread { background: rgba(94,42,151,0.03); border-left: 4px solid #5E2A97; }
+        .notification-icon-wrapper { width: 3rem; height: 3rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .notification-icon-wrapper.success { background: rgba(34,197,94,0.1); color: #16a34a; }
+        .notification-icon-wrapper.primary { background: rgba(94,42,151,0.1); color: #5E2A97; }
+        .notification-icon-wrapper.warning { background: rgba(249,115,22,0.1); color: #f97316; }
+        .notification-icon-wrapper.info { background: rgba(147,51,234,0.1); color: #9333ea; }
+        .notification-content { flex: 1; min-width: 0; }
+        .notification-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.375rem; }
+        .notification-title { font-size: 0.9375rem; font-weight: 700; color: #222; margin: 0; line-height: 1.4; }
+        .notification-time { font-size: 0.75rem; color: #94a3b8; white-space: nowrap; display: flex; align-items: center; gap: 0.25rem; }
+        .notification-message { font-size: 0.875rem; color: #666; line-height: 1.6; margin: 0; }
+        .notification-badge-unread { position: absolute; top: -0.375rem; right: -0.375rem; width: 0.75rem; height: 0.75rem; background: #ef4444; border-radius: 50%; border: 2px solid #fff; }
+        .empty-state { text-align: center; padding: 4rem 2rem; }
+        .empty-icon { width: 5rem; height: 5rem; border-radius: 50%; background: #F7F7F7; color: #666; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; }
+        .empty-icon .material-symbols-outlined { font-size: 48px; }
+        .empty-title { font-size: 1.25rem; font-weight: 700; color: #222; margin-bottom: 0.5rem; }
+        .empty-message { font-size: 0.9375rem; color: #666; }
+        @keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(400px); opacity: 0; } }
+        @media (max-width: 768px) { .content-wrapper { padding: 1rem; } .page-title { font-size: 1.25rem; } .actions-bar { flex-direction: column; align-items: stretch; } .search-box { max-width: 100%; } }
+</style>
 </head>
 
 <body>
@@ -770,44 +813,49 @@
                 </div>
             </header>
 
-            <!-- ===== School notifications list ===== -->
-            <div class="content-wrapper" style="padding:24px;">
-                <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
-                    <div>
-                        <h1 style="font-size:1.5rem; font-weight:700; color:#1e1b2e; margin:0;">Notifications</h1>
-                        <p style="font-size:0.85rem; color:#6b6577; margin:4px 0 0;">Stay updated with announcements and platform activity</p>
-                    </div>
-                    <button id="markAllReadBtn" style="background:#5E2A97; color:#fff; border:none; border-radius:8px; padding:9px 16px; font-weight:600; font-size:0.82rem; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
-                        <span class="material-symbols-outlined" style="font-size:18px;">done_all</span> Mark all as read
-                    </button>
+            <div class="content-wrapper">
+                <div class="page-header">
+                    <h1 class="page-title">Notifications</h1>
+                    <p class="page-subtitle">Stay updated with announcements and platform activity</p>
                 </div>
-                {% if combined_notifications %}
-                <div style="display:flex; flex-direction:column; gap:10px; max-width:900px;">
+                <div class="filter-tabs">
+                    <button class="filter-tab active" data-filter="all"><span>All</span><span class="filter-count">{{ total }}</span></button>
+                    <button class="filter-tab" data-filter="unread"><span>Unread</span><span class="filter-count" id="unreadCount">{{ unread }}</span></button>
+                    <button class="filter-tab" data-filter="announcement"><span>Announcements</span><span class="filter-count">{{ announcement_count }}</span></button>
+                    <button class="action-btn" id="markAllReadBtn"><span class="material-symbols-outlined">check_circle</span> Mark all as read</button>
+                </div>
+                <div class="actions-bar">
+                    <div class="search-box">
+                        <span class="material-symbols-outlined search-icon">search</span>
+                        <input type="text" class="search-input" placeholder="Search notifications..." id="searchInput">
+                    </div>
+                </div>
+                <div class="notifications-list">
                     {% for item in combined_notifications %}
-                    <div class="section-card notif-card" style="padding:16px; {% if item.is_announcement %}cursor:pointer;{% endif %} {% if not item.is_read %}border-left:3px solid #5E2A97;{% endif %}"{% if item.is_announcement %} data-href="{% url 'students:school_announcement_detail' item.content_id %}"{% endif %}>
-                        <div style="display:flex; gap:14px; align-items:flex-start;">
-                            <div style="width:40px; height:40px; border-radius:50%; background:rgba(94,42,151,0.1); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                                <span class="material-symbols-outlined" style="color:#5E2A97;">{{ item.icon }}</span>
-                            </div>
-                            <div style="flex:1; min-width:0;">
-                                <p style="margin:0; font-weight:600; font-size:0.95rem; color:#1e293b;">{{ item.title }}</p>
-                                <p style="margin:6px 0 0; font-size:0.85rem; color:#64748b; line-height:1.5;">{{ item.message|urlize }}</p>
-                                <p style="margin:8px 0 0; font-size:0.7rem; color:#94a3b8;">{{ item.created_at|timesince }} ago</p>
-                            </div>
-                            {% if item.is_announcement %}<span class="material-symbols-outlined" style="font-size:20px; color:#cbb8e6; align-self:center;">chevron_right</span>{% elif not item.is_read %}<span style="width:8px; height:8px; border-radius:50%; background:#ef4444; flex-shrink:0; margin-top:6px;"></span>{% endif %}
+                    <div class="notification-card {% if not item.is_read %}unread{% endif %}" data-type="{{ item.notif_type }}" data-id="{{ item.id }}"{% if item.is_announcement %} data-href="{% url 'students:school_announcement_detail' item.content_id %}"{% endif %}>
+                        {% if not item.is_read %}<div class="notification-badge-unread"></div>{% endif %}
+                        <div class="notification-icon-wrapper {% if item.notif_type == 'team' %}success{% elif item.notif_type == 'submission' %}warning{% elif item.notif_type == 'announcement' %}info{% else %}primary{% endif %}">
+                            <span class="material-symbols-outlined">{{ item.icon }}</span>
                         </div>
+                        <div class="notification-content">
+                            <div class="notification-header">
+                                <h3 class="notification-title">{{ item.title }}</h3>
+                                <span class="notification-time"><span class="material-symbols-outlined" style="font-size: 14px;">schedule</span> {{ item.created_at|timesince }} ago</span>
+                            </div>
+                            {% if item.message %}<p class="notification-message">{{ item.message|truncatewords:20 }}</p>{% endif %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state">
+                        <div class="empty-icon"><span class="material-symbols-outlined">notifications_off</span></div>
+                        <h3 class="empty-title">No notifications yet</h3>
+                        <p class="empty-message">When you get notifications about announcements or platform activity, they will appear here.</p>
                     </div>
                     {% endfor %}
                 </div>
-                {% else %}
-                <div style="text-align:center; padding:60px 0; color:#94a3b8;">
-                    <span class="material-symbols-outlined" style="font-size:56px; opacity:0.3;">notifications_off</span>
-                    <p style="margin-top:12px;">No notifications yet</p>
-                </div>
-                {% endif %}
             </div>
         
-        </main>
+</main>
     </div>
 
     <!-- Bootstrap JS -->
@@ -900,29 +948,89 @@
         profileDd.addEventListener('click', function(e) { e.stopPropagation(); });
     }
     </script>
-    <script>
-    document.getElementById('markAllReadBtn')?.addEventListener('click', function(){
-        var m = document.cookie.match('(^|;)\s*csrftoken\s*=\s*([^;]+)');
-        fetch("{% url 'students:mark_all_read' %}", {method:'POST', headers:{'X-CSRFToken': m ? m[2] : ''}})
-          .then(function(){ location.reload(); }).catch(function(){ location.reload(); });
-    });
-    // Notification bell dropdown toggle
-    (function(){
-        var btn = document.getElementById('notificationBtn');
-        var dd = document.getElementById('notifDropdown');
-        if (btn && dd) {
-            btn.addEventListener('click', function(e){ e.stopPropagation(); dd.style.display = (dd.style.display === 'block') ? 'none' : 'block'; });
-            document.addEventListener('click', function(){ dd.style.display = 'none'; });
-            dd.addEventListener('click', function(e){ e.stopPropagation(); });
+        <script>
+    (function() {
+        const filterTabs = document.querySelectorAll('.filter-tab');
+        const notificationCards = document.querySelectorAll('.notification-card');
+        const csrfToken = '{{ csrf_token }}';
+        filterTabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                filterTabs.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                const filter = this.getAttribute('data-filter');
+                notificationCards.forEach(card => {
+                    if (filter === 'all') { card.style.display = 'flex'; }
+                    else if (filter === 'unread') { card.style.display = card.classList.contains('unread') ? 'flex' : 'none'; }
+                    else { card.style.display = card.getAttribute('data-type') === filter ? 'flex' : 'none'; }
+                });
+            });
+        });
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const q = this.value.toLowerCase();
+                notificationCards.forEach(card => {
+                    const t = card.querySelector('.notification-title');
+                    const m = card.querySelector('.notification-message');
+                    const text = (t ? t.textContent : '') + ' ' + (m ? m.textContent : '');
+                    card.style.display = text.toLowerCase().includes(q) ? 'flex' : 'none';
+                });
+            });
+        }
+        notificationCards.forEach(card => {
+            card.addEventListener('click', function(e) {
+                if (e.target.closest('a')) return;
+                if (e.target.closest('.notification-action-btn')) return;
+                const href = this.getAttribute('data-href');
+                if (href) { window.location.href = href; return; }
+                if (!this.classList.contains('unread')) return;
+                const id = this.getAttribute('data-id');
+                fetch('/notifications/' + id + '/read/', { method: 'POST', headers: { 'X-CSRFToken': csrfToken } })
+                    .then(r => r.json()).then(d => {
+                        if (d.success) {
+                            this.classList.remove('unread');
+                            const b = this.querySelector('.notification-badge-unread'); if (b) b.remove();
+                            updateUnreadCount(); showToast('Notification marked as read', 'success');
+                        }
+                    }).catch(function(){});
+            });
+        });
+        const markAllBtn = document.getElementById('markAllReadBtn');
+        if (markAllBtn) {
+            markAllBtn.addEventListener('click', function() {
+                fetch('/notifications/mark-all-read/', { method: 'POST', headers: { 'X-CSRFToken': csrfToken } })
+                    .then(r => r.json()).then(d => {
+                        if (d.success) {
+                            notificationCards.forEach(card => { card.classList.remove('unread'); const b = card.querySelector('.notification-badge-unread'); if (b) b.remove(); });
+                            updateUnreadCount();
+                            const dot = document.querySelector('.notif-badge-dot'); if (dot) dot.remove();
+                            showToast('All notifications marked as read', 'success');
+                        }
+                    }).catch(function(){});
+            });
+        }
+        function updateUnreadCount() {
+            const c = document.querySelectorAll('.notification-card.unread').length;
+            const el = document.getElementById('unreadCount'); if (el) el.textContent = c;
+        }
+        function showToast(message, type) {
+            const ex = document.querySelector('.toast-notification'); if (ex) ex.remove();
+            const colors = { success: '#22c55e', error: '#ef4444', info: '#5E2A97' };
+            const icons = { success: 'check_circle', error: 'error', info: 'info' };
+            const toast = document.createElement('div');
+            toast.className = 'toast-notification';
+            toast.style.cssText = 'position:fixed;bottom:2rem;right:2rem;background:' + (colors[type]||colors.info) + ';color:#fff;padding:1rem 1.5rem;border-radius:0.75rem;box-shadow:0 10px 25px rgba(0,0,0,0.2);z-index:9999;display:flex;align-items:center;gap:0.75rem;font-size:0.875rem;font-weight:500;animation:slideIn 0.3s ease;';
+            toast.innerHTML = '<span class="material-symbols-outlined" style="font-size:20px;">' + (icons[type]||icons.info) + '</span><span>' + message + '</span>';
+            document.body.appendChild(toast);
+            setTimeout(() => { toast.style.animation = 'slideOut 0.3s ease'; setTimeout(() => toast.remove(), 300); }, 3000);
+        }
+        var bBtn = document.getElementById('notificationBtn'); var bDd = document.getElementById('notifDropdown');
+        if (bBtn && bDd) {
+            bBtn.addEventListener('click', function(e){ e.stopPropagation(); bDd.style.display = (bDd.style.display === 'block') ? 'none' : 'block'; });
+            document.addEventListener('click', function(){ bDd.style.display = 'none'; });
+            bDd.addEventListener('click', function(e){ e.stopPropagation(); });
         }
     })();
-    // Announcement cards navigate to their detail page (inner links still work)
-    document.querySelectorAll('.notif-card[data-href]').forEach(function(card){
-        card.addEventListener('click', function(e){
-            if (e.target.closest('a')) return;   // let the zoom/link click through
-            window.location.href = card.getAttribute('data-href');
-        });
-    });
     </script>
 </body>
 

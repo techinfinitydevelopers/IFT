@@ -516,3 +516,9 @@ On the school notifications page, announcement items now link to the individual 
 ## 2026-08-13 — Fix broken announcement card layout on school notifications
 
 Previous change wrapped the announcement notification card in an <a>, but the body is urlize'd (contains a Zoom link) → an <a> inside an <a> is invalid HTML, so the browser broke that card's layout (rendered unstyled). Reverted the card to a <div class="section-card notif-card"> with a data-href, and navigation is now handled by a click listener (which ignores clicks on inner links so the Zoom link still works). Layout restored; announcement cards remain clickable to the detail page.
+
+---
+
+## 2026-08-13 — School notifications page: match student notification UI exactly
+
+Rebuilt the school notifications content to mirror the student page: filter tabs (All / Unread / Announcements) + Mark-all-read, search box, and the identical .notification-card styling (icon wrappers, unread highlight, hover) + JS (tab filter, search, click-to-mark-read, mark-all, toast). Kept the school chrome (sidebar/header/bell). Announcement cards carry data-href and navigate to the detail page on click (div card + click handler, so no nested-anchor breakage; inner Zoom links still work). Verified on prod: 200, filter-tabs/search/cards render, announcement data-href present, school sidebar intact.
