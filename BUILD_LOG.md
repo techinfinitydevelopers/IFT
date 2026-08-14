@@ -575,3 +575,9 @@ Added saima@techinfinity.io (Gurukul Road Metro Station) to REPORT_EXCLUDED_EMAI
 ## 2026-08-14 — Teacher mentoring cron: add Friday (Thu + Fri 11 AM)
 
 Weekly teacher-mentoring invite should now also go out Friday 11 AM IST (in addition to Thursday). The command has no weekday guard and dedups per calendar day, so no code change is needed — only the Railway cron service schedule changes from `30 5 * * 4` to `30 5 * * 4,5` (Thu & Fri, 05:30 UTC). Updated the command docstring/help to reflect Thu+Fri. The schedule itself lives in the Railway dashboard cron service (not the repo).
+
+---
+
+## 2026-08-14 — Idea Booster Masterclass: 30-min-before reminder email to students
+
+New `send_idea_booster_reminder` command + `email_idea_booster_reminder.html` template. Sends the "IFT Idea Booster Masterclass" reminder to all students with the session's date + Zoom link filled in. SESSIONS = 15 Aug / 29 Aug / 19 Sep / 3 Oct 2026 (4 PM). The command self-checks the date (sends only on a session date; no-op otherwise), dedups per student per session (MilestoneEmailLog key ib_<date>), throttled 0.4s, retry-safe. Meant to run on a daily Railway cron at 3:30 PM IST (10:00 UTC, `0 10 * * *`) so it fires 30 min before each 4 PM session. Verified: template renders with date/link, date-match logic correct, safe no-op on non-session days.

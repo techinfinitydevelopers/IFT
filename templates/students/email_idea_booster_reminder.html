@@ -1,0 +1,28 @@
+{% extends "accounts/email_onboard_base.html" %}
+{% block greeting %}Dear Students,{% endblock %}
+{% block intro %}A quick reminder to join the <strong>IFT Idea Booster Masterclass</strong> — an exclusive learning series designed to help you strengthen your ideas and take them to the next level!{% endblock %}
+{% block credentials %}{% endblock %}
+{% block content %}
+<tr>
+  <td style="padding:4px 32px 0 32px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f7f4fb; border-radius:8px; border:1px solid #ece6f5;">
+      <tr>
+        <td style="padding:18px 20px;">
+          <p style="margin:0 0 6px 0; font-size:14px; color:#1e1b2e;">🎙️ <strong>Hosted by:</strong> Sushil Mungekar, Founder &amp; CEO, ENpower</p>
+          <p style="margin:0 0 6px 0; font-size:14px; color:#1e1b2e;">📅 <strong>Date:</strong> {{ session_date }}</p>
+          <p style="margin:0 0 6px 0; font-size:14px; color:#1e1b2e;">🕓 <strong>Time:</strong> 4:00 PM – 5:00 PM</p>
+          <p style="margin:0 0 6px 0; font-size:14px; color:#1e1b2e;">🔁 <strong>Frequency:</strong> Once every 15 days</p>
+          <p style="margin:0; font-size:14px; color:#1e1b2e;">🔒 <strong>Exclusive for Registered IFT Students</strong></p>
+        </td>
+      </tr>
+    </table>
+
+    <p style="margin:16px 0 0 0; font-size:14px; color:#444;">Come ready to learn practical techniques, think like an innovator, and build your ideas with confidence.</p>
+    <p style="margin:12px 0 0 0; font-size:14px; color:#1e1b2e;">🚀 Don't miss this opportunity to learn directly from the Founder and give your idea the boost it deserves!</p>
+  </td>
+</tr>
+{% endblock %}
+{% block button_href %}{{ session_link }}{% endblock %}
+{% block button_label %}Join the Webinar{% endblock %}
+{% block security_note %}{% endblock %}
+{% block footer %}Warm regards,<br>Team IFT{% endblock %}
