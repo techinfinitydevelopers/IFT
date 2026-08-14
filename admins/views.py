@@ -1478,6 +1478,138 @@ def onboard_student(request):
     return render(request, 'admins/user_management/onboard_student.html', context)
 
 
+# ─── Bulk student upload (super-admin, pre-paid via cheque) ──────────────────
+BULK_STUDENT_COLUMNS = ['first_name', 'last_name', 'email', 'phone', 'grade', 'gender']
+
+
+@login_required
+@user_passes_test(is_staff_or_superuser)
+def bulk_upload_students(request):
+    """Page: bulk-upload a school's students from CSV (they are marked pre-paid)."""
+    schools = School.objects.filter(is_active=True).order_by('name')
+    return render(request, 'admins/user_management/bulk_upload_students.html', {'schools': schools})
+
+
+@login_required
+@user_passes_test(is_staff_or_superuser)
+def bulk_students_template(request):
+    """Download a sample CSV with the exact columns the upload expects."""
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="bulk_students_template.csv"'
+    w = csv.writer(response)
+    w.writerow(BULK_STUDENT_COLUMNS)
+    w.writerow(['Aarav', 'Sharma', 'aarav.sharma@example.com', '9876543210', '9', 'male'])
+    w.writerow(['Diya', 'Patel', 'diya.patel@example.com', '9876500000', '10', 'female'])
+    return response
+
+
+@login_required
+@user_passes_test(is_staff_or_superuser)
+def bulk_parse_students_csv(request):
+    """Parse an uploaded CSV and return the rows as JSON (NO DB writes)."""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'POST only'}, status=405)
+    import io
+    f = request.FILES.get('file')
+    if not f:
+        return JsonResponse({'success': False, 'message': 'No file uploaded.'}, status=400)
+    try:
+        text = f.read().decode('utf-8-sig', errors='replace')
+    except Exception:
+        return JsonResponse({'success': False, 'message': 'Could not read the file.'}, status=400)
+    reader = csv.DictReader(io.StringIO(text))
+    headers = [(h or '').strip().lower() for h in (reader.fieldnames or [])]
+    missing = [c for c in BULK_STUDENT_COLUMNS if c not in headers]
+    if missing:
+        return JsonResponse({'success': False,
+                             'message': 'CSV is missing columns: ' + ', '.join(missing)}, status=400)
+    rows = []
+    for i, r in enumerate(reader, start=2):  # row 1 = header
+        rl = {k.strip().lower(): (v or '').strip() for k, v in r.items() if k}
+        if not any(rl.get(c) for c in BULK_STUDENT_COLUMNS):
+            continue  # skip fully blank lines
+        rows.append({'row': i, 'first_name': rl.get('first_name', ''),
+                     'last_name': rl.get('last_name', ''), 'email': rl.get('email', ''),
+                     'phone': rl.get('phone', ''), 'grade': rl.get('grade', ''),
+                     'gender': rl.get('gender', '').lower()})
+    return JsonResponse({'success': True, 'rows': rows, 'count': len(rows)})
+
+
+@login_required
+@user_passes_test(is_staff_or_superuser)
+def bulk_create_students_chunk(request):
+    """Create a chunk of students under a school (pre-paid) and email their creds.
+    Called repeatedly by the frontend with small batches to drive a progress bar."""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'POST only'}, status=405)
+    import json as _json
+    import secrets
+    from accounts.forms import duplicate_account_message
+    from accounts.emails import send_onboard_credentials
+    try:
+        from accounts.models import UserProfile
+    except Exception:
+        UserProfile = None
+    try:
+        payload = _json.loads(request.body.decode('utf-8'))
+    except Exception:
+        return JsonResponse({'success': False, 'message': 'Bad request body.'}, status=400)
+
+    try:
+        school = School.objects.get(id=payload.get('school_id'))
+    except (School.DoesNotExist, ValueError, TypeError):
+        return JsonResponse({'success': False, 'message': 'Please select a valid school.'}, status=400)
+
+    valid_grades = {str(i) for i in range(7, 13)}
+    valid_genders = {'male', 'female', 'other'}
+    fee = 1600 if school.is_tata_classedge else 2500
+    results = []
+    for r in (payload.get('rows') or []):
+        fn = (r.get('first_name') or '').strip()
+        ln = (r.get('last_name') or '').strip()
+        email = (r.get('email') or '').strip()
+        phone = (r.get('phone') or '').strip()
+        grade = (r.get('grade') or '').strip()
+        gender = (r.get('gender') or '').strip().lower()
+        label = (f'{fn} {ln}'.strip()) or email or f'Row {r.get("row")}'
+
+        def fail(reason):
+            results.append({'row': r.get('row'), 'name': label, 'email': email,
+                            'status': 'failed', 'reason': reason})
+        if not (fn and ln and email):
+            fail('Missing first/last name or email'); continue
+        if grade not in valid_grades:
+            fail(f'Invalid grade "{grade}" (must be 7-12)'); continue
+        if gender and gender not in valid_genders:
+            fail(f'Invalid gender "{gender}" (male/female/other)'); continue
+        dup = duplicate_account_message(email, phone)
+        if dup:
+            fail(dup); continue
+        try:
+            temp_password = secrets.token_urlsafe(6)
+            user = User.objects.create_user(username=email, email=email,
+                                            first_name=fn, last_name=ln, password=temp_password)
+            Student.objects.create(
+                user=user,
+                student_id=f"IFT-{timezone.now():%Y}-{user.id:04d}",
+                school=school, school_name=school.name,
+                grade=grade, gender=gender, phone=phone,
+                is_paid=True, payment_amount=fee,
+                payment_transaction_id='BULK-CHEQUE', paid_at=timezone.now(),
+            )
+            if UserProfile is not None:
+                UserProfile.objects.get_or_create(user=user, defaults={'role': 'student'})
+            try:
+                send_onboard_credentials(user, temp_password, 'Student', {'username': email})
+            except Exception:
+                pass  # student created; email failure shouldn't fail the row
+            results.append({'row': r.get('row'), 'name': label, 'email': email,
+                            'status': 'created', 'reason': ''})
+        except Exception as e:
+            fail(str(e)[:140])
+    return JsonResponse({'success': True, 'results': results})
+
+
 @login_required
 @user_passes_test(is_staff_or_superuser)
 def edit_student(request, student_id):
