@@ -569,3 +569,9 @@ Added `REPORT_EXCLUDED_EMAILS` (milisheth1104@gmail.com, kunal.techinfinity@gmai
 ## 2026-08-14 — Reports exclusion: add 2 test schools (by email + school name)
 
 Added saima@techinfinity.io (Gurukul Road Metro Station) to REPORT_EXCLUDED_EMAILS; Navjivan Vidyalaya High School was already covered via kunal.techinfinity@gmail.com. Also added REPORT_EXCLUDED_SCHOOL_NAMES + name-based exclusion (`_test_name_q`) because some test students typed the school as free text (school_name) with no linked School FK, which the email match couldn't catch (e.g. "Ray Kaur" under "Gurukul Road Metro Station"). Consolidated all report exports to use `_excluded_students_q()` / `_excluded_schools_q()` (email OR school-name). Applied to Students/Schools reports, Zonal (summary+detail incl. submissions), and both management CSV exports. Verified: both schools and all their students (FK-linked and text-only) are absent from every export; students report 344→343.
+
+---
+
+## 2026-08-14 — Teacher mentoring cron: add Friday (Thu + Fri 11 AM)
+
+Weekly teacher-mentoring invite should now also go out Friday 11 AM IST (in addition to Thursday). The command has no weekday guard and dedups per calendar day, so no code change is needed — only the Railway cron service schedule changes from `30 5 * * 4` to `30 5 * * 4,5` (Thu & Fri, 05:30 UTC). Updated the command docstring/help to reflect Thu+Fri. The schedule itself lives in the Railway dashboard cron service (not the repo).

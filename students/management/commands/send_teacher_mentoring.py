@@ -1,12 +1,12 @@
 """Weekly Teacher Mentoring & Training invite to all registered (active) schools.
 
-Schedule this on its OWN Railway cron service, Thursdays 11:00 AM IST:
-    cron:  30 5 * * 4      (05:30 UTC = 11:00 IST, Thursday)
+Schedule this on its OWN Railway cron service, Thursday AND Friday 11:00 AM IST:
+    cron:  30 5 * * 4,5    (05:30 UTC = 11:00 IST, Thursday & Friday)
     start: python manage.py send_teacher_mentoring
 
-The cron enforces the Thursday-11 AM timing; this command just sends to every
-active school (deduped once per calendar day via RecurringEmailLog) and stops
-after the last session date. Safe to run repeatedly.
+The cron enforces the day/time; this command just sends to every active school
+(deduped once per calendar day via RecurringEmailLog, so Thursday and Friday
+each send once) and stops after the last session date. Safe to run repeatedly.
 """
 from datetime import date
 
@@ -19,7 +19,7 @@ SUBJECT = 'Weekly IFT Teacher Mentoring & Training Session'
 
 
 class Command(BaseCommand):
-    help = 'Send the weekly Teacher Mentoring invite to all active schools (Thursday 11 AM cron).'
+    help = 'Send the weekly Teacher Mentoring invite to all active schools (Thu & Fri 11 AM cron).'
 
     def handle(self, *args, **options):
         from students.models import School
