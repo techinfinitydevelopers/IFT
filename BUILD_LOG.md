@@ -606,3 +606,10 @@ Still LOCAL only — not pushed to prod.
 1. Admin Tickets page sidebar was missing the "Marketing Collaterals" link — added it (admins/tickets/base_admin.html; all ticket pages extend it).
 2. School Marketing Collaterals now download INSTANTLY instead of opening a new tab: new `digital_resource_download` view (FileResponse as_attachment) + URL; the card links there (removed target=_blank + the ignored `download` attr, which S3 cross-origin files don't honour).
 3. School Marketing Collaterals show a thumbnail for image files (DigitalResource.is_image property) so you get a gist without downloading; non-images keep the file-type badge.
+
+---
+
+## 2026-08-14 — Collaterals: PDF first-page thumbnail + hide Marketing Collaterals from students
+
+- School Marketing Collaterals: PDFs now show a first-page inline preview (scaled iframe of the file) with a "PDF" badge fallback if the browser can't render it; images already show a real thumbnail. (Server-side thumbnail generation would be the only 100%-guaranteed route; the iframe preview works in most browsers.)
+- Removed the "Marketing Collaterals" item from the STUDENT sidebar on the support/help pages (templates/support/base_user.html student branch). Schools keep theirs. Students no longer see marketing collaterals anywhere.

@@ -438,6 +438,11 @@
                     <a href="{% url 'students:digital_resource_download' resource.id %}" style="background:var(--surface-light);border:1px solid var(--border-light);border-radius:12px;padding:18px;display:flex;align-items:center;gap:14px;transition:all 0.2s ease;height:100%;text-decoration:none;color:inherit;">
                         {% if resource.is_image %}
                         <img src="{{ resource.file.url }}" alt="{{ resource.title }}" loading="lazy" style="width:56px;height:56px;border-radius:10px;object-fit:cover;flex-shrink:0;border:1px solid var(--border-light);">
+                        {% elif resource.file_extension == 'PDF' %}
+                        <div style="width:56px;height:56px;border-radius:10px;overflow:hidden;border:1px solid var(--border-light);flex-shrink:0;position:relative;background:var(--primary-light);display:flex;align-items:center;justify-content:center;">
+                            <span style="color:var(--primary);font-weight:700;font-size:0.7rem;">PDF</span>
+                            <iframe src="{{ resource.file.url }}#toolbar=0&navpanes=0&scrollbar=0&view=Fit" title="{{ resource.title }}" loading="lazy" style="position:absolute;top:0;left:0;width:152px;height:152px;border:0;transform:scale(0.368);transform-origin:top left;pointer-events:none;background:#fff;"></iframe>
+                        </div>
                         {% else %}
                         <div style="width:56px;height:56px;border-radius:10px;background:var(--primary-light);color:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:700;font-size:0.7rem;">{{ resource.file_extension|default:"FILE" }}</div>
                         {% endif %}
