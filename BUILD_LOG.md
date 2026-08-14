@@ -563,3 +563,9 @@ The header notification bell dropdown items now open their detail page instead o
 ## 2026-08-13 — Reports: exclude test/QA accounts from all exports
 
 Added `REPORT_EXCLUDED_EMAILS` (milisheth1104@gmail.com, kunal.techinfinity@gmail.com, gefethibqyvxyyzdik@jbsze.net) + `_test_email_q()` helper in admins/views.py. These test accounts (students or schools) are now excluded from every report download: Students report, Schools report, Zonal (summary + detailed), Top-N CSV, and the Students/Schools management CSV exports. Matched case-insensitively across the account's own email and (for students) their school's user/contact/principal emails. On-screen management LISTS are unchanged (admins still see test accounts there). Verified on prod: students report 296→295, schools report 346→344; all exports run.
+
+---
+
+## 2026-08-14 — Reports exclusion: add 2 test schools (by email + school name)
+
+Added saima@techinfinity.io (Gurukul Road Metro Station) to REPORT_EXCLUDED_EMAILS; Navjivan Vidyalaya High School was already covered via kunal.techinfinity@gmail.com. Also added REPORT_EXCLUDED_SCHOOL_NAMES + name-based exclusion (`_test_name_q`) because some test students typed the school as free text (school_name) with no linked School FK, which the email match couldn't catch (e.g. "Ray Kaur" under "Gurukul Road Metro Station"). Consolidated all report exports to use `_excluded_students_q()` / `_excluded_schools_q()` (email OR school-name). Applied to Students/Schools reports, Zonal (summary+detail incl. submissions), and both management CSV exports. Verified: both schools and all their students (FK-linked and text-only) are absent from every export; students report 344→343.
