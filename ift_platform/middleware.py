@@ -38,13 +38,23 @@ _TCE_NAV_HIDE = """<script>
     d.querySelectorAll('a.nav-dropdown-item').forEach(function(x){ if (x.style.display !== 'none') vis++; });
     if (vis === 0) d.style.display = 'none';
   });
-  // Page-level write-action buttons on the Students/Schools list pages
-  // (Onboard, Delete Test Data, Import/Sample CSV). Export CSV stays — it is
-  // read-only and part of what TCE is allowed to do.
+  // Write-action controls on the Students/Schools list pages that live in the
+  // page body (outside the sidebar): toolbar buttons (Onboard, Delete Test Data,
+  // Import/Sample CSV) AND the per-row action icons (Edit, Reset Password,
+  // Delete, and the School activate/Tata toggles). Read-only controls stay:
+  // Export CSV and the per-row "View Details" (openDetailsSidebar) button.
   ['a[href*="/user-management/onboard-"]',
    'a[href*="/user-management/schools/sample-csv"]',
    '[onclick*="deleteTestData"]',
-   '[onclick*="importModal"]'].forEach(function(sel){
+   '[onclick*="importModal"]',
+   'a[href*="/user-management/student/"]',
+   'a[href*="/user-management/school/"]',
+   '[onclick*="resetStudentPassword"]',
+   '[onclick*="deleteStudent"]',
+   '[onclick*="resetSchoolPassword"]',
+   '[onclick*="deleteSchool"]',
+   '[onclick*="toggleSchoolStatus"]',
+   '[onclick*="toggleSchoolTataClassEdge"]'].forEach(function(sel){
     document.querySelectorAll(sel).forEach(function(el){ el.style.display = 'none'; });
   });
 })();
