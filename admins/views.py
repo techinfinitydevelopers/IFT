@@ -3547,7 +3547,7 @@ def report_students_export(request):
                                            (st.school.city if st.school else st.city)).lower() == want]
 
     headers = [
-        'Student Name', 'Gender', 'Grade', 'School', 'City', 'State', 'Zone', 'Board',
+        'Student Name', 'Registered On', 'Gender', 'Grade', 'School', 'City', 'State', 'Zone', 'Board',
         'Tata ClassEdge',
         'Paid', 'Amount', 'Idea Title', 'SDG / Track', 'Submission Date', 'Status',
         'AI Score', 'Evaluator Name', 'Evaluator Score', 'Top 400', 'Top 100', 'Top 12',
@@ -3572,6 +3572,7 @@ def report_students_export(request):
         city = (school.city if school else st.city) or ''
         rows.append([
             st.user.get_full_name() or st.user.username,
+            (st.created_at.strftime('%d-%m-%Y') if st.created_at else ''),
             st.get_gender_display() if st.gender else '',
             st.grade,
             st.school_display_name,
@@ -3633,7 +3634,7 @@ def report_schools_export(request):
         schools = [s for s in schools if _state_to_zone(s.state, s.city).lower() == want]
 
     headers = [
-        'School Name', 'City', 'State', 'Zone', 'Board', 'Tata ClassEdge',
+        'School Name', 'Registered On', 'City', 'State', 'Zone', 'Board', 'Tata ClassEdge',
         'Coordinator Name', 'Coordinator Mobile', 'Principal Name', 'Principal Email',
         'Pin Code', 'Total Students', 'Paid Students', 'Submitted Ideas',
         'Highest AI Score', 'Status',
@@ -3654,7 +3655,9 @@ def report_schools_export(request):
     for sc in schools:
         best = best_map.get(sc.id)
         rows.append([
-            sc.name, sc.city, sc.state, _state_to_zone(sc.state, sc.city), sc.board,
+            sc.name,
+            (sc.created_at.strftime('%d-%m-%Y') if sc.created_at else ''),
+            sc.city, sc.state, _state_to_zone(sc.state, sc.city), sc.board,
             'Yes' if sc.is_tata_classedge else 'No',
             sc.designated_teacher_name, sc.designated_teacher_mobile,
             sc.principal_name, sc.principal_email, sc.pin_code,
