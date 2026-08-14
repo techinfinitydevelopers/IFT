@@ -2923,6 +2923,21 @@ def school_learning_resources(request):
 
 
 @login_required
+def digital_resource_download(request, resource_id):
+    """Force-download a marketing collateral (Content-Disposition: attachment) so it
+    saves instantly instead of opening in a new tab — S3 files ignore the HTML
+    'download' attribute cross-origin, so we stream it through the server."""
+    from admins.models import DigitalResource
+    from django.http import FileResponse, Http404
+    import os as _os
+    r = get_object_or_404(DigitalResource, id=resource_id, is_active=True)
+    if r.visibility not in ('all', 'schools', 'students'):
+        raise Http404
+    name = _os.path.basename(r.file.name) or f'resource-{r.id}'
+    return FileResponse(r.file.open('rb'), as_attachment=True, filename=name)
+
+
+@login_required
 def school_digital_resources(request):
     """School-facing Digital Resources page — downloadable collaterals."""
     from students.models import School

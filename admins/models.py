@@ -291,3 +291,8 @@ class DigitalResource(models.Model):
     def file_extension(self):
         name = self.file.name or ''
         return name.rsplit('.', 1)[-1].upper() if '.' in name else ''
+
+    @property
+    def is_image(self):
+        """True for image files — the school view shows these as a thumbnail."""
+        return self.file_extension in ('JPG', 'JPEG', 'PNG', 'WEBP', 'GIF', 'BMP')

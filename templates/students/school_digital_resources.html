@@ -435,9 +435,13 @@
             <div class="row g-3 mb-2">
                 {% for resource in category.list %}
                 <div class="col-12 col-sm-6 col-lg-4">
-                    <a href="{{ resource.file.url }}" target="_blank" rel="noopener" download style="background:var(--surface-light);border:1px solid var(--border-light);border-radius:12px;padding:18px;display:flex;align-items:center;gap:14px;transition:all 0.2s ease;height:100%;text-decoration:none;color:inherit;">
-                        <div style="width:48px;height:48px;border-radius:10px;background:var(--primary-light);color:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:700;font-size:0.7rem;">{{ resource.file_extension|default:"FILE" }}</div>
-                        <div>
+                    <a href="{% url 'students:digital_resource_download' resource.id %}" style="background:var(--surface-light);border:1px solid var(--border-light);border-radius:12px;padding:18px;display:flex;align-items:center;gap:14px;transition:all 0.2s ease;height:100%;text-decoration:none;color:inherit;">
+                        {% if resource.is_image %}
+                        <img src="{{ resource.file.url }}" alt="{{ resource.title }}" loading="lazy" style="width:56px;height:56px;border-radius:10px;object-fit:cover;flex-shrink:0;border:1px solid var(--border-light);">
+                        {% else %}
+                        <div style="width:56px;height:56px;border-radius:10px;background:var(--primary-light);color:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:700;font-size:0.7rem;">{{ resource.file_extension|default:"FILE" }}</div>
+                        {% endif %}
+                        <div style="min-width:0;">
                             <p style="font-size:0.9rem;font-weight:600;margin:0 0 4px;">{{ resource.title }}</p>
                             {% if resource.description %}<p style="font-size:0.75rem;color:var(--text-muted);margin:0;">{{ resource.description }}</p>{% endif %}
                         </div>

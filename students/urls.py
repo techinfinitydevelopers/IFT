@@ -57,6 +57,7 @@ urlpatterns = [
     path('school/submission/<int:submission_id>/', views.school_submission_detail, name='school_submission_detail'),
     path('school/learning-resources/', views.school_learning_resources, name='school_learning_resources'),
     path('school/digital-resources/', views.school_digital_resources, name='school_digital_resources'),
+    path('digital-resources/<int:resource_id>/download/', views.digital_resource_download, name='digital_resource_download'),
     path('school/faq/', views.school_faq, name='school_faq'),
     path('school/profile/', views.school_profile, name='school_profile'),
     path('school/payments/', views.school_payments, name='school_payments'),

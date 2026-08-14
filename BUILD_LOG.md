@@ -598,3 +598,11 @@ New feature to bulk-register a school's students from CSV. Columns match self-re
 - Bulk-uploaded students data table below the box: name/email/school/grade + "Email Sent" ✔/✘ (flips to ✔ after send) + Manage/Reset-PW link (normal flow). "Sent" tracked via a SEPARATE MilestoneEmailLog marker ('bulk_creds') — no change to Student model, no report impact, read-only (no duplicate students).
 - Feature flag BULK_STUDENT_UPLOAD_ENABLED (default OFF): all 7 bulk views 404 unless enabled, so it's fully hidden on prod until the Railway env var is set to true. Local .env has it true for testing.
 Still LOCAL only — not pushed to prod.
+
+---
+
+## 2026-08-14 — Fixes: tickets sidebar, instant collateral download, image thumbnails
+
+1. Admin Tickets page sidebar was missing the "Marketing Collaterals" link — added it (admins/tickets/base_admin.html; all ticket pages extend it).
+2. School Marketing Collaterals now download INSTANTLY instead of opening a new tab: new `digital_resource_download` view (FileResponse as_attachment) + URL; the card links there (removed target=_blank + the ignored `download` attr, which S3 cross-origin files don't honour).
+3. School Marketing Collaterals show a thumbnail for image files (DigitalResource.is_image property) so you get a gist without downloading; non-images keep the file-type badge.
