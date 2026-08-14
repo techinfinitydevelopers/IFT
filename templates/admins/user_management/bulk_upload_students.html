@@ -579,10 +579,14 @@
                 <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;">
                     <div style="flex:1;min-width:240px;">
                         <label style="font-weight:600;font-size:0.85rem;display:block;margin-bottom:6px;">School</label>
-                        <select id="bulkSchool" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-family:inherit;">
-                            <option value="">Select a school…</option>
-                            {% for s in schools %}<option value="{{ s.id }}">{{ s.name }}{% if s.city %} — {{ s.city }}{% endif %}</option>{% endfor %}
-                        </select>
+                        <div style="position:relative;">
+                            <input type="text" id="bulkSchoolSearch" placeholder="Search &amp; select a school…" autocomplete="off"
+                                   style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-family:inherit;">
+                            <input type="hidden" id="bulkSchool">
+                            <div id="bulkSchoolList" style="display:none;position:absolute;z-index:60;left:0;right:0;top:calc(100% + 4px);max-height:260px;overflow:auto;background:#fff;border:1px solid #ddd;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.12);">
+                                {% for s in schools %}<div class="bulk-school-opt" data-id="{{ s.id }}" data-text="{{ s.name }}{% if s.city %} — {{ s.city }}{% endif %}" style="padding:9px 12px;cursor:pointer;font-size:0.88rem;border-bottom:1px solid #f2f2f2;">{{ s.name }}{% if s.city %} <span style="color:#888;">— {{ s.city }}</span>{% endif %}</div>{% endfor %}
+                            </div>
+                        </div>
                     </div>
                     <div style="flex:1;min-width:240px;">
                         <label style="font-weight:600;font-size:0.85rem;display:block;margin-bottom:6px;">CSV File</label>
@@ -592,9 +596,11 @@
                 </div>
                 <p style="color:#888;font-size:0.78rem;margin:8px 0 0;">Required columns: first_name, last_name, email, phone, grade (7-12), gender (male/female/other)</p>
 
-                <div style="margin-top:18px;">
+                <div style="margin-top:18px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;">
                     <button id="bulkUploadBtn" style="background:#5E2A97;color:#fff;border:none;border-radius:8px;padding:12px 24px;font-weight:600;font-size:0.9rem;cursor:pointer;">Upload &amp; Create</button>
+                    <button id="bulkEmailBtn" style="background:#0ea5e9;color:#fff;border:none;border-radius:8px;padding:12px 24px;font-weight:600;font-size:0.9rem;cursor:pointer;">📧 Send Login Emails to All</button>
                 </div>
+                <p style="color:#888;font-size:0.78rem;margin:8px 0 0;">"Send Login Emails" mails fresh login details to <strong>all bulk-uploaded students</strong> of the selected school (run it after creating them).</p>
 
                 <div id="bulkProgressWrap" style="display:none;margin-top:22px;">
                     <div style="display:flex;justify-content:space-between;font-size:0.85rem;font-weight:600;margin-bottom:6px;">
@@ -621,6 +627,54 @@
                         </table>
                     </div>
                 </div>
+
+                <!-- Email progress + results -->
+                <div id="bulkEmailProgressWrap" style="display:none;margin-top:22px;">
+                    <div style="display:flex;justify-content:space-between;font-size:0.85rem;font-weight:600;margin-bottom:6px;">
+                        <span id="bulkEmailLabel">Sending login emails…</span>
+                        <span id="bulkEmailCount">0 / 0</span>
+                    </div>
+                    <div style="background:#eee;border-radius:99px;height:12px;overflow:hidden;">
+                        <div id="bulkEmailBar" style="height:100%;width:0;background:#0ea5e9;transition:width .2s;"></div>
+                    </div>
+                    <div style="display:flex;gap:18px;margin-top:10px;font-size:0.85rem;">
+                        <span style="color:#16a34a;font-weight:600;">✅ Sent: <span id="bulkEmailSent">0</span></span>
+                        <span style="color:#ef4444;font-weight:600;">❌ Failed: <span id="bulkEmailFailed">0</span></span>
+                    </div>
+                </div>
+                <div id="bulkEmailResultsWrap" style="display:none;margin-top:20px;">
+                    <h3 style="font-size:1rem;font-weight:700;margin:0 0 10px;">Email Results</h3>
+                    <div style="overflow:auto;max-height:420px;border:1px solid #eee;border-radius:10px;">
+                        <table style="width:100%;border-collapse:collapse;font-size:0.8rem;white-space:nowrap;">
+                            <thead><tr style="background:#0ea5e9;color:#fff;text-align:left;position:sticky;top:0;">
+                                <th style="padding:8px 10px;">Name</th><th style="padding:8px 10px;">Email</th><th style="padding:8px 10px;">Status</th><th style="padding:8px 10px;">Reason</th>
+                            </tr></thead>
+                            <tbody id="bulkEmailBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <!-- ===== Bulk-uploaded students table ===== -->
+            <div class="onboard-form-card" style="background:#fff;border:1px solid #eee;border-radius:16px;padding:24px;max-width:1000px;margin-top:20px;">
+                <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;margin-bottom:14px;">
+                    <div>
+                        <h2 style="font-size:1.15rem;font-weight:700;margin:0;">Bulk-Uploaded Students</h2>
+                        <p style="color:#666;font-size:0.82rem;margin:4px 0 0;">All students added via bulk upload. ✅ = login email sent, ❌ = not sent yet.</p>
+                    </div>
+                    <div style="display:flex;gap:8px;align-items:center;">
+                        <input type="text" id="bulkTableSearch" placeholder="Search name / email / school…" style="padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-family:inherit;min-width:240px;">
+                        <button id="bulkTableRefresh" style="background:#f1f1f1;border:none;border-radius:8px;padding:8px 12px;cursor:pointer;font-weight:600;">↻ Refresh</button>
+                    </div>
+                </div>
+                <div style="overflow:auto;max-height:520px;border:1px solid #eee;border-radius:10px;">
+                    <table style="width:100%;border-collapse:collapse;font-size:0.82rem;white-space:nowrap;">
+                        <thead><tr style="background:#5E2A97;color:#fff;text-align:left;position:sticky;top:0;">
+                            <th style="padding:9px 12px;">#</th><th style="padding:9px 12px;">Name</th><th style="padding:9px 12px;">Email</th><th style="padding:9px 12px;">School</th><th style="padding:9px 12px;">Grade</th><th style="padding:9px 12px;">Email Sent</th><th style="padding:9px 12px;">Action</th>
+                        </tr></thead>
+                        <tbody id="bulkTableBody"><tr><td colspan="7" style="padding:16px;text-align:center;color:#888;">Loading…</td></tr></tbody>
+                    </table>
+                </div>
+                <p id="bulkTableCount" style="color:#888;font-size:0.78rem;margin:8px 0 0;"></p>
             </div>
         </div>
     </main>
@@ -635,6 +689,25 @@
         var pb=document.getElementById('profileAvatarBtn'), pd=document.getElementById('profileDropdown');
         if(pb&&pd){pb.addEventListener('click',function(e){e.stopPropagation(); var open=pd.style.display==='block'; pd.style.display=open?'none':'block'; pd.style.opacity='1'; pd.style.transform='translateY(0)';});
             document.addEventListener('click',function(){pd.style.display='none';});}
+    })();
+    // ---- searchable school dropdown ----
+    (function(){
+        var inp=document.getElementById('bulkSchoolSearch'), hid=document.getElementById('bulkSchool'), list=document.getElementById('bulkSchoolList');
+        if(!inp||!list) return;
+        var opts=Array.prototype.slice.call(list.querySelectorAll('.bulk-school-opt'));
+        function open(){list.style.display='block';}
+        function close(){list.style.display='none';}
+        inp.addEventListener('focus', open);
+        inp.addEventListener('input', function(){
+            var q=inp.value.toLowerCase(); hid.value=''; open();
+            opts.forEach(function(o){ o.style.display = o.getAttribute('data-text').toLowerCase().indexOf(q)>=0 ? '' : 'none'; });
+        });
+        opts.forEach(function(o){
+            o.addEventListener('mousedown', function(e){ e.preventDefault(); inp.value=o.getAttribute('data-text'); hid.value=o.getAttribute('data-id'); close(); });
+            o.addEventListener('mouseover', function(){ o.style.background='#f5f0ff'; });
+            o.addEventListener('mouseout', function(){ o.style.background=''; });
+        });
+        document.addEventListener('click', function(e){ if(!e.target.closest('#bulkSchoolList') && e.target!==inp) close(); });
     })();
     // ---- bulk upload ----
     (function(){
@@ -682,8 +755,93 @@
             }
             document.getElementById('bulkProgressLabel').textContent='Completed';
             btn.disabled=false; btn.textContent='Upload & Create';
+            if(window.__loadBulkTable) window.__loadBulkTable();
             alert('Done! Created '+created+', Failed '+failed+'.');
         });
+    })();
+    // ---- send login emails ----
+    (function(){
+        var CHUNK=20;
+        function csrf(){var c=(document.cookie.split('; ').find(function(x){return x.indexOf('csrftoken=')===0;})||''); return c.split('=')[1]||'';}
+        var btn=document.getElementById('bulkEmailBtn');
+        if(!btn) return;
+        btn.addEventListener('click', async function(){
+            var schoolId=document.getElementById('bulkSchool').value;
+            if(!schoolId){alert('Please select a school first.');return;}
+            if(!confirm('Send login emails to ALL bulk-uploaded students of this school? A fresh password is generated and emailed to each.')) return;
+            btn.disabled=true; btn.textContent='Preparing…';
+            var tg;
+            try{ tg=await fetch("{% url 'admins:bulk_email_targets' %}", {method:'POST',headers:{'X-CSRFToken':csrf(),'Content-Type':'application/json'},body:JSON.stringify({school_id:schoolId})}).then(function(r){return r.json();}); }
+            catch(e){ tg={success:false,message:'Request failed'}; }
+            if(!tg.success){ alert(tg.message||'Could not load students'); btn.disabled=false; btn.textContent='📧 Send Login Emails to All'; return; }
+            var ids=tg.ids||[], total=ids.length;
+            if(!total){ alert('No bulk-uploaded students found for this school. Create them first with "Upload & Create".'); btn.disabled=false; btn.textContent='📧 Send Login Emails to All'; return; }
+            document.getElementById('bulkEmailProgressWrap').style.display='block';
+            document.getElementById('bulkEmailResultsWrap').style.display='block';
+            var bar=document.getElementById('bulkEmailBar'), cnt=document.getElementById('bulkEmailCount');
+            var sentEl=document.getElementById('bulkEmailSent'), failEl=document.getElementById('bulkEmailFailed'), body=document.getElementById('bulkEmailBody');
+            body.innerHTML='';
+            var done=0, sent=0, failed=0;
+            btn.textContent='Sending…';
+            for(var i=0;i<total;i+=CHUNK){
+                var chunk=ids.slice(i,i+CHUNK);
+                var res;
+                try{ res=await fetch("{% url 'admins:bulk_send_emails_chunk' %}", {method:'POST',headers:{'X-CSRFToken':csrf(),'Content-Type':'application/json'},body:JSON.stringify({ids:chunk})}).then(function(r){return r.json();}); }
+                catch(e){ res={results:chunk.map(function(id){return {id:id,name:'',email:'',status:'failed',reason:'Request failed'};})}; }
+                (res.results||[]).forEach(function(x){
+                    done++; if(x.status==='sent'){sent++;}else{failed++;}
+                    var tr=document.createElement('tr'); tr.style.borderBottom='1px solid #f0f0f0';
+                    tr.innerHTML='<td style="padding:7px 10px;">'+(x.name||'')+'</td>'+
+                        '<td style="padding:7px 10px;">'+(x.email||'')+'</td>'+
+                        '<td style="padding:7px 10px;color:'+(x.status==='sent'?'#16a34a':'#ef4444')+';font-weight:600;">'+(x.status==='sent'?'Sent':'Failed')+'</td>'+
+                        '<td style="padding:7px 10px;color:#888;">'+(x.reason||'')+'</td>';
+                    body.appendChild(tr);
+                });
+                var pct=Math.round(done*100/total);
+                bar.style.width=pct+'%'; cnt.textContent=done+' / '+total; sentEl.textContent=sent; failEl.textContent=failed;
+            }
+            document.getElementById('bulkEmailLabel').textContent='Completed';
+            btn.disabled=false; btn.textContent='📧 Send Login Emails to All';
+            if(window.__loadBulkTable) window.__loadBulkTable();
+            alert('Emails done! Sent '+sent+', Failed '+failed+'.');
+        });
+    })();
+    // ---- bulk-uploaded students table ----
+    (function(){
+        var body=document.getElementById('bulkTableBody'), search=document.getElementById('bulkTableSearch'),
+            refresh=document.getElementById('bulkTableRefresh'), countEl=document.getElementById('bulkTableCount');
+        if(!body) return;
+        var all=[];
+        function esc(s){var d=document.createElement('div'); d.textContent=(s==null?'':String(s)); return d.innerHTML;}
+        function render(){
+            var q=(search.value||'').toLowerCase();
+            var rows=all.filter(function(s){ return !q || (s.name+' '+s.email+' '+s.school).toLowerCase().indexOf(q)>=0; });
+            if(!rows.length){ body.innerHTML='<tr><td colspan="7" style="padding:16px;text-align:center;color:#888;">No bulk-uploaded students'+(q?' match your search.':' yet.')+'</td></tr>'; countEl.textContent=''; return; }
+            body.innerHTML=rows.map(function(s,i){
+                var tick = s.sent ? '<span style="color:#16a34a;font-weight:700;">&#10004; Sent</span>' : '<span style="color:#ef4444;font-weight:700;">&#10008; Not sent</span>';
+                return '<tr style="border-bottom:1px solid #f0f0f0;">'+
+                    '<td style="padding:8px 12px;color:#888;">'+(i+1)+'</td>'+
+                    '<td style="padding:8px 12px;">'+esc(s.name)+'</td>'+
+                    '<td style="padding:8px 12px;">'+esc(s.email)+'</td>'+
+                    '<td style="padding:8px 12px;">'+esc(s.school)+'</td>'+
+                    '<td style="padding:8px 12px;">'+esc(s.grade)+'</td>'+
+                    '<td style="padding:8px 12px;">'+tick+'</td>'+
+                    '<td style="padding:8px 12px;"><a href="'+s.edit_url+'" style="color:#5E2A97;font-weight:600;text-decoration:none;">Manage / Reset PW</a></td>'+
+                '</tr>';
+            }).join('');
+            var sentN=all.filter(function(s){return s.sent;}).length;
+            countEl.textContent='Total: '+all.length+'  •  Email sent: '+sentN+'  •  Pending: '+(all.length-sentN);
+        }
+        function load(){
+            body.innerHTML='<tr><td colspan="7" style="padding:16px;text-align:center;color:#888;">Loading…</td></tr>';
+            fetch("{% url 'admins:bulk_students_list' %}").then(function(r){return r.json();}).then(function(d){
+                all=(d && d.students)||[]; render();
+            }).catch(function(){ body.innerHTML='<tr><td colspan="7" style="padding:16px;text-align:center;color:#ef4444;">Could not load list.</td></tr>'; });
+        }
+        window.__loadBulkTable=load;
+        if(search) search.addEventListener('input', render);
+        if(refresh) refresh.addEventListener('click', load);
+        load();
     })();
     </script>
 </body>

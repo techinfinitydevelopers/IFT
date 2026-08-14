@@ -587,3 +587,14 @@ New `send_idea_booster_reminder` command + `email_idea_booster_reminder.html` te
 ## 2026-08-14 — Bulk student upload (super-admin, pre-paid) — LOCAL ONLY, not pushed
 
 New feature to bulk-register a school's students from CSV. Columns match self-registration: first_name, last_name, email, phone, grade (7-12), gender. School is picked once per batch; students are created is_paid=True (cheque/offline, payment_transaction_id='BULK-CHEQUE', amount 1600 TCE / 2500 non-TCE) so they skip the payment gate on login, and each gets onboarding credentials by email. Views: bulk_upload_students (page), bulk_students_template (sample CSV), bulk_parse_students_csv (parse only, no writes), bulk_create_students_chunk (creates a chunk + emails). Frontend parses via the parse endpoint then POSTs chunks of 20 to the create endpoint, driving a live progress bar + created/failed counts + per-row results table (avoids request timeout on ~400 rows). Template cloned from onboard_student chrome. NOT wired into any sidebar/nav (unlisted URL) and NOT pushed to prod yet — pending local testing + a later decision on hiding it from the client.
+
+---
+
+## 2026-08-14 — Bulk upload: Send-Emails button, students table, TCE-aware fee, feature flag (LOCAL)
+
+- Split create from email: "Upload & Create" only creates students (pre-paid); a separate "📧 Send Login Emails to All" button mails fresh login creds to all bulk-uploaded students of the selected school (chunked, progress bar). Password is (re)generated at send time (plaintext isn't stored).
+- Fee is TCE-aware: 1600 if the selected school is Tata ClassEdge, else 2500.
+- Searchable school dropdown (custom combobox).
+- Bulk-uploaded students data table below the box: name/email/school/grade + "Email Sent" ✔/✘ (flips to ✔ after send) + Manage/Reset-PW link (normal flow). "Sent" tracked via a SEPARATE MilestoneEmailLog marker ('bulk_creds') — no change to Student model, no report impact, read-only (no duplicate students).
+- Feature flag BULK_STUDENT_UPLOAD_ENABLED (default OFF): all 7 bulk views 404 unless enabled, so it's fully hidden on prod until the Railway env var is set to true. Local .env has it true for testing.
+Still LOCAL only — not pushed to prod.

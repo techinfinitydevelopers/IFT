@@ -243,3 +243,7 @@ SMS_SENDER = os.getenv('SMS_SENDER', 'ENLRNG')
 SMS_ENTITY_ID = os.getenv('SMS_ENTITY_ID', '')
 SMS_OTP_TEMPLATE_ID = os.getenv('SMS_OTP_TEMPLATE_ID', '')
 OTP_EXPIRY_SECONDS = int(os.getenv('OTP_EXPIRY_SECONDS', '600'))
+
+# Feature flag: bulk student upload (super-admin). OFF by default so it stays
+# fully hidden on prod until reveal. Flip via Railway env var to reveal/hide.
+BULK_STUDENT_UPLOAD_ENABLED = os.getenv('BULK_STUDENT_UPLOAD_ENABLED', 'false').lower() == 'true'

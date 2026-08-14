@@ -1482,6 +1482,23 @@ def onboard_student(request):
 BULK_STUDENT_COLUMNS = ['first_name', 'last_name', 'email', 'phone', 'grade', 'gender']
 
 
+def bulk_feature_required(view):
+    """404 every bulk-upload view unless BULK_STUDENT_UPLOAD_ENABLED is on.
+    Feature stays fully hidden on prod (default off); flip the Railway env var
+    to reveal. 404 (not a login redirect) so it looks like the page doesn't exist."""
+    from functools import wraps
+    from django.http import Http404
+    from django.conf import settings as _settings
+
+    @wraps(view)
+    def _wrapped(request, *args, **kwargs):
+        if not getattr(_settings, 'BULK_STUDENT_UPLOAD_ENABLED', False):
+            raise Http404()
+        return view(request, *args, **kwargs)
+    return _wrapped
+
+
+@bulk_feature_required
 @login_required
 @user_passes_test(is_staff_or_superuser)
 def bulk_upload_students(request):
@@ -1490,6 +1507,7 @@ def bulk_upload_students(request):
     return render(request, 'admins/user_management/bulk_upload_students.html', {'schools': schools})
 
 
+@bulk_feature_required
 @login_required
 @user_passes_test(is_staff_or_superuser)
 def bulk_students_template(request):
@@ -1503,6 +1521,7 @@ def bulk_students_template(request):
     return response
 
 
+@bulk_feature_required
 @login_required
 @user_passes_test(is_staff_or_superuser)
 def bulk_parse_students_csv(request):
@@ -1535,6 +1554,7 @@ def bulk_parse_students_csv(request):
     return JsonResponse({'success': True, 'rows': rows, 'count': len(rows)})
 
 
+@bulk_feature_required
 @login_required
 @user_passes_test(is_staff_or_superuser)
 def bulk_create_students_chunk(request):
@@ -1545,7 +1565,6 @@ def bulk_create_students_chunk(request):
     import json as _json
     import secrets
     from accounts.forms import duplicate_account_message
-    from accounts.emails import send_onboard_credentials
     try:
         from accounts.models import UserProfile
     except Exception:
@@ -1599,15 +1618,103 @@ def bulk_create_students_chunk(request):
             )
             if UserProfile is not None:
                 UserProfile.objects.get_or_create(user=user, defaults={'role': 'student'})
-            try:
-                send_onboard_credentials(user, temp_password, 'Student', {'username': email})
-            except Exception:
-                pass  # student created; email failure shouldn't fail the row
+            # NOTE: login-credentials email is NOT sent here — it is sent later,
+            # only when the admin clicks "Send Login Emails" (bulk_send_emails_chunk).
             results.append({'row': r.get('row'), 'name': label, 'email': email,
                             'status': 'created', 'reason': ''})
         except Exception as e:
             fail(str(e)[:140])
     return JsonResponse({'success': True, 'results': results})
+
+
+@bulk_feature_required
+@login_required
+@user_passes_test(is_staff_or_superuser)
+def bulk_email_targets(request):
+    """Return ids of the bulk-uploaded students of a school (to email their creds)."""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'POST only'}, status=405)
+    import json as _json
+    try:
+        payload = _json.loads(request.body.decode('utf-8'))
+    except Exception:
+        return JsonResponse({'success': False, 'message': 'Bad request.'}, status=400)
+    try:
+        school = School.objects.get(id=payload.get('school_id'))
+    except (School.DoesNotExist, ValueError, TypeError):
+        return JsonResponse({'success': False, 'message': 'Please select a valid school.'}, status=400)
+    ids = list(Student.objects.filter(
+        school=school, payment_transaction_id='BULK-CHEQUE').values_list('id', flat=True))
+    return JsonResponse({'success': True, 'ids': ids, 'count': len(ids)})
+
+
+@bulk_feature_required
+@login_required
+@user_passes_test(is_staff_or_superuser)
+def bulk_send_emails_chunk(request):
+    """Set a fresh temp password for a chunk of students and email their login creds.
+    Called repeatedly by the 'Send Login Emails' button to drive a progress bar."""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'POST only'}, status=405)
+    import json as _json
+    import secrets
+    from accounts.emails import send_onboard_credentials
+    from admins.models import MilestoneEmailLog
+    try:
+        payload = _json.loads(request.body.decode('utf-8'))
+    except Exception:
+        return JsonResponse({'success': False, 'message': 'Bad request.'}, status=400)
+    ids = payload.get('ids') or []
+    results = []
+    for st in Student.objects.filter(id__in=ids).select_related('user'):
+        user = st.user
+        email = (user.email if user else '').strip()
+        label = (user.get_full_name() if user else '') or email or f'#{st.id}'
+        if not user or not email:
+            results.append({'id': st.id, 'name': label, 'email': email,
+                            'status': 'failed', 'reason': 'No email on account'})
+            continue
+        try:
+            temp_password = secrets.token_urlsafe(6)
+            user.set_password(temp_password)
+            user.save(update_fields=['password'])
+            send_onboard_credentials(user, temp_password, 'Student', {'username': email})
+            # Mark "credentials emailed" in a SEPARATE log (no change to Student /
+            # reports) — drives the green tick in the bulk students table.
+            MilestoneEmailLog.objects.get_or_create(student=st, milestone='bulk_creds')
+            results.append({'id': st.id, 'name': label, 'email': email,
+                            'status': 'sent', 'reason': ''})
+        except Exception as e:
+            results.append({'id': st.id, 'name': label, 'email': email,
+                            'status': 'failed', 'reason': str(e)[:140]})
+    return JsonResponse({'success': True, 'results': results})
+
+
+@bulk_feature_required
+@login_required
+@user_passes_test(is_staff_or_superuser)
+def bulk_students_list(request):
+    """JSON: all bulk-uploaded students + whether their login email was sent.
+    Read-only — never creates anything (no duplicate students) and touches no
+    report data; the 'sent' flag comes from a separate MilestoneEmailLog marker."""
+    from admins.models import MilestoneEmailLog
+    sent_ids = set(MilestoneEmailLog.objects.filter(milestone='bulk_creds')
+                   .values_list('student_id', flat=True))
+    qs = (Student.objects.filter(payment_transaction_id='BULK-CHEQUE')
+          .select_related('user', 'school').order_by('-created_at'))
+    students = []
+    for st in qs:
+        u = st.user
+        students.append({
+            'id': st.id,
+            'name': (u.get_full_name() if u else '') or (u.username if u else ''),
+            'email': (u.email if u else ''),
+            'school': (st.school.name if st.school else st.school_name) or '',
+            'grade': st.grade or '',
+            'sent': st.id in sent_ids,
+            'edit_url': f'/super-admin/user-management/student/{st.id}/edit/',
+        })
+    return JsonResponse({'success': True, 'students': students, 'count': len(students)})
 
 
 @login_required
