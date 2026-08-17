@@ -3899,7 +3899,7 @@ def report_schools_export(request):
         schools = [s for s in schools if _state_to_zone(s.state, s.city).lower() == want]
 
     headers = [
-        'School Name', 'Registered On', 'City', 'State', 'Zone', 'Board', 'Tata ClassEdge',
+        'School Name', 'Google Place ID', 'Registered On', 'City', 'State', 'Zone', 'Board', 'Tata ClassEdge',
         'Coordinator Name', 'Coordinator Mobile', 'Principal Name', 'Principal Email',
         'Pin Code', 'Total Students', 'Paid Students', 'Submitted Ideas',
         'Highest AI Score', 'Status',
@@ -3921,6 +3921,7 @@ def report_schools_export(request):
         best = best_map.get(sc.id)
         rows.append([
             sc.name,
+            sc.google_place_id,
             (sc.created_at.strftime('%d-%m-%Y') if sc.created_at else ''),
             sc.city, sc.state, _state_to_zone(sc.state, sc.city), sc.board,
             'Yes' if sc.is_tata_classedge else 'No',

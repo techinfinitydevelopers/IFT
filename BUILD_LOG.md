@@ -1,5 +1,10 @@
 # Build Log
 
+## 2026-08-17 — Add Google Place ID to Schools report export
+- Duplicate schools are being found in production (user shared an exported `schools_report.xlsx`); `School.google_place_id` is the unique identifier used to prevent *new* duplicates at registration time, but the Reports page's Schools export (`admins/views.py:report_schools_export`, `/super-admin/reports/export/schools/`) didn't include it — no way to spot/dedupe existing ones by that field from the export alone.
+- Added a "Google Place ID" column (right after "School Name") to the export headers/rows.
+- Verified via test client: exported `.xlsx` has the new column with the correct value.
+
 ## 2026-08-12 — Fix Railway auto-deploy (push to main now deploys)
 - **Symptom:** pushes to `techinfinitydevelopers/IFT` `main` did not deploy; Railway showed "Auto deploy unavailable" / "GitHub Repo not found", prod stuck on an old SHA. `techinfinitydevelopers` is a **personal** GitHub account (not an org).
 - **Root cause:** the Railway GitHub App (installation 132018388) had repo access to `mumbaidabbawala` only — **not** IFT — so Railway could not read the repo/branch to wire native auto-deploy.
