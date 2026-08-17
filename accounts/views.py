@@ -286,6 +286,17 @@ def send_otp_api(request):
     return JsonResponse({'success': ok, 'message': err or 'OTP sent to your mobile number.'})
 
 
+def verify_otp_api(request):
+    """Live-check a submitted OTP so the UI can show a checkmark before the
+    user submits the whole form. Does NOT clear the session OTP — the final
+    form submit still re-verifies (and clears) it server-side as before."""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'POST only'}, status=405)
+    from . import otp as otp_service
+    ok, err = otp_service.verify(request, request.POST.get('phone', ''), request.POST.get('otp', ''))
+    return JsonResponse({'success': ok, 'message': err or 'Mobile number verified.'})
+
+
 def school_search_api(request):
     q = request.GET.get('q', '').strip()
     schools = School.objects.filter(status='active')

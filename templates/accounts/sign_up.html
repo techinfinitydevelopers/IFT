@@ -116,6 +116,7 @@
         <input type="text" class="form-control" id="otp" name="otp" placeholder="Enter 6-digit OTP" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" value="{{ form.data.otp|default:'' }}">
         {% if otp_error %}<p class="field-error">{{ otp_error }}</p>{% endif %}
     </div>
+    <div style="margin:-0.6rem 0 1rem;"><span id="otpVerifyMsg" style="font-size:0.8rem;"></span></div>
 
     <!-- Terms & Conditions -->
     <div class="form-check">
@@ -198,6 +199,34 @@
                 setTimeout(function(){ btn.disabled = false; }, d.success ? 30000 : 2000);
             })
             .catch(function(){ otpMsg.textContent = 'Failed to send OTP. Try again.'; otpMsg.style.color = '#d00'; btn.disabled = false; });
+    });
+})();
+
+// Live OTP verification: check as soon as 6 digits are entered, show a
+// green confirmation under the mobile number field.
+(function(){
+    var phone = document.getElementById('phone');
+    var otpInput = document.getElementById('otp');
+    var otpVerifyMsg = document.getElementById('otpVerifyMsg');
+    if(!otpInput || !otpVerifyMsg) return;
+    function csrf(){ var el = document.querySelector('input[name=csrfmiddlewaretoken]'); return el ? el.value : ''; }
+    otpInput.addEventListener('input', function(){
+        var code = (otpInput.value || '').replace(/\D/g,'');
+        if(code.length !== 6){ otpVerifyMsg.textContent = ''; return; }
+        var p = (phone.value || '').replace(/\D/g,'');
+        otpVerifyMsg.textContent = 'Verifying...'; otpVerifyMsg.style.color = '#666';
+        var fd = new FormData(); fd.append('phone', p); fd.append('otp', code); fd.append('csrfmiddlewaretoken', csrf());
+        fetch('{% url "accounts:verify_otp" %}', { method:'POST', body: fd, headers: {'X-CSRFToken': csrf()} })
+            .then(function(r){ return r.json(); })
+            .then(function(d){
+                if(d.success){
+                    otpVerifyMsg.textContent = '✓ Mobile number verified.';
+                    otpVerifyMsg.style.color = '#188038';
+                } else {
+                    otpVerifyMsg.textContent = d.message; otpVerifyMsg.style.color = '#d00';
+                }
+            })
+            .catch(function(){ otpVerifyMsg.textContent = ''; });
     });
 })();
 let searchTimeout;

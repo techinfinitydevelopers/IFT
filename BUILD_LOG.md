@@ -1,5 +1,11 @@
 # Build Log
 
+## 2026-08-17 — Green "mobile verified" message on OTP forms
+- School sign-up and student sign-up pages verify mobile via OTP but gave no feedback once it was correct.
+- Added `accounts.views.verify_otp_api` (`POST /accounts/api/verify-otp/`) — live-checks the OTP against the session without clearing it, so final form submit still re-verifies/clears as before.
+- `templates/accounts/school_sign_up.html` and `templates/accounts/sign_up.html`: OTP input now auto-fires this check at 6 digits and shows a green "✓ Mobile number verified." message under the OTP field (red error otherwise).
+- Verified: Django check clean; test-client hit on `/accounts/api/verify-otp/` with a seeded session OTP returns `{success: true}` on match, `{success: false, "Incorrect OTP..."}` on mismatch; browser screenshot confirms the green message renders.
+
 ## 2026-08-17 — Add Google Place ID to Schools report export
 - Duplicate schools are being found in production (user shared an exported `schools_report.xlsx`); `School.google_place_id` is the unique identifier used to prevent *new* duplicates at registration time, but the Reports page's Schools export (`admins/views.py:report_schools_export`, `/super-admin/reports/export/schools/`) didn't include it — no way to spot/dedupe existing ones by that field from the export alone.
 - Added a "Google Place ID" column (right after "School Name") to the export headers/rows.

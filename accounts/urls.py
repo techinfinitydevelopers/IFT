@@ -11,6 +11,7 @@ urlpatterns = [
     path('school-sign-up/', views.school_sign_up, name='school_sign_up'),
     path('api/schools/', views.school_search_api, name='school_search_api'),
     path('api/send-otp/', views.send_otp_api, name='send_otp'),
+    path('api/verify-otp/', views.verify_otp_api, name='verify_otp'),
 
     # Password reset
     path('forgot-password/', views.ForgotPasswordView.as_view(), name='password_reset'),
