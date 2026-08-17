@@ -14,6 +14,8 @@ import requests
 from django.conf import settings
 
 _SESSION_KEY = 'phone_otp'
+_MAX_ATTEMPTS = 5          # wrong-code guesses allowed before the OTP is voided
+_RESEND_COOLDOWN = 30      # seconds a user must wait between OTP requests
 _OTP_MESSAGE = (
     "Your OTP for India Future Tycoons verification is {otp}. "
     "Valid for 10 minutes. Do not share it with anyone. - ENLEARNING"
@@ -44,6 +46,13 @@ def generate_and_send(request, phone):
         return False, 'Enter a valid 10-digit Indian mobile number.'
     if not is_configured():
         return False, 'SMS service is not configured yet. Please try later.'
+
+    # Resend throttle — block rapid re-requests for the same number
+    existing = request.session.get(_SESSION_KEY)
+    if existing and existing.get('phone') == phone:
+        elapsed = int(time.time()) - int(existing.get('ts', 0))
+        if 0 <= elapsed < _RESEND_COOLDOWN:
+            return False, f'Please wait {_RESEND_COOLDOWN - elapsed}s before requesting another OTP.'
 
     otp = f"{random.randint(0, 999999):06d}"
     params = {
@@ -86,7 +95,13 @@ def verify(request, phone, code):
         return False, 'Mobile number changed. Please request a new OTP.'
     if int(time.time()) - int(data.get('ts', 0)) > settings.OTP_EXPIRY_SECONDS:
         return False, 'OTP expired. Please request a new one.'
+    if data.get('attempts', 0) >= _MAX_ATTEMPTS:
+        clear(request)
+        return False, 'Too many incorrect attempts. Please request a new OTP.'
     if str(code).strip() != str(data.get('otp')):
+        data['attempts'] = data.get('attempts', 0) + 1
+        request.session[_SESSION_KEY] = data
+        request.session.modified = True
         return False, 'Incorrect OTP. Please try again.'
     return True, None
 

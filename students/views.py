@@ -401,6 +401,7 @@ def _learning_progress(student, membership):
     return video_list, videos_total, videos_watched, team_video_status
 
 
+@login_required
 def submit_idea(request):
     """Idea submission form — only team leader or solo student can submit"""
     try:
@@ -408,6 +409,10 @@ def submit_idea(request):
     except Student.DoesNotExist:
         messages.error(request, 'Please complete your profile first.')
         return redirect('students:dashboard')
+
+    # Payment gate — unpaid students cannot submit (same as dashboard/team flows)
+    if not student.is_paid:
+        return redirect('students:initiate_payment')
 
     # Check if member (not leader) — block submission
     from students.models import TeamMembership
@@ -1618,6 +1623,9 @@ def publish_idea(request, submission_id):
 
     if submission.student.user != request.user:
         return JsonResponse({'success': False, 'message': 'Only the team leader can publish.'}, status=403)
+
+    if not submission.student.is_paid:
+        return JsonResponse({'success': False, 'message': 'Please complete payment before publishing.', 'redirect': '/payment/'}, status=403)
 
     if submission.status == 'submitted':
         return JsonResponse({'success': False, 'message': 'Already published.'}, status=400)
@@ -3498,7 +3506,10 @@ def razorpay_webhook(request):
         except razorpay.errors.SignatureVerificationError:
             return JsonResponse({'error': 'Invalid signature'}, status=400)
     else:
-        print('[RAZORPAY WEBHOOK] Warning: RAZORPAY_WEBHOOK_SECRET not set, skipping signature verification', flush=True)
+        # Fail closed: without the secret we cannot verify authenticity, so refuse
+        # to process (an unsigned request could otherwise mark anyone as paid).
+        print('[RAZORPAY WEBHOOK] RAZORPAY_WEBHOOK_SECRET not set — rejecting unverified webhook', flush=True)
+        return JsonResponse({'error': 'Webhook not configured'}, status=503)
 
     try:
         event = json.loads(body)

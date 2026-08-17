@@ -14,6 +14,7 @@ import secrets
 from django.conf import settings
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.http import JsonResponse
+from django.utils.http import url_has_allowed_host_and_scheme
 
 from .models import UserProfile, JuryProfile
 from .forms import StudentSignUpForm, SchoolSignUpForm
@@ -42,7 +43,10 @@ def sign_in(request):
             else:
                 request.session.set_expiry(1209600)  # 2 weeks
             next_url = request.GET.get('next') or request.POST.get('next', '')
-            if next_url:
+            # Only allow same-site redirects — block open-redirect to external hosts
+            if next_url and url_has_allowed_host_and_scheme(
+                next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+            ):
                 return redirect(next_url)
             return redirect('accounts:role_redirect')
         else:
