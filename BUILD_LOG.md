@@ -631,3 +631,24 @@ Still LOCAL only — not pushed to prod.
 
 - School Marketing Collaterals: PDFs now show a first-page inline preview (scaled iframe of the file) with a "PDF" badge fallback if the browser can't render it; images already show a real thumbnail. (Server-side thumbnail generation would be the only 100%-guaranteed route; the iframe preview works in most browsers.)
 - Removed the "Marketing Collaterals" item from the STUDENT sidebar on the support/help pages (templates/support/base_user.html student branch). Schools keep theirs. Students no longer see marketing collaterals anywhere.
+
+---
+
+## 2026-08-17 — Prod outage fix: gunicorn worker killed while serving 38MB landing video
+
+**Symptom (prod logs):** `[CRITICAL] WORKER TIMEOUT` → `Worker was sent SIGKILL! Perhaps out of memory?`, repeating every ~60s. Every occurrence was on `GET /static/landing/ift-final-promo-season4.<hash>.mp4`, with the traceback ending in `sock.sendall` inside gunicorn's `write_file`.
+
+**Root cause:** NOT out of memory — gunicorn's own timeout kill. `static/landing/ift-final-promo-season4.mp4` is 38.6MB and is served by WhiteNoise through gunicorn. The container ran the **default sync worker with no `--workers` flag = 1 worker** and `--timeout 60`. A slow/mobile client that can't drain 38MB inside 60s leaves the single worker blocked in `sock.sendall`; the arbiter's timeout then SIGKILLs it mid-stream. With only one worker, that took the **whole site** down (not just the video) for each kill/reboot cycle. "Perhaps out of memory?" is gunicorn's generic guess whenever a child dies by SIGKILL.
+
+**Fix (Dockerfile + Procfile, both were `--timeout 60` on the default sync worker):**
+`gunicorn ift_platform.wsgi --worker-class gthread --workers 1 --threads 8 --timeout 120`
+- `gthread`: its `--timeout` is a worker *heartbeat*, not a request-duration cap, so a slow response can no longer kill the worker, and the other 7 threads keep serving while one drains a big file. Built into gunicorn (>=22 in requirements) — no new dependency, no code change.
+- **`--workers 1` on purpose.** `--workers 2` was tried first and reverted: `PROGRESS_TRACKER` (admins/views.py:22) is an in-memory dict, and two features start a background thread then have the browser poll `get_progress` (views.py:1090) — rankings bulk upload (`bulk_upload_ideas`, views.py:998) and batch AI evaluate (`batch_evaluate_async`, views.py:1117). With 2+ workers the poll can land on the worker that never saw the task → `404 Task not found`. The work itself still finishes (the thread writes to the DB), but the progress bar breaks and an admin may re-run it and duplicate rows. Move that state to DB/cache before scaling workers. Bulk *student* upload is unaffected — it chunks client-side and doesn't use PROGRESS_TRACKER.
+
+**No data loss from the deploy:** config-only change (no models/migrations — `No migrations to apply`), Postgres is a separate Railway service, uploads live on S3/R2 via django-storages, and sessions are DB-backed (no `SESSION_ENGINE` override) so nobody gets logged out. Only in-flight requests drop during the restart.
+
+**Not the cause / already fine:** `CompressedManifestStaticFilesStorage` hashes the filename, so WhiteNoise sends `max-age=31536000, immutable` — repeat visitors don't re-download. The three `.mp4` references in templates/landing/index.html (:1119 autoplay bg, :1175 hero `preload="auto"`, :1860 HOF card) all point at the same URL, so it's one 38MB download per *new* visitor, not three.
+
+**Still open (recommended next, not done):** move the 38MB video off Django onto the existing R2/S3 bucket (django-storages already configured for media) so Cloudflare serves it with range-request support and zero app load; and re-encode it (1080p H.264 ~1.5Mbps ≈ 6-8MB).
+
+**Also seen in the same logs, unrelated & not investigated:** `[RAZORPAY WEBHOOK] No student found for order_id=order_TQr3bo3hsgf6uo` (x2) — a payment webhook arrived with no matching Student row.
