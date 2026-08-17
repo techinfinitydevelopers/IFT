@@ -670,6 +670,13 @@ def school_dashboard(request):
         return redirect('students:dashboard')
 
     if request.method == 'POST':
+        # Profile-completion POST is only for PENDING schools. An inactive
+        # (admin-disabled) school must not be able to re-activate itself by
+        # POSTing a profile payload (the form is never shown to it, but the
+        # endpoint would otherwise still set status='active').
+        if school.status != 'pending':
+            return JsonResponse({'success': False, 'message': 'This account cannot be modified.'}, status=403)
+
         import re
         from django.core.validators import validate_email, URLValidator
         from django.core.exceptions import ValidationError as DjangoValidationError
@@ -808,6 +815,15 @@ def school_dashboard(request):
     # If pending, show complete profile form
     if school.status == 'pending':
         return render(request, 'students/school_dashboard.html', {'school': school, 'is_pending': True})
+
+    # Admin-disabled (inactive) or any other non-active status — deny the
+    # dashboard. Log out first: redirecting an authenticated school to sign_in
+    # would loop (sign_in -> role_redirect -> school_dashboard -> here).
+    if school.status != 'active':
+        from django.contrib.auth import logout as auth_logout
+        auth_logout(request)
+        messages.error(request, 'Your school account has been deactivated. Please contact support.')
+        return redirect('accounts:sign_in')
 
     # ---- Active dashboard stats ----
     students = Student.objects.filter(school=school)
@@ -1348,27 +1364,37 @@ def join_team(request):
 
     code = data.get('team_code', '').strip().upper()
 
-    try:
-        team = Team.objects.get(team_code=code)
-    except Team.DoesNotExist:
-        return JsonResponse({'success': False, 'message': 'Invalid team code.'}, status=400)
+    from django.db import transaction
+    # Lock the team row and re-check capacity inside the transaction so two
+    # students joining the same team concurrently can't both slip past the
+    # is_full check and create a 3rd member. (select_for_update is a no-op on
+    # SQLite/local but enforced on Postgres/prod.)
+    with transaction.atomic():
+        try:
+            team = Team.objects.select_for_update().get(team_code=code)
+        except Team.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Invalid team code.'}, status=400)
 
-    if team.is_full:
-        return JsonResponse({'success': False, 'message': 'Team is full (max 2 members).'}, status=400)
+        if team.is_full:
+            return JsonResponse({'success': False, 'message': 'Team is full (max 2 members).'}, status=400)
 
-    # Check if there's a pending invite for this student's email
-    pending = TeamMembership.objects.filter(team=team, email=student.user.email, status='pending').first()
-    if pending:
-        pending.student = student
-        pending.status = 'active'
-        pending.save()
-    else:
-        TeamMembership.objects.create(
-            team=team,
-            student=student,
-            role='member',
-            status='active',
-        )
+        # Re-check inside the lock — guards against a double-submit racing in
+        if TeamMembership.objects.filter(student=student).exists():
+            return JsonResponse({'success': False, 'message': 'You are already in a team.'}, status=400)
+
+        # Check if there's a pending invite for this student's email
+        pending = TeamMembership.objects.filter(team=team, email=student.user.email, status='pending').first()
+        if pending:
+            pending.student = student
+            pending.status = 'active'
+            pending.save()
+        else:
+            TeamMembership.objects.create(
+                team=team,
+                student=student,
+                role='member',
+                status='active',
+            )
 
     create_notification(team.leader, 'team', 'New Member Joined', f'{student.user.get_full_name()} has joined your team.', 'group_add', '/team/', 'View Team')
 
@@ -1627,8 +1653,11 @@ def publish_idea(request, submission_id):
     if not submission.student.is_paid:
         return JsonResponse({'success': False, 'message': 'Please complete payment before publishing.', 'redirect': '/payment/'}, status=403)
 
-    if submission.status == 'submitted':
-        return JsonResponse({'success': False, 'message': 'Already published.'}, status=400)
+    # Only a draft can be published. Blocking every non-draft status (submitted,
+    # under_review, evaluated, reviewed) stops a re-publish from clobbering an
+    # already-evaluated idea (status reset + AI re-run + certificate re-sent).
+    if submission.status != 'draft':
+        return JsonResponse({'success': False, 'message': 'This idea has already been published.'}, status=400)
 
     # Validate required fields before publishing
     required_fields = ['q1_target_group', 'q2_exact_problem', 'q3_solution_simple', 'q4_differentiation',

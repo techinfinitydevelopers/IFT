@@ -758,11 +758,11 @@ def batch_evaluate_view(request):
 @user_passes_test(is_staff_or_superuser)
 def rankings_view(request):
     """View rankings leaderboard with two sections: Top 400 and Normal Rankings"""
-    from ai_assistant.evaluator import update_rankings
-    
-    # Update rankings
-    update_rankings()
-    
+    # Rankings are recomputed at evaluation time (update_rankings() runs after
+    # every batch/single evaluation), so this read-only view no longer rewrites
+    # them on each GET — that was N DB writes per page load and let a read-only
+    # viewer trigger writes. Just read the stored ranks.
+
     # Get Top 400 evaluations (higher score = better)
     top_400_evaluations = AIEvaluation.objects.select_related(
         'submission', 'submission__student__user'
