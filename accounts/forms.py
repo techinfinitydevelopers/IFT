@@ -117,7 +117,7 @@ class SchoolSignUpForm(forms.Form):
     def clean_contact_email(self):
         email = self.cleaned_data['contact_email']
         from django.contrib.auth.models import User
-        if User.objects.filter(email=email).exists():
+        if User.objects.filter(email__iexact=email).exists():
             raise forms.ValidationError('An account with this email already exists.')
         return email
 

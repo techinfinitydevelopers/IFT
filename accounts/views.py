@@ -30,7 +30,7 @@ def sign_in(request):
         remember_me = request.POST.get('remember_me')
 
         user = None
-        for user_obj in User.objects.filter(email=email):
+        for user_obj in User.objects.filter(email__iexact=email):
             user = authenticate(request, username=user_obj.username, password=password)
             if user is not None:
                 break

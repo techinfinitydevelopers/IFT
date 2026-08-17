@@ -361,6 +361,18 @@ def dashboard(request):
 
 import threading
 
+
+def _send_branded_email_async(subject, to_email, template, context):
+    """Fire-and-forget branded email on a background thread so slow ZeptoMail
+    never blocks the request/response (payment confirm, publish, etc.)."""
+    def _worker():
+        try:
+            from accounts.emails import send_branded_email
+            send_branded_email(subject, to_email, template, context)
+        except Exception:
+            pass
+    threading.Thread(target=_worker, daemon=True).start()
+
 @login_required
 def _learning_progress(student, membership):
     """Own module progress + each team member's progress. Shared by leader and
@@ -970,9 +982,14 @@ def school_payments(request):
         return redirect('students:dashboard')
 
     students = Student.objects.filter(school=school).select_related('user').order_by('user__first_name')
+    # One query for all students who have a non-draft submission (was per-student N+1).
+    submitted_student_ids = set(
+        IdeaSubmission.objects.filter(student__school=school)
+        .exclude(status='draft').values_list('student_id', flat=True)
+    )
     rows = []
     for s in students:
-        has_submission = IdeaSubmission.objects.filter(student=s).exclude(status='draft').exists()
+        has_submission = s.id in submitted_student_ids
         rows.append({
             'name': s.user.get_full_name() or s.user.username,
             'email': s.user.email,
@@ -1623,17 +1640,13 @@ def publish_idea(request, submission_id):
 
     create_notification(request.user, 'submission', 'Idea Published', 'Your idea has been published and submitted for review.', 'rocket_launch', '/my-idea/', 'View Idea')
 
-    # Send idea-submission confirmation email
-    try:
-        from accounts.emails import send_branded_email
-        send_branded_email(
-            'Your Idea Was Submitted Successfully!',
-            request.user.email,
-            'students/email_idea_submitted.html',
-            {'user': request.user},
-        )
-    except:
-        pass
+    # Send idea-submission confirmation email (background — don't block publish)
+    _send_branded_email_async(
+        'Your Idea Was Submitted Successfully!',
+        request.user.email,
+        'students/email_idea_submitted.html',
+        {'user': request.user},
+    )
 
     # Trigger AI processing
     def run_ai(sub_id):
@@ -2054,7 +2067,7 @@ def school_teams(request):
 
     submissions = IdeaSubmission.objects.filter(
         student__school=school
-    ).select_related('student__user').order_by('-created_at')
+    ).select_related('student__user', 'ai_evaluation').order_by('-created_at')
 
     if search:
         submissions = submissions.filter(
@@ -2067,9 +2080,14 @@ def school_teams(request):
     if status_filter:
         submissions = submissions.filter(status=status_filter)
 
-    # Build list with extra data
+    # Paginate the QUERYSET first so we build display rows for the current page
+    # only (was iterating every submission on every page).
+    paginator = Paginator(submissions, 20)
+    page_obj = paginator.get_page(request.GET.get('page', 1))
+
+    # Build list with extra data (current page only)
     sub_list = []
-    for s in submissions:
+    for s in page_obj:
         ai_score = None
         is_top_400 = False
         try:
@@ -2123,9 +2141,9 @@ def school_teams(request):
     submitted_count = all_subs.filter(status='submitted').count()
     evaluated_count = all_subs.filter(status='evaluated').count()
 
-    # Pagination
-    paginator = Paginator(sub_list, 20)
-    page_obj = paginator.get_page(request.GET.get('page', 1))
+    # Display rows were built for the current page above; keep page_obj's
+    # pagination nav intact by swapping in the built rows.
+    page_obj.object_list = sub_list
 
     context = {
         'school': school,
@@ -2168,12 +2186,27 @@ def school_students(request):
     if grade_filter:
         students_qs = students_qs.filter(grade=grade_filter)
 
+    # Bulk-load team + idea (with AI eval) once, keyed by student, to avoid the
+    # per-student N+1 queries below. order_by('pk') + setdefault replicates the
+    # old per-row `.first()` (which ordered by pk) exactly.
+    students = list(students_qs)
+    student_ids = [s.id for s in students]
+
+    membership_map = {}
+    for m in TeamMembership.objects.filter(student_id__in=student_ids).select_related('team').order_by('pk'):
+        membership_map.setdefault(m.student_id, m)
+
+    idea_map = {}
+    for i in (IdeaSubmission.objects.filter(student_id__in=student_ids)
+              .exclude(status='draft').select_related('ai_evaluation').order_by('pk')):
+        idea_map.setdefault(i.student_id, i)
+
     # Annotate with team and submission info
     student_list = []
-    for s in students_qs:
-        membership = TeamMembership.objects.filter(student=s).select_related('team').first()
+    for s in students:
+        membership = membership_map.get(s.id)
         team_name = membership.team.name if membership else ''
-        idea = IdeaSubmission.objects.filter(student=s).exclude(status='draft').first()
+        idea = idea_map.get(s.id)
         idea_title = (idea.title or idea.q3_solution_simple or '')[:40] if idea else ''
         idea_desc = (idea.q3_solution_simple or idea.q2_exact_problem or '')[:80] if idea else ''
 
@@ -3400,16 +3433,12 @@ def verify_payment(request):
             'razorpay_signature': razorpay_signature,
         })
     except razorpay.errors.SignatureVerificationError:
-        try:
-            from accounts.emails import send_branded_email
-            send_branded_email(
-                'Payment Failed - India\'s Future Tycoons',
-                request.user.email,
-                'students/email_payment_failed.html',
-                {'user': request.user, 'login_url': f"{getattr(settings, 'SITE_URL', '')}/dashboard/"},
-            )
-        except Exception:
-            pass
+        _send_branded_email_async(
+            'Payment Failed - India\'s Future Tycoons',
+            request.user.email,
+            'students/email_payment_failed.html',
+            {'user': request.user, 'login_url': f"{getattr(settings, 'SITE_URL', '')}/dashboard/"},
+        )
         create_notification(request.user, 'system', 'Payment Failed', 'Your payment could not be verified. Any deducted amount will be refunded. Please try again.', 'error', '/dashboard/', 'Retry')
         return JsonResponse({'success': False, 'message': 'Payment verification failed.'}, status=400)
 
@@ -3423,23 +3452,19 @@ def verify_payment(request):
 
     create_notification(request.user, 'system', 'Payment Successful', f'Your registration fee of Rs {int(student.payment_amount)} has been received.', 'check_circle', '/dashboard/', 'Go to Dashboard')
 
-    try:
-        from accounts.emails import send_branded_email
-        school_name = student.school.name if student.school else student.school_name or 'N/A'
-        send_branded_email(
-            'Payment Successful - India\'s Future Tycoons',
-            request.user.email,
-            'students/email_payment_success.html',
-            {
-                'user': request.user,
-                'payment_amount': int(student.payment_amount),
-                'transaction_id': razorpay_payment_id,
-                'school_name': school_name,
-                'login_url': f"{getattr(settings, 'SITE_URL', '')}/dashboard/",
-            },
-        )
-    except Exception:
-        pass
+    school_name = student.school.name if student.school else student.school_name or 'N/A'
+    _send_branded_email_async(
+        'Payment Successful - India\'s Future Tycoons',
+        request.user.email,
+        'students/email_payment_success.html',
+        {
+            'user': request.user,
+            'payment_amount': int(student.payment_amount),
+            'transaction_id': razorpay_payment_id,
+            'school_name': school_name,
+            'login_url': f"{getattr(settings, 'SITE_URL', '')}/dashboard/",
+        },
+    )
 
     return JsonResponse({'success': True, 'message': 'Payment verified!', 'redirect': '/dashboard/'})
 
