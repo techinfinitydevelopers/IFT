@@ -15,6 +15,19 @@ from django.conf import settings
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.http import JsonResponse
 from django.utils.http import url_has_allowed_host_and_scheme
+import threading
+
+
+def _send_onboard_async(user, temp_password, role):
+    """Send onboarding credentials on a background thread so a slow ZeptoMail
+    call never blocks (and never 500s) the signup request/response."""
+    def _worker():
+        try:
+            from .emails import send_onboard_credentials
+            send_onboard_credentials(user, temp_password, role)
+        except Exception:
+            pass
+    threading.Thread(target=_worker, daemon=True).start()
 
 from .models import UserProfile, JuryProfile
 from .forms import StudentSignUpForm, SchoolSignUpForm
@@ -50,7 +63,15 @@ def sign_in(request):
                 return redirect(next_url)
             return redirect('accounts:role_redirect')
         else:
-            messages.error(request, 'Invalid email or password.')
+            # Distinguish a deactivated account (correct password but
+            # is_active=False, which ModelBackend rejects as None) from a
+            # genuinely wrong credential — only reveals "deactivated" when the
+            # password actually matches, so it leaks nothing extra.
+            inactive = User.objects.filter(email__iexact=email, is_active=False).first()
+            if inactive and inactive.check_password(password):
+                messages.error(request, 'Your account has been deactivated. Please contact support.')
+            else:
+                messages.error(request, 'Invalid email or password.')
 
     return render(request, 'accounts/sign_in.html')
 
@@ -95,17 +116,19 @@ def sign_up(request):
             login(request, user)
             messages.success(request, 'Account created successfully!')
 
-            # Send welcome email + in-app / push notification
-            try:
-                from .emails import send_branded_email
-                send_branded_email(
-                    "Congratulations! You're One Step Closer To Starting Your IFT Journey!",
-                    user.email,
-                    'accounts/email_welcome_student.html',
-                    {'user': user},
-                )
-            except:
-                pass
+            # Send welcome email in the background — don't block signup on ZeptoMail
+            def _welcome_email(u):
+                try:
+                    from .emails import send_branded_email
+                    send_branded_email(
+                        "Congratulations! You're One Step Closer To Starting Your IFT Journey!",
+                        u.email,
+                        'accounts/email_welcome_student.html',
+                        {'user': u},
+                    )
+                except Exception:
+                    pass
+            threading.Thread(target=_welcome_email, args=(user,), daemon=True).start()
             try:
                 from students.push import notify
                 notify(user, 'system', 'Welcome to IFT Season 6!', 'Your account is ready. Start your innovation journey.', 'celebration', '/dashboard/', 'Go to Dashboard')
@@ -145,7 +168,16 @@ def role_redirect(request):
     try:
         profile = request.user.profile
     except UserProfile.DoesNotExist:
-        profile = UserProfile.objects.create(user=request.user, role='student')
+        # Infer the real role from a linked profile instead of blindly assuming
+        # 'student' (which mis-routed orphaned school/jury users).
+        u = request.user
+        if hasattr(u, 'school_profile'):
+            role = 'school'
+        elif hasattr(u, 'jury_profile'):
+            role = 'jury'
+        else:
+            role = 'student'
+        profile = UserProfile.objects.create(user=u, role=role)
 
     if profile.is_superadmin or profile.is_viewer or profile.is_tce:
         return redirect('admins:dashboard')
@@ -233,9 +265,8 @@ def school_sign_up(request):
                 google_place_id=form.cleaned_data.get('google_place_id') or None,
             )
 
-            # Send email with temp credentials
-            from .emails import send_onboard_credentials
-            send_onboard_credentials(user, temp_password, 'School')
+            # Send email with temp credentials (background — don't block signup)
+            _send_onboard_async(user, temp_password, 'School')
 
             otp_service.clear(request)
             messages.success(request, 'School registered! Check your email for login credentials.')

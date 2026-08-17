@@ -3706,6 +3706,26 @@ def _evaluator_for(submission):
     return (ea.evaluator.get_full_name() or ea.evaluator.username), (ea.score if ea.score is not None else '')
 
 
+def _safe_float(val):
+    """Return float(val) or None — used to ignore malformed numeric GET params
+    (which would otherwise raise a 500 when the ORM evaluates the query)."""
+    try:
+        return float(val)
+    except (TypeError, ValueError):
+        return None
+
+
+def _safe_date(val):
+    """Parse a YYYY-MM-DD GET param to a date, or None if missing/malformed.
+    parse_date() still raises ValueError on a valid-format but out-of-range date
+    (e.g. 2026-13-99), so we catch that too."""
+    from django.utils.dateparse import parse_date
+    try:
+        return parse_date(val or '')
+    except (TypeError, ValueError):
+        return None
+
+
 @login_required
 @user_passes_test(is_staff_or_superuser)
 def report_students_export(request):
@@ -3729,7 +3749,7 @@ def report_students_export(request):
     students = students.exclude(_excluded_students_q())
 
     # ---- student-level filters ----
-    if g.get('school'):
+    if g.get('school', '').isdigit():
         students = students.filter(school_id=g['school'])
     if g.get('grade'):
         students = students.filter(grade=g['grade'])
@@ -3746,10 +3766,12 @@ def report_students_export(request):
     if g.get('paid') in ('true', 'false'):
         students = students.filter(is_paid=(g['paid'] == 'true'))
     # ---- registration date range (inclusive) ----
-    if g.get('date_from'):
-        students = students.filter(created_at__date__gte=g['date_from'])
-    if g.get('date_to'):
-        students = students.filter(created_at__date__lte=g['date_to'])
+    _df = _safe_date(g.get('date_from'))
+    if _df:
+        students = students.filter(created_at__date__gte=_df)
+    _dt = _safe_date(g.get('date_to'))
+    if _dt:
+        students = students.filter(created_at__date__lte=_dt)
 
     # ---- submission-level filters: keep only students with a matching submission ----
     sub_q = Q()
@@ -3767,12 +3789,14 @@ def report_students_export(request):
         sub_q &= Q(submissions__ai_evaluation__is_top_12=True)
     elif top == '100':
         sub_q &= Q(submissions__ai_evaluation__rank__gt=0, submissions__ai_evaluation__rank__lte=100)
-    if g.get('evaluator'):
+    if g.get('evaluator', '').isdigit():
         sub_q &= Q(submissions__evaluator_assignments__evaluator_id=g['evaluator'])
-    if g.get('min_score'):
-        sub_q &= Q(submissions__ai_evaluation__final_score__gte=g['min_score'])
-    if g.get('max_score'):
-        sub_q &= Q(submissions__ai_evaluation__final_score__lte=g['max_score'])
+    _min = _safe_float(g.get('min_score'))
+    if _min is not None:
+        sub_q &= Q(submissions__ai_evaluation__final_score__gte=_min)
+    _max = _safe_float(g.get('max_score'))
+    if _max is not None:
+        sub_q &= Q(submissions__ai_evaluation__final_score__lte=_max)
     if sub_q:
         students = students.filter(sub_q).distinct()
 
@@ -3862,10 +3886,12 @@ def report_schools_export(request):
     if g.get('status'):
         schools = schools.filter(status=g['status'])
     # ---- registration date range (inclusive) ----
-    if g.get('date_from'):
-        schools = schools.filter(created_at__date__gte=g['date_from'])
-    if g.get('date_to'):
-        schools = schools.filter(created_at__date__lte=g['date_to'])
+    _df = _safe_date(g.get('date_from'))
+    if _df:
+        schools = schools.filter(created_at__date__gte=_df)
+    _dt = _safe_date(g.get('date_to'))
+    if _dt:
+        schools = schools.filter(created_at__date__lte=_dt)
     schools = schools.order_by('name')
 
     if g.get('zone'):
@@ -4419,28 +4445,36 @@ def send_certificates_batch(request):
 
     recipients = _certificate_recipients(cert_type)
     already = set() if resend else _sent_entity_keys(cert_type)
-
-    sent = failed = skipped = 0
-    for r in recipients:
-        if (r['kind'], r['entity_id']) in already:
-            skipped += 1
-            continue
-        ok, _ = _send_certificate(
-            cert_type, r['name'], r['email'], student=r['student'],
-            school=r['school'], sent_by=request.user, is_test=False)
-        if ok:
-            sent += 1
-        else:
-            failed += 1
-
+    to_send = [r for r in recipients if (r['kind'], r['entity_id']) not in already]
+    skipped = len(recipients) - len(to_send)
     label = active_certificate_types()[cert_type]['label']
-    parts = [f'{sent} sent']
+
+    if not to_send:
+        messages.info(request, f'{label}: nothing to send ({skipped} already sent).')
+        return redirect('admins:certificates')
+
+    # Send on a background thread. Each certificate is PDF generation + a blocking
+    # ZeptoMail call (~1-2s); doing hundreds inline blew past the gunicorn worker
+    # timeout and only partially sent. _send_certificate records each send, so
+    # dedup + the counts on the certificates page stay accurate as they complete.
+    user = request.user
+
+    def _run_batch():
+        for r in to_send:
+            try:
+                _send_certificate(
+                    cert_type, r['name'], r['email'], student=r['student'],
+                    school=r['school'], sent_by=user, is_test=False)
+            except Exception:
+                pass
+
+    threading.Thread(target=_run_batch, daemon=True).start()
+
+    msg = f'{label}: sending {len(to_send)} certificate(s) in the background'
     if skipped:
-        parts.append(f'{skipped} skipped (already sent)')
-    if failed:
-        parts.append(f'{failed} failed')
-    msg = f'{label}: ' + ', '.join(parts) + '.'
-    (messages.success if failed == 0 else messages.warning)(request, msg)
+        msg += f' ({skipped} skipped, already sent)'
+    msg += '. This runs for a few minutes — refresh the page to see progress.'
+    messages.success(request, msg)
     return redirect('admins:certificates')
 
 

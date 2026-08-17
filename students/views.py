@@ -1488,7 +1488,10 @@ def suggest_edit(request, submission_id):
     from students.models import IdeaSuggestion, TeamMembership
 
     submission = get_object_or_404(IdeaSubmission, id=submission_id)
-    student = request.user.student_profile
+    try:
+        student = request.user.student_profile
+    except Student.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Only students can suggest edits.'}, status=403)
 
     # Verify member of same team
     leader_membership = TeamMembership.objects.filter(student=submission.student, role='leader').first()
@@ -3305,7 +3308,10 @@ def evaluator_faq(request):
 @require_POST
 def mark_video_watched(request, video_id):
     from students.models import LearningVideo, VideoProgress
-    student = request.user.student_profile
+    try:
+        student = request.user.student_profile
+    except Student.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Only students can do this.'}, status=403)
     video = get_object_or_404(LearningVideo, id=video_id)
     progress, _ = VideoProgress.objects.get_or_create(student=student, video=video)
     if not progress.watched:
@@ -3318,7 +3324,10 @@ def mark_video_watched(request, video_id):
 @login_required
 def video_completion_status(request):
     from students.models import LearningVideo, VideoProgress, TeamMembership
-    student = request.user.student_profile
+    try:
+        student = request.user.student_profile
+    except Student.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Only students can do this.'}, status=403)
     # Videos are optional — progress is informational only.
     videos = LearningVideo.objects.filter(is_active=True)
 
