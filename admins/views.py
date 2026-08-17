@@ -3916,6 +3916,55 @@ def report_schools_export(request):
     best_map = dict(AIEvaluation.objects.values('submission__student__school')
                     .annotate(m=Max('final_score'))
                     .values_list('submission__student__school', 'm'))
+
+    if g.get('dedupe') in ('1', 'true'):
+        # Collapse duplicate school registrations into one row per real-world
+        # school. Grouped by google_place_id (the established unique id); a
+        # school without a place_id falls back to name+city so it still dedupes
+        # against exact-match siblings instead of being silently dropped.
+        # Canonical row = the duplicate with the most students registered
+        # (ties -> earliest registered), so a school with real activity
+        # survives over an empty duplicate. Counts are SUMMED across the group.
+        groups = {}
+        order = []
+        for sc in schools:
+            key = sc.google_place_id or f"name:{(sc.name or '').strip().lower()}|{(sc.city or '').strip().lower()}"
+            if key not in groups:
+                groups[key] = []
+                order.append(key)
+            groups[key].append(sc)
+
+        rows = []
+        for key in order:
+            members = groups[key]
+            canonical = max(
+                members,
+                key=lambda s: (tot_map.get(s.id, 0), -(s.created_at.timestamp() if s.created_at else 0))
+            )
+            tot = sum(tot_map.get(s.id, 0) for s in members)
+            paid = sum(paid_map.get(s.id, 0) for s in members)
+            sub = sum(sub_map.get(s.id, 0) for s in members)
+            bests = [best_map.get(s.id) for s in members if best_map.get(s.id) is not None]
+            best = max(bests) if bests else None
+            place_id = next((s.google_place_id for s in members if s.google_place_id), '')
+            sc = canonical
+            rows.append([
+                sc.name,
+                place_id,
+                len(members),
+                (sc.created_at.strftime('%d-%m-%Y') if sc.created_at else ''),
+                sc.city, sc.state, _state_to_zone(sc.state, sc.city), sc.board,
+                'Yes' if sc.is_tata_classedge else 'No',
+                sc.designated_teacher_name, sc.designated_teacher_mobile,
+                sc.principal_name, sc.principal_email, sc.pin_code,
+                tot, paid, sub,
+                best if best is not None else '', sc.get_status_display(),
+            ])
+        dedupe_headers = headers[:2] + ['Duplicate Count'] + headers[2:]
+        if g.get('preview'):
+            return JsonResponse({'headers': dedupe_headers, 'rows': rows, 'count': len(rows)})
+        return xlsx_response('schools_report_unique', dedupe_headers, rows, 'Unique Schools')
+
     rows = []
     for sc in schools:
         best = best_map.get(sc.id)

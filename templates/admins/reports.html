@@ -770,6 +770,13 @@
                             </select></div>
                         <div><label class="rb-lbl">Zone</label>
                             <select name="zone" class="rb-input"><option value="">All</option><option>North</option><option>South</option><option>East</option><option>West</option><option>Central</option><option>Northeast</option></select></div>
+                        <div class="rb-schools" style="display:none;">
+                            <label class="rb-lbl">Duplicates</label>
+                            <label style="display:flex;align-items:center;gap:6px;height:38px;font-size:0.82rem;color:#374151;">
+                                <input type="checkbox" name="dedupe" value="1" id="rbDedupe">
+                                Merge duplicate schools (unique only)
+                            </label>
+                        </div>
                         <div><label class="rb-lbl">Registered From</label>
                             <input type="date" name="date_from" class="rb-input"></div>
                         <div><label class="rb-lbl">Registered To</label>
@@ -823,6 +830,7 @@
                         function apply(){
                             var schools=mode.value==='schools';
                             document.querySelectorAll('.rb-student').forEach(function(el){el.style.display=schools?'none':'';});
+                            document.querySelectorAll('.rb-schools').forEach(function(el){el.style.display=schools?'':'none';});
                             form.action=baseUrl();
                         }
                         mode.addEventListener('change',apply); apply();

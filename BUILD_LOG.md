@@ -1,5 +1,12 @@
 # Build Log
 
+## 2026-08-17 — Deduped "unique schools" export (merge duplicate registrations)
+- Duplicate school registrations (same school, registered more than once) were each showing as separate rows in the Schools report export, inflating counts and making cleanup hard.
+- `google_place_id` is unique per row at the DB level, so real-world duplicates in practice share it as null, not as a matching value — grouping is therefore by `google_place_id` when set, else by `name+city` (lowercased) as a fallback, so null-place-id duplicates still collapse together.
+- Added a "Merge duplicate schools (unique only)" checkbox to the Reports page (Schools mode only) → sends `dedupe=1` to the existing `/super-admin/reports/export/schools/` endpoint (`admins/views.py:report_schools_export`).
+- Per duplicate group: canonical row = the member with the most students (ties → earliest registered), so a real registration with student activity wins over an empty duplicate. Total Students / Paid Students / Submitted Ideas are **summed** across the group (user's explicit choice); Highest AI Score = max across the group. A new "Duplicate Count" column shows how many source rows were merged into each output row.
+- Verified via test client: 3 duplicate "Test Dupe School" rows (1 with a student) collapsed into 1 output row with `Duplicate Count: 3`, `Total Students: 1`, canonical = the one with the student; non-dedupe export still returns all 4 rows unchanged (3 dupes + 1 unrelated control).
+
 ## 2026-08-17 — Green "mobile verified" message on OTP forms
 - School sign-up and student sign-up pages verify mobile via OTP but gave no feedback once it was correct.
 - Added `accounts.views.verify_otp_api` (`POST /accounts/api/verify-otp/`) — live-checks the OTP against the session without clearing it, so final form submit still re-verifies/clears as before.
