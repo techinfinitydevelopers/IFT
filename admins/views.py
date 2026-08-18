@@ -34,6 +34,17 @@ def is_staff_or_superuser(user):
     return bool(profile and profile.role in ('viewer', 'tce'))
 
 
+def is_bulk_admin(user):
+    """Bulk student upload is a super-admin/staff-only feature. Explicitly deny
+    the read-only 'viewer' and 'tce' roles — unlike is_staff_or_superuser they
+    must NOT see or use bulk upload at all (they get read-only access elsewhere)."""
+    profile = getattr(user, 'profile', None)
+    role = getattr(profile, 'role', None) if profile is not None else None
+    if role in ('viewer', 'tce'):
+        return False
+    return bool(user.is_staff or user.is_superuser)
+
+
 # Test/QA accounts (students or schools) whose data must NEVER appear in any
 # report export. Matched case-insensitively.
 REPORT_EXCLUDED_EMAILS = [
@@ -1500,7 +1511,7 @@ def bulk_feature_required(view):
 
 @bulk_feature_required
 @login_required
-@user_passes_test(is_staff_or_superuser)
+@user_passes_test(is_bulk_admin)
 def bulk_upload_students(request):
     """Page: bulk-upload a school's students from CSV (they are marked pre-paid)."""
     schools = School.objects.filter(is_active=True).order_by('name')
@@ -1509,7 +1520,7 @@ def bulk_upload_students(request):
 
 @bulk_feature_required
 @login_required
-@user_passes_test(is_staff_or_superuser)
+@user_passes_test(is_bulk_admin)
 def bulk_students_template(request):
     """Download a sample CSV with the exact columns the upload expects."""
     response = HttpResponse(content_type='text/csv')
@@ -1523,7 +1534,7 @@ def bulk_students_template(request):
 
 @bulk_feature_required
 @login_required
-@user_passes_test(is_staff_or_superuser)
+@user_passes_test(is_bulk_admin)
 def bulk_parse_students_csv(request):
     """Parse an uploaded CSV and return the rows as JSON (NO DB writes)."""
     if request.method != 'POST':
@@ -1556,7 +1567,7 @@ def bulk_parse_students_csv(request):
 
 @bulk_feature_required
 @login_required
-@user_passes_test(is_staff_or_superuser)
+@user_passes_test(is_bulk_admin)
 def bulk_create_students_chunk(request):
     """Create a chunk of students under a school (pre-paid) and email their creds.
     Called repeatedly by the frontend with small batches to drive a progress bar."""
@@ -1629,7 +1640,7 @@ def bulk_create_students_chunk(request):
 
 @bulk_feature_required
 @login_required
-@user_passes_test(is_staff_or_superuser)
+@user_passes_test(is_bulk_admin)
 def bulk_email_targets(request):
     """Return ids of the bulk-uploaded students of a school (to email their creds)."""
     if request.method != 'POST':
@@ -1650,7 +1661,7 @@ def bulk_email_targets(request):
 
 @bulk_feature_required
 @login_required
-@user_passes_test(is_staff_or_superuser)
+@user_passes_test(is_bulk_admin)
 def bulk_send_emails_chunk(request):
     """Set a fresh temp password for a chunk of students and email their login creds.
     Called repeatedly by the 'Send Login Emails' button to drive a progress bar."""
@@ -1692,7 +1703,7 @@ def bulk_send_emails_chunk(request):
 
 @bulk_feature_required
 @login_required
-@user_passes_test(is_staff_or_superuser)
+@user_passes_test(is_bulk_admin)
 def bulk_students_list(request):
     """JSON: all bulk-uploaded students + whether their login email was sent.
     Read-only — never creates anything (no duplicate students) and touches no
