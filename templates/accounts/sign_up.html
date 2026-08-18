@@ -122,7 +122,7 @@
     <div class="form-check">
         <input class="form-check-input" type="checkbox" id="terms" name="terms" required>
         <label class="form-check-label" for="terms">
-            By creating an account means you agree to the <a href="#">Terms & Conditions</a> and our <a href="#">Privacy Policy</a>
+            By creating an account means you agree to the <a href="{% url 'students:terms_of_service' %}" target="_blank" rel="noopener">Terms & Conditions</a> and our <a href="{% url 'students:privacy_policy' %}" target="_blank" rel="noopener">Privacy Policy</a>
         </label>
     </div>
     {% if form.terms.errors %}<p class="field-error" style="margin-top: -1rem; margin-bottom: 1rem;">{{ form.terms.errors.0 }}</p>{% endif %}
