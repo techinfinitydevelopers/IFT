@@ -161,6 +161,7 @@
                     <a class="nav-dropdown-item" href="{% url 'admins:schools_list' %}"><span class="material-symbols-outlined">apartment</span><span class="nav-text">Schools</span></a>
                     <a class="nav-dropdown-item" href="{% url 'admins:onboard_evaluator' %}"><span class="material-symbols-outlined">person_add</span><span class="nav-text">Onboard Evaluator</span></a>
                     <a class="nav-dropdown-item" href="{% url 'admins:evaluators_list' %}"><span class="material-symbols-outlined">groups</span><span class="nav-text">Evaluators</span></a>
+                    {% if bulk_student_upload_enabled %}<a class="nav-dropdown-item {% if request.resolver_match.url_name == 'bulk_upload_students' %}active{% endif %}" href="{% url 'admins:bulk_upload_students' %}"><span class="material-symbols-outlined">upload_file</span><span class="nav-text">Bulk Upload Students</span></a>{% endif %}
                 </div>
             </div>
             <a class="nav-item" href="{% url 'admins:evaluator_management' %}"><span class="material-symbols-outlined">supervisor_account</span><span class="nav-text">Evaluator Management</span></a>

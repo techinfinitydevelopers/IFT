@@ -95,6 +95,7 @@ TEMPLATES = [
                 'accounts.context_processors.launch_confetti',
                 'accounts.context_processors.unread_notification_count',
                 'accounts.context_processors.vapid_public_key',
+                'accounts.context_processors.bulk_upload_flag',
             ],
         },
     },

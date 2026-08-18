@@ -4,6 +4,22 @@ def vapid_public_key(request):
     return {'vapid_public_key': getattr(settings, 'VAPID_PUBLIC_KEY', '')}
 
 
+def bulk_upload_flag(request):
+    """Show the bulk-student-upload sidebar nav item only when the feature flag
+    is on AND the user is super-admin/staff — never for viewer/tce/students
+    (mirrors admins.views.is_bulk_admin, which gates the actual pages)."""
+    from django.conf import settings
+    show = False
+    if getattr(settings, 'BULK_STUDENT_UPLOAD_ENABLED', False):
+        user = getattr(request, 'user', None)
+        if user is not None and getattr(user, 'is_authenticated', False):
+            profile = getattr(user, 'profile', None)
+            role = getattr(profile, 'role', None) if profile is not None else None
+            if role not in ('viewer', 'tce') and (user.is_staff or user.is_superuser):
+                show = True
+    return {'bulk_student_upload_enabled': show}
+
+
 def launch_confetti(request):
     """Show launch-day celebratory confetti from 29 Jul 2026 11:00 AM IST onwards.
 

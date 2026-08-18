@@ -338,6 +338,12 @@
                         <span class="material-symbols-outlined">groups</span>
                         <span class="nav-text">Evaluators</span>
                     </a>
+                    {% if bulk_student_upload_enabled %}
+                    <a class="nav-dropdown-item {% if request.resolver_match.url_name == 'bulk_upload_students' %}active{% endif %}" href="{% url 'admins:bulk_upload_students' %}">
+                        <span class="material-symbols-outlined">upload_file</span>
+                        <span class="nav-text">Bulk Upload Students</span>
+                    </a>
+                    {% endif %}
                 </div>
             </div>
 
