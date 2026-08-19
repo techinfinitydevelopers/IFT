@@ -78,7 +78,15 @@ def sign_in(request):
 
 def sign_up(request):
     if request.user.is_authenticated:
-        return redirect('accounts:role_redirect')
+        # A logged-in student/school opening the public sign-up (e.g. a school
+        # coordinator registering several students back-to-back) should get a
+        # fresh registration form — not be bounced to the previous student's
+        # payment page. Log them out first. Admin-level sessions are left alone.
+        _p = getattr(request.user, 'profile', None)
+        _role = getattr(_p, 'role', None) if _p is not None else None
+        if request.user.is_staff or request.user.is_superuser or _role in ('viewer', 'tce'):
+            return redirect('accounts:role_redirect')
+        logout(request)
 
     show_school_not_registered = False
     duplicate_message = None
@@ -197,7 +205,14 @@ def role_redirect(request):
 
 def school_sign_up(request):
     if request.user.is_authenticated:
-        return redirect('accounts:role_redirect')
+        # Same as sign_up: log out a logged-in student/school so a fresh school
+        # registration form is shown instead of bouncing to a dashboard/payment.
+        # Admin-level sessions are left alone.
+        _p = getattr(request.user, 'profile', None)
+        _role = getattr(_p, 'role', None) if _p is not None else None
+        if request.user.is_staff or request.user.is_superuser or _role in ('viewer', 'tce'):
+            return redirect('accounts:role_redirect')
+        logout(request)
 
     if request.method == 'POST':
         form = SchoolSignUpForm(request.POST)
