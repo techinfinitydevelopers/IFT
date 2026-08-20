@@ -322,6 +322,12 @@
                                     </div>
                                     <div class="divider-custom"></div>
                                     <div class="w-100 d-flex flex-column gap-3">
+                                        {% if team.is_full %}
+                                        <div class="text-center" style="padding:6px 0;">
+                                            <span class="material-symbols-outlined" style="font-size:38px; color:#16a34a;">check_circle</span>
+                                            <p class="mb-0 mt-2" style="font-size:0.95rem; font-weight:700; color:var(--text-dark);">Your team is now complete!</p>
+                                        </div>
+                                        {% else %}
                                         <label class="text-uppercase fw-bold text-start" style="font-size:0.75rem; letter-spacing:0.05em; color:var(--text-muted);">Group Code</label>
                                         <div class="group-code-box d-flex align-items-center gap-2">
                                             <span class="flex-grow-1 group-code-text" id="teamCodeValue" style="color:var(--text-dark);">{{ team.team_code }}</span>
@@ -333,6 +339,7 @@
                                             </button>
                                         </div>
                                         <p class="text-start mb-0" style="font-size:0.75rem; color:var(--text-muted);">Share this code to invite your teammate (Maximum 2 members, including the Team Leader)</p>
+                                        {% endif %}
                                     </div>
                                 </div>
 
@@ -385,19 +392,6 @@
                                         </div>
                                         <div class="d-flex align-items-center gap-2 ms-sm-auto">
                                             <span class="status-badge status-badge-pending">Pending</span>
-                                            {% if is_leader %}
-                                            <div class="position-relative">
-                                                <button class="remove-member-btn" onclick="toggleMenu(this)" title="More options">
-                                                    <span class="material-symbols-outlined" style="font-size:20px;">more_vert</span>
-                                                </button>
-                                                <div class="dropdown-menu-custom" style="display:none; position:absolute; right:0; top:100%; background:white; border-radius:8px; box-shadow:0 4px 16px rgba(0,0,0,0.15); padding:4px; min-width:160px; z-index:100;">
-                                                    <button onclick="removeMember({{ membership.id }}, '{{ membership.email|escapejs }}')" style="display:flex; align-items:center; gap:8px; width:100%; padding:8px 12px; border:none; background:none; border-radius:6px; cursor:pointer; font-family:'Poppins',sans-serif; font-size:0.8125rem; color:#ef4444; font-weight:500;" onmouseover="this.style.background='rgba(239,68,68,0.06)'" onmouseout="this.style.background='none'">
-                                                        <span class="material-symbols-outlined" style="font-size:18px;">person_remove</span>
-                                                        Remove Member
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            {% endif %}
                                         </div>
                                         {% else %}
                                         <!-- Active member -->
@@ -424,11 +418,6 @@
                                         </div>
                                         <div class="d-flex align-items-center gap-3 ms-sm-auto">
                                             <span class="status-badge status-badge-active">Active</span>
-                                            {% if is_leader and membership.role != 'leader' %}
-                                            <button class="remove-member-btn" onclick="removeMember({{ membership.id }}, '{{ membership.student.user.get_full_name|escapejs }}')" title="Remove member">
-                                                <span class="material-symbols-outlined" style="font-size:20px;">person_remove</span>
-                                            </button>
-                                            {% endif %}
                                         </div>
                                         {% endif %}
                                     </div>

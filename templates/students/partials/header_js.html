@@ -25,12 +25,31 @@ if (_helpBtn) _helpBtn.addEventListener('click', function(e) {
     if (!isOpen) dd.classList.add('show');
 });
 
+function _getCookie(name) {
+    const m = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+    return m ? m.pop() : '';
+}
+function _markNotificationsRead() {
+    fetch("{% url 'students:mark_all_read' %}", {
+        method: 'POST',
+        headers: {'X-CSRFToken': _getCookie('csrftoken')}
+    }).then(function() {
+        // Clear the red badge on the bell + dropdown title immediately.
+        document.querySelectorAll('.notif-badge-dot').forEach(function(el){ el.remove(); });
+    }).catch(function(){});
+}
+
 if (_notifBtn) _notifBtn.addEventListener('click', function(e) {
     e.stopPropagation();
     const dd = document.getElementById('notifDropdown');
     const isOpen = dd.classList.contains('show');
     closeAllDropdowns();
-    if (!isOpen) dd.classList.add('show');
+    if (!isOpen) {
+        dd.classList.add('show');
+        // Opening the notifications marks them read (clears the badge) — no need
+        // to open each one and mark it manually.
+        if (document.querySelector('.notif-badge-dot')) _markNotificationsRead();
+    }
 });
 
 if (_fullscreenBtn) _fullscreenBtn.addEventListener('click', function() {

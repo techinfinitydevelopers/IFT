@@ -660,6 +660,10 @@
                 <span class="material-symbols-outlined">dashboard</span>
                 <span class="nav-text">Dashboard</span>
             </a>
+            <a class="nav-item" href="{% url 'students:school_digital_resources' %}">
+                <span class="material-symbols-outlined">folder_zip</span>
+                <span class="nav-text">Marketing Collaterals</span>
+            </a>
             <a class="nav-item" href="{% url 'students:school_students' %}">
                 <span class="material-symbols-outlined">school</span>
                 <span class="nav-text">Students</span>
@@ -683,10 +687,6 @@
             <a class="nav-item" href="{% url 'students:school_learning_resources' %}">
                 <span class="material-symbols-outlined">play_circle</span>
                 <span class="nav-text">Learning Resources</span>
-            </a>
-            <a class="nav-item" href="{% url 'students:school_digital_resources' %}">
-                <span class="material-symbols-outlined">folder_zip</span>
-                <span class="nav-text">Marketing Collaterals</span>
             </a>
             <a class="nav-item" href="{% url 'students:my_highlights' %}">
                 <span class="material-symbols-outlined">auto_awesome</span>
@@ -1037,6 +1037,107 @@
                 </div>
             </div>
 
+            <!-- Upcoming Training Calendar + Announcements/Recent Activity -->
+            <div class="row g-4 mb-4">
+                <!-- Upcoming Training Calendar (main, left) -->
+                <div class="col-12 col-lg-8">
+                    <div class="section-card" style="height:auto;">
+                        <div class="section-header">
+                            <h3 class="section-title">Upcoming Training Calendar</h3>
+                            <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">Every Friday</span>
+                        </div>
+                        {% if training_sessions %}
+                        <div class="row g-3">
+                            {% for t in training_sessions %}
+                            <div class="col-12 col-sm-6">
+                                <div style="display:flex; align-items:center; gap:14px; border:1px solid var(--border-light); border-radius:12px; padding:16px; height:100%;">
+                                    <div style="width:56px; height:56px; border-radius:10px; background:rgba(94,42,151,0.08); display:flex; flex-direction:column; align-items:center; justify-content:center; flex-shrink:0;">
+                                        <span style="font-size:1.25rem; font-weight:800; color:var(--primary); line-height:1;">{{ t.date|date:"d" }}</span>
+                                        <span style="font-size:0.6rem; font-weight:700; color:var(--primary); text-transform:uppercase;">{{ t.date|date:"M" }}</span>
+                                    </div>
+                                    <div style="flex:1; min-width:0;">
+                                        <p style="font-size:0.85rem; font-weight:700; color:var(--text-dark); margin:0; line-height:1.3;">{{ t.title }}</p>
+                                        <p style="font-size:0.72rem; color:var(--text-muted); margin:4px 0 0;">
+                                            {{ t.date|date:"l" }} &middot; {{ t.time }}
+                                            <span style="color:#2563eb; font-weight:700;">&middot; <span class="material-symbols-outlined" style="font-size:12px; vertical-align:-2px;">videocam</span> {{ t.mode }}</span>
+                                        </p>
+                                        {% if t.link %}<a href="{{ t.link }}" target="_blank" style="font-size:0.72rem; color:var(--primary); font-weight:600; text-decoration:none; display:inline-flex; align-items:center; gap:2px; margin-top:4px;"><span class="material-symbols-outlined" style="font-size:14px;">link</span> Join Link</a>{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div style="text-align:center; padding:40px 0; color:var(--text-muted);">
+                            <span class="material-symbols-outlined" style="font-size:48px; opacity:0.3;">event</span>
+                            <p style="margin-top:8px; font-size:0.875rem;">No upcoming training sessions</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Announcements + Recent Activity (right) -->
+                <div class="col-12 col-lg-4">
+                    <div class="section-card" style="height:auto;">
+                        <div class="section-header">
+                            <h3 class="section-title">Announcements</h3>
+                        </div>
+                        {% if announcements %}
+                        {% for ann in announcements %}
+                        <a href="{% url 'students:school_announcement_detail' ann.id %}" class="ann-item" style="display:block; text-decoration:none; color:inherit; cursor:pointer;">
+                            <div style="display:flex; align-items:flex-start; gap:12px;">
+                                <div style="width:32px; height:32px; border-radius:50%; background:rgba(94,42,151,0.1); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                    <span class="material-symbols-outlined" style="font-size:16px; color:var(--primary);">campaign</span>
+                                </div>
+                                <div style="flex:1;">
+                                    <p style="font-weight:600; font-size:0.8125rem; margin:0 0 2px;">{{ ann.title }}</p>
+                                    {% if ann.subtitle %}<p style="font-size:0.75rem; color:var(--text-muted); margin:0 0 4px;">{{ ann.subtitle }}</p>{% endif %}
+                                    <p style="font-size:0.625rem; color:#94a3b8; margin:0;">{{ ann.created_at|timesince }} ago</p>
+                                </div>
+                                <span class="material-symbols-outlined" style="font-size:18px; color:#cbb8e6; align-self:center;">chevron_right</span>
+                            </div>
+                        </a>
+                        {% endfor %}
+                        {% else %}
+                        <div style="text-align:center; padding:40px 0; color:var(--text-muted);">
+                            <span class="material-symbols-outlined" style="font-size:48px; opacity:0.3;">campaign</span>
+                            <p style="margin-top:8px; font-size:0.875rem;">No announcements</p>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="section-card" style="height:auto; margin-top:1.5rem;">
+                        <div class="section-header">
+                            <h3 class="section-title">Recent Activity</h3>
+                        </div>
+                        {% if recent %}
+                        <div style="display:flex; flex-direction:column;">
+                            {% for sub in recent %}
+                            <div class="feed-item">
+                                <div class="feed-icon {% if sub.status == 'submitted' %}feed-icon-success{% elif sub.status == 'evaluated' %}feed-icon-blue{% elif sub.status == 'draft' %}feed-icon-warning{% else %}feed-icon-info{% endif %}">
+                                    <span class="material-symbols-outlined">
+                                        {% if sub.status == 'submitted' %}check_circle{% elif sub.status == 'evaluated' %}smart_toy{% elif sub.status == 'draft' %}edit_note{% else %}assignment{% endif %}
+                                    </span>
+                                </div>
+                                <div>
+                                    <p class="feed-title">{{ sub.student.user.get_full_name }} - {{ sub.title|default:"Untitled"|truncatechars:30 }}</p>
+                                    <p class="feed-meta">Status: {{ sub.get_status_display }}</p>
+                                    <p class="feed-meta" style="margin-top:2px; color:#94a3b8;">{{ sub.created_at|timesince }} ago</p>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div style="text-align:center; padding:40px 0; color:var(--text-muted);">
+                            <span class="material-symbols-outlined" style="font-size:48px; opacity:0.3;">history</span>
+                            <p style="margin-top:8px; font-size:0.875rem;">No recent activity</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
             <!-- Payment Status + Live Status Funnel -->
             <div class="row g-4 mb-4">
                 <div class="col-12 col-lg-7">
@@ -1163,107 +1264,6 @@
                         <div style="text-align:center;padding:40px 0;color:var(--text-muted);">
                             <span class="material-symbols-outlined" style="font-size:48px;opacity:0.3;">groups</span>
                             <p style="margin-top:8px;font-size:0.875rem;">No students enrolled yet</p>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-
-            <!-- Upcoming Training Calendar + Announcements/Recent Activity -->
-            <div class="row g-4 mb-4">
-                <!-- Upcoming Training Calendar (main, left) -->
-                <div class="col-12 col-lg-8">
-                    <div class="section-card" style="height:auto;">
-                        <div class="section-header">
-                            <h3 class="section-title">Upcoming Training Calendar</h3>
-                            <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">Every Friday</span>
-                        </div>
-                        {% if training_sessions %}
-                        <div class="row g-3">
-                            {% for t in training_sessions %}
-                            <div class="col-12 col-sm-6">
-                                <div style="display:flex; align-items:center; gap:14px; border:1px solid var(--border-light); border-radius:12px; padding:16px; height:100%;">
-                                    <div style="width:56px; height:56px; border-radius:10px; background:rgba(94,42,151,0.08); display:flex; flex-direction:column; align-items:center; justify-content:center; flex-shrink:0;">
-                                        <span style="font-size:1.25rem; font-weight:800; color:var(--primary); line-height:1;">{{ t.date|date:"d" }}</span>
-                                        <span style="font-size:0.6rem; font-weight:700; color:var(--primary); text-transform:uppercase;">{{ t.date|date:"M" }}</span>
-                                    </div>
-                                    <div style="flex:1; min-width:0;">
-                                        <p style="font-size:0.85rem; font-weight:700; color:var(--text-dark); margin:0; line-height:1.3;">{{ t.title }}</p>
-                                        <p style="font-size:0.72rem; color:var(--text-muted); margin:4px 0 0;">
-                                            {{ t.date|date:"l" }} &middot; {{ t.time }}
-                                            <span style="color:#2563eb; font-weight:700;">&middot; <span class="material-symbols-outlined" style="font-size:12px; vertical-align:-2px;">videocam</span> {{ t.mode }}</span>
-                                        </p>
-                                        {% if t.link %}<a href="{{ t.link }}" target="_blank" style="font-size:0.72rem; color:var(--primary); font-weight:600; text-decoration:none; display:inline-flex; align-items:center; gap:2px; margin-top:4px;"><span class="material-symbols-outlined" style="font-size:14px;">link</span> Join Link</a>{% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                        {% else %}
-                        <div style="text-align:center; padding:40px 0; color:var(--text-muted);">
-                            <span class="material-symbols-outlined" style="font-size:48px; opacity:0.3;">event</span>
-                            <p style="margin-top:8px; font-size:0.875rem;">No upcoming training sessions</p>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <!-- Announcements + Recent Activity (right) -->
-                <div class="col-12 col-lg-4">
-                    <div class="section-card" style="height:auto;">
-                        <div class="section-header">
-                            <h3 class="section-title">Announcements</h3>
-                        </div>
-                        {% if announcements %}
-                        {% for ann in announcements %}
-                        <a href="{% url 'students:school_announcement_detail' ann.id %}" class="ann-item" style="display:block; text-decoration:none; color:inherit; cursor:pointer;">
-                            <div style="display:flex; align-items:flex-start; gap:12px;">
-                                <div style="width:32px; height:32px; border-radius:50%; background:rgba(94,42,151,0.1); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                                    <span class="material-symbols-outlined" style="font-size:16px; color:var(--primary);">campaign</span>
-                                </div>
-                                <div style="flex:1;">
-                                    <p style="font-weight:600; font-size:0.8125rem; margin:0 0 2px;">{{ ann.title }}</p>
-                                    {% if ann.subtitle %}<p style="font-size:0.75rem; color:var(--text-muted); margin:0 0 4px;">{{ ann.subtitle }}</p>{% endif %}
-                                    <p style="font-size:0.625rem; color:#94a3b8; margin:0;">{{ ann.created_at|timesince }} ago</p>
-                                </div>
-                                <span class="material-symbols-outlined" style="font-size:18px; color:#cbb8e6; align-self:center;">chevron_right</span>
-                            </div>
-                        </a>
-                        {% endfor %}
-                        {% else %}
-                        <div style="text-align:center; padding:40px 0; color:var(--text-muted);">
-                            <span class="material-symbols-outlined" style="font-size:48px; opacity:0.3;">campaign</span>
-                            <p style="margin-top:8px; font-size:0.875rem;">No announcements</p>
-                        </div>
-                        {% endif %}
-                    </div>
-
-                    <!-- Recent Activity -->
-                    <div class="section-card" style="height:auto; margin-top:1.5rem;">
-                        <div class="section-header">
-                            <h3 class="section-title">Recent Activity</h3>
-                        </div>
-                        {% if recent %}
-                        <div style="display:flex; flex-direction:column;">
-                            {% for sub in recent %}
-                            <div class="feed-item">
-                                <div class="feed-icon {% if sub.status == 'submitted' %}feed-icon-success{% elif sub.status == 'evaluated' %}feed-icon-blue{% elif sub.status == 'draft' %}feed-icon-warning{% else %}feed-icon-info{% endif %}">
-                                    <span class="material-symbols-outlined">
-                                        {% if sub.status == 'submitted' %}check_circle{% elif sub.status == 'evaluated' %}smart_toy{% elif sub.status == 'draft' %}edit_note{% else %}assignment{% endif %}
-                                    </span>
-                                </div>
-                                <div>
-                                    <p class="feed-title">{{ sub.student.user.get_full_name }} - {{ sub.title|default:"Untitled"|truncatechars:30 }}</p>
-                                    <p class="feed-meta">Status: {{ sub.get_status_display }}</p>
-                                    <p class="feed-meta" style="margin-top:2px; color:#94a3b8;">{{ sub.created_at|timesince }} ago</p>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                        {% else %}
-                        <div style="text-align:center; padding:40px 0; color:var(--text-muted);">
-                            <span class="material-symbols-outlined" style="font-size:48px; opacity:0.3;">history</span>
-                            <p style="margin-top:8px; font-size:0.875rem;">No recent activity</p>
                         </div>
                         {% endif %}
                     </div>
@@ -1533,7 +1533,7 @@
                 <span class="material-symbols-outlined" style="font-size:34px; color:#5E2A97;">smart_display</span>
             </div>
             <h3 style="font-size:1.25rem; font-weight:700; color:#1a1f2e; margin:0 0 10px;">Get Ready for Your Teacher Mentoring Session</h3>
-            <p style="font-size:0.9rem; color:#555; line-height:1.6; margin:0 0 22px;">Complete all the learning videos before attending any of the Friday Teacher Mentoring Sessions. This will help you participate confidently in discussions, activities, and Q&amp;A.</p>
+            <p style="font-size:0.9rem; color:#555; line-height:1.6; margin:0 0 22px;">Before you attend our weekly Teacher Mentoring Sessions watch all learning videos. This will help you participate confidently in discussions, activities &amp; Q&amp;As.</p>
             <a href="{% url 'students:school_learning_resources' %}" style="display:inline-flex; align-items:center; gap:8px; background:#5E2A97; color:#fff; text-decoration:none; padding:12px 26px; border-radius:12px; font-weight:600; font-size:0.92rem;">
                 <span class="material-symbols-outlined" style="font-size:20px;">play_circle</span> Start Watching
             </a>

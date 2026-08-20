@@ -79,13 +79,13 @@
         <nav class="flex-grow-1 px-3 d-flex flex-column gap-2 mt-3" style="overflow-y:auto;">
             {% if user_role == 'school' %}
             <a class="nav-item" href="{% url 'students:school_dashboard' %}"><span class="material-symbols-outlined">dashboard</span><span class="nav-text">Dashboard</span></a>
+            <a class="nav-item" href="{% url 'students:school_digital_resources' %}"><span class="material-symbols-outlined">folder_zip</span><span class="nav-text">Marketing Collaterals</span></a>
             <a class="nav-item" href="{% url 'students:school_students' %}"><span class="material-symbols-outlined">school</span><span class="nav-text">Students</span></a>
             <a class="nav-item" href="{% url 'students:school_teams' %}"><span class="material-symbols-outlined">groups</span><span class="nav-text">Submissions</span></a>
             <a class="nav-item" href="{% url 'students:school_results' %}"><span class="material-symbols-outlined">leaderboard</span><span class="nav-text">Results</span></a>
             <a class="nav-item" href="{% url 'students:school_halloffame' %}"><span class="material-symbols-outlined">emoji_events</span><span class="nav-text">Hall of Fame</span></a>
             <a class="nav-item" href="{% url 'students:school_reports' %}"><span class="material-symbols-outlined">analytics</span><span class="nav-text">Reports</span></a>
             <a class="nav-item" href="{% url 'students:school_learning_resources' %}"><span class="material-symbols-outlined">play_circle</span><span class="nav-text">Learning Resources</span></a>
-            <a class="nav-item" href="{% url 'students:school_digital_resources' %}"><span class="material-symbols-outlined">folder_zip</span><span class="nav-text">Marketing Collaterals</span></a>
             <a class="nav-item" href="{% url 'students:my_highlights' %}"><span class="material-symbols-outlined">auto_awesome</span><span class="nav-text">IFTx Highlights</span></a>
             <a class="nav-item" href="{% url 'students:school_faq' %}"><span class="material-symbols-outlined">help</span><span class="nav-text">FAQ</span></a>
             <a class="nav-item nav-item-active" href="{% url 'students:my_tickets' %}"><span class="material-symbols-outlined">support_agent</span><span class="nav-text">Help</span></a>

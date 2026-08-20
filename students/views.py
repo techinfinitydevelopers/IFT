@@ -2029,9 +2029,12 @@ def notifications_page(request):
     from accounts.context_processors import _visibility_for_role
     role = getattr(getattr(request.user, 'profile', None), 'role', 'student')
     vis = _visibility_for_role(role)
-    content_qs = Content.objects.filter(
-        status='published', visibility__in=vis
-    ).order_by('-created_at')[:20]
+    content_qs = Content.objects.filter(status='published', visibility__in=vis)
+    # Don't show announcements posted before the user registered (match the bell dropdown).
+    joined = getattr(request.user, 'date_joined', None)
+    if joined:
+        content_qs = content_qs.filter(created_at__gte=joined)
+    content_qs = content_qs.order_by('-created_at')[:20]
 
     combined = []
     for n in notifications[:50]:
@@ -2052,6 +2055,15 @@ def notifications_page(request):
         'submission_count': notifications.filter(notification_type='submission').count(),
         'announcement_count': notifications.filter(notification_type='announcement').count() + announcement_content_count,
     }
+    # Viewing the notifications page clears the bell badge — mark personal
+    # notifications read + snapshot the announcements-read time, so the user
+    # doesn't have to mark each one manually.
+    Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
+    _p = getattr(request.user, 'profile', None)
+    if _p is not None:
+        _p.announcements_read_at = timezone.now()
+        _p.save(update_fields=['announcements_read_at'])
+
     # Role-aware chrome: school users get the school-styled notifications page
     # (student template has the student sidebar/profile, which 500s for schools).
     if getattr(getattr(request.user, 'profile', None), 'role', '') == 'school':

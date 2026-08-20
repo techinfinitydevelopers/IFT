@@ -105,9 +105,12 @@ def student_has_submission(request):
         try:
             profile = request.user.profile
             if profile.role == 'student':
-                from students.models import IdeaSubmission
-                has_sub = IdeaSubmission.objects.filter(student=request.user.student_profile).exists()
-                return {'student_has_submission': has_sub}
+                from students.models import IdeaSubmission, TeamMembership
+                student = request.user.student_profile
+                has_sub = IdeaSubmission.objects.filter(student=student).exists()
+                membership = TeamMembership.objects.filter(student=student).first()
+                is_member = bool(membership and membership.role != 'leader')
+                return {'student_has_submission': has_sub, 'student_is_team_member': is_member}
         except Exception:
             pass
-    return {'student_has_submission': False}
+    return {'student_has_submission': False, 'student_is_team_member': False}

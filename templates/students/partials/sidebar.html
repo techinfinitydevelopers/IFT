@@ -21,7 +21,7 @@
         {% if not student_has_submission %}
         <a class="nav-item {% if active_page == 'submit' %}nav-item-active{% endif %}" href="{% url 'students:submit_idea' %}">
             <span class="material-symbols-outlined" {% if active_page == 'submit' %}style="font-variation-settings: 'FILL' 1;"{% endif %}>lightbulb</span>
-            <span class="nav-text">Idea Submission</span>
+            <span class="nav-text">{% if student_is_team_member %}My Idea{% else %}Idea Submission{% endif %}</span>
         </a>
         {% endif %}
         <a class="nav-item {% if active_page == 'resources' %}nav-item-active{% endif %}" href="{% url 'students:learning_resources' %}">

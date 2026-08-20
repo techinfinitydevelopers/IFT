@@ -1,20 +1,18 @@
 {% extends "accounts/email_onboard_base.html" %}
-{% block greeting %}Congratulations!{% endblock %}
-{% block intro %}You have successfully registered for IFT.<br><br>You are just a few steps away from the thrilling IFT experience!{% endblock %}
+{% block greeting %}Hi{% if user.first_name %} {{ user.first_name }}{% endif %},{% endblock %}
+{% block intro %}You're almost there! Complete your payment to unlock the IFT platform and start building, learning, and submitting your idea.{% endblock %}
 {% block credentials %}{% endblock %}
-{% block content %}
+{% block content %}{% endblock %}
+{% block button %}
 <tr>
-  <td style="padding:4px 32px 0 32px;">
-    <p style="margin:0 0 8px 0; font-size:14px; color:#1e1b2e;"><strong>Step 1:</strong> Complete your payment</p>
-    <p style="margin:0 0 8px 0; font-size:14px; color:#1e1b2e;"><strong>Step 2:</strong> Be a Solo-preneur or invite a friend.</p>
-    <p style="margin:0 0 8px 0; font-size:14px; color:#1e1b2e;"><strong>Step 3:</strong> Start your learning journey.</p>
-    <p style="margin:0 0 16px 0; font-size:14px; color:#1e1b2e;"><strong>Step 4:</strong> Start building your idea</p>
-    <p style="margin:0 0 14px 0; font-size:14px; color:#6b6577;">Complete these steps to be a part of India's First-ever Entrepreneurship Search &amp; Mentorship Program.</p>
-    <p style="margin:0 0 16px 0; font-size:14px; color:#6b6577;">We are here to guide you every step of the way!</p>
-    <p style="margin:0; font-size:14px; font-weight:700; color:#1e1b2e;">Log In To Your Dashboard To Complete Payment Now!</p>
+  <td style="padding:24px 32px 6px 32px;" align="center">
+    <a href="https://www.indiafuturetycoons.com/payment/" style="display:inline-block; background-color:#F5C542; color:#2A1245; text-decoration:none; font-weight:700; font-size:14px; padding:12px 30px; border-radius:24px;">Complete Payment &amp; Start Your Journey</a>
+  </td>
+</tr>
+<tr>
+  <td style="padding:8px 32px 8px 32px;" align="center">
+    <a href="https://www.indiafuturetycoons.com/accounts/sign-in/" style="display:inline-block; background-color:#ffffff; color:#5E2A97; text-decoration:none; font-weight:700; font-size:14px; padding:11px 34px; border-radius:24px; border:1px solid #5E2A97;">Log In</a>
   </td>
 </tr>
 {% endblock %}
-{% block button_href %}https://www.indiafuturetycoons.com/accounts/sign-in/{% endblock %}
-{% block button_label %}Log In{% endblock %}
 {% block security_note %}{% endblock %}
