@@ -3062,7 +3062,7 @@ def school_digital_resources(request):
     except School.DoesNotExist:
         return redirect('students:dashboard')
 
-    resources = DigitalResource.objects.filter(is_active=True, visibility__in=['all', 'schools']).order_by('category', '-created_at')
+    resources = DigitalResource.objects.filter(is_active=True, visibility__in=['all', 'schools']).order_by('order', '-created_at')
     return render(request, 'students/school_digital_resources.html', {'school': school, 'resources': resources})
 
 

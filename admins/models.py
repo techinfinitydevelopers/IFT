@@ -280,9 +280,11 @@ class DigitalResource(models.Model):
     is_active = models.BooleanField(default=True)
     uploaded_by = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name='uploaded_resources')
     created_at = models.DateTimeField(auto_now_add=True)
+    # Manual display order on the school Marketing Collaterals page (lower first).
+    order = models.IntegerField(default=0)
 
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['order', '-created_at']
 
     def __str__(self):
         return f"[{self.get_category_display()}] {self.title}"
