@@ -60,6 +60,26 @@ class Student(models.Model):
         ordering = ['-created_at']
 
 
+# The 6-step "IFT School Activation Journey" checklist shown on the school
+# dashboard (schools tick each step) and surfaced per-school to the super-admin.
+# Text is kept verbatim from the client's activation infographic.
+SCHOOL_ACTIVATION_STEPS = [
+    {'key': 'step1', 'title': 'Popularise IFT In Your School',
+     'desc': 'Use the posters, creatives, videos, and other marketing resources to promote IFT and encourage student registrations.'},
+    {'key': 'step2', 'title': 'Drive Student Registrations',
+     'desc': 'Track registrations and ensure all students complete payment to activate their IFT access.'},
+    {'key': 'step3', 'title': 'Get Your Teacher Trained As IFT Mentor',
+     'desc': 'Encourage students to complete the prescribed learning videos and track progress on the dashboard.'},
+    {'key': 'step4', 'title': 'Encourage Students To Go Through Learning Tutorials',
+     'desc': 'Assigned IFT Teachers attend a Friday training session and implement the learning with students.'},
+    {'key': 'step5', 'title': 'Mentor Student Ideas And Drive Idea Submissions',
+     'desc': 'Conduct a school ideation workshop to help students turn their learning into innovative ideas.'},
+    {'key': 'step6', 'title': 'IFTx At Your School',
+     'desc': 'Give students a platform to present their ideas through a school-level IFTx showcase. Upload event photos, videos and a short summary on your School Dashboard.'},
+]
+SCHOOL_ACTIVATION_STEP_KEYS = [s['key'] for s in SCHOOL_ACTIVATION_STEPS]
+
+
 class School(models.Model):
     """School information model"""
     BOARD_CHOICES = [
@@ -110,9 +130,23 @@ class School(models.Model):
     google_place_id = models.CharField(max_length=255, unique=True, null=True, blank=True,
                                         help_text='Google Places place_id — source of truth to prevent duplicate school registrations.')
     created_at = models.DateTimeField(auto_now_add=True)
+    # {'step1': True, 'step2': False, ...} — which activation-journey steps the
+    # school has ticked. Manual: the school checks/unchecks each step itself.
+    activation_checklist = models.JSONField(default=dict, blank=True)
 
     def __str__(self):
         return self.name
+
+    @property
+    def activation_steps(self):
+        """List of the 6 activation steps with each step's done state."""
+        data = self.activation_checklist or {}
+        return [{**s, 'done': bool(data.get(s['key']))} for s in SCHOOL_ACTIVATION_STEPS]
+
+    @property
+    def activation_done_count(self):
+        data = self.activation_checklist or {}
+        return sum(1 for k in SCHOOL_ACTIVATION_STEP_KEYS if data.get(k))
 
     class Meta:
         ordering = ['name']

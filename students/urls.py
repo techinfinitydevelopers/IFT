@@ -46,6 +46,7 @@ urlpatterns = [
     path('digital-resources/', views.digital_resources, name='digital_resources'),
     path('code-ai/', views.code_ai, name='code_ai'),
     path('school/dashboard/', views.school_dashboard, name='school_dashboard'),
+    path('school/activation-checklist/toggle/', views.school_activation_toggle, name='school_activation_toggle'),
     path('school/students/', views.school_students, name='school_students'),
     path('school/teams/', views.school_teams, name='school_teams'),
     path('school/submissions/', views.school_submissions, name='school_submissions'),

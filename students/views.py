@@ -2101,6 +2101,36 @@ def mark_all_notifications_read(request):
 
 
 @login_required
+def school_activation_toggle(request):
+    """School ticks/unticks one step of the IFT Activation Journey checklist (AJAX)."""
+    from students.models import School, SCHOOL_ACTIVATION_STEP_KEYS
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'POST only'}, status=405)
+    try:
+        school = request.user.school_profile
+    except School.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Schools only.'}, status=403)
+    import json as _json
+    try:
+        data = _json.loads(request.body.decode('utf-8'))
+    except Exception:
+        data = request.POST
+    step = (data.get('step') or '').strip()
+    done = data.get('done')
+    if isinstance(done, str):
+        done = done.lower() == 'true'
+    if step not in SCHOOL_ACTIVATION_STEP_KEYS:
+        return JsonResponse({'success': False, 'message': 'Invalid step.'}, status=400)
+    checklist = dict(school.activation_checklist or {})
+    checklist[step] = bool(done)
+    school.activation_checklist = checklist
+    school.save(update_fields=['activation_checklist'])
+    done_count = sum(1 for k in SCHOOL_ACTIVATION_STEP_KEYS if checklist.get(k))
+    return JsonResponse({'success': True, 'done': bool(done),
+                         'done_count': done_count, 'total': len(SCHOOL_ACTIVATION_STEP_KEYS)})
+
+
+@login_required
 def school_teams(request):
     """School admin — Idea Submissions list (with team members column)."""
     from students.models import School, TeamMembership, IdeaSubmission

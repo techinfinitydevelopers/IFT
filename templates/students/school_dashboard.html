@@ -206,7 +206,7 @@
         .section-card {
             background: var(--surface-light); border-radius: 12px;
             padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.04);
-            border: 1px solid var(--border-light); margin-bottom: 24px; height: 100%;
+            border: 1px solid var(--border-light); height: 100%;
         }
         .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .section-title { font-size: 1rem; font-weight: 700; color: var(--text-dark); margin: 0; }
@@ -929,9 +929,55 @@
                 </div>
             </div>
 
+            <!-- IFT School Activation Journey checklist -->
+            <div class="row g-4 mb-4">
+                <div class="col-12">
+                    <div class="section-card" style="height:auto;">
+                        <div class="section-header">
+                            <h3 class="section-title">IFT School Activation Journey</h3>
+                            <span id="activationProgress" style="font-size:0.8rem; font-weight:700; color:var(--primary);">{{ school.activation_done_count }}/6 completed</span>
+                        </div>
+                        <p style="font-size:0.8rem; color:var(--text-muted); margin:0 0 14px;">A step-by-step framework to drive and build strong ideas. Tick each step as your school completes it.</p>
+                        <div class="d-flex flex-column gap-2">
+                            {% for step in school.activation_steps %}
+                            <label class="activation-item" style="display:flex; align-items:flex-start; gap:12px; border:1px solid var(--border-light); border-radius:12px; padding:14px 16px; cursor:pointer; transition:background 0.15s;" onmouseover="this.style.background='#faf8fd'" onmouseout="this.style.background='transparent'">
+                                <input type="checkbox" class="activation-check" data-step="{{ step.key }}" {% if step.done %}checked{% endif %} style="margin-top:2px; width:18px; height:18px; accent-color:#5E2A97; cursor:pointer; flex-shrink:0;">
+                                <span style="min-width:0;">
+                                    <span style="display:block; font-size:0.9rem; font-weight:700; color:var(--text-dark);">{{ forloop.counter }}. {{ step.title }}</span>
+                                    <span style="display:block; font-size:0.78rem; color:var(--text-muted); margin-top:2px; line-height:1.5;">{{ step.desc }}</span>
+                                </span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <script>
+            (function(){
+                function getCookie(n){var m=document.cookie.match('(^|;)\\s*'+n+'\\s*=\\s*([^;]+)');return m?m.pop():'';}
+                document.querySelectorAll('.activation-check').forEach(function(cb){
+                    cb.addEventListener('change', function(){
+                        var step=cb.getAttribute('data-step'), done=cb.checked;
+                        cb.disabled=true;
+                        fetch("{% url 'students:school_activation_toggle' %}",{
+                            method:'POST',
+                            headers:{'Content-Type':'application/json','X-CSRFToken':getCookie('csrftoken')},
+                            body:JSON.stringify({step:step,done:done})
+                        }).then(function(r){return r.json();}).then(function(d){
+                            cb.disabled=false;
+                            if(d && d.success){
+                                var p=document.getElementById('activationProgress');
+                                if(p) p.textContent=d.done_count+'/'+d.total+' completed';
+                            } else { cb.checked=!done; }
+                        }).catch(function(){ cb.disabled=false; cb.checked=!done; });
+                    });
+                });
+            })();
+            </script>
+
             <!-- Competition Progress -->
             {% if phases %}
-            <div class="section-card" style="height:auto;">
+            <div class="section-card mb-4" style="height:auto;">
                 <div class="section-header">
                     <h3 class="section-title">Competition Progress</h3>
                     <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">Season 6</span>
