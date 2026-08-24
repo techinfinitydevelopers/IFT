@@ -47,6 +47,8 @@ class Student(models.Model):
     razorpay_signature = models.CharField(max_length=255, blank=True)
     paid_at = models.DateTimeField(null=True, blank=True)
 
+    has_seen_welcome_popup = models.BooleanField(default=False)
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     @property
@@ -117,6 +119,8 @@ class School(models.Model):
     principal_email = models.EmailField(blank=True)
     designated_teacher_name = models.CharField(max_length=150, blank=True)
     designated_teacher_mobile = models.CharField(max_length=15, blank=True)
+    coordinator_name = models.CharField(max_length=150, blank=True)
+    coordinator_email = models.EmailField(blank=True)
     contact_email = models.EmailField(blank=True)
     contact_phone = models.CharField(max_length=15, blank=True)
     website = models.URLField(blank=True)

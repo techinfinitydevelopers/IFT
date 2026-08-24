@@ -247,6 +247,11 @@ def dashboard(request):
     if not student.is_paid:
         return redirect('students:initiate_payment')
 
+    show_welcome_popup = not student.has_seen_welcome_popup
+    if show_welcome_popup:
+        student.has_seen_welcome_popup = True
+        student.save(update_fields=['has_seen_welcome_popup'])
+
     from students.models import TeamMembership
 
     submissions = IdeaSubmission.objects.filter(student=student).order_by('-created_at')
@@ -303,6 +308,14 @@ def dashboard(request):
     except Exception:
         phases, active_phase = [], None
 
+    # Pending suggestions count (for leader) — same banner as my_idea.html
+    pending_suggestions_count = 0
+    if membership and team_role == 'leader' and latest_submission:
+        from students.models import IdeaSuggestion
+        pending_suggestions_count = IdeaSuggestion.objects.filter(
+            submission=latest_submission, status='pending'
+        ).count()
+
     # Recent activity from notifications
     from students.models import Notification
     recent_activity = Notification.objects.filter(user=request.user).order_by('-created_at')[:5]
@@ -355,6 +368,8 @@ def dashboard(request):
         'videos_total': len(video_list),
         'videos_watched': len([v for v in video_list if v['watched']]),
         'payment_amount': _get_payment_amount(student) if not student.is_paid else 0,
+        'show_welcome_popup': show_welcome_popup,
+        'pending_suggestions_count': pending_suggestions_count,
     }
     return render(request, 'students/dashboard_v2.html', context)
 
@@ -700,6 +715,9 @@ def school_dashboard(request):
         website = g('website')
         dt_name = g('designated_teacher_name')
         dt_mobile = g('designated_teacher_mobile')
+        coordinator_different = g('coordinator_different') in ('on', 'true', '1')
+        coordinator_name = g('coordinator_name')
+        coordinator_email = g('coordinator_email')
 
         # Normalise mobile: strip non-digits, drop +91 / leading 0
         m = re.sub(r'\D', '', dt_mobile)
@@ -748,6 +766,21 @@ def school_dashboard(request):
             errors['designated_teacher_mobile'] = 'Mobile number is required.'
         elif not re.fullmatch(r'[6-9]\d{9}', m):
             errors['designated_teacher_mobile'] = 'Enter a valid 10-digit Indian mobile number.'
+        if coordinator_different:
+            if not coordinator_name:
+                errors['coordinator_name'] = 'School coordinator name is required.'
+            elif not NAME_RE.fullmatch(coordinator_name):
+                errors['coordinator_name'] = 'Enter a valid name (letters, spaces, . - only).'
+            if not coordinator_email:
+                errors['coordinator_email'] = 'School coordinator email is required.'
+            else:
+                try:
+                    validate_email(coordinator_email)
+                except DjangoValidationError:
+                    errors['coordinator_email'] = 'Enter a valid email address.'
+        else:
+            coordinator_name = ''
+            coordinator_email = ''
         # --- Optional but validated if provided ---
         if school_type and school_type not in TYPES:
             errors['school_type'] = 'Invalid school type.'
@@ -803,6 +836,8 @@ def school_dashboard(request):
         school.website = website
         school.designated_teacher_name = dt_name
         school.designated_teacher_mobile = m
+        school.coordinator_name = coordinator_name
+        school.coordinator_email = coordinator_email
         school.status = 'active'
         school.is_active = True
         school.save()

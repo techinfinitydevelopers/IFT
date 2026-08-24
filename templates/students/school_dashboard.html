@@ -382,6 +382,7 @@
             display: flex; align-items: center; gap: 0.5rem; margin: 0 0 1.5rem 0;
         }
         .form-section-title .material-symbols-outlined { font-size: 1.5rem; color: var(--primary); }
+        .form-section-desc { font-size: 0.875rem; color: var(--text-muted); margin: -1rem 0 1.5rem 0; }
 
         .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
         .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
@@ -618,6 +619,7 @@
                         <span class="material-symbols-outlined">person_pin</span>
                         D. Designated Teacher
                     </h2>
+                    <p class="form-section-desc">Nominate a teacher to lead the IFT program in your school.</p>
                     <div class="form-grid">
                         <div class="form-group">
                             <label class="form-label">Designated Teacher Name <span class="required">*</span></label>
@@ -626,6 +628,28 @@
                         <div class="form-group">
                             <label class="form-label">Designated Teacher Mobile <span class="required">*</span></label>
                             <input type="tel" name="designated_teacher_mobile" class="form-input" placeholder="10-digit mobile number" maxlength="10" pattern="[6-9][0-9]{9}" inputmode="numeric" title="Enter a valid 10-digit mobile number" value="{{ school.designated_teacher_mobile }}" required />
+                        </div>
+                        <div class="form-group full-width" style="flex-direction:row; align-items:center; gap:0.5rem;">
+                            <input type="checkbox" id="coordinatorToggle" name="coordinator_different" style="width:18px; height:18px; accent-color:#5E2A97; cursor:pointer; flex-shrink:0;" {% if school.coordinator_name %}checked{% endif %} />
+                            <label class="form-label" for="coordinatorToggle" style="margin:0; cursor:pointer;">School Coordinator is different from the Designated Teacher</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section E - School Coordinator (shown when checkbox above is checked) -->
+                <div class="form-section coordinator-section" style="{% if not school.coordinator_name %}display:none;{% endif %}">
+                    <h2 class="form-section-title">
+                        <span class="material-symbols-outlined">supervisor_account</span>
+                        E. School Coordinator
+                    </h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Coordinator Name <span class="required">*</span></label>
+                            <input type="text" name="coordinator_name" class="form-input" placeholder="Full name" pattern="[A-Za-z][A-Za-z .'\-]{1,99}" title="Letters, spaces, . - only" value="{{ school.coordinator_name }}" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Coordinator Email <span class="required">*</span></label>
+                            <input type="email" name="coordinator_email" class="form-input" placeholder="coordinator@school.edu" value="{{ school.coordinator_email }}" />
                         </div>
                     </div>
                 </div>
@@ -640,6 +664,21 @@
         </div>
     </div>
 </div>
+
+<script>
+(function () {
+    var toggle = document.getElementById('coordinatorToggle');
+    if (!toggle) return;
+    var section = document.querySelector('.coordinator-section');
+    var inputs = section.querySelectorAll('input');
+    function sync() {
+        section.style.display = toggle.checked ? '' : 'none';
+        inputs.forEach(function (i) { i.required = toggle.checked; });
+    }
+    toggle.addEventListener('change', sync);
+    sync();
+})();
+</script>
 
 {% else %}
 {# =============== ACTIVE: Full Dashboard =============== #}
