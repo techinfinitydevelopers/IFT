@@ -14,7 +14,7 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 
 # Emails stop after the last Friday session.
-LAST_SESSION_DATE = date(2026, 9, 25)
+LAST_SESSION_DATE = date(2026, 9, 26)
 SUBJECT = 'Weekly IFT Teacher Mentoring & Training Session'
 
 
