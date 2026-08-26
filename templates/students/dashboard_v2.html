@@ -274,10 +274,10 @@
         .awaiting-icon { font-size: 48px; color: #475569; }
 
         /* Timeline */
-        .timeline-card { background-color: var(--surface-light); border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); padding: 24px; height: 100%; }
+        .timeline-card { background-color: var(--surface-light); border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); padding: 24px; }
         .timeline-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
         .timeline-title { font-size: 1.125rem; font-weight: 700; color: var(--text-dark); }
-        .timeline-container { position: relative; padding-left: 8px; }
+        .timeline-container { position: relative; padding-left: 8px; max-height: 340px; overflow-y: auto; }
         .timeline-line { position: absolute; left: 27px; top: 41px; bottom: 32px; width: 2px; background-color: #e2e8f0; }
         .timeline-item { position: relative; display: flex; gap: 24px; padding-bottom: 32px; }
         .timeline-item:last-child { padding-bottom: 0; }
