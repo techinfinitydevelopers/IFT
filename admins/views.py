@@ -3821,7 +3821,7 @@ def report_students_export(request):
                                            (st.school.city if st.school else st.city)).lower() == want]
 
     headers = [
-        'Student Name', 'Registered On', 'Gender', 'Grade', 'School', 'City', 'State', 'Zone', 'Board',
+        'Student Name', 'Mobile Number', 'Registered On', 'Gender', 'Grade', 'School', 'City', 'State', 'Zone', 'Board',
         'Tata ClassEdge',
         'Paid', 'Amount', 'Idea Title', 'SDG / Track', 'Submission Date', 'Status',
         'AI Score', 'Evaluator Name', 'Evaluator Score', 'Top 400', 'Top 100', 'Top 12',
@@ -3844,8 +3844,13 @@ def report_students_export(request):
             ev, ev_name, ev_score = None, '', ''
         state = (school.state if school else st.state) or ''
         city = (school.city if school else st.city) or ''
+        # Coordinator Mobile: designated_teacher_mobile is often never filled in
+        # (school sign-up only collects contact_phone) — fall back to the
+        # registration phone so the column isn't blank for self-registered schools.
+        coordinator_mobile = (school.designated_teacher_mobile if school else '') or (school.contact_phone if school else '') or ''
         rows.append([
             st.user.get_full_name() or st.user.username,
+            st.phone or '',
             (st.created_at.strftime('%d-%m-%Y') if st.created_at else ''),
             st.get_gender_display() if st.gender else '',
             st.grade,
@@ -3867,7 +3872,7 @@ def report_students_export(request):
             'Yes' if (ev and ev.rank and 0 < ev.rank <= 100) else 'No',
             'Yes' if (ev and ev.is_top_12) else 'No',
             (school.designated_teacher_name if school else '') or '',
-            (school.designated_teacher_mobile if school else '') or '',
+            coordinator_mobile,
             (school.principal_name if school else '') or '',
         ])
     if g.get('preview'):
@@ -3959,6 +3964,9 @@ def report_schools_export(request):
             best = max(bests) if bests else None
             place_id = next((s.google_place_id for s in members if s.google_place_id), '')
             sc = canonical
+            # designated_teacher_mobile is often never filled in (sign-up only
+            # collects contact_phone) — fall back to it so the column isn't blank.
+            coordinator_mobile = sc.designated_teacher_mobile or sc.contact_phone or ''
             rows.append([
                 sc.name,
                 place_id,
@@ -3966,7 +3974,7 @@ def report_schools_export(request):
                 (sc.created_at.strftime('%d-%m-%Y') if sc.created_at else ''),
                 sc.city, sc.state, _state_to_zone(sc.state, sc.city), sc.board,
                 'Yes' if sc.is_tata_classedge else 'No',
-                sc.designated_teacher_name, sc.designated_teacher_mobile,
+                sc.designated_teacher_name, coordinator_mobile,
                 sc.principal_name, sc.principal_email, sc.pin_code,
                 tot, paid, sub,
                 best if best is not None else '', sc.get_status_display(),
@@ -3979,13 +3987,16 @@ def report_schools_export(request):
     rows = []
     for sc in schools:
         best = best_map.get(sc.id)
+        # designated_teacher_mobile is often never filled in (sign-up only
+        # collects contact_phone) — fall back to it so the column isn't blank.
+        coordinator_mobile = sc.designated_teacher_mobile or sc.contact_phone or ''
         rows.append([
             sc.name,
             sc.google_place_id,
             (sc.created_at.strftime('%d-%m-%Y') if sc.created_at else ''),
             sc.city, sc.state, _state_to_zone(sc.state, sc.city), sc.board,
             'Yes' if sc.is_tata_classedge else 'No',
-            sc.designated_teacher_name, sc.designated_teacher_mobile,
+            sc.designated_teacher_name, coordinator_mobile,
             sc.principal_name, sc.principal_email, sc.pin_code,
             tot_map.get(sc.id, 0), paid_map.get(sc.id, 0), sub_map.get(sc.id, 0),
             best if best is not None else '', sc.get_status_display(),

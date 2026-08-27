@@ -1,5 +1,11 @@
 # Build Log
 
+## 2026-08-27 — Fix blank Coordinator Mobile in Reports exports; add student Mobile Number column
+- **Root cause:** `School.designated_teacher_mobile` (the "Coordinator Mobile" export column) is only ever set via manual admin edit — the school sign-up form (`accounts/forms.py:SchoolSignUpForm`) collects `contact_phone`, never `designated_teacher_mobile`. So any self-registered school an admin hasn't touched exports blank there, even though School Management's preview correctly shows a number (it reads `contact_phone`).
+- Fix: both `report_students_export` and `report_schools_export` (incl. the dedupe branch) in `admins/views.py` now use `designated_teacher_mobile or contact_phone` for Coordinator Mobile.
+- Also added a "Mobile Number" column (student's own `phone`) to the Students report — was missing entirely, not a formatting bug. City/State/Zone were checked and are already correctly wired and populating for normal (school-linked) students.
+- Verified via test client: seeded school with `contact_phone` set and `designated_teacher_mobile` blank — both exports (students, schools, schools-dedupe) now show the phone number instead of blank; student's own phone shows in the new column.
+
 ## 2026-08-17 — Deduped "unique schools" export (merge duplicate registrations)
 - Duplicate school registrations (same school, registered more than once) were each showing as separate rows in the Schools report export, inflating counts and making cleanup hard.
 - `google_place_id` is unique per row at the DB level, so real-world duplicates in practice share it as null, not as a matching value — grouping is therefore by `google_place_id` when set, else by `name+city` (lowercased) as a fallback, so null-place-id duplicates still collapse together.
