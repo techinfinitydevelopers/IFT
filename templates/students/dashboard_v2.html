@@ -614,7 +614,7 @@
                 </div>
                 {% endif %}
 
-                <!-- Important Dates Timeline + CodeAI Certification widget -->
+                <!-- Important Dates Timeline + CodeAI Certification -->
                 <div class="row g-4" style="margin-top:0;">
                     <div class="col-12 col-lg-7">
                         <div class="timeline-card">
@@ -659,11 +659,7 @@
                         </div>
                     </div>
                     <div class="col-12 col-lg-5">
-                        <div class="card-custom codeai-widget" style="padding:20px;height:auto;display:flex;flex-direction:column;">
-                            <p style="font-weight:700;font-size:1rem;color:var(--text-dark);margin:0 0 14px 0;display:flex;align-items:center;gap:8px;">
-                                <span class="material-symbols-outlined" style="color:var(--primary);">event</span>
-                                Upcoming Idea Booster Masterclass
-                            </p>
+                        <div class="card-custom codeai-widget" style="padding:20px;height:100%;display:flex;flex-direction:column;">
                             <p style="font-weight:700;font-size:0.95rem;color:var(--text-dark);margin:0 0 12px 0;">
                                 🎉 Congratulations! You are now eligible for a FREE CodeAI Certification
                             </p>
@@ -674,9 +670,35 @@
                                     <h4 class="codeai-widget-title">How AI Makes <span>Decisions</span> 🤖</h4>
                                 </div>
                             </div>
-                            <p style="font-size:0.85rem;color:var(--text-muted);margin:14px 0 0 0;">
+                            <p style="font-size:0.85rem;color:var(--text-muted);margin:14px 0 0 0;flex:1;">
                                 Click on the <strong>CodeAI</strong> button in your menu &amp; start learning!
                             </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upcoming Idea Booster Masterclass -->
+                <div class="row g-4" style="margin-top:0;">
+                    <div class="col-12">
+                        <div class="card-custom" style="padding:20px;">
+                            <p style="font-weight:700;font-size:1rem;color:var(--text-dark);margin:0 0 14px 0;display:flex;align-items:center;gap:8px;">
+                                <span class="material-symbols-outlined" style="color:var(--primary);">event</span>
+                                {% if masterclass_content %}{{ masterclass_content.title }}{% else %}Upcoming Idea Booster Masterclass{% endif %}
+                            </p>
+                            {% if masterclass_content %}
+                            <p style="font-size:0.9rem;color:var(--text-muted);margin:0 0 16px 0;">{{ masterclass_content.subtitle|default:masterclass_content.body }}</p>
+                            {% if masterclass_link %}
+                            <a href="{{ masterclass_link }}" target="_blank" rel="noopener" class="codeai-widget-btn">
+                                <span class="material-symbols-outlined">event_available</span>
+                                Register
+                            </a>
+                            {% endif %}
+                            {% else %}
+                            <div class="text-center py-4" style="color: var(--text-muted);">
+                                <span class="material-symbols-outlined mb-2" style="font-size: 40px; color: #cbd5e1;">campaign</span>
+                                <p class="mb-0">Details will be announced soon.</p>
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -701,6 +723,14 @@
                     }
                     .codeai-widget-title { position:relative; z-index:2; font-size:1.05rem; font-weight:800; line-height:1.2; margin:0; }
                     .codeai-widget-title span { color:var(--secondary); }
+                    .codeai-widget-btn {
+                        display:inline-flex; align-items:center; gap:8px; text-decoration:none;
+                        background:linear-gradient(135deg,#5E2A97,#7B3FB5); color:#fff; border:none;
+                        font-weight:700; font-size:0.9rem; padding:0.65rem 1.4rem; border-radius:0.6rem;
+                        box-shadow:0 4px 14px rgba(94,42,151,0.32); transition:transform 0.15s ease, box-shadow 0.15s ease; width:fit-content;
+                    }
+                    .codeai-widget-btn:hover { transform:translateY(-2px); box-shadow:0 6px 18px rgba(94,42,151,0.42); color:#fff; }
+                    .codeai-widget-btn .material-symbols-outlined { font-size:18px; }
                 </style>
 
                 <!-- Learning Videos (optional) -->

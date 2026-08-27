@@ -80,6 +80,9 @@ class Content(models.Model):
     # notification has fired, so the daily cron never double-sends either one.
     reminder_notification_sent = models.BooleanField(default=False)
     live_notification_sent = models.BooleanField(default=False)
+    # When ticked (on a published announcement), this is the one shown in the
+    # "Upcoming Idea Booster Masterclass" widget on the student dashboard.
+    is_idea_booster_masterclass = models.BooleanField(default=False)
     # Training-calendar specific fields
     event_date = models.DateField(null=True, blank=True)
     event_time = models.CharField(max_length=50, blank=True)

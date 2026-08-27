@@ -3031,6 +3031,7 @@ def content_create(request):
         event_date = data.get('event_date', '') or None
         event_time = data.get('event_time', '').strip()
         event_mode = data.get('event_mode', '').strip() or 'Online'
+        is_idea_booster_masterclass = str(data.get('is_idea_booster_masterclass', '')).lower() in ('true', 'on', '1')
 
         if not all([content_type, title]):
             return JsonResponse({'success': False, 'message': 'Title and content type are required.'}, status=400)
@@ -3048,6 +3049,7 @@ def content_create(request):
             event_date=event_date,
             event_time=event_time,
             event_mode=event_mode,
+            is_idea_booster_masterclass=is_idea_booster_masterclass,
         )
 
         return JsonResponse({
@@ -3084,6 +3086,7 @@ def content_edit(request, content_id):
         event_date = data.get('event_date', '') or None
         event_time = data.get('event_time', '').strip()
         event_mode = data.get('event_mode', '').strip() or 'Online'
+        is_idea_booster_masterclass = str(data.get('is_idea_booster_masterclass', '')).lower() in ('true', 'on', '1')
 
         if not title:
             return JsonResponse({'success': False, 'message': 'Title is required.'}, status=400)
@@ -3098,6 +3101,7 @@ def content_edit(request, content_id):
         content.event_date = event_date
         content.event_time = event_time
         content.event_mode = event_mode
+        content.is_idea_booster_masterclass = is_idea_booster_masterclass
         content.save()
 
         return JsonResponse({

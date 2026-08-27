@@ -14,6 +14,7 @@ from .forms import StudentRegistrationForm, IdeaSubmissionForm
 from ai_assistant.processors import generate_summary
 import os
 import json
+import re
 
 
 def _get_payment_amount(student):
@@ -328,6 +329,18 @@ def dashboard(request):
         visibility__in=['all', 'students']
     ).order_by('-created_at')[:5]
 
+    # Idea Booster Masterclass widget — latest announcement the admin flagged for it.
+    masterclass_content = Content.objects.filter(
+        status='published',
+        is_idea_booster_masterclass=True,
+        visibility__in=['all', 'students']
+    ).order_by('-created_at').first()
+    masterclass_link = None
+    if masterclass_content:
+        url_match = re.search(r'https?://\S+', masterclass_content.subtitle or masterclass_content.body)
+        if url_match:
+            masterclass_link = url_match.group(0).rstrip(')].,')
+
     # Learning Videos
     from students.models import LearningVideo, VideoProgress
     learning_videos = LearningVideo.objects.filter(is_active=True).order_by('order')
@@ -370,6 +383,8 @@ def dashboard(request):
         'payment_amount': _get_payment_amount(student) if not student.is_paid else 0,
         'show_welcome_popup': show_welcome_popup,
         'pending_suggestions_count': pending_suggestions_count,
+        'masterclass_content': masterclass_content,
+        'masterclass_link': masterclass_link,
     }
     return render(request, 'students/dashboard_v2.html', context)
 
