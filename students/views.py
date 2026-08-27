@@ -336,10 +336,15 @@ def dashboard(request):
         visibility__in=['all', 'students']
     ).order_by('-created_at').first()
     masterclass_link = None
+    masterclass_subtitle_text = ''
     if masterclass_content:
-        url_match = re.search(r'https?://\S+', masterclass_content.subtitle or masterclass_content.body)
+        raw_subtitle = masterclass_content.subtitle or masterclass_content.body
+        url_match = re.search(r'https?://\S+', raw_subtitle)
+        masterclass_subtitle_text = raw_subtitle
         if url_match:
             masterclass_link = url_match.group(0).rstrip(')].,')
+            # Strip just the URL so only the plain descriptive text remains.
+            masterclass_subtitle_text = raw_subtitle.replace(url_match.group(0), '').strip(' :.')
 
     # Learning Videos
     from students.models import LearningVideo, VideoProgress
@@ -385,6 +390,7 @@ def dashboard(request):
         'pending_suggestions_count': pending_suggestions_count,
         'masterclass_content': masterclass_content,
         'masterclass_link': masterclass_link,
+        'masterclass_subtitle_text': masterclass_subtitle_text,
     }
     return render(request, 'students/dashboard_v2.html', context)
 
