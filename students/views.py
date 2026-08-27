@@ -336,15 +336,12 @@ def dashboard(request):
         visibility__in=['all', 'students']
     ).order_by('-created_at').first()
     masterclass_link = None
-    masterclass_subtitle_text = ''
     if masterclass_content:
-        url_match = re.search(r'https?://\S+', masterclass_content.body or '')
+        # Stop at markdown/punctuation that isn't part of the URL itself
+        # (e.g. "https://...zJw](url)" from a pasted markdown link).
+        url_match = re.search(r'https?://[^\s\]\)\("]+', masterclass_content.body or '')
         if url_match:
             masterclass_link = url_match.group(0).rstrip(')].,')
-        # Plain text only — drop URLs and anything that isn't a letter, digit,
-        # space, or basic sentence punctuation.
-        no_url = re.sub(r'https?://\S+', '', masterclass_content.subtitle or '')
-        masterclass_subtitle_text = re.sub(r"[^\w\s.,!?'-]", '', no_url).strip()
 
     # Learning Videos
     from students.models import LearningVideo, VideoProgress
@@ -390,7 +387,6 @@ def dashboard(request):
         'pending_suggestions_count': pending_suggestions_count,
         'masterclass_content': masterclass_content,
         'masterclass_link': masterclass_link,
-        'masterclass_subtitle_text': masterclass_subtitle_text,
     }
     return render(request, 'students/dashboard_v2.html', context)
 
