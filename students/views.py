@@ -338,13 +338,13 @@ def dashboard(request):
     masterclass_link = None
     masterclass_subtitle_text = ''
     if masterclass_content:
-        raw_subtitle = masterclass_content.subtitle or masterclass_content.body
-        url_match = re.search(r'https?://\S+', raw_subtitle)
-        masterclass_subtitle_text = raw_subtitle
+        url_match = re.search(r'https?://\S+', masterclass_content.body or '')
         if url_match:
             masterclass_link = url_match.group(0).rstrip(')].,')
-            # Strip just the URL so only the plain descriptive text remains.
-            masterclass_subtitle_text = raw_subtitle.replace(url_match.group(0), '').strip(' :.')
+        # Plain text only — drop URLs and anything that isn't a letter, digit,
+        # space, or basic sentence punctuation.
+        no_url = re.sub(r'https?://\S+', '', masterclass_content.subtitle or '')
+        masterclass_subtitle_text = re.sub(r"[^\w\s.,!?'-]", '', no_url).strip()
 
     # Learning Videos
     from students.models import LearningVideo, VideoProgress
