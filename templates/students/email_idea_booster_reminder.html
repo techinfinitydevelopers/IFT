@@ -1,28 +1,32 @@
 {% extends "accounts/email_onboard_base.html" %}
-{% block greeting %}Dear Students,{% endblock %}
-{% block intro %}A quick reminder to join the <strong>IFT Idea Booster Masterclass</strong> — an exclusive learning series designed to help you strengthen your ideas and take them to the next level!{% endblock %}
+{% block greeting %}Dear Participant,{% endblock %}
+{% block intro %}Just a gentle reminder to join us for the <strong>IFT Idea Booster Masterclass</strong>! 💡🚀{% endblock %}
 {% block credentials %}{% endblock %}
 {% block content %}
 <tr>
   <td style="padding:4px 32px 0 32px;">
+    <p style="margin:0 0 16px 0; font-size:14px; color:#444;">If you have questions about your idea submission, platform navigation, innovation, business ideas, or the next steps, this session is for you!</p>
+
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f7f4fb; border-radius:8px; border:1px solid #ece6f5;">
       <tr>
         <td style="padding:18px 20px;">
-          <p style="margin:0 0 6px 0; font-size:14px; color:#1e1b2e;">🎙️ <strong>Hosted by:</strong> Sushil Mungekar, Founder &amp; CEO, ENpower</p>
-          <p style="margin:0 0 6px 0; font-size:14px; color:#1e1b2e;">📅 <strong>Date:</strong> {{ session_date }}</p>
-          <p style="margin:0 0 6px 0; font-size:14px; color:#1e1b2e;">🕓 <strong>Time:</strong> 4:00 PM – 5:00 PM</p>
-          <p style="margin:0 0 6px 0; font-size:14px; color:#1e1b2e;">🔁 <strong>Frequency:</strong> Once every 15 days</p>
-          <p style="margin:0; font-size:14px; color:#1e1b2e;">🔒 <strong>Exclusive for Registered IFT Students</strong></p>
+          <p style="margin:0 0 6px 0; font-size:14px; color:#1e1b2e;">📅 {{ session_date }}</p>
+          <p style="margin:0; font-size:14px; color:#1e1b2e;">⏰ 11:00 AM – 12:00 PM</p>
         </td>
       </tr>
     </table>
 
-    <p style="margin:16px 0 0 0; font-size:14px; color:#444;">Come ready to learn practical techniques, think like an innovator, and build your ideas with confidence.</p>
-    <p style="margin:12px 0 0 0; font-size:14px; color:#1e1b2e;">🚀 Don't miss this opportunity to learn directly from the Founder and give your idea the boost it deserves!</p>
+    <p style="margin:16px 0 4px 0; font-size:14px; color:#1e1b2e;">🔗 <strong>Register &amp; Join the Live Session:</strong></p>
+    <p style="margin:0; font-size:14px;"><a href="{{ session_link }}" style="color:#5E2A97;">{{ session_link }}</a></p>
+
+    <p style="margin:16px 0 0 0; font-size:14px; color:#1e1b2e;">⏳ Don't forget: The last date to submit your IFT idea is 15th October 2026.</p>
+
+    <p style="margin:16px 0 0 0; font-size:14px; color:#444;">Don't let doubts stop your innovation.</p>
+    <p style="margin:12px 0 0 0; font-size:14px; color:#1e1b2e;">Join us, get your questions answered, and take the next step towards building your idea!</p>
+    <p style="margin:16px 0 0 0; font-size:14px; color:#1e1b2e;">See you at the Masterclass!</p>
   </td>
 </tr>
 {% endblock %}
-{% block button_href %}{{ session_link }}{% endblock %}
-{% block button_label %}Join the Webinar{% endblock %}
+{% block button %}{% endblock %}
 {% block security_note %}{% endblock %}
-{% block footer %}Warm regards,<br>Team IFT{% endblock %}
+{% block footer %}Team India's Future Tycoons{% endblock %}
