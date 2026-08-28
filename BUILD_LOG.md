@@ -1,5 +1,11 @@
 # Build Log
 
+## 2026-08-27 — Add "Avg Students / School" KPI to Admin Dashboard
+- User asked for schools-registered / avg-students-per-school / payment stats. Total Schools, Paid/Unpaid Registrations, and Total Payment Collected already existed on the Admin Dashboard (`admins/views.py:admin_dashboard`) — only the average was missing.
+- Added `avg_students_per_school = total_students / total_schools_all` (rounded to 1 decimal, guarded against div-by-zero) and a matching KPI card on `templates/admins/admin_dashboard.html`.
+- Verified via test client: dashboard renders 200, new KPI card present with computed value.
+- Note: production DB isn't reachable from this dev environment (Railway's internal Postgres only resolves inside Railway's network) — live numbers must be read from the Admin Dashboard itself, not computed here.
+
 ## 2026-08-27 — Fix blank Coordinator Mobile in Reports exports; add student Mobile Number column
 - **Root cause:** `School.designated_teacher_mobile` (the "Coordinator Mobile" export column) is only ever set via manual admin edit — the school sign-up form (`accounts/forms.py:SchoolSignUpForm`) collects `contact_phone`, never `designated_teacher_mobile`. So any self-registered school an admin hasn't touched exports blank there, even though School Management's preview correctly shows a number (it reads `contact_phone`).
 - Fix: both `report_students_export` and `report_schools_export` (incl. the dedupe branch) in `admins/views.py` now use `designated_teacher_mobile or contact_phone` for Coordinator Mobile.

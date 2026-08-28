@@ -574,6 +574,16 @@
                 </div>
 
                 <div class="col-6 col-lg-2">
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <div class="kpi-icon teal"><span class="material-symbols-outlined">groups</span></div>
+                        </div>
+                        <span class="kpi-label">Avg Students / School</span>
+                        <div class="kpi-value">{{ avg_students_per_school }}</div>
+                    </div>
+                </div>
+
+                <div class="col-6 col-lg-2">
                     <a href="{% url 'admins:all_submissions' %}" class="kpi-link">
                     <div class="kpi-card">
                         <div class="kpi-header">

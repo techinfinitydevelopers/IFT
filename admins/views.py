@@ -184,6 +184,7 @@ def admin_dashboard(request):
     from django.db.models import Sum
     total_payment_collected = Student.objects.filter(is_paid=True).aggregate(
         t=Sum('payment_amount'))['t'] or 0
+    avg_students_per_school = round(total_students / total_schools_all, 1) if total_schools_all else 0
 
     context = {
         'submissions': submissions_list,
@@ -204,6 +205,7 @@ def admin_dashboard(request):
         'paid_registrations': paid_registrations,
         'unpaid_registrations': unpaid_registrations,
         'total_payment_collected': total_payment_collected,
+        'avg_students_per_school': avg_students_per_school,
         'selected_category': category or '',
         'search_query': search_query or '',
         'page_obj': page_obj,
