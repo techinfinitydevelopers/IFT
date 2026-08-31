@@ -1,5 +1,9 @@
 # Build Log
 
+## 2026-08-31 — Fix students-list filter row wrapping (UI bug from Payment Status filter)
+- After adding the Paid/Unpaid dropdown, user shared a screenshot: on overflow the 4th filter broke onto its own line, right-aligned alone — because `justify-content-md-end` justifies each flex line independently.
+- Fix: search column `col-md-5→col-lg-4`, filters column `col-md-7→col-lg-8`, new `.filters-group` class (flex-wrap, left-aligned, 10px gap) replacing the old inline flex/justify-end classes, `.filter-select` width 170px→150px. Committed `1abe945`, pushed.
+
 ## 2026-08-31 — Meta Pixel on school registration flow (TCE campaign)
 - TCE running a Meta ad campaign to `accounts/school-sign-up/?utm_source=meta&utm_medium=tceIFTcampaign&utm_campaign=ift_school_registration`; needed Pixel ID `1569067591675057` tracking PageView + a CompleteRegistration event on successful school signup.
 - Registration (`school_sign_up.html`) and sign-in (`sign_in.html`) both extend `accounts/auth_base.html`; the success flow is a full-page POST→redirect (no AJAX) — `school_sign_up` view sets `messages.success('School registered! Check your email for login credentials.')` then `redirect('accounts:sign_in')`, so the confirmation actually renders on the sign-in page, not the registration page itself.
