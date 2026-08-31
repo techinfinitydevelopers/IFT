@@ -1,0 +1,29 @@
+{% extends "accounts/email_onboard_base.html" %}
+{% block greeting %}Dear Student,{% endblock %}
+{% block intro %}As a participant of India's Future Tycoons (IFT), your school now has exclusive access to <strong>Code AI</strong>, a free AI literacy program designed to help you understand, explore, and confidently use Artificial Intelligence. The best part? You will learn through a fun game that you will enjoy!{% endblock %}
+{% block credentials %}{% endblock %}
+{% block content %}
+<tr>
+  <td style="padding:4px 32px 0 32px;">
+    <p style="margin:0 0 16px 0; font-size:14px; color:#1e1b2e;">Play to win a <strong>Certificate of Participation</strong> from CodeAI — a Global Organization.</p>
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f7f4fb; border-radius:8px; border:1px solid #ece6f5;">
+      <tr>
+        <td style="padding:18px 20px;">
+          <p style="margin:0 0 10px 0; font-size:12px; font-weight:700; color:#5E2A97; text-transform:uppercase; letter-spacing:0.06em;">Program Details</p>
+          <p style="margin:0 0 6px 0; font-size:14px; color:#1e1b2e;"><strong>Cost:</strong> Completely Free</p>
+          <p style="margin:0 0 6px 0; font-size:14px; color:#1e1b2e;"><strong>Format:</strong> Online Through IFT Dashboard (Use a Laptop or PC)</p>
+          <p style="margin:0 0 6px 0; font-size:14px; color:#1e1b2e;"><strong>Eligibility:</strong> Exclusive for IFT participants</p>
+          <p style="margin:0; font-size:14px; color:#1e1b2e;"><strong>Duration:</strong> 4 Hours</p>
+        </td>
+      </tr>
+    </table>
+
+    <p style="margin:16px 0 0 0; font-size:14px; color:#444;">Together, let's ensure that every student has the opportunity to become future-ready in an AI-powered world.</p>
+  </td>
+</tr>
+{% endblock %}
+{% block button_href %}{{ login_url }}{% endblock %}
+{% block button_label %}Get Started Today{% endblock %}
+{% block security_note %}{% endblock %}
+{% block footer %}Best regards,<br>Team IFT{% endblock %}
