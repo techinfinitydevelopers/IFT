@@ -49,10 +49,9 @@ Students submit venture ideas, get AI + jury evaluated, ranked (Top 400 / Top
 - **Browser cached 301 loop:** Chrome caches 301/308 redirects hard; **deleting cookies does NOT clear them** → `ERR_TOO_MANY_REDIRECTS` persists even after a server fix. Fix via Incognito / clear cached files. (The capgemini `/accounts/sign-up/` loop was this — server returned clean 200.)
 - **Railway 502:** usually transient (container restart/redeploy/cold start). A past hard 502 was a custom Start Command with empty `$PORT`; fixed by letting the Dockerfile CMD (`--bind 0.0.0.0:8000`) run.
 
-## Git state (2026-07-21)
-- Local `main` is **6 commits BEHIND** `origin/main` (landing-page integration, hero mp4 video, Razorpay test payment page, ALLOWED_HOSTS/CSRF update). These are live on capgemini but not local.
-- Local has **uncommitted certificate feature** (24 modified admin/accounts files + new `admins/certificates.py`, migration `0010`, `templates/admins/certificates.html`, `static/certificates/`, `static/fonts/`, `BUILD_LOG.md`).
-- **No file overlap** between the two → syncing (`git pull --rebase`) will be clean. Nothing certificate-related committed/pushed yet.
+## Git state (2026-08-31)
+- Local `main` in sync with `origin/main`, working tree clean. Latest: `dfd6ae5` Payment Status filter on super-admin students list.
+- Payment fields on `Student`: `is_paid` (bool), `payment_amount` set at Razorpay **order-creation** time (not just on success) — so a student who started but never completed payment still has `payment_amount` populated with `is_paid=False`. Students who never attempted payment have `payment_amount=NULL`. `admins/views.py:students_list` supports `school`/`grade`/`price`/`paid` GET params; UI (`templates/admins/user_management/students_list.html`) now exposes all four as dropdowns.
 
 ## Pending / next
 1. **Certificate feature:** commit → `git pull --rebase origin main` → push → Railway auto-deploy → live email test (capgemini env has ZeptoMail). NOTE `top400.jpg`'s printed body still reads "School Champion" (client to confirm). `school-champion.jpg` is 19MB (repo weight).

@@ -1,5 +1,18 @@
 # Build Log
 
+## 2026-08-31 — Meta Pixel on school registration flow (TCE campaign)
+- TCE running a Meta ad campaign to `accounts/school-sign-up/?utm_source=meta&utm_medium=tceIFTcampaign&utm_campaign=ift_school_registration`; needed Pixel ID `1569067591675057` tracking PageView + a CompleteRegistration event on successful school signup.
+- Registration (`school_sign_up.html`) and sign-in (`sign_in.html`) both extend `accounts/auth_base.html`; the success flow is a full-page POST→redirect (no AJAX) — `school_sign_up` view sets `messages.success('School registered! Check your email for login credentials.')` then `redirect('accounts:sign_in')`, so the confirmation actually renders on the sign-in page, not the registration page itself.
+- Added the unmodified Meta base code (PageView) to `auth_base.html`'s `<head>` — covers registration AND sign-in page, since `fbq` must be defined on whichever page the event fires on (separate page load, no shared JS state).
+- In the same template's messages loop, added a conditional: when `message.message` matches that exact confirmation string, fire `fbq('track', 'CompleteRegistration')`. String is unique to `accounts/views.py:287`, no ambiguity with other flows.
+- No UTM code needed — Django passes query params through untouched.
+
+## 2026-08-31 — Payment Status (Paid/Unpaid) filter on super-admin Students list
+- User noticed the existing Price filter (₹2500/₹1600) matches on `Student.payment_amount` alone, ignoring `is_paid` — so it can surface both paid AND unpaid students (unpaid ones get `payment_amount` set as soon as a Razorpay order is created, even if never completed; students who never attempted payment have `payment_amount=NULL` and don't show under either price).
+- Backend (`admins/views.py:students_list`, line ~1302) already accepted a `paid=true/false` query param — just wasn't exposed in the UI.
+- Added a "All Payment Status / Paid / Unpaid" dropdown to `templates/admins/user_management/students_list.html`, wired into the existing `applyFilters()` JS (same pattern as School/Grade/Price — sets URL param, reloads). No backend change needed.
+- Committed `dfd6ae5`, pushed to `origin/main`.
+
 ## 2026-08-27 — Add "Avg Students / School" KPI to Admin Dashboard
 - User asked for schools-registered / avg-students-per-school / payment stats. Total Schools, Paid/Unpaid Registrations, and Total Payment Collected already existed on the Admin Dashboard (`admins/views.py:admin_dashboard`) — only the average was missing.
 - Added `avg_students_per_school = total_students / total_schools_all` (rounded to 1 decimal, guarded against div-by-zero) and a matching KPI card on `templates/admins/admin_dashboard.html`.
