@@ -1279,6 +1279,7 @@ def students_list(request):
     selected_school = request.GET.get('school', '')
     selected_grade = request.GET.get('grade', '')
     selected_paid = request.GET.get('paid', '')
+    selected_price = request.GET.get('price', '')
 
     students = Student.objects.select_related('user').all()
 
@@ -1300,6 +1301,9 @@ def students_list(request):
 
     if selected_paid in ('true', 'false'):
         students = students.filter(is_paid=(selected_paid == 'true'))
+
+    if selected_price in ('2500', '1600'):
+        students = students.filter(payment_amount=selected_price)
 
     # Annotate with submission count and order by latest first
     students = students.annotate(submission_count=Count('submissions')).order_by('-created_at')
@@ -1325,6 +1329,7 @@ def students_list(request):
         'selected_school': selected_school,
         'selected_grade': selected_grade,
         'selected_paid': selected_paid,
+        'selected_price': selected_price,
     }
     return render(request, 'admins/user_management/students_list.html', context)
 
