@@ -727,6 +727,11 @@
                                 <option value="2500" {% if selected_price == '2500' %}selected{% endif %}>₹2500</option>
                                 <option value="1600" {% if selected_price == '1600' %}selected{% endif %}>₹1600</option>
                             </select>
+                            <select class="filter-select" id="paidFilter">
+                                <option value="">All Payment Status</option>
+                                <option value="true" {% if selected_paid == 'true' %}selected{% endif %}>Paid</option>
+                                <option value="false" {% if selected_paid == 'false' %}selected{% endif %}>Unpaid</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -974,6 +979,7 @@
     const schoolFilter = document.getElementById('schoolFilter');
     const gradeFilter = document.getElementById('gradeFilter');
     const priceFilter = document.getElementById('priceFilter');
+    const paidFilter = document.getElementById('paidFilter');
 
     function applyFilters() {
         const params = new URLSearchParams();
@@ -981,6 +987,7 @@
         if (schoolFilter && schoolFilter.value) params.set('school', schoolFilter.value);
         if (gradeFilter && gradeFilter.value) params.set('grade', gradeFilter.value);
         if (priceFilter && priceFilter.value) params.set('price', priceFilter.value);
+        if (paidFilter && paidFilter.value) params.set('paid', paidFilter.value);
         window.location.href = '?' + params.toString();
     }
 
@@ -995,6 +1002,7 @@
     if (schoolFilter) schoolFilter.addEventListener('change', applyFilters);
     if (gradeFilter) gradeFilter.addEventListener('change', applyFilters);
     if (priceFilter) priceFilter.addEventListener('change', applyFilters);
+    if (paidFilter) paidFilter.addEventListener('change', applyFilters);
 
     // ── Row Click → Open Details ──
     document.querySelectorAll('.custom-table tbody tr').forEach(function(row) {
