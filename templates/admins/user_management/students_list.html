@@ -238,11 +238,16 @@
             box-shadow: 0 0 0 3px rgba(94, 42, 151, 0.1);
         }
 
+        .filters-group {
+            display: flex; align-items: center; flex-wrap: wrap;
+            gap: 10px; justify-content: flex-start;
+        }
+
         .filter-select {
             padding: 10px 12px; border: 1px solid var(--border-light); border-radius: 8px;
             font-family: 'Poppins', sans-serif; font-size: 0.875rem;
             color: var(--text-dark); background: #f8fafc;
-            outline: none; cursor: pointer; width: 170px; flex-shrink: 0;
+            outline: none; cursor: pointer; width: 150px; flex-shrink: 0;
             overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
         }
         .filter-select:focus { border-color: var(--primary); }
@@ -703,13 +708,13 @@
                 <!-- Search & Filters -->
                 <div class="main-card-header">
                     <div class="row align-items-center g-3">
-                        <div class="col-12 col-md-5">
+                        <div class="col-12 col-lg-4">
                             <div class="search-input">
                                 <span class="material-symbols-outlined">search</span>
                                 <input type="text" id="searchInput" placeholder="Search by name, school, or ID..." value="{{ search_query|default:'' }}">
                             </div>
                         </div>
-                        <div class="col-12 col-md-7 d-flex align-items-center gap-3 justify-content-md-end flex-wrap">
+                        <div class="col-12 col-lg-8 filters-group">
                             <select class="filter-select" id="schoolFilter">
                                 <option value="">All Schools</option>
                                 {% for school in schools %}
