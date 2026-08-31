@@ -55,6 +55,8 @@ def _save_media(request, highlight):
 @login_required
 def my_highlights(request):
     school = _school_of(request.user)
+    if school and school.status != 'active':
+        return redirect('students:school_dashboard')
     qs = IFTxHighlight.objects.filter(created_by=request.user)
     if school:
         qs = IFTxHighlight.objects.filter(school=school)
@@ -63,6 +65,9 @@ def my_highlights(request):
 
 @login_required
 def upload_highlight(request):
+    school = _school_of(request.user)
+    if school and school.status != 'active':
+        return redirect('students:school_dashboard')
     if request.method == 'POST':
         title = (request.POST.get('title') or '').strip()
         event_date = request.POST.get('event_date') or None
@@ -101,6 +106,8 @@ def upload_highlight(request):
 @login_required
 def highlight_detail(request, highlight_id):
     school = _school_of(request.user)
+    if school and school.status != 'active':
+        return redirect('students:school_dashboard')
     qs = IFTxHighlight.objects.filter(created_by=request.user)
     if school:
         qs = IFTxHighlight.objects.filter(school=school)

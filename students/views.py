@@ -864,20 +864,19 @@ def school_dashboard(request):
             'message': 'School profile completed successfully!',
         })
 
-    # If pending, show complete profile form
-    if school.status == 'pending':
-        return render(request, 'students/school_dashboard.html', {'school': school, 'is_pending': True})
+    is_pending = (school.status == 'pending')
 
-    # Admin-disabled (inactive) or any other non-active status — deny the
-    # dashboard. Log out first: redirecting an authenticated school to sign_in
-    # would loop (sign_in -> role_redirect -> school_dashboard -> here).
-    if school.status != 'active':
+    # Admin-disabled (inactive) or any other non-active/non-pending status —
+    # deny the dashboard. Log out first: redirecting an authenticated school
+    # to sign_in would loop (sign_in -> role_redirect -> school_dashboard -> here).
+    if school.status not in ('pending', 'active'):
         from django.contrib.auth import logout as auth_logout
         auth_logout(request)
         messages.error(request, 'Your school account has been deactivated. Please contact support.')
         return redirect('accounts:sign_in')
 
-    # ---- Active dashboard stats ----
+    # ---- Dashboard stats (also shown to pending schools; they get a
+    # "Complete Your Profile" floating alert instead of a hard blocking form) ----
     students = Student.objects.filter(school=school)
     student_count = students.count()
 
@@ -1013,7 +1012,7 @@ def school_dashboard(request):
 
     context = {
         'school': school,
-        'is_pending': False,
+        'is_pending': is_pending,
         'student_count': student_count,
         'badge_metric': badge_metric,
         'badge_tiers': badge_tiers,
@@ -3085,6 +3084,10 @@ def school_learning_resources(request):
         school = request.user.school_profile
     except School.DoesNotExist:
         return redirect('accounts:sign_in')
+
+    if school.status != 'active':
+        return redirect('students:school_dashboard')
+
     videos = LearningVideo.objects.filter(is_active=True).order_by('order')
     return render(request, 'students/school_learning_resources.html', {'school': school, 'learning_videos': videos})
 
@@ -3113,6 +3116,9 @@ def school_digital_resources(request):
         school = request.user.school_profile
     except School.DoesNotExist:
         return redirect('students:dashboard')
+
+    if school.status != 'active':
+        return redirect('students:school_dashboard')
 
     resources = DigitalResource.objects.filter(is_active=True, visibility__in=['all', 'schools']).order_by('order', '-created_at')
     return render(request, 'students/school_digital_resources.html', {'school': school, 'resources': resources})
