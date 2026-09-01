@@ -42,6 +42,17 @@ body {
     inset: 0;
 }
 
+.auth-left iframe {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    transform: translate(-50%, -50%);
+    border: 0;
+    pointer-events: none;
+}
+
 .auth-right {
     flex: 1;
     display: flex;
