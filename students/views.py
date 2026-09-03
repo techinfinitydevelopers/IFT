@@ -245,8 +245,10 @@ def dashboard(request):
             grade='10',
         )
 
-    if not student.is_paid:
-        return redirect('students:initiate_payment')
+    # Unpaid students now SEE the dashboard (view-only) instead of being bounced
+    # to the payment page — every action is blocked with a "complete payment"
+    # popup until they pay. Becomes fully normal once is_paid=True.
+    is_locked = not student.is_paid
 
     show_welcome_popup = not student.has_seen_welcome_popup
     if show_welcome_popup:
@@ -387,6 +389,7 @@ def dashboard(request):
         'pending_suggestions_count': pending_suggestions_count,
         'masterclass_content': masterclass_content,
         'masterclass_link': masterclass_link,
+        'is_locked': is_locked,
     }
     return render(request, 'students/dashboard_v2.html', context)
 

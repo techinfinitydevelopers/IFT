@@ -284,8 +284,12 @@ def school_sign_up(request):
             _send_onboard_async(user, temp_password, 'School')
 
             otp_service.clear(request)
+            # First-time convenience: log the school straight into its dashboard
+            # (view-only until the profile is completed). The credentials email is
+            # still sent so they can log in normally next time.
+            login(request, user)
             messages.success(request, 'School registered! Check your email for login credentials.')
-            return redirect('accounts:sign_in')
+            return redirect('students:school_dashboard')
     else:
         form = SchoolSignUpForm()
 

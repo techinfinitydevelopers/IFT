@@ -711,6 +711,43 @@
     }
 })();
 </script>
+
+{# ---- View-only lock: block every page/action until the profile is completed ---- #}
+<div id="lockPopup" style="display:none; position:fixed; inset:0; z-index:2100; background:rgba(15,15,25,0.55);">
+  <div style="max-width:390px; margin:14vh auto 0; background:#fff; border-radius:16px; padding:30px 26px; text-align:center; font-family:'Poppins',sans-serif; box-shadow:0 20px 60px rgba(0,0,0,0.25);">
+    <span class="material-symbols-outlined" style="font-size:46px; color:#EF4444;">lock</span>
+    <h3 style="margin:10px 0 6px; font-size:1.15rem; font-weight:700; color:#1a1f2e;">Complete Your Profile First</h3>
+    <p style="margin:0 0 22px; font-size:0.88rem; color:#64748b; line-height:1.55;">Please complete your school profile to activate your account and unlock all features.</p>
+    <button type="button" id="lockPopupCta" style="background:#5E2A97; color:#fff; border:none; border-radius:10px; padding:11px 28px; font-weight:600; cursor:pointer; font-family:'Poppins',sans-serif; font-size:0.9rem;">Complete Profile</button>
+    <button type="button" id="lockPopupClose" style="display:block; margin:14px auto 0; background:none; border:none; color:#94a3b8; cursor:pointer; font-size:0.85rem;">Close</button>
+  </div>
+</div>
+<script>
+(function(){
+    var pop = document.getElementById('lockPopup');
+    function show(){ pop.style.display = 'block'; }
+    function hide(){ pop.style.display = 'none'; }
+    document.getElementById('lockPopupClose').addEventListener('click', hide);
+    document.getElementById('lockPopupCta').addEventListener('click', function(){ hide(); var f=document.getElementById('completeProfileFab'); if(f) f.click(); });
+    pop.addEventListener('click', function(e){ if(e.target === pop) hide(); });
+
+    var DASH = "{% url 'students:school_dashboard' %}";
+    var OK_IDS = ['completeProfileFab','sidebarToggleBtn','notificationBtn','profileAvatarBtn','fullscreenBtn'];
+    document.addEventListener('click', function(e){
+        var el = e.target.closest('a, button, input');
+        if(!el) return;
+        // Always allowed: profile modal, this lock popup, header dropdowns
+        if(el.closest('#completeProfileModal') || el.closest('#lockPopup')) return;
+        if(el.closest('.dropdown-panel') || el.closest('.header-dropdown')) return;
+        if(OK_IDS.indexOf(el.id) > -1) return;
+        var href = (el.getAttribute && el.getAttribute('href')) || '';
+        if(href.indexOf('sign-out') > -1 || el.closest('.logout-btn')) return;   // logout
+        if(href && href === DASH) return;                                         // current dashboard
+        // Everything else = a sub-page nav or an action -> block + show popup
+        e.preventDefault(); e.stopPropagation(); show();
+    }, true);
+})();
+</script>
 {% endif %}
 
 {# =============== Full Dashboard (always shown; pending schools also get the FAB above) =============== #}
