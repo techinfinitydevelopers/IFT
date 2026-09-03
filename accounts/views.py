@@ -122,6 +122,9 @@ def sign_up(request):
             )
             otp_service.clear(request)
             login(request, user)
+            # One-shot flag: fire Meta Pixel CompleteRegistration once on the
+            # next page (the post-registration view-only dashboard).
+            request.session['fire_complete_registration'] = True
             messages.success(request, 'Account created successfully!')
 
             # Send welcome email in the background — don't block signup on ZeptoMail
@@ -288,6 +291,9 @@ def school_sign_up(request):
             # (view-only until the profile is completed). The credentials email is
             # still sent so they can log in normally next time.
             login(request, user)
+            # One-shot flag: fire Meta Pixel CompleteRegistration once on the
+            # next page (the post-registration view-only dashboard).
+            request.session['fire_complete_registration'] = True
             messages.success(request, 'School registered! Check your email for login credentials.')
             return redirect('students:school_dashboard')
     else:

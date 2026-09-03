@@ -76,6 +76,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'ift_platform.middleware.GoogleAnalyticsMiddleware',
     'ift_platform.middleware.GoogleTagManagerMiddleware',
+    'ift_platform.middleware.MetaPixelMiddleware',
 ]
 
 ROOT_URLCONF = 'ift_platform.urls'

@@ -169,6 +169,83 @@ class GoogleAnalyticsMiddleware:
         return response
 
 
+META_PIXEL_ID = "1569067591675057"
+
+_PIXEL_SNIPPET = """<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{{if(f.fbq)return;n=f.fbq=function(){{n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)}};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '{id}');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id={id}&ev=PageView&noscript=1"
+/></noscript>
+<!-- End Meta Pixel Code -->
+""".format(id=META_PIXEL_ID)
+
+# Fired once, on the first page load after a successful registration, gated by
+# the request.session['fire_complete_registration'] flag set in the signup views.
+_PIXEL_COMPLETE_REG = """<script>
+  if (typeof fbq === 'function') { fbq('track', 'CompleteRegistration'); }
+</script>
+"""
+
+
+class MetaPixelMiddleware:
+    """Injects the Meta Pixel base code (init + PageView) right after <head> on
+    every HTML page, mirroring the GA/GTM middlewares (templates don't share one
+    base). If the current request's session carries the one-shot
+    'fire_complete_registration' flag (set in the signup views), also emits a
+    single CompleteRegistration event and clears the flag — so the event fires
+    exactly once, on the post-registration view-only dashboard, regardless of how
+    many times that dashboard is later reloaded.
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        try:
+            if getattr(response, "streaming", False):
+                return response
+            if "text/html" not in response.get("Content-Type", ""):
+                return response
+            if not hasattr(response, "content"):
+                return response
+
+            charset = response.charset or "utf-8"
+            content = response.content.decode(charset, errors="ignore")
+            if META_PIXEL_ID in content:
+                return response
+
+            idx = content.lower().find("<head>")
+            if idx == -1:
+                return response
+
+            snippet = _PIXEL_SNIPPET
+            session = getattr(request, "session", None)
+            if session is not None and session.pop("fire_complete_registration", False):
+                snippet += _PIXEL_COMPLETE_REG
+
+            insert_at = idx + len("<head>")
+            content = content[:insert_at] + "\n" + snippet + content[insert_at:]
+            response.content = content.encode(charset)
+            if response.has_header("Content-Length"):
+                response["Content-Length"] = str(len(response.content))
+        except Exception:
+            # Analytics must never break a page render.
+            pass
+        return response
+
+
 _GTM_HEAD_SNIPPET = """<!-- Google Tag Manager -->
 <script>(function(w,d,s,l,i){{w[l]=w[l]||[];w[l].push({{'gtm.start':
 new Date().getTime(),event:'gtm.js'}});var f=d.getElementsByTagName(s)[0],
