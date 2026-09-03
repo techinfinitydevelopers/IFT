@@ -250,6 +250,33 @@ _STATE_ALIASES = {
     'dadra and nagar haveli': 'dadra and nagar haveli and daman and diu',
     'andaman nicobar': 'andaman and nicobar islands',
     'andaman and nicobar': 'andaman and nicobar islands',
+    # No-space / common misspellings seen in manually-typed school data
+    'tamilnadu': 'tamil nadu',
+    'tamilnad': 'tamil nadu',
+    'maharastra': 'maharashtra',
+    'maharashta': 'maharashtra',
+    'andhrapradesh': 'andhra pradesh',
+    'andra pradesh': 'andhra pradesh',
+    'madhyapradesh': 'madhya pradesh',
+    'uttarpradesh': 'uttar pradesh',
+    'westbengal': 'west bengal',
+    'himachalpradesh': 'himachal pradesh',
+    'arunachalpradesh': 'arunachal pradesh',
+    'haryama': 'haryana',
+    'chattisgarh': 'chhattisgarh',
+    'pondichery': 'puducherry',
+    # 2-letter state / UT codes (India vehicle/postal style)
+    'mh': 'maharashtra', 'up': 'uttar pradesh', 'pb': 'punjab', 'ap': 'andhra pradesh',
+    'ka': 'karnataka', 'tn': 'tamil nadu', 'gj': 'gujarat', 'rj': 'rajasthan',
+    'mp': 'madhya pradesh', 'wb': 'west bengal', 'br': 'bihar', 'hr': 'haryana',
+    'dl': 'delhi', 'ts': 'telangana', 'tg': 'telangana', 'kl': 'kerala',
+    'od': 'odisha', 'or': 'odisha', 'jh': 'jharkhand', 'cg': 'chhattisgarh',
+    'uk': 'uttarakhand', 'ua': 'uttarakhand', 'hp': 'himachal pradesh',
+    'jk': 'jammu and kashmir', 'ga': 'goa', 'as': 'assam', 'ml': 'meghalaya',
+    'mn': 'manipur', 'mz': 'mizoram', 'nl': 'nagaland', 'tr': 'tripura',
+    'sk': 'sikkim', 'ar': 'arunachal pradesh', 'py': 'puducherry', 'pi': 'puducherry',
+    'ch': 'chandigarh', 'an': 'andaman and nicobar islands', 'ld': 'lakshadweep',
+    'dn': 'dadra and nagar haveli and daman and diu', 'la': 'ladakh',
 }
 _CITY_ALIASES = {
     'bangalore': 'bengaluru',
@@ -288,16 +315,24 @@ def _normalize(value):
 
 def _lookup(state='', city=''):
     """Return (region, zone). State-first, city as fallback."""
-    s = _normalize(state)
-    if s:
-        s = _STATE_ALIASES.get(s, s)
+    s_raw = _normalize(state)
+    if s_raw:
+        s = _STATE_ALIASES.get(s_raw, s_raw)
         if s in STATE_ZONE:
             return STATE_ZONE[s]
-    c = _normalize(city)
-    if c:
-        c = _CITY_ALIASES.get(c, c)
+        # user may have typed a CITY in the state field (e.g. "Bhopal")
+        sc = _CITY_ALIASES.get(s_raw, s_raw)
+        if sc in CITY_ZONE:
+            return CITY_ZONE[sc]
+    c_raw = _normalize(city)
+    if c_raw:
+        c = _CITY_ALIASES.get(c_raw, c_raw)
         if c in CITY_ZONE:
             return CITY_ZONE[c]
+        # user may have typed a STATE in the city field
+        cs = _STATE_ALIASES.get(c_raw, c_raw)
+        if cs in STATE_ZONE:
+            return STATE_ZONE[cs]
     return _UNKNOWN
 
 
