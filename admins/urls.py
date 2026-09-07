@@ -15,6 +15,7 @@ urlpatterns = [
     path('highlights/export/', highlights_views.admin_highlights_export, name='admin_highlights_export'),
     path('highlights/<int:highlight_id>/', highlights_views.admin_highlight_detail, name='admin_highlight_detail'),
     path('submissions/', views.all_submissions, name='all_submissions'),
+    path('submissions/export/', views.all_submissions_export, name='all_submissions_export'),
     path('submissions/classic/', views.all_submissions_classic, name='all_submissions_classic'),
     path('submission/<int:submission_id>/', views.submission_detail, name='submission_detail'),
     path('submission/<int:submission_id>/classic/', views.submission_detail_v2, name='submission_detail_classic'),

@@ -583,10 +583,11 @@
                         </nav>
                     </div>
                     <div class="col-12 col-md-6 d-flex justify-content-md-end align-items-center gap-3 mt-3 mt-md-0">
-                        <button class="btn-secondary-custom" id="exportBtn">
+                        <a class="btn-secondary-custom" id="exportBtn" style="text-decoration: none;"
+                           href="{% url 'admins:all_submissions_export' %}?status={{ selected_status|urlencode }}&category={{ selected_category|urlencode }}&search={{ search_query|urlencode }}">
                             <span class="material-symbols-outlined" style="font-size: 18px;">file_download</span>
                             Export CSV
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>

@@ -685,8 +685,88 @@ def all_submissions(request):
         'selected_category': category,
         'search_query': search,
     }
-    
+
     return render(request, 'admins/all_submissions_v3.html', context)
+
+
+@login_required
+@user_passes_test(is_staff_or_superuser)
+def all_submissions_export(request):
+    """Server-side CSV export of all submissions (super-admin).
+
+    The Export CSV button previously only showed a toast and downloaded
+    nothing. This streams a real CSV of ALL matching submissions, honouring
+    the same status/category/search filters as the list page.
+    """
+    import csv
+    from django.http import HttpResponse
+    from students.models import TeamMembership
+
+    submissions = IdeaSubmission.objects.all().select_related(
+        'student__user', 'ai_evaluation'
+    ).order_by('-created_at')
+
+    status = request.GET.get('status', '')
+    category = request.GET.get('category', '')
+    search = request.GET.get('search', '')
+
+    if status:
+        submissions = submissions.filter(status=status)
+    if category:
+        submissions = submissions.filter(final_category=category)
+    if search:
+        submissions = submissions.filter(
+            Q(title__icontains=search) |
+            Q(q3_solution_simple__icontains=search) |
+            Q(student__user__first_name__icontains=search) |
+            Q(student__user__last_name__icontains=search) |
+            Q(student__school_name__icontains=search)
+        )
+
+    response = HttpResponse(content_type='text/csv; charset=utf-8')
+    response['Content-Disposition'] = 'attachment; filename="ift-submissions.csv"'
+    response.write('﻿')  # BOM so Excel opens UTF-8 correctly
+
+    writer = csv.writer(response)
+    writer.writerow(['ID', 'Idea', 'Category', 'Team / Student', 'School',
+                     'Status', 'AI Score', 'Evaluator Score', 'Top 400', 'Rank', 'Date'])
+
+    for s in submissions:
+        ai_score = ''
+        is_top_400 = ''
+        rank = ''
+        try:
+            ev = s.ai_evaluation
+            ai_score = ev.final_score
+            is_top_400 = 'Yes' if ev.is_top_400 else 'No'
+            rank = ev.rank if ev.rank is not None else ''
+        except Exception:
+            pass
+
+        leader_membership = TeamMembership.objects.filter(
+            student=s.student, role='leader'
+        ).select_related('team').first()
+        team_name = (leader_membership.team.name if leader_membership
+                     else (s.student.user.get_full_name() or s.student.user.username))
+
+        eval_assignment = EvaluatorAssignment.objects.filter(submission=s, status='evaluated').first()
+        evaluator_score = eval_assignment.score if eval_assignment else ''
+
+        writer.writerow([
+            'SUB-{}'.format(s.id),
+            (s.title or s.q3_solution_simple or s.q2_exact_problem or 'Untitled'),
+            (s.get_final_category_display() or s.get_ai_suggested_category_display() or 'Other'),
+            team_name,
+            s.student.school_display_name or '',
+            s.get_status_display(),
+            ai_score,
+            evaluator_score,
+            is_top_400,
+            rank,
+            s.submitted_at.strftime('%b %d, %Y') if s.submitted_at else '',
+        ])
+
+    return response
 
 
 @login_required
