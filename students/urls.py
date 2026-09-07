@@ -49,6 +49,7 @@ urlpatterns = [
     path('school/activation-checklist/toggle/', views.school_activation_toggle, name='school_activation_toggle'),
     path('school/students/', views.school_students, name='school_students'),
     path('school/teams/', views.school_teams, name='school_teams'),
+    path('school/teams/export/', views.school_submissions_export, name='school_submissions_export'),
     path('school/submissions/', views.school_submissions, name='school_submissions'),
     path('school/results/', views.school_results, name='school_results'),
     path('school/reports/', views.school_reports, name='school_reports'),

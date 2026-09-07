@@ -585,10 +585,11 @@
                         </nav>
                     </div>
                     <div class="col-12 col-md-6 d-flex justify-content-md-end align-items-center gap-3 mt-3 mt-md-0">
-                        <button class="btn-secondary-custom" onclick="exportCSV()">
+                        <a class="btn-secondary-custom" style="text-decoration: none;"
+                           href="{% url 'students:school_submissions_export' %}?q={{ search_query|urlencode }}&status={{ status_filter|urlencode }}">
                             <span class="material-symbols-outlined" style="font-size: 18px;">file_download</span>
                             Export CSV
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -1011,29 +1012,7 @@
         if (e.key === 'Escape' && detailsSidebar.classList.contains('open')) closeDetailsSidebarFn();
     });
 
-    // Export CSV
-    function exportCSV() {
-        const rows = [['ID', 'Idea', 'Team', 'Student', 'Grade', 'Track', 'Status', 'AI Score', 'Date']];
-        document.querySelectorAll('.custom-table tbody tr').forEach(row => {
-            rows.push([
-                'SUB-' + String(row.getAttribute('data-id')).padStart(3, '0'),
-                row.getAttribute('data-title') || '',
-                row.getAttribute('data-team') || '',
-                row.getAttribute('data-student') || '',
-                row.getAttribute('data-grade') || '',
-                row.getAttribute('data-track') || '',
-                row.getAttribute('data-status-label') || '',
-                row.getAttribute('data-score') || '',
-                row.getAttribute('data-date') || ''
-            ]);
-        });
-        const csv = rows.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(',')).join('\n');
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = 'iftx-submissions.csv'; a.click();
-        URL.revokeObjectURL(url);
-    }
+    // Export CSV is now a server-side download (see the Export link above).
 </script>
 </body>
 </html>

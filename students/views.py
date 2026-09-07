@@ -2295,6 +2295,84 @@ def school_teams(request):
 
 
 @login_required
+def school_submissions_export(request):
+    """Server-side CSV export of this school's idea submissions.
+
+    Replaces the old client-side blob download (a detached <a>.click() that
+    failed to trigger in some browsers, and only saw the current page's 20
+    rows). This streams a proper CSV of ALL matching submissions and honours
+    the same search/status filters as the list page.
+    """
+    import csv
+    from django.http import HttpResponse
+    from students.models import School, TeamMembership, IdeaSubmission
+
+    try:
+        school = request.user.school_profile
+    except School.DoesNotExist:
+        return redirect('accounts:sign_in')
+
+    if school.status != 'active':
+        return redirect('students:school_dashboard')
+
+    search = request.GET.get('q', '').strip()
+    status_filter = request.GET.get('status', '')
+
+    submissions = IdeaSubmission.objects.filter(
+        student__school=school
+    ).select_related('student__user', 'ai_evaluation').order_by('-created_at')
+
+    if search:
+        submissions = submissions.filter(
+            Q(title__icontains=search) |
+            Q(student__user__first_name__icontains=search) |
+            Q(student__user__last_name__icontains=search) |
+            Q(q3_solution_simple__icontains=search)
+        )
+    if status_filter:
+        submissions = submissions.filter(status=status_filter)
+
+    response = HttpResponse(content_type='text/csv; charset=utf-8')
+    response['Content-Disposition'] = 'attachment; filename="ift-submissions.csv"'
+    response.write('﻿')  # BOM so Excel opens UTF-8 correctly
+
+    writer = csv.writer(response)
+    writer.writerow(['ID', 'Idea', 'Team', 'Student', 'Grade', 'Track', 'Status', 'AI Score', 'Date'])
+
+    for s in submissions:
+        ai_score = ''
+        try:
+            ai_score = s.ai_evaluation.final_score
+        except Exception:
+            pass
+
+        leader_membership = TeamMembership.objects.filter(
+            student=s.student, role='leader'
+        ).select_related('team').first()
+        team = leader_membership.team if leader_membership else None
+        if team is None:
+            membership = TeamMembership.objects.filter(
+                student=s.student
+            ).select_related('team').first()
+            team = membership.team if membership else None
+        team_name = team.name if team else s.student.user.get_full_name()
+
+        writer.writerow([
+            'SUB-{:03d}'.format(s.id),
+            (s.title or s.q3_solution_simple or 'Untitled'),
+            team_name,
+            s.student.user.get_full_name(),
+            s.student.grade or '',
+            s.get_competition_track_display() if s.competition_track else '',
+            s.get_status_display(),
+            ai_score,
+            (s.submitted_at or s.created_at).strftime('%b %d, %Y') if (s.submitted_at or s.created_at) else '',
+        ])
+
+    return response
+
+
+@login_required
 def school_students(request):
     """School admin — view enrolled students."""
     from students.models import School, Student, TeamMembership, IdeaSubmission
