@@ -2351,8 +2351,25 @@ def school_submissions_export(request):
     response['Content-Disposition'] = 'attachment; filename="ift-submissions.csv"'
     response.write('﻿')  # BOM so Excel opens UTF-8 correctly
 
+    # The 12 idea questions, appended after the metadata columns.
+    q_fields = [
+        ('q1_target_group', 'Q1 - Target Group & Struggle'),
+        ('q2_exact_problem', 'Q2 - Exact Problem'),
+        ('q3_solution_simple', 'Q3 - Solution'),
+        ('q4_differentiation', 'Q4 - Differentiation'),
+        ('q5_build_steps', 'Q5 - Build Steps'),
+        ('q6_resources', 'Q6 - Resources'),
+        ('q7_positive_change', 'Q7 - Positive Change'),
+        ('q8_challenges', 'Q8 - Challenges'),
+        ('q9_team_fit', 'Q9 - Team Fit'),
+        ('q10_feedback', 'Q10 - Feedback'),
+        ('q11_creative_element', 'Q11 - Creative Element'),
+        ('q12_pitch', 'Q12 - Pitch'),
+    ]
+
     writer = csv.writer(response)
-    writer.writerow(['ID', 'Idea', 'Team', 'Student', 'Grade', 'Track', 'Status', 'AI Score', 'Date'])
+    writer.writerow(['ID', 'Idea', 'Team', 'Student', 'Grade', 'Track', 'Status', 'AI Score', 'Date']
+                    + [label for _, label in q_fields])
 
     for s in submissions:
         ai_score = ''
@@ -2382,7 +2399,7 @@ def school_submissions_export(request):
             s.get_status_display(),
             ai_score,
             (s.submitted_at or s.created_at).strftime('%b %d, %Y') if (s.submitted_at or s.created_at) else '',
-        ])
+        ] + [(getattr(s, fname, '') or '') for fname, _ in q_fields])
 
     return response
 
