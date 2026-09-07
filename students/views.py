@@ -479,7 +479,22 @@ def submit_idea(request):
         save_type = request.POST.get('save_type', 'submit')  # 'draft' or 'submit'
 
         if save_type == 'draft':
-            # Draft — save whatever is filled, skip validation
+            # Draft — save whatever is filled, skip validation.
+            # Guard: don't create a brand-new EMPTY draft. If nothing has been
+            # answered/uploaded and there's no existing submission yet, there is
+            # nothing to save — a zero-content row would otherwise show up as a
+            # "Draft" in reports. (Existing drafts are left untouched.)
+            _content_fields = [
+                'q1_target_group', 'q2_exact_problem', 'q3_solution_simple', 'q4_differentiation',
+                'q5_build_steps', 'q6_resources', 'q7_positive_change', 'q8_challenges',
+                'q9_team_fit', 'q10_feedback', 'q11_creative_element', 'q12_pitch', 'title',
+            ]
+            _has_content = any(request.POST.get(f, '').strip() for f in _content_fields)
+            _has_upload = any(request.FILES.get(fn) for fn in ['document_file', 'image_file', 'video_file'])
+            if not existing and not _has_content and not _has_upload:
+                messages.info(request, 'Nothing to save yet — answer at least one question before saving a draft.')
+                return redirect('students:submit_idea')
+
             if existing:
                 submission = existing
             else:
