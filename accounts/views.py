@@ -88,6 +88,10 @@ def sign_up(request):
             return redirect('accounts:role_redirect')
         logout(request)
 
+    from . import utm as utm_service
+    if request.method == 'GET':
+        utm_service.capture(request)
+
     show_school_not_registered = False
     duplicate_message = None
     if request.method == 'POST':
@@ -111,6 +115,7 @@ def sign_up(request):
             )
             UserProfile.objects.create(user=user, role='student')
             school_obj = form.cleaned_data['school']
+            utm_data = utm_service.pop(request)
             Student.objects.create(
                 user=user,
                 student_id=f"IFT{user.id:05d}",
@@ -119,6 +124,7 @@ def sign_up(request):
                 grade=form.cleaned_data['grade'],
                 gender=form.cleaned_data['gender'],
                 phone=form.cleaned_data.get('phone', ''),
+                **utm_data,
             )
             otp_service.clear(request)
             login(request, user)
@@ -217,6 +223,10 @@ def school_sign_up(request):
             return redirect('accounts:role_redirect')
         logout(request)
 
+    from . import utm as utm_service
+    if request.method == 'GET':
+        utm_service.capture(request)
+
     if request.method == 'POST':
         form = SchoolSignUpForm(request.POST)
         if form.is_valid():
@@ -281,6 +291,7 @@ def school_sign_up(request):
                 status='pending',
                 is_active=False,
                 google_place_id=form.cleaned_data.get('google_place_id') or None,
+                **utm_service.pop(request),
             )
 
             # Send email with temp credentials (background — don't block signup)

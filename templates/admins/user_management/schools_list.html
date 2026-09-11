@@ -243,6 +243,19 @@
             outline: none; border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(94, 42, 151, 0.1);
         }
+        .utm-filter-select {
+            padding: 10px 12px; border: 1px solid var(--border-light); border-radius: 8px;
+            font-family: 'Poppins', sans-serif; font-size: 0.875rem;
+            color: var(--text-dark); background: #f8fafc;
+            outline: none; cursor: pointer; width: 170px; flex-shrink: 0;
+        }
+        .utm-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: rgba(94,42,151,0.1); color: var(--primary);
+            font-size: 0.7rem; font-weight: 700; padding: 3px 9px; border-radius: 999px;
+            text-transform: uppercase; letter-spacing: 0.03em;
+        }
+        .utm-badge.organic { background: #f0f0f0; color: #666; }
 
         /* ══ Table ══ */
         .custom-table { width: 100%; font-size: 0.875rem; border-collapse: collapse; }
@@ -665,7 +678,7 @@
 
             <!-- Stats Grid -->
             <div class="row g-4 mb-4">
-                <div class="col-12 col-md-4">
+                <div class="col-12 col-md-3">
                     <div class="stat-card">
                         <div class="stat-icon blue">
                             <span class="material-symbols-outlined">account_balance</span>
@@ -676,7 +689,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-12 col-md-4">
+                <div class="col-12 col-md-3">
                     <div class="stat-card">
                         <div class="stat-icon green">
                             <span class="material-symbols-outlined">check_circle</span>
@@ -687,7 +700,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-12 col-md-4">
+                <div class="col-12 col-md-3">
                     <div class="stat-card">
                         <div class="stat-icon amber">
                             <span class="material-symbols-outlined">groups</span>
@@ -695,6 +708,17 @@
                         <div>
                             <p class="stat-label">Total Students</p>
                             <h3 class="stat-value">{{ total_students|default:"0" }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: rgba(94,42,151,0.1); color: var(--primary);">
+                            <span class="material-symbols-outlined">campaign</span>
+                        </div>
+                        <div>
+                            <p class="stat-label">From Campaigns</p>
+                            <h3 class="stat-value">{{ campaign_schools_count|default:"0" }}</h3>
                         </div>
                     </div>
                 </div>
@@ -720,6 +744,13 @@
                         <span class="material-symbols-outlined">search</span>
                         <input type="text" id="searchInput" placeholder="Search by school name, city, principal..." value="{{ search_query|default:'' }}">
                     </div>
+                    <select class="utm-filter-select" id="utmSourceFilter">
+                        <option value="">All Sources</option>
+                        <option value="organic" {% if selected_utm_source == 'organic' %}selected{% endif %}>Organic (no campaign)</option>
+                        {% for src in utm_sources %}
+                        <option value="{{ src }}" {% if selected_utm_source == src %}selected{% endif %}>{{ src }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
 
                 <!-- Bulk Actions Bar -->
@@ -744,6 +775,7 @@
                                 <th>State</th>
                                 <th>Principal</th>
                                 <th>Students</th>
+                                <th>Campaign</th>
                                 <th>Activation</th>
                                 <th>Tata ClassEdge</th>
                                 <th>Status</th>
@@ -794,6 +826,13 @@
                                 <td>{{ school.principal_name|default:"-" }}</td>
                                 <td>
                                     <span style="font-weight:700; color:var(--primary);">{{ school.students_count|default:"0" }}</span>
+                                </td>
+                                <td>
+                                    {% if school.utm_source %}
+                                    <span class="utm-badge" title="Medium: {{ school.utm_medium|default:'-' }} &#10;Campaign: {{ school.utm_campaign|default:'-' }}">{{ school.utm_source }}</span>
+                                    {% else %}
+                                    <span class="utm-badge organic">Organic</span>
+                                    {% endif %}
                                 </td>
                                 <td onclick="event.stopPropagation();">
                                     <span title="{% for s in school.activation_steps %}{{ forloop.counter }}. {{ s.title }} — {% if s.done %}Done{% else %}Pending{% endif %}&#10;{% endfor %}" style="display:inline-block; font-size:0.75rem; font-weight:700; padding:2px 9px; border-radius:99px; {% if school.activation_done_count == 6 %}background:#dcfce7; color:#166534;{% elif school.activation_done_count > 0 %}background:#fef3c7; color:#b45309;{% else %}background:#f1f5f9; color:#94a3b8;{% endif %}">{{ school.activation_done_count }}/6</span>
@@ -1120,23 +1159,24 @@
 
     // Search with debounce
     const searchInput = document.getElementById('searchInput');
+    const utmSourceFilter = document.getElementById('utmSourceFilter');
+
+    function applySchoolFilters() {
+        const params = new URLSearchParams();
+        if (searchInput && searchInput.value) params.set('q', searchInput.value);
+        if (utmSourceFilter && utmSourceFilter.value) params.set('utm_source', utmSourceFilter.value);
+        window.location.href = '?' + params.toString();
+    }
+
     if (searchInput) {
         let debounceTimer;
         searchInput.addEventListener('keyup', function (e) {
-            if (e.key === 'Enter') {
-                const params = new URLSearchParams();
-                if (searchInput.value) params.set('q', searchInput.value);
-                window.location.href = '?' + params.toString();
-                return;
-            }
+            if (e.key === 'Enter') { applySchoolFilters(); return; }
             clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(function () {
-                const params = new URLSearchParams();
-                if (searchInput.value) params.set('q', searchInput.value);
-                window.location.href = '?' + params.toString();
-            }, 600);
+            debounceTimer = setTimeout(applySchoolFilters, 600);
         });
     }
+    if (utmSourceFilter) utmSourceFilter.addEventListener('change', applySchoolFilters);
 })();
 
 // ══ Details Sidebar ══

@@ -2016,6 +2016,7 @@ def bulk_delete_students(request):
 def schools_list(request):
     """List all schools with search."""
     search_query = request.GET.get('q', '').strip()
+    selected_utm_source = request.GET.get('utm_source', '').strip()
 
     schools = School.objects.all()
 
@@ -2027,6 +2028,16 @@ def schools_list(request):
             Q(principal_name__icontains=search_query) |
             Q(board__icontains=search_query)
         )
+
+    if selected_utm_source:
+        if selected_utm_source == 'organic':
+            schools = schools.filter(utm_source='')
+        else:
+            schools = schools.filter(utm_source=selected_utm_source)
+
+    # Distinct campaign sources seen so far, for the filter dropdown.
+    utm_sources = (School.objects.exclude(utm_source='')
+                   .values_list('utm_source', flat=True).distinct().order_by('utm_source'))
 
     # Annotate with student count, latest first
     schools = schools.annotate(students_count=Count('students')).order_by('-created_at')
@@ -2042,6 +2053,9 @@ def schools_list(request):
         'active_schools': School.objects.filter(is_active=True).count(),
         'total_students': Student.objects.count(),
         'search_query': search_query,
+        'utm_sources': utm_sources,
+        'selected_utm_source': selected_utm_source,
+        'campaign_schools_count': School.objects.exclude(utm_source='').count(),
     }
     return render(request, 'admins/user_management/schools_list.html', context)
 

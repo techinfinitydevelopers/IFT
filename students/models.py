@@ -49,6 +49,12 @@ class Student(models.Model):
 
     has_seen_welcome_popup = models.BooleanField(default=False)
 
+    # Campaign attribution — captured from the registration URL's ?utm_*
+    # params at sign-up time (see accounts/utm.py). Blank for organic signups.
+    utm_source = models.CharField(max_length=100, blank=True)
+    utm_medium = models.CharField(max_length=100, blank=True)
+    utm_campaign = models.CharField(max_length=150, blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     @property
@@ -133,6 +139,11 @@ class School(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
     google_place_id = models.CharField(max_length=255, unique=True, null=True, blank=True,
                                         help_text='Google Places place_id — source of truth to prevent duplicate school registrations.')
+    # Campaign attribution — captured from the registration URL's ?utm_*
+    # params at sign-up time (see accounts/utm.py). Blank for organic signups.
+    utm_source = models.CharField(max_length=100, blank=True)
+    utm_medium = models.CharField(max_length=100, blank=True)
+    utm_campaign = models.CharField(max_length=150, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     # {'step1': True, 'step2': False, ...} — which activation-journey steps the
     # school has ticked. Manual: the school checks/unchecks each step itself.
