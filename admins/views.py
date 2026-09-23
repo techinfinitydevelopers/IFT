@@ -21,6 +21,15 @@ from admins.models import EvaluatorAssignment
 # In-memory progress tracker (works for single-server/SQLite setup)
 PROGRESS_TRACKER = {}
 
+# Lead-source (utm_source) values that count as a paid channel for the
+# "Paid/Unpaid" report filter — everything else (organic, partner referral
+# like tataclassedge, chatgpt.com, blank) is treated as unpaid.
+PAID_LEAD_SOURCES = {'meta', 'facebook', 'instagram', 'google', 'google-ads', 'paid-social', 'paid_social'}
+
+
+def _is_paid_lead_source(source):
+    return (source or '').strip().lower() in PAID_LEAD_SOURCES
+
 
 def is_staff_or_superuser(user):
     """Admin-panel access: staff/superuser, or a read-only 'viewer' role.
@@ -3822,6 +3831,15 @@ def reports_view(request):
     context['report_cities'] = _distinct('city')
     context['report_states'] = _distinct('state')
 
+    # Distinct lead sources (utm_source) across schools + students, for the
+    # "Lead Source" filter dropdown.
+    lead_sources = set()
+    for v in School.objects.exclude(utm_source='').values_list('utm_source', flat=True):
+        lead_sources.add(v.strip())
+    for v in Student.objects.exclude(utm_source='').values_list('utm_source', flat=True):
+        lead_sources.add(v.strip())
+    context['report_lead_sources'] = sorted(lead_sources, key=str.lower)
+
     return render(request, 'admins/reports.html', context)
 
 
@@ -3898,6 +3916,25 @@ def report_students_export(request):
         students = students.filter(school__is_tata_classedge=(g['tata'] == 'true'))
     if g.get('paid') in ('true', 'false'):
         students = students.filter(is_paid=(g['paid'] == 'true'))
+    # ---- lead source / paid-vs-unpaid (a student's own utm_source, falling
+    # back to their school's, since bulk-added students rarely carry their own) ----
+    lead_source = g.get('lead_source', '').strip()
+    if lead_source == 'organic':
+        students = students.filter(
+            Q(utm_source='') | Q(utm_source__isnull=True)
+        ).filter(
+            Q(school__isnull=True) | Q(school__utm_source='') | Q(school__utm_source__isnull=True)
+        )
+    elif lead_source:
+        students = students.filter(
+            Q(utm_source=lead_source) | Q(utm_source='', school__utm_source=lead_source)
+        )
+    if g.get('lead_paid') in ('true', 'false'):
+        _paid_q = (
+            Q(utm_source__in=PAID_LEAD_SOURCES)
+            | Q(utm_source='', school__utm_source__in=PAID_LEAD_SOURCES)
+        )
+        students = students.filter(_paid_q) if g['lead_paid'] == 'true' else students.exclude(_paid_q)
     # ---- registration date range (inclusive) ----
     _df = _safe_date(g.get('date_from'))
     if _df:
@@ -3948,6 +3985,7 @@ def report_students_export(request):
         'Paid', 'Amount', 'Idea Title', 'SDG / Track', 'Submission Date', 'Status',
         'AI Score', 'Evaluator Name', 'Evaluator Score', 'Top 400', 'Top 100', 'Top 12',
         'Coordinator Name', 'Coordinator Mobile', 'Principal Name',
+        'Lead Source', 'Lead Type',
     ]
     rows = []
     for st in students_list:
@@ -3970,6 +4008,7 @@ def report_students_export(request):
         # (school sign-up only collects contact_phone) — fall back to the
         # registration phone so the column isn't blank for self-registered schools.
         coordinator_mobile = (school.designated_teacher_mobile if school else '') or (school.contact_phone if school else '') or ''
+        effective_lead_source = st.utm_source or (school.utm_source if school else '') or ''
         rows.append([
             st.user.get_full_name() or st.user.username,
             st.phone or '',
@@ -3996,6 +4035,8 @@ def report_students_export(request):
             (school.designated_teacher_name if school else '') or '',
             coordinator_mobile,
             (school.principal_name if school else '') or '',
+            effective_lead_source or 'Organic',
+            'Paid' if _is_paid_lead_source(effective_lead_source) else 'Unpaid',
         ])
     if g.get('preview'):
         return JsonResponse({'headers': headers, 'rows': rows, 'count': len(rows)})
@@ -4023,6 +4064,14 @@ def report_schools_export(request):
         schools = schools.filter(is_tata_classedge=(g['tata'] == 'true'))
     if g.get('status'):
         schools = schools.filter(status=g['status'])
+    lead_source = g.get('lead_source', '').strip()
+    if lead_source == 'organic':
+        schools = schools.filter(Q(utm_source='') | Q(utm_source__isnull=True))
+    elif lead_source:
+        schools = schools.filter(utm_source=lead_source)
+    if g.get('lead_paid') in ('true', 'false'):
+        _paid_q = Q(utm_source__in=PAID_LEAD_SOURCES)
+        schools = schools.filter(_paid_q) if g['lead_paid'] == 'true' else schools.exclude(_paid_q)
     # ---- registration date range (inclusive) ----
     _df = _safe_date(g.get('date_from'))
     if _df:
@@ -4040,7 +4089,7 @@ def report_schools_export(request):
         'School Name', 'Google Place ID', 'Registered On', 'City', 'State', 'Zone', 'Board', 'Tata ClassEdge',
         'Coordinator Name', 'Coordinator Mobile', 'Principal Name', 'Principal Email',
         'Pin Code', 'Total Students', 'Paid Students', 'Submitted Ideas',
-        'Highest AI Score', 'Status',
+        'Highest AI Score', 'Status', 'Lead Source', 'Lead Type',
     ]
     # Bulk aggregates in a few queries — avoids per-school N+1, which times out
     # on prod (app<->DB cross-region latency × 4 queries × hundreds of schools).
@@ -4100,6 +4149,8 @@ def report_schools_export(request):
                 sc.principal_name, sc.principal_email, sc.pin_code,
                 tot, paid, sub,
                 best if best is not None else '', sc.get_status_display(),
+                sc.utm_source or 'Organic',
+                'Paid' if _is_paid_lead_source(sc.utm_source) else 'Unpaid',
             ])
         dedupe_headers = headers[:2] + ['Duplicate Count'] + headers[2:]
         if g.get('preview'):
@@ -4122,6 +4173,8 @@ def report_schools_export(request):
             sc.principal_name, sc.principal_email, sc.pin_code,
             tot_map.get(sc.id, 0), paid_map.get(sc.id, 0), sub_map.get(sc.id, 0),
             best if best is not None else '', sc.get_status_display(),
+            sc.utm_source or 'Organic',
+            'Paid' if _is_paid_lead_source(sc.utm_source) else 'Unpaid',
         ])
     if g.get('preview'):
         return JsonResponse({'headers': headers, 'rows': rows, 'count': len(rows)})

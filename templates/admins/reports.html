@@ -803,6 +803,13 @@
                             <select name="evaluator" class="rb-input"><option value="">All</option>
                                 {% for e in report_evaluators %}<option value="{{ e.id }}">{{ e.first_name }} {{ e.last_name }}</option>{% endfor %}
                             </select></div>
+                        <div><label class="rb-lbl">Lead Source</label>
+                            <select name="lead_source" class="rb-input"><option value="">All</option>
+                                <option value="organic">Organic (no campaign)</option>
+                                {% for src in report_lead_sources %}<option value="{{ src }}">{{ src }}</option>{% endfor %}
+                            </select></div>
+                        <div><label class="rb-lbl">Paid / Unpaid</label>
+                            <select name="lead_paid" class="rb-input"><option value="">All</option><option value="true">Paid</option><option value="false">Unpaid</option></select></div>
                         <div style="display:flex;gap:8px;">
                             <button type="button" id="rbPreviewBtn" class="btn-filter" style="flex:1;justify-content:center;">
                                 <span class="material-symbols-outlined" style="font-size:18px;">visibility</span> Preview
