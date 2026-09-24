@@ -3985,7 +3985,7 @@ def report_students_export(request):
         'Paid', 'Amount', 'Idea Title', 'SDG / Track', 'Submission Date', 'Status',
         'AI Score', 'Evaluator Name', 'Evaluator Score', 'Top 400', 'Top 100', 'Top 12',
         'Coordinator Name', 'Coordinator Mobile', 'Principal Name',
-        'Lead Source', 'Lead Type',
+        'Lead Source', 'Paid/Unpaid',
     ]
     rows = []
     for st in students_list:
@@ -4069,9 +4069,6 @@ def report_schools_export(request):
         schools = schools.filter(Q(utm_source='') | Q(utm_source__isnull=True))
     elif lead_source:
         schools = schools.filter(utm_source=lead_source)
-    if g.get('lead_paid') in ('true', 'false'):
-        _paid_q = Q(utm_source__in=PAID_LEAD_SOURCES)
-        schools = schools.filter(_paid_q) if g['lead_paid'] == 'true' else schools.exclude(_paid_q)
     # ---- registration date range (inclusive) ----
     _df = _safe_date(g.get('date_from'))
     if _df:
@@ -4089,7 +4086,7 @@ def report_schools_export(request):
         'School Name', 'Google Place ID', 'Registered On', 'City', 'State', 'Zone', 'Board', 'Tata ClassEdge',
         'Coordinator Name', 'Coordinator Mobile', 'Principal Name', 'Principal Email',
         'Pin Code', 'Total Students', 'Paid Students', 'Submitted Ideas',
-        'Highest AI Score', 'Status', 'Lead Source', 'Lead Type',
+        'Highest AI Score', 'Status', 'Lead Source',
     ]
     # Bulk aggregates in a few queries — avoids per-school N+1, which times out
     # on prod (app<->DB cross-region latency × 4 queries × hundreds of schools).
@@ -4150,7 +4147,6 @@ def report_schools_export(request):
                 tot, paid, sub,
                 best if best is not None else '', sc.get_status_display(),
                 sc.utm_source or 'Organic',
-                'Paid' if _is_paid_lead_source(sc.utm_source) else 'Unpaid',
             ])
         dedupe_headers = headers[:2] + ['Duplicate Count'] + headers[2:]
         if g.get('preview'):
@@ -4174,7 +4170,6 @@ def report_schools_export(request):
             tot_map.get(sc.id, 0), paid_map.get(sc.id, 0), sub_map.get(sc.id, 0),
             best if best is not None else '', sc.get_status_display(),
             sc.utm_source or 'Organic',
-            'Paid' if _is_paid_lead_source(sc.utm_source) else 'Unpaid',
         ])
     if g.get('preview'):
         return JsonResponse({'headers': headers, 'rows': rows, 'count': len(rows)})
