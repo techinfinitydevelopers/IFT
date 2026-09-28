@@ -32,3 +32,7 @@ openpyxl>=3.1
 boto3>=1.34.0
 django-storages>=1.14.0
 
+# Pin below 3.0 — boto3/botocore require python-dateutil<3.0.0. dateutil 3.0
+# (released Sep 2026) otherwise gets picked transitively and breaks the build.
+python-dateutil>=2.8.2,<3.0.0
+
