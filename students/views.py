@@ -3058,6 +3058,29 @@ def school_profile(request):
             school.principal_email = data.get('principal_email', school.principal_email).strip()
             school.contact_phone = data.get('contact_phone', school.contact_phone).strip()
             school.website = data.get('website', school.website).strip()
+        elif section == 'account':
+            # Update the LOGIN email (User.email + username) so password-reset
+            # links go to the new address. Editing profile emails alone never
+            # touched the auth account before — this is the fix for that.
+            from django.http import JsonResponse
+            from django.db.models import Q as _Q
+            new_email = (data.get('login_email', '') or '').strip()
+            if not new_email or '@' not in new_email or '.' not in new_email.rsplit('@', 1)[-1]:
+                return JsonResponse({'success': False, 'message': 'Please enter a valid login email.'})
+            u = request.user
+            if new_email.lower() != (u.email or '').lower():
+                clash = User.objects.filter(
+                    _Q(email__iexact=new_email) | _Q(username__iexact=new_email)
+                ).exclude(pk=u.pk).exists()
+                if clash:
+                    return JsonResponse({'success': False, 'message': 'That email is already used by another account.'})
+                u.email = new_email
+                u.username = new_email  # school/student accounts use username = email
+                u.save(update_fields=['email', 'username'])
+                # keep the school's contact email (its original login email) in sync
+                school.contact_email = new_email
+                school.save(update_fields=['contact_email'])
+            return JsonResponse({'success': True, 'message': 'Login email updated. Use it to log in and receive password-reset links.'})
 
         school.save()
         from django.http import JsonResponse
