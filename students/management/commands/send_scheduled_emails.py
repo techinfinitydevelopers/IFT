@@ -28,8 +28,8 @@ from datetime import date, timedelta
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
-IDEA_DEADLINE = date(2026, 10, 15)
-RESUBMIT_DEADLINE = date(2026, 11, 15)
+IDEA_DEADLINE = date(2026, 11, 15)
+RESUBMIT_DEADLINE = date(2026, 11, 30)
 
 
 class Command(BaseCommand):

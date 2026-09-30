@@ -48,6 +48,7 @@ class Student(models.Model):
     paid_at = models.DateTimeField(null=True, blank=True)
 
     has_seen_welcome_popup = models.BooleanField(default=False)
+    has_seen_deadline_extended_popup = models.BooleanField(default=False)
 
     # Campaign attribution — captured from the registration URL's ?utm_*
     # params at sign-up time (see accounts/utm.py). Blank for organic signups.

@@ -255,6 +255,13 @@ def dashboard(request):
         student.has_seen_welcome_popup = True
         student.save(update_fields=['has_seen_welcome_popup'])
 
+    # One-time "Deadline Extended" announcement — skip it on the same load as
+    # the welcome popup so the two modals don't stack for a brand-new student.
+    show_deadline_popup = (not show_welcome_popup) and (not student.has_seen_deadline_extended_popup)
+    if show_deadline_popup:
+        student.has_seen_deadline_extended_popup = True
+        student.save(update_fields=['has_seen_deadline_extended_popup'])
+
     from students.models import TeamMembership
 
     submissions = IdeaSubmission.objects.filter(student=student).order_by('-created_at')
@@ -386,6 +393,7 @@ def dashboard(request):
         'videos_watched': len([v for v in video_list if v['watched']]),
         'payment_amount': _get_payment_amount(student) if not student.is_paid else 0,
         'show_welcome_popup': show_welcome_popup,
+        'show_deadline_popup': show_deadline_popup,
         'pending_suggestions_count': pending_suggestions_count,
         'masterclass_content': masterclass_content,
         'masterclass_link': masterclass_link,
@@ -983,14 +991,14 @@ def school_dashboard(request):
     platform_teams = Team.objects.filter(is_active=True).count()
     platform_ideas = IdeaSubmission.objects.exclude(status='draft').count()
 
-    # ---- Days left for submission (from submission Phase, fallback 15 Oct 2026) ----
+    # ---- Days left for submission (from submission Phase, fallback 15 Nov 2026) ----
     from datetime import date
     sub_phase = Phase.objects.filter(name__icontains='submission').order_by('order').first()
     if sub_phase:
         days_left = sub_phase.days_remaining
         submission_deadline = sub_phase.end_date
     else:
-        submission_deadline = date(2026, 10, 15)
+        submission_deadline = date(2026, 11, 15)
         days_left = max(0, (submission_deadline - timezone.now().date()).days)
 
     # ---- Upcoming training calendar (managed by super admin via Content) ----
@@ -1113,7 +1121,7 @@ def platform_live_stats(request):
         days_left = sub_phase.days_remaining
         deadline = sub_phase.end_date
     else:
-        deadline = date(2026, 10, 15)
+        deadline = date(2026, 11, 15)
         days_left = max(0, (deadline - timezone.now().date()).days)
 
     return JsonResponse({
