@@ -3062,10 +3062,30 @@ def school_profile(request):
             school.pin_code = data.get('pin_code', school.pin_code).strip()
             school.country = data.get('country', school.country).strip()
         elif section == 'contact':
+            from django.http import JsonResponse
+            from django.db.models import Q as _Q
             school.principal_name = data.get('principal_name', school.principal_name).strip()
-            school.principal_email = data.get('principal_email', school.principal_email).strip()
+            new_email = data.get('principal_email', school.principal_email).strip()
+            school.principal_email = new_email
             school.contact_phone = data.get('contact_phone', school.contact_phone).strip()
             school.website = data.get('website', school.website).strip()
+            # Keep the LOGIN/reset email (User.email + username) in sync with the
+            # email the school edits here. Previously a profile email change only
+            # touched principal_email, so password-reset kept going to the old
+            # login address — this makes the edited email the login email too.
+            u = request.user
+            if new_email and new_email.lower() != (u.email or '').lower():
+                if '@' not in new_email or '.' not in new_email.rsplit('@', 1)[-1]:
+                    return JsonResponse({'success': False, 'message': 'Please enter a valid email address.'})
+                clash = User.objects.filter(
+                    _Q(email__iexact=new_email) | _Q(username__iexact=new_email)
+                ).exclude(pk=u.pk).exists()
+                if clash:
+                    return JsonResponse({'success': False, 'message': 'That email is already used by another account.'})
+                u.email = new_email
+                u.username = new_email  # school/student accounts use username = email
+                u.save(update_fields=['email', 'username'])
+                school.contact_email = new_email
         elif section == 'account':
             # Update the LOGIN email (User.email + username) so password-reset
             # links go to the new address. Editing profile emails alone never
