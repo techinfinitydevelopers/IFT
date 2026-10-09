@@ -533,12 +533,15 @@ def submit_idea(request):
             for field_name, file_type in [('document_file', 'document'), ('image_file', 'image'), ('video_file', 'video')]:
                 uploaded_file = request.FILES.get(field_name)
                 if uploaded_file:
-                    if existing:
-                        UploadedFile.objects.filter(submission=submission, file_type=file_type).delete()
-                    UploadedFile.objects.create(
-                        submission=submission, file_type=file_type,
-                        file=uploaded_file, original_filename=uploaded_file.name, file_size=uploaded_file.size
-                    )
+                    try:
+                        if existing:
+                            UploadedFile.objects.filter(submission=submission, file_type=file_type).delete()
+                        UploadedFile.objects.create(
+                            submission=submission, file_type=file_type,
+                            file=uploaded_file, original_filename=uploaded_file.name, file_size=uploaded_file.size
+                        )
+                    except Exception as e:
+                        print(f"[DRAFT] {file_type} upload failed for student {getattr(student,'id',None)}: {e}", flush=True)
 
             messages.success(request, 'Draft saved successfully!')
             return redirect('students:dashboard')
@@ -579,22 +582,32 @@ def submit_idea(request):
                 ('video_file', 'video'),
             ]
 
+            upload_failed = False
             for field_name, file_type in files_data:
                 uploaded_file = request.FILES.get(field_name)
                 if uploaded_file:
-                    # Remove old file of same type if editing
-                    if existing:
-                        UploadedFile.objects.filter(submission=submission, file_type=file_type).delete()
-                    UploadedFile.objects.create(
-                        submission=submission,
-                        file_type=file_type,
-                        file=uploaded_file,
-                        original_filename=uploaded_file.name,
-                        file_size=uploaded_file.size
-                    )
+                    try:
+                        # Remove old file of same type if editing
+                        if existing:
+                            UploadedFile.objects.filter(submission=submission, file_type=file_type).delete()
+                        UploadedFile.objects.create(
+                            submission=submission,
+                            file_type=file_type,
+                            file=uploaded_file,
+                            original_filename=uploaded_file.name,
+                            file_size=uploaded_file.size
+                        )
+                    except Exception as e:
+                        # A storage/upload failure must not 500 the whole submit —
+                        # the idea text is already saved; surface a clear message.
+                        upload_failed = True
+                        print(f"[SUBMIT] {file_type} upload failed for student {getattr(student,'id',None)}: {e}", flush=True)
 
             # Submit for Review — redirect to My Idea where leader can Publish
-            messages.success(request, 'Idea saved! Review and publish from My Idea page.')
+            if upload_failed:
+                messages.warning(request, 'Your idea text was saved, but a file (image/video/document) could not be uploaded — please re-open and re-attach a smaller file.')
+            else:
+                messages.success(request, 'Idea saved! Review and publish from My Idea page.')
             return redirect('students:my_idea')
     else:
         form = IdeaSubmissionForm(instance=existing) if existing else IdeaSubmissionForm()

@@ -665,8 +665,27 @@
     else currentStep = 1;
     {% endif %}
 
+    // Client-side file-size guard — oversized files (esp. videos) otherwise
+    // take too long to upload and time out on the server (500). Block early.
+    var FILE_LIMITS = { doc_file: 25, img_file: 10, vid_file: 50 }; // MB
+    function checkFileSizes() {
+        var labels = { doc_file: 'document', img_file: 'image', vid_file: 'video' };
+        for (var id in FILE_LIMITS) {
+            var el = document.getElementById(id);
+            if (el && el.files && el.files[0]) {
+                var mb = el.files[0].size / (1024 * 1024);
+                if (mb > FILE_LIMITS[id]) {
+                    alert('Your ' + labels[id] + ' is ' + mb.toFixed(1) + ' MB — too large (max ' + FILE_LIMITS[id] + ' MB). Please compress it or choose a smaller file, then try again.');
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     // Submit for Review — saves as draft, no validation, show toast then redirect
     window.submitForReview = function() {
+        if (!checkFileSizes()) return;
         document.getElementById('saveTypeInput').value = 'submit';
         var form = document.getElementById('ideaForm');
         form.setAttribute('novalidate', 'true');
@@ -683,6 +702,7 @@
 
     // Save as Draft — skips validation, sets save_type=draft
     window.saveDraft = function() {
+        if (!checkFileSizes()) return;
         document.getElementById('saveTypeInput').value = 'draft';
         var form = document.getElementById('ideaForm');
         form.setAttribute('novalidate', 'true');
