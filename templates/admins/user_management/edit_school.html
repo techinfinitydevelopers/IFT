@@ -591,6 +591,31 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
+                                        <label class="form-label">Designated Teacher Name</label>
+                                        <input type="text" class="form-input" id="designatedTeacherName" name="designated_teacher_name" placeholder="e.g. Mr. Ramesh Kumar" value="{{ school.designated_teacher_name }}">
+                                        <div class="field-hint" style="font-size:0.78rem;color:#888;margin-top:4px;">Shown in the school dashboard greeting.</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">Designated Teacher Mobile</label>
+                                        <input type="tel" class="form-input" id="designatedTeacherMobile" name="designated_teacher_mobile" placeholder="10-digit mobile" value="{{ school.designated_teacher_mobile }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">Coordinator Name</label>
+                                        <input type="text" class="form-input" id="coordinatorName" name="coordinator_name" placeholder="Coordinator full name" value="{{ school.coordinator_name }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">Coordinator Email</label>
+                                        <input type="email" class="form-input" id="coordinatorEmail" name="coordinator_email" placeholder="coordinator@school.in" value="{{ school.coordinator_email }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
                                         <label class="form-label">Website</label>
                                         <input type="url" class="form-input" id="schoolWebsite" name="website" placeholder="https://www.school.in" value="{{ school.website }}">
                                     </div>

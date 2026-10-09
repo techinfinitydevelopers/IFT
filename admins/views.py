@@ -2414,6 +2414,12 @@ def edit_school(request, school_id):
         school.principal_email = request.POST.get('principal_email', school.principal_email).strip()
         school.contact_email = request.POST.get('contact_email', school.contact_email).strip()
         school.contact_phone = request.POST.get('contact_phone', school.contact_phone).strip()
+        # Designated teacher (coordinating teacher — shown in the school dashboard
+        # greeting) and coordinator were not editable here before.
+        school.designated_teacher_name = request.POST.get('designated_teacher_name', school.designated_teacher_name).strip()
+        school.designated_teacher_mobile = request.POST.get('designated_teacher_mobile', school.designated_teacher_mobile).strip()
+        school.coordinator_name = request.POST.get('coordinator_name', school.coordinator_name).strip()
+        school.coordinator_email = request.POST.get('coordinator_email', school.coordinator_email).strip()
         school.website = request.POST.get('website', school.website).strip()
         established = request.POST.get('established_year', '') or None
         school.established_year = int(established) if established else school.established_year
