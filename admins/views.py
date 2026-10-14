@@ -1604,6 +1604,39 @@ def onboard_student(request):
 
 # ─── Bulk student upload (super-admin, pre-paid via cheque) ──────────────────
 BULK_STUDENT_COLUMNS = ['first_name', 'last_name', 'email', 'phone', 'grade', 'gender']
+# ID-based import: no email required. Only name + grade are mandatory.
+BULK_STUDENT_COLUMNS_ID = ['first_name', 'last_name', 'grade']
+
+
+def _bulk_fernet():
+    """Fernet cipher keyed off SECRET_KEY — encrypts stored ID-import passwords.
+    NOTE: if SECRET_KEY ever changes, previously stored passwords can't be
+    decrypted (re-export would then need a password reset). SECRET_KEY is a
+    stable Railway env var, so this is safe in practice."""
+    import base64
+    import hashlib
+    from cryptography.fernet import Fernet
+    from django.conf import settings as _settings
+    key = base64.urlsafe_b64encode(hashlib.sha256(_settings.SECRET_KEY.encode()).digest())
+    return Fernet(key)
+
+
+def _bulk_enc_pw(plain):
+    return _bulk_fernet().encrypt(plain.encode()).decode()
+
+
+def _bulk_dec_pw(token):
+    try:
+        return _bulk_fernet().decrypt(token.encode()).decode()
+    except Exception:
+        return ''
+
+
+def _gen_student_password(length=8):
+    """Readable password for students (no ambiguous O/0/I/1/l) — alphanumeric only."""
+    import secrets as _s
+    alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+    return ''.join(_s.choice(alphabet) for _ in range(length))
 
 
 def bulk_feature_required(view):
@@ -1660,16 +1693,18 @@ def bulk_parse_students_csv(request):
         text = f.read().decode('utf-8-sig', errors='replace')
     except Exception:
         return JsonResponse({'success': False, 'message': 'Could not read the file.'}, status=400)
+    mode = (request.POST.get('mode') or 'email').strip().lower()
+    required = BULK_STUDENT_COLUMNS_ID if mode == 'id' else BULK_STUDENT_COLUMNS
     reader = csv.DictReader(io.StringIO(text))
     headers = [(h or '').strip().lower() for h in (reader.fieldnames or [])]
-    missing = [c for c in BULK_STUDENT_COLUMNS if c not in headers]
+    missing = [c for c in required if c not in headers]
     if missing:
         return JsonResponse({'success': False,
                              'message': 'CSV is missing columns: ' + ', '.join(missing)}, status=400)
     rows = []
     for i, r in enumerate(reader, start=2):  # row 1 = header
         rl = {k.strip().lower(): (v or '').strip() for k, v in r.items() if k}
-        if not any(rl.get(c) for c in BULK_STUDENT_COLUMNS):
+        if not any(rl.get(c) for c in required):
             continue  # skip fully blank lines
         rows.append({'row': i, 'first_name': rl.get('first_name', ''),
                      'last_name': rl.get('last_name', ''), 'email': rl.get('email', ''),
@@ -1829,16 +1864,177 @@ def bulk_students_list(request):
     students = []
     for st in qs:
         u = st.user
+        uname = (u.username if u else '') or ''
+        # Login ID = the username, but only when it's an ID-style login (no email).
+        login_id = uname if ('@' not in uname) else ''
         students.append({
             'id': st.id,
-            'name': (u.get_full_name() if u else '') or (u.username if u else ''),
+            'name': (u.get_full_name() if u else '') or uname,
             'email': (u.email if u else ''),
+            'login_id': login_id,
             'school': (st.school.name if st.school else st.school_name) or '',
             'grade': st.grade or '',
             'sent': st.id in sent_ids,
             'edit_url': f'/super-admin/user-management/student/{st.id}/edit/',
         })
     return JsonResponse({'success': True, 'students': students, 'count': len(students)})
+
+
+# ======================================================================
+# ID-BASED BULK IMPORT (no student emails) — fully separate from the
+# email-based flow above. Generates a Login ID + password per student,
+# stores a recoverable (encrypted) copy so the credential sheet can be
+# re-exported, and keeps an import history. Nothing here touches the
+# email-based upload / "Send Login Emails" path.
+# ======================================================================
+
+@bulk_feature_required
+@login_required
+@user_passes_test(is_bulk_admin)
+def bulk_students_template_id(request):
+    """Sample CSV for ID-based import — email NOT required."""
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="bulk_students_id_template.csv"'
+    w = csv.writer(response)
+    w.writerow(['first_name', 'last_name', 'grade', 'phone', 'gender'])
+    w.writerow(['Aarav', 'Sharma', '9', '9876543210', 'male'])
+    w.writerow(['Diya', 'Patel', '10', '', 'female'])
+    return response
+
+
+@bulk_feature_required
+@login_required
+@user_passes_test(is_bulk_admin)
+def bulk_create_students_id_chunk(request):
+    """Create a chunk of ID-based students (no email) and record their login
+    credentials in a StudentImportBatch for later re-export."""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'POST only'}, status=405)
+    import json as _json
+    import uuid as _uuid
+    from accounts.forms import duplicate_account_message
+    from admins.models import StudentImportBatch, ImportBatchCredential
+    try:
+        from accounts.models import UserProfile
+    except Exception:
+        UserProfile = None
+    try:
+        payload = _json.loads(request.body.decode('utf-8'))
+    except Exception:
+        return JsonResponse({'success': False, 'message': 'Bad request body.'}, status=400)
+
+    try:
+        school = School.objects.get(id=payload.get('school_id'))
+    except (School.DoesNotExist, ValueError, TypeError):
+        return JsonResponse({'success': False, 'message': 'Please select a valid school.'}, status=400)
+
+    client_key = (payload.get('batch_key') or '').strip()
+    if not client_key:
+        return JsonResponse({'success': False, 'message': 'Missing batch key.'}, status=400)
+    file_name = (payload.get('file_name') or '').strip()[:255]
+    batch, _ = StudentImportBatch.objects.get_or_create(
+        client_key=client_key,
+        defaults={'school': school, 'created_by': request.user, 'file_name': file_name},
+    )
+
+    valid_grades = {str(i) for i in range(7, 13)}
+    valid_genders = {'male', 'female', 'other'}
+    fee = 1600 if school.is_tata_classedge else 2500
+    results = []
+    for r in (payload.get('rows') or []):
+        fn = (r.get('first_name') or '').strip()
+        ln = (r.get('last_name') or '').strip()
+        email = (r.get('email') or '').strip()  # optional
+        phone = (r.get('phone') or '').strip()
+        grade = (r.get('grade') or '').strip()
+        gender = (r.get('gender') or '').strip().lower()
+        label = (f'{fn} {ln}'.strip()) or f'Row {r.get("row")}'
+
+        def fail(reason):
+            results.append({'row': r.get('row'), 'name': label, 'login_id': '',
+                            'status': 'failed', 'reason': reason})
+        if not (fn and ln):
+            fail('Missing first/last name'); continue
+        if grade not in valid_grades:
+            fail(f'Invalid grade "{grade}" (must be 7-12)'); continue
+        if gender and gender not in valid_genders:
+            fail(f'Invalid gender "{gender}" (male/female/other)'); continue
+        # Only guards against a clash when an email/phone is actually given.
+        dup = duplicate_account_message(email, phone)
+        if dup:
+            fail(dup); continue
+        try:
+            temp_password = _gen_student_password()
+            tmp_username = f'tmp-{_uuid.uuid4().hex[:16]}'
+            user = User.objects.create_user(username=tmp_username, email=email,
+                                            first_name=fn, last_name=ln, password=temp_password)
+            login_id = f'IFT{user.id:05d}'
+            user.username = login_id
+            user.save(update_fields=['username'])
+            student = Student.objects.create(
+                user=user,
+                student_id=f"IFT-{timezone.now():%Y}-{user.id:04d}",
+                school=school, school_name=school.name,
+                grade=grade, gender=gender, phone=phone,
+                is_paid=True, payment_amount=fee,
+                payment_transaction_id='BULK-CHEQUE', paid_at=timezone.now(),
+            )
+            if UserProfile is not None:
+                UserProfile.objects.get_or_create(user=user, defaults={'role': 'student'})
+            ImportBatchCredential.objects.create(
+                batch=batch, student=student, name=f'{fn} {ln}'.strip(),
+                login_id=login_id, grade=grade, password_enc=_bulk_enc_pw(temp_password),
+            )
+            results.append({'row': r.get('row'), 'name': label, 'login_id': login_id,
+                            'status': 'created', 'reason': ''})
+        except Exception as e:
+            fail(str(e)[:140])
+
+    batch.student_count = batch.credentials.count()
+    batch.save(update_fields=['student_count'])
+    return JsonResponse({'success': True, 'results': results, 'batch_id': batch.id})
+
+
+@bulk_feature_required
+@login_required
+@user_passes_test(is_bulk_admin)
+def bulk_import_batches_list(request):
+    """JSON: ID-based import history (one row per upload batch)."""
+    from admins.models import StudentImportBatch
+    qs = StudentImportBatch.objects.select_related('school').all()
+    batches = [{
+        'id': b.id,
+        'date': timezone.localtime(b.created_at).strftime('%d %b %Y, %I:%M %p'),
+        'school': (b.school.name if b.school else ''),
+        'file_name': b.file_name or '—',
+        'count': b.student_count,
+        'export_url': f'/super-admin/user-management/bulk-upload-students/batch-export/?batch_id={b.id}',
+    } for b in qs]
+    return JsonResponse({'success': True, 'batches': batches, 'count': len(batches)})
+
+
+@bulk_feature_required
+@login_required
+@user_passes_test(is_bulk_admin)
+def bulk_batch_export(request):
+    """Download the login-credentials sheet (Name, Grade, Login ID, Password) for
+    one ID-based import batch. Passwords are decrypted from storage so the sheet
+    always matches the credentials the students were originally given."""
+    from admins.models import StudentImportBatch
+    try:
+        batch = StudentImportBatch.objects.select_related('school').get(id=request.GET.get('batch_id'))
+    except (StudentImportBatch.DoesNotExist, ValueError, TypeError):
+        return HttpResponse('Batch not found.', status=404)
+    safe_school = ''.join(c for c in (batch.school.name if batch.school else 'school')
+                          if c.isalnum() or c in ' -_').strip().replace(' ', '_')[:40] or 'school'
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = (
+        f'attachment; filename="login_credentials_{safe_school}_batch{batch.id}.csv"')
+    w = csv.writer(response)
+    w.writerow(['Name', 'Grade', 'Login ID', 'Password'])
+    for c in batch.credentials.all():
+        w.writerow([c.name, c.grade, c.login_id, _bulk_dec_pw(c.password_enc)])
+    return response
 
 
 @login_required

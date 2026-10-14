@@ -49,6 +49,14 @@ def sign_in(request):
             if user is not None:
                 break
 
+        # Fallback: ID-based students (bulk import, no email) log in with their
+        # Login ID (= username), not an email. Tried only if the email lookup
+        # above found nothing, so the existing email-login flow is unchanged.
+        if user is None and email:
+            id_user = User.objects.filter(username__iexact=email).first()
+            if id_user is not None:
+                user = authenticate(request, username=id_user.username, password=password)
+
         if user is not None:
             login(request, user)
             if not remember_me:

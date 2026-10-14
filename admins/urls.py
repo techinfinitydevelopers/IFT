@@ -47,6 +47,11 @@ urlpatterns = [
     path('user-management/bulk-upload-students/email-targets/', views.bulk_email_targets, name='bulk_email_targets'),
     path('user-management/bulk-upload-students/send-emails/', views.bulk_send_emails_chunk, name='bulk_send_emails_chunk'),
     path('user-management/bulk-upload-students/list/', views.bulk_students_list, name='bulk_students_list'),
+    # ID-based import (no student emails)
+    path('user-management/bulk-upload-students/template-id/', views.bulk_students_template_id, name='bulk_students_template_id'),
+    path('user-management/bulk-upload-students/create-id/', views.bulk_create_students_id_chunk, name='bulk_create_students_id_chunk'),
+    path('user-management/bulk-upload-students/batches/', views.bulk_import_batches_list, name='bulk_import_batches_list'),
+    path('user-management/bulk-upload-students/batch-export/', views.bulk_batch_export, name='bulk_batch_export'),
     path('user-management/student/<int:student_id>/edit/', views.edit_student, name='edit_student'),
     path('user-management/student/<int:student_id>/delete/', views.delete_student, name='delete_student'),
     path('user-management/student/<int:student_id>/reset-password/', views.reset_student_password, name='reset_student_password'),

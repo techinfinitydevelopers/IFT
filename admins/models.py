@@ -301,3 +301,51 @@ class DigitalResource(models.Model):
     def is_image(self):
         """True for image files — the school view shows these as a thumbnail."""
         return self.file_extension in ('JPG', 'JPEG', 'PNG', 'WEBP', 'GIF', 'BMP')
+
+
+class StudentImportBatch(models.Model):
+    """One ID-based bulk-import run (no student emails).
+
+    ID-based imports generate a Login ID + password per student and we keep a
+    recoverable copy of those credentials here so the admin can re-download the
+    exact same sheet later (e.g. a student forgot their password). ONLY the
+    ID-based flow writes here — the email-based bulk upload is untouched and
+    never creates a batch.
+    """
+    client_key = models.CharField(max_length=64, unique=True,
+                                  help_text="Frontend-generated id tying all chunks of one upload together")
+    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='import_batches')
+    created_by = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL,
+                                   related_name='student_import_batches')
+    created_at = models.DateTimeField(auto_now_add=True)
+    file_name = models.CharField(max_length=255, blank=True)
+    student_count = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.school.name} — {self.student_count} students ({self.created_at:%d %b %Y})"
+
+
+class ImportBatchCredential(models.Model):
+    """One student's login credentials inside an ID-based import batch.
+
+    The password is stored ENCRYPTED (Fernet, key derived from SECRET_KEY) so the
+    credential sheet can be re-exported with the exact same password. It is never
+    stored in plaintext.
+    """
+    batch = models.ForeignKey(StudentImportBatch, on_delete=models.CASCADE, related_name='credentials')
+    student = models.ForeignKey(Student, null=True, blank=True, on_delete=models.SET_NULL,
+                                related_name='import_credentials')
+    name = models.CharField(max_length=300)
+    login_id = models.CharField(max_length=64)
+    grade = models.CharField(max_length=10, blank=True)
+    password_enc = models.TextField(help_text="Fernet-encrypted password (never plaintext)")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['id']
+
+    def __str__(self):
+        return f"{self.login_id} ({self.name})"

@@ -580,9 +580,10 @@
 
             <div class="onboard-form-card" style="background:#fff;border:1px solid #eee;border-radius:16px;padding:24px;max-width:1000px;">
                 <h2 style="font-size:1.3rem;font-weight:700;margin:0 0 4px;">Bulk Upload Students</h2>
-                <p style="color:#666;font-size:0.9rem;margin:0 0 18px;">Upload a CSV to register many students at once for one school. Uploaded students are marked <strong>paid</strong> (cheque / offline) and receive their login details by email.</p>
+                <p style="color:#666;font-size:0.9rem;margin:0 0 18px;">Upload a CSV to register many students at once for one school. Uploaded students are marked <strong>paid</strong> (cheque / offline).</p>
 
-                <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;">
+                <!-- School selector (shared by both modes) -->
+                <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;max-width:520px;">
                     <div style="flex:1;min-width:240px;">
                         <label style="font-weight:600;font-size:0.85rem;display:block;margin-bottom:6px;">School</label>
                         <div style="position:relative;">
@@ -594,19 +595,49 @@
                             </div>
                         </div>
                     </div>
-                    <div style="flex:1;min-width:240px;">
-                        <label style="font-weight:600;font-size:0.85rem;display:block;margin-bottom:6px;">CSV File</label>
-                        <input type="file" id="bulkFile" accept=".csv" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:8px;">
-                    </div>
-                    <a href="{% url 'admins:bulk_students_template' %}" style="background:#f1f1f1;color:#333;padding:10px 14px;border-radius:8px;text-decoration:none;font-weight:600;font-size:0.85rem;white-space:nowrap;">⬇ Sample CSV</a>
                 </div>
-                <p style="color:#888;font-size:0.78rem;margin:8px 0 0;">Required columns: first_name, last_name, email, phone, grade (7-12), gender (male/female/other)</p>
 
-                <div style="margin-top:18px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;">
-                    <button id="bulkUploadBtn" style="background:#5E2A97;color:#fff;border:none;border-radius:8px;padding:12px 24px;font-weight:600;font-size:0.9rem;cursor:pointer;">Upload &amp; Create</button>
-                    <button id="bulkEmailBtn" style="background:#0ea5e9;color:#fff;border:none;border-radius:8px;padding:12px 24px;font-weight:600;font-size:0.9rem;cursor:pointer;">📧 Send Login Emails to All</button>
+                <!-- Mode toggle -->
+                <div style="margin-top:18px;display:inline-flex;background:#f1f1f1;border-radius:10px;padding:4px;gap:4px;">
+                    <button type="button" class="mode-tab" data-mode="email" id="tabEmail"
+                            style="border:none;border-radius:8px;padding:8px 18px;font-weight:600;font-size:0.85rem;cursor:pointer;background:#5E2A97;color:#fff;">Email-based</button>
+                    <button type="button" class="mode-tab" data-mode="id" id="tabId"
+                            style="border:none;border-radius:8px;padding:8px 18px;font-weight:600;font-size:0.85rem;cursor:pointer;background:transparent;color:#444;">ID-based (no emails)</button>
                 </div>
-                <p style="color:#888;font-size:0.78rem;margin:8px 0 0;">"Send Login Emails" mails fresh login details to <strong>all bulk-uploaded students</strong> of the selected school (run it after creating them).</p>
+
+                <!-- ===== EMAIL MODE ===== -->
+                <div id="emailModePanel" style="margin-top:16px;">
+                    <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;">
+                        <div style="flex:1;min-width:240px;">
+                            <label style="font-weight:600;font-size:0.85rem;display:block;margin-bottom:6px;">CSV File</label>
+                            <input type="file" id="bulkFile" accept=".csv" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:8px;">
+                        </div>
+                        <a href="{% url 'admins:bulk_students_template' %}" style="background:#f1f1f1;color:#333;padding:10px 14px;border-radius:8px;text-decoration:none;font-weight:600;font-size:0.85rem;white-space:nowrap;">⬇ Sample CSV</a>
+                    </div>
+                    <p style="color:#888;font-size:0.78rem;margin:8px 0 0;">Required columns: first_name, last_name, email, phone, grade (7-12), gender (male/female/other)</p>
+                    <div style="margin-top:18px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;">
+                        <button id="bulkUploadBtn" style="background:#5E2A97;color:#fff;border:none;border-radius:8px;padding:12px 24px;font-weight:600;font-size:0.9rem;cursor:pointer;">Upload &amp; Create</button>
+                        <button id="bulkEmailBtn" style="background:#0ea5e9;color:#fff;border:none;border-radius:8px;padding:12px 24px;font-weight:600;font-size:0.9rem;cursor:pointer;">📧 Send Login Emails to All</button>
+                    </div>
+                    <p style="color:#888;font-size:0.78rem;margin:8px 0 0;">"Send Login Emails" mails fresh login details to <strong>all bulk-uploaded students</strong> of the selected school (run it after creating them).</p>
+                </div>
+
+                <!-- ===== ID MODE ===== -->
+                <div id="idModePanel" style="margin-top:16px;display:none;">
+                    <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;">
+                        <div style="flex:1;min-width:240px;">
+                            <label style="font-weight:600;font-size:0.85rem;display:block;margin-bottom:6px;">CSV File</label>
+                            <input type="file" id="bulkFileId" accept=".csv" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:8px;">
+                        </div>
+                        <a href="{% url 'admins:bulk_students_template_id' %}" style="background:#f1f1f1;color:#333;padding:10px 14px;border-radius:8px;text-decoration:none;font-weight:600;font-size:0.85rem;white-space:nowrap;">⬇ Sample CSV</a>
+                    </div>
+                    <p style="color:#888;font-size:0.78rem;margin:8px 0 0;">Required columns: first_name, last_name, grade (7-12). Optional: phone, gender. <strong>No email needed</strong> — each student gets an auto Login ID + password.</p>
+                    <div style="margin-top:18px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;">
+                        <button id="bulkUploadIdBtn" style="background:#5E2A97;color:#fff;border:none;border-radius:8px;padding:12px 24px;font-weight:600;font-size:0.9rem;cursor:pointer;">Upload &amp; Create</button>
+                        <button id="bulkExportBatchBtn" style="display:none;background:#10B981;color:#fff;border:none;border-radius:8px;padding:12px 24px;font-weight:600;font-size:0.9rem;cursor:pointer;">⬇ Export Login Sheet</button>
+                    </div>
+                    <p style="color:#888;font-size:0.78rem;margin:8px 0 0;">After creating, download the <strong>Login Sheet</strong> (Name, Grade, Login ID, Password) and share it with the school. The same sheet can always be re-downloaded from <strong>Import History</strong> below.</p>
+                </div>
 
                 <div id="bulkProgressWrap" style="display:none;margin-top:22px;">
                     <div style="display:flex;justify-content:space-between;font-size:0.85rem;font-weight:600;margin-bottom:6px;">
@@ -627,7 +658,7 @@
                     <div style="overflow:auto;max-height:420px;border:1px solid #eee;border-radius:10px;">
                         <table style="width:100%;border-collapse:collapse;font-size:0.8rem;white-space:nowrap;">
                             <thead><tr style="background:#5E2A97;color:#fff;text-align:left;position:sticky;top:0;">
-                                <th style="padding:8px 10px;">Row</th><th style="padding:8px 10px;">Name</th><th style="padding:8px 10px;">Email</th><th style="padding:8px 10px;">Status</th><th style="padding:8px 10px;">Reason</th>
+                                <th style="padding:8px 10px;">Row</th><th style="padding:8px 10px;">Name</th><th style="padding:8px 10px;">Email / Login ID</th><th style="padding:8px 10px;">Status</th><th style="padding:8px 10px;">Reason</th>
                             </tr></thead>
                             <tbody id="bulkResultsBody"></tbody>
                         </table>
@@ -660,8 +691,8 @@
                     </div>
                 </div>
             </div>
-            <!-- ===== Bulk-uploaded students table ===== -->
-            <div class="onboard-form-card" style="background:#fff;border:1px solid #eee;border-radius:16px;padding:24px;max-width:1000px;margin-top:20px;">
+            <!-- ===== Bulk-uploaded students table (EMAIL mode only) ===== -->
+            <div id="bulkStudentsCard" class="onboard-form-card" style="background:#fff;border:1px solid #eee;border-radius:16px;padding:24px;max-width:1000px;margin-top:20px;">
                 <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;margin-bottom:14px;">
                     <div>
                         <h2 style="font-size:1.15rem;font-weight:700;margin:0;">Bulk-Uploaded Students</h2>
@@ -675,12 +706,31 @@
                 <div style="overflow:auto;max-height:520px;border:1px solid #eee;border-radius:10px;">
                     <table style="width:100%;border-collapse:collapse;font-size:0.82rem;white-space:nowrap;">
                         <thead><tr style="background:#5E2A97;color:#fff;text-align:left;position:sticky;top:0;">
-                            <th style="padding:9px 12px;">#</th><th style="padding:9px 12px;">Name</th><th style="padding:9px 12px;">Email</th><th style="padding:9px 12px;">School</th><th style="padding:9px 12px;">Grade</th><th style="padding:9px 12px;">Email Sent</th><th style="padding:9px 12px;">Action</th>
+                            <th style="padding:9px 12px;">#</th><th style="padding:9px 12px;">Name</th><th style="padding:9px 12px;">Email</th><th style="padding:9px 12px;">Login ID</th><th style="padding:9px 12px;">School</th><th style="padding:9px 12px;">Grade</th><th style="padding:9px 12px;">Email Sent</th><th style="padding:9px 12px;">Action</th>
                         </tr></thead>
-                        <tbody id="bulkTableBody"><tr><td colspan="7" style="padding:16px;text-align:center;color:#888;">Loading…</td></tr></tbody>
+                        <tbody id="bulkTableBody"><tr><td colspan="8" style="padding:16px;text-align:center;color:#888;">Loading…</td></tr></tbody>
                     </table>
                 </div>
                 <p id="bulkTableCount" style="color:#888;font-size:0.78rem;margin:8px 0 0;"></p>
+            </div>
+
+            <!-- ===== Import History (ID-based only) ===== -->
+            <div id="importHistoryCard" class="onboard-form-card" style="display:none;background:#fff;border:1px solid #eee;border-radius:16px;padding:24px;max-width:1000px;margin-top:20px;">
+                <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;margin-bottom:14px;">
+                    <div>
+                        <h2 style="font-size:1.15rem;font-weight:700;margin:0;">Import History <span style="font-size:0.8rem;font-weight:500;color:#888;">(ID-based)</span></h2>
+                        <p style="color:#666;font-size:0.82rem;margin:4px 0 0;">Every ID-based import. Re-download any batch's login sheet (same Login IDs &amp; passwords) if a student forgets theirs.</p>
+                    </div>
+                    <button id="historyRefresh" style="background:#f1f1f1;border:none;border-radius:8px;padding:8px 12px;cursor:pointer;font-weight:600;">↻ Refresh</button>
+                </div>
+                <div style="overflow:auto;max-height:420px;border:1px solid #eee;border-radius:10px;">
+                    <table style="width:100%;border-collapse:collapse;font-size:0.82rem;white-space:nowrap;">
+                        <thead><tr style="background:#10B981;color:#fff;text-align:left;position:sticky;top:0;">
+                            <th style="padding:9px 12px;">Date</th><th style="padding:9px 12px;">School</th><th style="padding:9px 12px;">File</th><th style="padding:9px 12px;">Students</th><th style="padding:9px 12px;">Sheet</th>
+                        </tr></thead>
+                        <tbody id="historyBody"><tr><td colspan="5" style="padding:16px;text-align:center;color:#888;">Loading…</td></tr></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </main>
@@ -695,6 +745,9 @@
         var pb=document.getElementById('profileAvatarBtn'), pd=document.getElementById('profileDropdown');
         if(pb&&pd){pb.addEventListener('click',function(e){e.stopPropagation(); var open=pd.style.display==='block'; pd.style.display=open?'none':'block'; pd.style.opacity='1'; pd.style.transform='translateY(0)';});
             document.addEventListener('click',function(){pd.style.display='none';});}
+        // User Management dropdown collapse/expand (was hardcoded open with no handler)
+        var um=document.getElementById('userManagementToggle');
+        if(um){um.addEventListener('click',function(){var dd=um.closest('.nav-dropdown'); if(dd) dd.classList.toggle('open');});}
     })();
     // ---- searchable school dropdown ----
     (function(){
@@ -821,14 +874,15 @@
         function esc(s){var d=document.createElement('div'); d.textContent=(s==null?'':String(s)); return d.innerHTML;}
         function render(){
             var q=(search.value||'').toLowerCase();
-            var rows=all.filter(function(s){ return !q || (s.name+' '+s.email+' '+s.school).toLowerCase().indexOf(q)>=0; });
-            if(!rows.length){ body.innerHTML='<tr><td colspan="7" style="padding:16px;text-align:center;color:#888;">No bulk-uploaded students'+(q?' match your search.':' yet.')+'</td></tr>'; countEl.textContent=''; return; }
+            var rows=all.filter(function(s){ return !q || (s.name+' '+s.email+' '+(s.login_id||'')+' '+s.school).toLowerCase().indexOf(q)>=0; });
+            if(!rows.length){ body.innerHTML='<tr><td colspan="8" style="padding:16px;text-align:center;color:#888;">No bulk-uploaded students'+(q?' match your search.':' yet.')+'</td></tr>'; countEl.textContent=''; return; }
             body.innerHTML=rows.map(function(s,i){
                 var tick = s.sent ? '<span style="color:#16a34a;font-weight:700;">&#10004; Sent</span>' : '<span style="color:#ef4444;font-weight:700;">&#10008; Not sent</span>';
                 return '<tr style="border-bottom:1px solid #f0f0f0;">'+
                     '<td style="padding:8px 12px;color:#888;">'+(i+1)+'</td>'+
                     '<td style="padding:8px 12px;">'+esc(s.name)+'</td>'+
-                    '<td style="padding:8px 12px;">'+esc(s.email)+'</td>'+
+                    '<td style="padding:8px 12px;">'+esc(s.email||'—')+'</td>'+
+                    '<td style="padding:8px 12px;font-weight:600;">'+esc(s.login_id||'—')+'</td>'+
                     '<td style="padding:8px 12px;">'+esc(s.school)+'</td>'+
                     '<td style="padding:8px 12px;">'+esc(s.grade)+'</td>'+
                     '<td style="padding:8px 12px;">'+tick+'</td>'+
@@ -839,15 +893,123 @@
             countEl.textContent='Total: '+all.length+'  •  Email sent: '+sentN+'  •  Pending: '+(all.length-sentN);
         }
         function load(){
-            body.innerHTML='<tr><td colspan="7" style="padding:16px;text-align:center;color:#888;">Loading…</td></tr>';
+            body.innerHTML='<tr><td colspan="8" style="padding:16px;text-align:center;color:#888;">Loading…</td></tr>';
             fetch("{% url 'admins:bulk_students_list' %}").then(function(r){return r.json();}).then(function(d){
                 all=(d && d.students)||[]; render();
-            }).catch(function(){ body.innerHTML='<tr><td colspan="7" style="padding:16px;text-align:center;color:#ef4444;">Could not load list.</td></tr>'; });
+            }).catch(function(){ body.innerHTML='<tr><td colspan="8" style="padding:16px;text-align:center;color:#ef4444;">Could not load list.</td></tr>'; });
         }
         window.__loadBulkTable=load;
         if(search) search.addEventListener('input', render);
         if(refresh) refresh.addEventListener('click', load);
         load();
+    })();
+    // ---- mode toggle (Email-based / ID-based) ----
+    (function(){
+        var tabEmail=document.getElementById('tabEmail'), tabId=document.getElementById('tabId');
+        var emailPanel=document.getElementById('emailModePanel'), idPanel=document.getElementById('idModePanel');
+        var histCard=document.getElementById('importHistoryCard'), studentsCard=document.getElementById('bulkStudentsCard');
+        if(!tabEmail||!tabId) return;
+        function activate(tab,on){ tab.style.background=on?'#5E2A97':'transparent'; tab.style.color=on?'#fff':'#444'; }
+        function setMode(m){
+            var isId=(m==='id');
+            emailPanel.style.display=isId?'none':'';
+            idPanel.style.display=isId?'':'none';
+            histCard.style.display=isId?'':'none';
+            // The "Bulk-Uploaded Students" table (Email Sent / Manage-Reset-PW) is an
+            // email-flow view — hide it in ID mode; ID mode uses Import History instead.
+            if(studentsCard) studentsCard.style.display=isId?'none':'';
+            activate(tabId,isId); activate(tabEmail,!isId);
+            if(isId && window.__loadHistory) window.__loadHistory();
+        }
+        tabEmail.addEventListener('click', function(){ setMode('email'); });
+        tabId.addEventListener('click', function(){ setMode('id'); });
+        setMode('email');
+    })();
+    // ---- ID-based upload (no emails) ----
+    (function(){
+        var CHUNK=20;
+        function csrf(){var c=(document.cookie.split('; ').find(function(x){return x.indexOf('csrftoken=')===0;})||''); return c.split('=')[1]||'';}
+        var btn=document.getElementById('bulkUploadIdBtn'), exportBtn=document.getElementById('bulkExportBatchBtn');
+        if(!btn) return;
+        var lastBatchId=null;
+        if(exportBtn) exportBtn.addEventListener('click', function(){
+            if(lastBatchId) window.location="{% url 'admins:bulk_batch_export' %}?batch_id="+lastBatchId;
+        });
+        btn.addEventListener('click', async function(){
+            var schoolId=document.getElementById('bulkSchool').value;
+            var fileEl=document.getElementById('bulkFileId');
+            if(!schoolId){alert('Please select a school first.');return;}
+            if(!fileEl.files.length){alert('Please choose a CSV file.');return;}
+            var file=fileEl.files[0];
+            var batchKey=Date.now()+'-'+Math.random().toString(36).slice(2,10);
+            if(exportBtn) exportBtn.style.display='none'; lastBatchId=null;
+            btn.disabled=true; btn.textContent='Parsing…';
+            var fd=new FormData(); fd.append('file', file); fd.append('mode','id');
+            var pr;
+            try{ pr=await fetch("{% url 'admins:bulk_parse_students_csv' %}", {method:'POST',headers:{'X-CSRFToken':csrf()},body:fd}).then(function(r){return r.json();}); }
+            catch(e){ pr={success:false,message:'Could not upload/parse the file.'}; }
+            if(!pr.success){ alert(pr.message||'Could not parse CSV'); btn.disabled=false; btn.textContent='Upload & Create'; return; }
+            var rows=pr.rows||[], total=rows.length;
+            if(!total){ alert('No student rows found in the CSV.'); btn.disabled=false; btn.textContent='Upload & Create'; return; }
+            document.getElementById('bulkProgressWrap').style.display='block';
+            document.getElementById('bulkResultsWrap').style.display='block';
+            var bar=document.getElementById('bulkProgressBar'), cnt=document.getElementById('bulkProgressCount');
+            var createdEl=document.getElementById('bulkCreated'), failedEl=document.getElementById('bulkFailed'), body=document.getElementById('bulkResultsBody');
+            body.innerHTML='';
+            var done=0, created=0, failed=0;
+            btn.textContent='Creating…';
+            for(var i=0;i<total;i+=CHUNK){
+                var chunk=rows.slice(i,i+CHUNK);
+                var res;
+                try{ res=await fetch("{% url 'admins:bulk_create_students_id_chunk' %}", {method:'POST',headers:{'X-CSRFToken':csrf(),'Content-Type':'application/json'},body:JSON.stringify({school_id:schoolId,rows:chunk,batch_key:batchKey,file_name:file.name})}).then(function(r){return r.json();}); }
+                catch(e){ res={results:chunk.map(function(c){return {row:c.row,name:((c.first_name||'')+' '+(c.last_name||'')).trim(),login_id:'',status:'failed',reason:'Request failed'};})}; }
+                if(res.batch_id) lastBatchId=res.batch_id;
+                (res.results||[]).forEach(function(x){
+                    done++; if(x.status==='created'){created++;}else{failed++;}
+                    var tr=document.createElement('tr'); tr.style.borderBottom='1px solid #f0f0f0';
+                    tr.innerHTML='<td style="padding:7px 10px;">'+(x.row||'')+'</td>'+
+                        '<td style="padding:7px 10px;">'+(x.name||'')+'</td>'+
+                        '<td style="padding:7px 10px;font-weight:600;">'+(x.login_id||'')+'</td>'+
+                        '<td style="padding:7px 10px;color:'+(x.status==='created'?'#16a34a':'#ef4444')+';font-weight:600;">'+(x.status==='created'?'Created':'Failed')+'</td>'+
+                        '<td style="padding:7px 10px;color:#888;">'+(x.reason||'')+'</td>';
+                    body.appendChild(tr);
+                });
+                var pct=Math.round(done*100/total);
+                bar.style.width=pct+'%'; cnt.textContent=done+' / '+total; createdEl.textContent=created; failedEl.textContent=failed;
+            }
+            document.getElementById('bulkProgressLabel').textContent='Completed';
+            btn.disabled=false; btn.textContent='Upload & Create';
+            if(created>0 && lastBatchId && exportBtn) exportBtn.style.display='';
+            if(window.__loadBulkTable) window.__loadBulkTable();
+            if(window.__loadHistory) window.__loadHistory();
+            alert('Done! Created '+created+', Failed '+failed+'.'+(created>0?' Click "Export Login Sheet" to download credentials.':''));
+        });
+    })();
+    // ---- import history (ID-based) ----
+    (function(){
+        var body=document.getElementById('historyBody'), refresh=document.getElementById('historyRefresh');
+        if(!body) return;
+        function esc(s){var d=document.createElement('div'); d.textContent=(s==null?'':String(s)); return d.innerHTML;}
+        function render(batches){
+            if(!batches.length){ body.innerHTML='<tr><td colspan="5" style="padding:16px;text-align:center;color:#888;">No ID-based imports yet.</td></tr>'; return; }
+            body.innerHTML=batches.map(function(b){
+                return '<tr style="border-bottom:1px solid #f0f0f0;">'+
+                    '<td style="padding:8px 12px;">'+esc(b.date)+'</td>'+
+                    '<td style="padding:8px 12px;">'+esc(b.school)+'</td>'+
+                    '<td style="padding:8px 12px;color:#888;">'+esc(b.file_name)+'</td>'+
+                    '<td style="padding:8px 12px;font-weight:600;">'+esc(b.count)+'</td>'+
+                    '<td style="padding:8px 12px;"><a href="'+b.export_url+'" style="color:#10B981;font-weight:700;text-decoration:none;">⬇ Download</a></td>'+
+                '</tr>';
+            }).join('');
+        }
+        function load(){
+            body.innerHTML='<tr><td colspan="5" style="padding:16px;text-align:center;color:#888;">Loading…</td></tr>';
+            fetch("{% url 'admins:bulk_import_batches_list' %}").then(function(r){return r.json();}).then(function(d){
+                render((d && d.batches)||[]);
+            }).catch(function(){ body.innerHTML='<tr><td colspan="5" style="padding:16px;text-align:center;color:#ef4444;">Could not load history.</td></tr>'; });
+        }
+        window.__loadHistory=load;
+        if(refresh) refresh.addEventListener('click', load);
     })();
     </script>
 </body>
