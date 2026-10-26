@@ -1532,7 +1532,7 @@ def onboard_student(request):
             return JsonResponse({'success': False, 'message': 'Please fill in all required fields including student mobile and email.'}, status=400)
 
         # Block duplicate email / phone (same rule as student self sign-up).
-        from accounts.forms import duplicate_account_message
+        from accounts.forms import duplicate_account_message, _normalize_mobile
         dup = duplicate_account_message(student_email, student_mobile)
         if dup:
             return JsonResponse({'success': False, 'message': dup}, status=400)
@@ -1723,7 +1723,7 @@ def bulk_create_students_chunk(request):
         return JsonResponse({'success': False, 'message': 'POST only'}, status=405)
     import json as _json
     import secrets
-    from accounts.forms import duplicate_account_message
+    from accounts.forms import duplicate_account_message, _normalize_mobile
     try:
         from accounts.models import UserProfile
     except Exception:
@@ -1746,7 +1746,7 @@ def bulk_create_students_chunk(request):
         fn = (r.get('first_name') or '').strip()
         ln = (r.get('last_name') or '').strip()
         email = (r.get('email') or '').strip()
-        phone = (r.get('phone') or '').strip()
+        phone = _normalize_mobile((r.get('phone') or '').strip())
         grade = (r.get('grade') or '').strip()
         gender = (r.get('gender') or '').strip().lower()
         label = (f'{fn} {ln}'.strip()) or email or f'Row {r.get("row")}'
@@ -1912,7 +1912,7 @@ def bulk_create_students_id_chunk(request):
         return JsonResponse({'success': False, 'message': 'POST only'}, status=405)
     import json as _json
     import uuid as _uuid
-    from accounts.forms import duplicate_account_message
+    from accounts.forms import duplicate_account_message, _normalize_mobile
     from admins.models import StudentImportBatch, ImportBatchCredential
     try:
         from accounts.models import UserProfile
@@ -1945,7 +1945,7 @@ def bulk_create_students_id_chunk(request):
         fn = (r.get('first_name') or '').strip()
         ln = (r.get('last_name') or '').strip()
         email = (r.get('email') or '').strip()  # optional
-        phone = (r.get('phone') or '').strip()
+        phone = _normalize_mobile((r.get('phone') or '').strip())
         grade = (r.get('grade') or '').strip()
         gender = (r.get('gender') or '').strip().lower()
         label = (f'{fn} {ln}'.strip()) or f'Row {r.get("row")}'
