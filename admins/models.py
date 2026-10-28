@@ -349,3 +349,39 @@ class ImportBatchCredential(models.Model):
 
     def __str__(self):
         return f"{self.login_id} ({self.name})"
+
+
+class ResultsRelease(models.Model):
+    """Singleton switch for the Top 400 / rank 'controlled release'.
+
+    AI evaluation + ranking keep running silently in the backend as students
+    submit. While `is_published` is False (the default), NO rank / Top 400 badge
+    is shown to students or schools, and NO Top 400 / Top 100 milestone emails
+    are sent. On release day the admin flips this on ('Finalize & Release
+    Results') — which reveals results everywhere and sends the milestone emails
+    once. Only one row is ever used (id=1)."""
+    is_published = models.BooleanField(default=False)
+    published_at = models.DateTimeField(null=True, blank=True)
+    published_by = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL,
+                                     related_name='results_releases')
+
+    class Meta:
+        verbose_name = 'Results Release'
+        verbose_name_plural = 'Results Release'
+
+    def __str__(self):
+        return 'Published' if self.is_published else 'Hidden (silent)'
+
+    @classmethod
+    def load(cls):
+        """Return the singleton row, creating it (hidden) on first use."""
+        obj = cls.objects.first()
+        if obj is None:
+            obj = cls.objects.create()
+        return obj
+
+    @classmethod
+    def is_live(cls):
+        """True once results have been released to students/schools."""
+        obj = cls.objects.first()
+        return bool(obj and obj.is_published)

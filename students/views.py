@@ -301,10 +301,14 @@ def dashboard(request):
         team_code = team.team_code
         team_members_list = list(team.memberships.select_related('student__user').filter(status='active'))
 
-    # AI Score
+    # AI Score / rank — only revealed once the admin releases results
+    # (controlled release). Until then, ranking runs silently in the backend and
+    # students see a "results coming" state instead of their rank/Top 400 badge.
+    from admins.models import ResultsRelease
+    results_published = ResultsRelease.is_live()
     ai_score = None
     ai_rank = None
-    if latest_submission:
+    if latest_submission and results_published:
         try:
             ev = latest_submission.ai_evaluation
             ai_score = ev.final_score
@@ -383,6 +387,7 @@ def dashboard(request):
         'team_code': team_code,
         'ai_score': ai_score,
         'ai_rank': ai_rank,
+        'results_published': results_published,
         'phases': phases,
         'active_phase': active_phase,
         'team_role': team_role,
@@ -931,10 +936,14 @@ def school_dashboard(request):
     ).exclude(status='draft')
     ideas_count = ideas.count()
 
-    # Avg AI score
-    avg_score = AIEvaluation.objects.filter(
-        submission__student__school=school
-    ).aggregate(avg=Avg('final_score'))['avg'] or 0
+    # Avg AI score — hidden until results are released (controlled release)
+    from admins.models import ResultsRelease
+    results_published = ResultsRelease.is_live()
+    avg_score = 0
+    if results_published:
+        avg_score = AIEvaluation.objects.filter(
+            submission__student__school=school
+        ).aggregate(avg=Avg('final_score'))['avg'] or 0
 
     # SDG Track Distribution
     all_ideas = IdeaSubmission.objects.filter(student__school=school).exclude(competition_track='')
@@ -1271,15 +1280,18 @@ def my_idea(request):
             })
         return render(request, 'students/my_idea.html', {'student': student, 'submission': None})
 
-    # Get AI evaluation if exists
+    # Get AI evaluation if exists — gated behind the controlled results release.
+    from admins.models import ResultsRelease
+    results_published = ResultsRelease.is_live()
     ai_score = None
     ai_rank = None
-    try:
-        ev = submission.ai_evaluation
-        ai_score = ev.final_score
-        ai_rank = ev.rank
-    except:
-        pass
+    if results_published:
+        try:
+            ev = submission.ai_evaluation
+            ai_score = ev.final_score
+            ai_rank = ev.rank
+        except:
+            pass
 
     # Team members from Team model (not legacy TeamMember)
     team_members = []
@@ -2257,17 +2269,22 @@ def school_teams(request):
     paginator = Paginator(submissions, 20)
     page_obj = paginator.get_page(request.GET.get('page', 1))
 
-    # Build list with extra data (current page only)
+    # Build list with extra data (current page only). AI score / Top 400 are
+    # gated behind the controlled results release — schools don't see ranks
+    # until the admin releases results.
+    from admins.models import ResultsRelease
+    results_published = ResultsRelease.is_live()
     sub_list = []
     for s in page_obj:
         ai_score = None
         is_top_400 = False
-        try:
-            ev = s.ai_evaluation
-            ai_score = ev.final_score
-            is_top_400 = ev.is_top_400
-        except Exception:
-            pass
+        if results_published:
+            try:
+                ev = s.ai_evaluation
+                ai_score = ev.final_score
+                is_top_400 = ev.is_top_400
+            except Exception:
+                pass
 
         # Resolve team (leader membership preferred) for name + members
         leader_membership = TeamMembership.objects.filter(
@@ -2392,12 +2409,15 @@ def school_submissions_export(request):
     writer.writerow(['ID', 'Idea', 'Team', 'Student', 'Grade', 'Track', 'Status', 'AI Score', 'Date']
                     + [label for _, label in q_fields])
 
+    from admins.models import ResultsRelease
+    results_published = ResultsRelease.is_live()
     for s in submissions:
         ai_score = ''
-        try:
-            ai_score = s.ai_evaluation.final_score
-        except Exception:
-            pass
+        if results_published:
+            try:
+                ai_score = s.ai_evaluation.final_score
+            except Exception:
+                pass
 
         leader_membership = TeamMembership.objects.filter(
             student=s.student, role='leader'
@@ -2469,6 +2489,8 @@ def school_students(request):
         idea_map.setdefault(i.student_id, i)
 
     # Annotate with team and submission info
+    from admins.models import ResultsRelease
+    results_published = ResultsRelease.is_live()
     student_list = []
     for s in students:
         membership = membership_map.get(s.id)
@@ -2477,9 +2499,9 @@ def school_students(request):
         idea_title = (idea.title or idea.q3_solution_simple or '')[:40] if idea else ''
         idea_desc = (idea.q3_solution_simple or idea.q2_exact_problem or '')[:80] if idea else ''
 
-        # Get AI score
+        # Get AI score — gated behind the controlled results release
         ai_score = None
-        if idea:
+        if idea and results_published:
             try:
                 ai_score = idea.ai_evaluation.final_score
             except:
@@ -2602,16 +2624,19 @@ def _school_submissions_legacy(request):
         submissions = submissions.filter(status=status_filter)
 
     # Build list with extra data
+    from admins.models import ResultsRelease
+    results_published = ResultsRelease.is_live()
     sub_list = []
     for s in submissions:
         ai_score = None
         is_top_400 = False
-        try:
-            ev = s.ai_evaluation
-            ai_score = ev.final_score
-            is_top_400 = ev.is_top_400
-        except:
-            pass
+        if results_published:
+            try:
+                ev = s.ai_evaluation
+                ai_score = ev.final_score
+                is_top_400 = ev.is_top_400
+            except:
+                pass
 
         # Get team name
         membership = TeamMembership.objects.filter(student=s.student, role='leader').select_related('team').first()
@@ -2671,10 +2696,16 @@ def school_results(request):
     if school.status != 'active':
         return redirect('students:school_dashboard')
 
-    # Get all evaluations for this school
-    evaluations = AIEvaluation.objects.filter(
-        submission__student__school=school
-    ).select_related('submission', 'submission__student__user').order_by('-final_score')
+    # Get all evaluations for this school — but only once results are released.
+    # Until the admin releases, schools see an empty "results not announced" state.
+    from admins.models import ResultsRelease
+    results_published = ResultsRelease.is_live()
+    if results_published:
+        evaluations = AIEvaluation.objects.filter(
+            submission__student__school=school
+        ).select_related('submission', 'submission__student__user').order_by('-final_score')
+    else:
+        evaluations = AIEvaluation.objects.none()
 
     # Stats
     total_evaluated = evaluations.count()
@@ -2733,6 +2764,7 @@ def school_results(request):
         'avg_score': round(avg_score, 1),
         'highest_score': highest_score,
         'param_avgs': {k: round(v or 0, 1) for k, v in param_avgs.items()},
+        'results_published': results_published,
     }
     return render(request, 'students/school_results.html', context)
 
@@ -2819,8 +2851,14 @@ def school_reports(request):
     # Participation rate
     participation_rate = round((total_subs / max(student_count, 1)) * 100)
 
-    # AI Scores
-    evaluations = AIEvaluation.objects.filter(submission__student__school=school)
+    # AI Scores — gated behind the controlled results release. Before release,
+    # schools see participation stats but NO scores / Top 400 / rankings.
+    from admins.models import ResultsRelease
+    results_published = ResultsRelease.is_live()
+    if results_published:
+        evaluations = AIEvaluation.objects.filter(submission__student__school=school)
+    else:
+        evaluations = AIEvaluation.objects.none()
     avg_score = evaluations.aggregate(avg=Avg('final_score'))['avg'] or 0
     top_400 = evaluations.filter(is_top_400=True).count()
     highest_score = evaluations.order_by('-final_score').values_list('final_score', flat=True).first() or 0
@@ -2975,6 +3013,7 @@ def school_reports(request):
         'categories': categories,
         'monthly_trend': monthly_trend,
         'monthly_max': monthly_max,
+        'results_published': results_published,
     }
     return render(request, 'students/school_reports.html', context)
 
@@ -2993,10 +3032,17 @@ def school_halloffame(request):
     if school.status != 'active':
         return redirect('students:school_dashboard')
 
-    # Get top evaluated ideas from this school
-    evaluations = AIEvaluation.objects.filter(
-        submission__student__school=school
-    ).select_related('submission', 'submission__student__user').order_by('-final_score')
+    # Get top evaluated ideas from this school — only after results are released.
+    # Before release the AI-driven winners list stays empty (admin-curated Hall of
+    # Fame entries below are unaffected).
+    from admins.models import ResultsRelease
+    results_published = ResultsRelease.is_live()
+    if results_published:
+        evaluations = AIEvaluation.objects.filter(
+            submission__student__school=school
+        ).select_related('submission', 'submission__student__user').order_by('-final_score')
+    else:
+        evaluations = AIEvaluation.objects.none()
 
     winners = []
     for i, ev in enumerate(evaluations[:20]):
@@ -3036,6 +3082,7 @@ def school_halloffame(request):
         'podium': list(hof_entries.filter(rank__lte=3).order_by('rank')),
         'grid': list(hof_entries.filter(rank__gt=3).order_by('rank')),
         'current_season': hof_season,
+        'results_published': results_published,
     }
     return render(request, 'students/halloffame.html', context)
 

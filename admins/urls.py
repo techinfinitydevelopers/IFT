@@ -31,6 +31,7 @@ urlpatterns = [
     # Rankings
     path('rankings/', views.rankings_view, name='rankings'),
     path('rankings/export/', views.export_top_400, name='export_top_400'),
+    path('rankings/release/', views.release_results, name='release_results'),
     path('rankings/download-template/', views.download_template, name='download_template'),
     path('rankings/bulk-upload/', views.bulk_upload_ideas, name='bulk_upload_ideas'),
     path('rankings/progress/<str:task_id>/', views.get_progress, name='get_progress'),

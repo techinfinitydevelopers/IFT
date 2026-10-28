@@ -904,7 +904,11 @@ def update_rankings():
         evaluation.is_top_400 = False
         evaluation.save(update_fields=['rank', 'is_top_400'])
 
-    _send_ranking_milestone_emails()
+    # NOTE: milestone emails (Top 400 / Top 100 / School Winner) are NO LONGER
+    # sent here. Ranking now runs silently in the backend; the emails fire only
+    # when the admin releases results (admins.views.release_results →
+    # _send_ranking_milestone_emails). This keeps the 'controlled release' intact
+    # so students aren't emailed before the reveal date.
 
     return evaluations.count()
 

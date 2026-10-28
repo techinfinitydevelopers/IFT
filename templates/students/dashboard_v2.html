@@ -538,6 +538,12 @@
                                 <span class="material-symbols-outlined" style="color:#f59e0b;">emoji_events</span>
                                 Your Journey & Badges
                             </h3>
+                            {% if not results_published %}
+                            <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
+                                <span class="material-symbols-outlined" style="color:#d97706;font-size:22px;">hourglass_top</span>
+                                <p style="margin:0;font-size:0.82rem;color:#92400e;">Top 400 / Top 100 results will be announced soon. Your Innovator, Problem Solver &amp; Pitch Star badges will unlock on announcement day.</p>
+                            </div>
+                            {% endif %}
                             <div style="display:flex;gap:16px;overflow-x:auto;padding-bottom:8px;">
 
                                 <!-- Quick Starter — unlocked on registration (always) -->

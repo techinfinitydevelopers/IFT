@@ -81,7 +81,11 @@ class Command(BaseCommand):
                 if send_milestone_email(s, 'idea_published', background=False):
                     sent['idea_published'] += 1
 
-        if today >= RESUBMIT_DEADLINE:
+        # Resubmit reminder reveals Top 400 status (only rank 101-400 get it), so
+        # it stays gated behind the controlled results release too — never send it
+        # while ranks are still hidden, regardless of the calendar date.
+        from admins.models import ResultsRelease
+        if today >= RESUBMIT_DEADLINE and ResultsRelease.is_live():
             evals = (AIEvaluation.objects.filter(is_top_400=True, rank__gt=100)
                      .select_related('submission__student__user'))
             for e in evals:

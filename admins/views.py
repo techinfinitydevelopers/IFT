@@ -931,6 +931,8 @@ def rankings_view(request):
             'id': e.submission.id
         })
     
+    from admins.models import ResultsRelease
+    rel = ResultsRelease.load()
     context = {
         'top_400_evaluations': top_400_data,
         'normal_evaluations': normal_data,
@@ -938,9 +940,43 @@ def rankings_view(request):
         'top_400_count': top_400_evaluations.count(),
         'normal_count': normal_evaluations.count(),
         'pending_count': IdeaSubmission.objects.filter(status='submitted').exclude(ai_evaluation__isnull=False).count(),
+        'results_published': rel.is_published,
+        'results_published_at': rel.published_at,
     }
-    
+
     return render(request, 'admins/rankings_v3.html', context)
+
+
+@login_required
+@user_passes_test(is_staff_or_superuser)
+def release_results(request):
+    """Toggle the Top 400 / rank 'controlled release'.
+
+    POST action=publish  -> freeze final rankings, reveal ranks to students &
+                            schools, and send the Top 400 / Top 100 milestone
+                            emails once.
+    POST action=unpublish-> hide ranks again (safety/testing). Already-sent
+                            emails cannot be recalled.
+    """
+    from admins.models import ResultsRelease
+    if request.method != 'POST':
+        return redirect('admins:rankings')
+    action = request.POST.get('action')
+    rel = ResultsRelease.load()
+    if action == 'publish':
+        from ai_assistant.evaluator import update_rankings, _send_ranking_milestone_emails
+        update_rankings()  # freeze the final Top 400 from the current scores
+        rel.is_published = True
+        rel.published_at = timezone.now()
+        rel.published_by = request.user
+        rel.save()
+        _send_ranking_milestone_emails()
+        messages.success(request, 'Results released — students & schools can now see Top 400 / ranks, and the milestone emails have been sent.')
+    elif action == 'unpublish':
+        rel.is_published = False
+        rel.save(update_fields=['is_published'])
+        messages.success(request, 'Results hidden again — ranks are no longer visible to students/schools. (Emails already sent cannot be recalled.)')
+    return redirect('admins:rankings')
 
 
 
@@ -1723,7 +1759,7 @@ def bulk_create_students_chunk(request):
         return JsonResponse({'success': False, 'message': 'POST only'}, status=405)
     import json as _json
     import secrets
-    from accounts.forms import duplicate_account_message, _normalize_mobile
+    from accounts.forms import duplicate_account_message
     try:
         from accounts.models import UserProfile
     except Exception:
@@ -1912,7 +1948,7 @@ def bulk_create_students_id_chunk(request):
         return JsonResponse({'success': False, 'message': 'POST only'}, status=405)
     import json as _json
     import uuid as _uuid
-    from accounts.forms import duplicate_account_message, _normalize_mobile
+    from accounts.forms import duplicate_account_message
     from admins.models import StudentImportBatch, ImportBatchCredential
     try:
         from accounts.models import UserProfile
