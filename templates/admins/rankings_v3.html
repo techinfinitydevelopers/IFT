@@ -747,6 +747,20 @@
                 </div>
             </div>
 
+            <!-- Flash messages (e.g. results-release lock notice, publish/hide confirmations) -->
+            {% if messages %}
+            <div style="margin-bottom:20px;">
+                {% for message in messages %}
+                <div style="border-radius:12px;padding:13px 18px;margin-bottom:10px;font-size:0.9rem;font-weight:600;
+                    {% if message.tags == 'error' %}background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;
+                    {% elif message.tags == 'success' %}background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;
+                    {% else %}background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
             <!-- Results Release (controlled reveal of Top 400 / ranks) -->
             <div style="border-radius:14px;padding:16px 20px;margin-bottom:24px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;{% if results_published %}background:#f0fdf4;border:1px solid #bbf7d0;{% else %}background:#fffbeb;border:1px solid #fde68a;{% endif %}">
                 <div style="display:flex;align-items:center;gap:12px;">
