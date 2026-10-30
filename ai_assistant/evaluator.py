@@ -5,11 +5,37 @@ Includes 10 coherence cross-checks with -1 penalty each. >5 failures = disqualif
 import json
 import os
 import re
+import tempfile
 from concurrent.futures import ThreadPoolExecutor
 from django.conf import settings
 from .openrouter_client import OpenRouterClient
 from .models import AIEvaluation, AISummary
 from students.models import IdeaSubmission
+
+
+def _download_to_temp(filefield):
+    """Return a LOCAL temp-file path holding this upload's bytes, or None if the
+    file isn't available. Files live in object storage (S3/Railway bucket) on
+    prod, so os.path on MEDIA_ROOT doesn't see them — go through the storage API
+    and materialise a local copy for the vision/video APIs that read a path.
+    Caller is responsible for deleting the returned path."""
+    try:
+        if not filefield or not filefield.name:
+            return None
+        if not filefield.storage.exists(filefield.name):
+            return None
+        ext = os.path.splitext(filefield.name)[1] or ''
+        tmp = tempfile.NamedTemporaryFile(delete=False, suffix=ext)
+        try:
+            with filefield.storage.open(filefield.name, 'rb') as src:
+                for chunk in iter(lambda: src.read(1024 * 1024), b''):
+                    tmp.write(chunk)
+        finally:
+            tmp.close()
+        return tmp.name
+    except Exception as e:
+        print(f"[ATTACH] could not fetch {getattr(filefield, 'name', '?')}: {e}")
+        return None
 
 
 # ============================================================================
@@ -399,6 +425,7 @@ def analyze_attachments(submission, client=None):
     # Categorize files and build details
     file_details_parts = []
     image_paths = []
+    temp_files = []  # local temp copies pulled from object storage; cleaned up at the end
     present_types = set()
     videos_with_frames = set()
     gemini_video_analyses = {}
@@ -412,17 +439,20 @@ def analyze_attachments(submission, client=None):
         if f.file_type == 'document' and f.extracted_text:
             detail += f"\n  Extracted Text: {f.extracted_text[:500]}"
         elif f.file_type == 'image':
-            full_path = os.path.join(settings.MEDIA_ROOT, str(f.file))
-            if os.path.exists(full_path):
-                image_paths.append(full_path)
+            local_img = _download_to_temp(f.file)
+            if local_img:
+                image_paths.append(local_img)
+                temp_files.append(local_img)
                 detail += "\n  (Image attached below - describe EXACTLY what you see, do not assume relevance)"
             else:
                 detail += "\n  Image file missing from disk - cannot analyze"
         elif f.file_type == 'video':
-            full_path = os.path.join(settings.MEDIA_ROOT, str(f.file))
             ext = f.original_filename.lower().split('.')[-1]
+            full_path = _download_to_temp(f.file)
+            if full_path:
+                temp_files.append(full_path)
 
-            if ext in GEMINI_VIDEO_FORMATS and os.path.exists(full_path):
+            if ext in GEMINI_VIDEO_FORMATS and full_path:
                 try:
                     video_prompt = f"""Analyze this video for relevance to a student's innovation idea.
 
@@ -481,7 +511,7 @@ Return JSON:
                     detail += f"\n  UNVERIFIED: Gemini analysis failed - {str(e)[:100]}"
             else:
                 videos_with_frames.add(f.original_filename)
-                if not os.path.exists(full_path):
+                if not full_path:
                     gemini_video_analyses[f.original_filename] = {
                         'summary': 'Video file missing from disk',
                         'is_relevant': False,
@@ -545,6 +575,12 @@ Return JSON:
                 return result
     except Exception as e:
         print(f"Attachment analysis failed: {e}")
+    finally:
+        for _p in temp_files:
+            try:
+                os.remove(_p)
+            except Exception:
+                pass
 
     return {
         'file_analyses': [
