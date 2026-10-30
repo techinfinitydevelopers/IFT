@@ -965,6 +965,15 @@ def release_results(request):
     action = request.POST.get('action')
     rel = ResultsRelease.load()
     if action == 'publish':
+        # Master lock: publishing ranks + firing milestone emails is irreversible,
+        # so it only proceeds when an admin has unlocked it via the Railway env var
+        # RESULTS_RELEASE_ENABLED. Until then an accidental button press is a no-op.
+        from django.conf import settings as _settings
+        if not getattr(_settings, 'RESULTS_RELEASE_ENABLED', False):
+            messages.error(request, '🔒 Results release is LOCKED. An admin must enable '
+                                    'RESULTS_RELEASE_ENABLED on the server before results can be '
+                                    'published. Nothing was released and no emails were sent.')
+            return redirect('admins:rankings')
         from ai_assistant.evaluator import update_rankings, _send_ranking_milestone_emails
         update_rankings()  # freeze the final Top 400 from the current scores
         rel.is_published = True

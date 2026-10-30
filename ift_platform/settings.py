@@ -249,3 +249,9 @@ OTP_EXPIRY_SECONDS = int(os.getenv('OTP_EXPIRY_SECONDS', '600'))
 # Feature flag: bulk student upload (super-admin). OFF by default so it stays
 # fully hidden on prod until reveal. Flip via Railway env var to reveal/hide.
 BULK_STUDENT_UPLOAD_ENABLED = os.getenv('BULK_STUDENT_UPLOAD_ENABLED', 'false').lower() == 'true'
+
+# Master lock for the Top 400 / results release. OFF by default so the
+# "Finalise & Release Results" button is INERT (clicking it just shows a lock
+# notice) until an admin sets this env var to true on Railway. Prevents an
+# accidental button press from publishing ranks / firing milestone emails.
+RESULTS_RELEASE_ENABLED = os.getenv('RESULTS_RELEASE_ENABLED', 'false').lower() == 'true'
