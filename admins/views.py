@@ -833,9 +833,10 @@ def evaluate_submission(request, submission_id):
         try:
             from ai_assistant.evaluator import evaluate_idea
             
-            evaluation = evaluate_idea(submission, force_reevaluate=force_reevaluate)
+            evaluation = evaluate_idea(submission, force_reevaluate=force_reevaluate,
+                                       evaluated_by=request.user)
             messages.success(
-                request, 
+                request,
                 f'Evaluation complete! Score: {evaluation.final_score}/100 (Rank: #{evaluation.rank or "TBD"})'
             )
             
@@ -1277,7 +1278,9 @@ def batch_evaluate_async(request):
         'message': 'Starting evaluation...'
     }
 
-    def process_evaluations(submissions, task_id):
+    evaluator_user = request.user
+
+    def process_evaluations(submissions, task_id, evaluated_by):
         import django
         django.setup()
         from django.db import connection
@@ -1286,7 +1289,7 @@ def batch_evaluate_async(request):
 
         for i, submission in enumerate(submissions):
             try:
-                evaluate_idea(submission)
+                evaluate_idea(submission, evaluated_by=evaluated_by)
                 tracker['current'] = i + 1
                 tracker['message'] = f'Evaluating {i+1}/{len(submissions)}...'
             except Exception as e:
@@ -1303,7 +1306,7 @@ def batch_evaluate_async(request):
         tracker['status'] = 'completed'
         tracker['message'] = f'Done. {success} evaluated, {len(tracker["errors"])} failed.'
 
-    thread = threading.Thread(target=process_evaluations, args=(submissions, task_id))
+    thread = threading.Thread(target=process_evaluations, args=(submissions, task_id, evaluator_user))
     thread.daemon = True
     thread.start()
 
@@ -1325,7 +1328,8 @@ def evaluate_submission_async(request, submission_id):
     try:
         from ai_assistant.evaluator import evaluate_idea, update_rankings
 
-        evaluation = evaluate_idea(submission, force_reevaluate=force_reevaluate)
+        evaluation = evaluate_idea(submission, force_reevaluate=force_reevaluate,
+                                   evaluated_by=request.user)
 
         # Update rankings after evaluation
         try:

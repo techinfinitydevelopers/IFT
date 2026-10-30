@@ -565,7 +565,7 @@ Return JSON:
 # ============================================================================
 # MAIN EVALUATION FUNCTION
 # ============================================================================
-def evaluate_idea(submission: IdeaSubmission, force_reevaluate=False) -> AIEvaluation:
+def evaluate_idea(submission: IdeaSubmission, force_reevaluate=False, evaluated_by=None) -> AIEvaluation:
     """
     Evaluate a single idea submission using 10-parameter rubric (0-10 scale).
     Includes 10 coherence cross-checks with -1 penalty per fail. >5 fails = disqualified.
@@ -596,7 +596,10 @@ def evaluate_idea(submission: IdeaSubmission, force_reevaluate=False) -> AIEvalu
         except AIEvaluation.DoesNotExist:
             pass
 
-    client = OpenRouterClient()
+    # Shared sink so every API call (main eval + coherence + attachment + video)
+    # records its tokens/cost; we total them for this evaluation afterwards.
+    usage_sink = []
+    client = OpenRouterClient(usage_sink=usage_sink)
 
     # Get 12 question answers (with fallback to old fields)
     questions = get_submission_questions(submission)
@@ -633,13 +636,13 @@ def evaluate_idea(submission: IdeaSubmission, force_reevaluate=False) -> AIEvalu
         )
 
     def _run_coherence():
-        coherence_client = OpenRouterClient()
+        coherence_client = OpenRouterClient(usage_sink=usage_sink)
         return run_coherence_checks(questions, coherence_client)
 
     def _run_attachments():
         if not has_files:
             return None
-        attachment_client = OpenRouterClient()
+        attachment_client = OpenRouterClient(usage_sink=usage_sink)
         return analyze_attachments(submission, attachment_client)
 
     with ThreadPoolExecutor(max_workers=3) as executor:
@@ -787,6 +790,11 @@ def evaluate_idea(submission: IdeaSubmission, force_reevaluate=False) -> AIEvalu
     # Cap total penalty at -5
     mismatch_penalty = min(mismatch_penalty, 5)
 
+    # Total tokens + cost across every API call made for this evaluation
+    # (main eval + coherence + attachment analysis + any video calls).
+    total_tokens = sum(u.get('total_tokens', 0) for u in usage_sink)
+    total_cost = sum(float(u.get('cost', 0) or 0) for u in usage_sink)
+
     # === Create evaluation record with all data ===
     evaluation = AIEvaluation.objects.create(
         submission=submission,
@@ -825,7 +833,9 @@ def evaluate_idea(submission: IdeaSubmission, force_reevaluate=False) -> AIEvalu
         # Metadata
         confidence_level=eval_data.get('confidence', 'medium'),
         model_used=response.get('model', 'anthropic/claude-sonnet-4.5'),
-        tokens_used=response.get('tokens', 0),
+        tokens_used=total_tokens,
+        cost_usd=round(total_cost, 6),
+        evaluated_by=evaluated_by,
         processing_time=response.get('time', 0),
         raw_response=response.get('raw_response', ''),
 

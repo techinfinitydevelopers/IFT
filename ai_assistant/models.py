@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 from students.models import IdeaSubmission
 
 
@@ -118,7 +119,12 @@ class AIEvaluation(models.Model):
 
     # Metadata
     model_used = models.CharField(max_length=100, default='anthropic/claude-3.5-sonnet')
-    tokens_used = models.IntegerField(default=0)
+    tokens_used = models.IntegerField(default=0, help_text="Total tokens across all AI calls for this evaluation")
+    cost_usd = models.DecimalField(max_digits=10, decimal_places=6, default=0,
+                                   help_text="Total OpenRouter cost in USD (credits) across all calls for this evaluation")
+    evaluated_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True,
+                                     on_delete=models.SET_NULL, related_name='ai_evaluations_run',
+                                     help_text="Admin who triggered this evaluation; null = auto / on submission")
     processing_time = models.FloatField(default=0, help_text="Processing time in seconds")
     evaluated_at = models.DateTimeField(auto_now_add=True)
 

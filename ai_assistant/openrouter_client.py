@@ -9,10 +9,32 @@ from django.conf import settings
 class OpenRouterClient:
     """Client for interacting with OpenRouter API with Vision support"""
     
-    def __init__(self, api_key=None):
+    def __init__(self, api_key=None, usage_sink=None):
         self.api_key = api_key or settings.OPENROUTER_API_KEY
         self.base_url = "https://openrouter.ai/api/v1/chat/completions"
         self.default_model = "anthropic/claude-sonnet-4.5"
+        # Optional shared list; each API call appends a usage record so the caller
+        # can total tokens + cost across the several calls made per evaluation.
+        self.usage_sink = usage_sink
+
+    def _record_usage(self, data, model):
+        """Pull token + cost usage out of an OpenRouter response, append it to
+        usage_sink (if set), and return (total_tokens, cost_usd)."""
+        usage = (data or {}).get('usage') or {}
+        total_tokens = usage.get('total_tokens', 0) or 0
+        # OpenRouter returns actual spend in `cost` (USD/credits) when the request
+        # asks for usage accounting ("usage": {"include": true}).
+        cost = usage.get('cost', 0) or 0
+        rec = {
+            'model': (data or {}).get('model', model),
+            'prompt_tokens': usage.get('prompt_tokens', 0) or 0,
+            'completion_tokens': usage.get('completion_tokens', 0) or 0,
+            'total_tokens': total_tokens,
+            'cost': cost,
+        }
+        if self.usage_sink is not None:
+            self.usage_sink.append(rec)
+        return total_tokens, cost
         
     def generate_completion(self, system_prompt, user_prompt, model=None, max_tokens=800, images=None):
         """
@@ -70,7 +92,8 @@ class OpenRouterClient:
             "max_tokens": max_tokens,
             "temperature": 0,
             "seed": 42,
-            "top_p": 1
+            "top_p": 1,
+            "usage": {"include": True}
         }
         
         start_time = time.time()
@@ -95,11 +118,13 @@ class OpenRouterClient:
 
             data = response.json()
             processing_time = time.time() - start_time
+            total_tokens, cost = self._record_usage(data, model)
 
             return {
                 'content': data['choices'][0]['message']['content'],
                 'model': data.get('model', model),
-                'tokens': data.get('usage', {}).get('total_tokens', 0),
+                'tokens': total_tokens,
+                'cost': cost,
                 'time': processing_time,
                 'raw_response': json.dumps(data)
             }
@@ -108,7 +133,7 @@ class OpenRouterClient:
             raise Exception(f"OpenRouter API request failed: {str(e)}")
         except (KeyError, IndexError) as e:
             raise Exception(f"Unexpected API response format: {str(e)}")
-    
+
     def generate_video_completion(self, system_prompt, user_prompt, video_path, model=None, max_tokens=1200):
         """
         Generate a completion with native video support using Gemini.
@@ -179,6 +204,7 @@ class OpenRouterClient:
             ],
             "max_tokens": max_tokens,
             "temperature": 0,
+            "usage": {"include": True}
         }
         
         start_time = time.time()
@@ -208,10 +234,12 @@ class OpenRouterClient:
                 print(f"[VIDEO API] No 'choices' in response. Keys: {list(data.keys())}. Error: {error_msg}")
                 raise Exception(f"Video API error: {error_msg or 'No choices in response'}")
 
+            total_tokens, cost = self._record_usage(data, model)
             return {
                 'content': data['choices'][0]['message']['content'],
                 'model': data.get('model', model),
-                'tokens': data.get('usage', {}).get('total_tokens', 0),
+                'tokens': total_tokens,
+                'cost': cost,
                 'time': processing_time,
                 'raw_response': json.dumps(data)
             }
