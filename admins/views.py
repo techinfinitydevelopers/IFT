@@ -1772,7 +1772,7 @@ def bulk_create_students_chunk(request):
         return JsonResponse({'success': False, 'message': 'POST only'}, status=405)
     import json as _json
     import secrets
-    from accounts.forms import duplicate_account_message
+    from accounts.forms import duplicate_account_message, _normalize_mobile
     try:
         from accounts.models import UserProfile
     except Exception:
