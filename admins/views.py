@@ -1948,7 +1948,7 @@ def bulk_create_students_id_chunk(request):
         return JsonResponse({'success': False, 'message': 'POST only'}, status=405)
     import json as _json
     import uuid as _uuid
-    from accounts.forms import duplicate_account_message
+    from accounts.forms import duplicate_account_message, _normalize_mobile
     from admins.models import StudentImportBatch, ImportBatchCredential
     try:
         from accounts.models import UserProfile
