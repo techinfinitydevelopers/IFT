@@ -1582,7 +1582,8 @@ def onboard_student(request):
 
         # Block duplicate email / phone (same rule as student self sign-up).
         from accounts.forms import duplicate_account_message, _normalize_mobile
-        dup = duplicate_account_message(student_email, student_mobile)
+        dup = duplicate_account_message(student_email, student_mobile,
+                                        first_name=first_name, last_name=last_name)
         if dup:
             return JsonResponse({'success': False, 'message': dup}, status=400)
 
@@ -1809,7 +1810,7 @@ def bulk_create_students_chunk(request):
             fail(f'Invalid grade "{grade}" (must be 7-12)'); continue
         if gender and gender not in valid_genders:
             fail(f'Invalid gender "{gender}" (male/female/other)'); continue
-        dup = duplicate_account_message(email, phone)
+        dup = duplicate_account_message(email, phone, first_name=fn, last_name=ln)
         if dup:
             fail(dup); continue
         try:
@@ -2009,7 +2010,7 @@ def bulk_create_students_id_chunk(request):
         if gender and gender not in valid_genders:
             fail(f'Invalid gender "{gender}" (male/female/other)'); continue
         # Only guards against a clash when an email/phone is actually given.
-        dup = duplicate_account_message(email, phone)
+        dup = duplicate_account_message(email, phone, first_name=fn, last_name=ln)
         if dup:
             fail(dup); continue
         try:

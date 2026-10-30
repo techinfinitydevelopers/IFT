@@ -35,20 +35,32 @@ def _normalize_mobile(value):
     return m
 
 
-def duplicate_account_message(email, phone):
-    """Return a user-facing message if this email or phone is already in the
-    system, else None. Shared by student self sign-up and admin onboarding so
-    both enrollment paths enforce the same uniqueness rule.
+def duplicate_account_message(email, phone, first_name=None, last_name=None):
+    """Return a user-facing message if this account is already in the system,
+    else None. Used by admin onboarding (single + bulk).
 
     Email lives on User.email (case-insensitive); phone on Student.phone
     (normalised 10-digit).
+
+    Email is always unique -> any email match blocks. For phone: when a name is
+    provided, a shared phone only counts as a duplicate if the NAME also matches.
+    This lets siblings share one guardian phone (same phone, different name) while
+    still catching true re-uploads (same name AND same phone). When no name is
+    passed, falls back to phone-only (legacy behaviour).
     """
     email = (email or '').strip()
     if email and User.objects.filter(email__iexact=email).exists():
         return 'This email is already present in the system. Please sign in instead.'
     ph = _normalize_mobile(phone)
-    if ph and Student.objects.filter(phone=ph).exists():
-        return 'This phone number is already present in the system. Please sign in instead.'
+    if ph:
+        qs = Student.objects.filter(phone=ph)
+        if first_name is not None or last_name is not None:
+            qs = qs.filter(user__first_name__iexact=(first_name or '').strip(),
+                           user__last_name__iexact=(last_name or '').strip())
+            if qs.exists():
+                return 'A student with this name and phone number already exists.'
+        elif qs.exists():
+            return 'This phone number is already present in the system. Please sign in instead.'
     return None
 
 
