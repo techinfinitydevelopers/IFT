@@ -747,18 +747,16 @@
                 </div>
             </div>
 
-            <!-- Flash messages (e.g. results-release lock notice, publish/hide confirmations) -->
+            <!-- Flash messages (results-release lock notice, publish/hide confirmations)
+                 shown as a popup instead of an inline banner. -->
             {% if messages %}
-            <div style="margin-bottom:20px;">
-                {% for message in messages %}
-                <div style="border-radius:12px;padding:13px 18px;margin-bottom:10px;font-size:0.9rem;font-weight:600;
-                    {% if message.tags == 'error' %}background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;
-                    {% elif message.tags == 'success' %}background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;
-                    {% else %}background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;{% endif %}">
-                    {{ message }}
-                </div>
-                {% endfor %}
-            </div>
+            <script>
+                window.addEventListener('DOMContentLoaded', function () {
+                    {% for message in messages %}
+                    window.alert("{{ message|escapejs }}");
+                    {% endfor %}
+                });
+            </script>
             {% endif %}
 
             <!-- Results Release (controlled reveal of Top 400 / ranks) -->
