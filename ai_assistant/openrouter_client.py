@@ -12,7 +12,7 @@ class OpenRouterClient:
     def __init__(self, api_key=None):
         self.api_key = api_key or settings.OPENROUTER_API_KEY
         self.base_url = "https://openrouter.ai/api/v1/chat/completions"
-        self.default_model = "anthropic/claude-sonnet-4"
+        self.default_model = "anthropic/claude-sonnet-4.5"
         
     def generate_completion(self, system_prompt, user_prompt, model=None, max_tokens=800, images=None):
         """
@@ -118,7 +118,7 @@ class OpenRouterClient:
             raise ValueError("OpenRouter API key not configured.")
         
         # Default to Gemini for video analysis
-        model = model or "google/gemini-2.0-flash-001"
+        model = model or "google/gemini-2.5-flash"
         
         headers = {
             "Authorization": f"Bearer {self.api_key}",

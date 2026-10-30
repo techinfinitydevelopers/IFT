@@ -273,7 +273,7 @@ def run_coherence_checks(questions, client):
         response = client.generate_completion(
             system_prompt="You are a strict logical consistency checker. Return ONLY valid JSON.",
             user_prompt=prompt,
-            model="anthropic/claude-sonnet-4",
+            model="anthropic/claude-sonnet-4.5",
             max_tokens=1200
         )
 
@@ -449,7 +449,7 @@ Return JSON:
                         system_prompt="You are a strict video relevance checker. Be skeptical - only mark videos as relevant if they DIRECTLY and SPECIFICALLY relate to the student's idea.",
                         user_prompt=video_prompt,
                         video_path=full_path,
-                        model="google/gemini-2.0-flash-001",
+                        model="google/gemini-2.5-flash",
                         max_tokens=800
                     )
 
@@ -514,7 +514,7 @@ Return JSON:
         response = client.generate_completion(
             system_prompt="You are a strict file relevance checker. Describe EXACTLY what you see. Be skeptical. Return ONLY valid JSON.",
             user_prompt=prompt,
-            model="anthropic/claude-sonnet-4",
+            model="anthropic/claude-sonnet-4.5",
             max_tokens=1000,
             images=image_paths if image_paths else None
         )
@@ -628,7 +628,7 @@ def evaluate_idea(submission: IdeaSubmission, force_reevaluate=False) -> AIEvalu
         return client.generate_completion(
             system_prompt="You are an expert idea evaluator. Return ONLY valid JSON, no other text.",
             user_prompt=prompt,
-            model="anthropic/claude-sonnet-4",
+            model="anthropic/claude-sonnet-4.5",
             max_tokens=2000
         )
 
@@ -824,7 +824,7 @@ def evaluate_idea(submission: IdeaSubmission, force_reevaluate=False) -> AIEvalu
 
         # Metadata
         confidence_level=eval_data.get('confidence', 'medium'),
-        model_used=response.get('model', 'anthropic/claude-sonnet-4'),
+        model_used=response.get('model', 'anthropic/claude-sonnet-4.5'),
         tokens_used=response.get('tokens', 0),
         processing_time=response.get('time', 0),
         raw_response=response.get('raw_response', ''),

@@ -152,7 +152,7 @@ Return JSON:
             system_prompt="You are a video content analyzer. Describe what you see in detail.",
             user_prompt=video_prompt,
             video_path=video_path,
-            model="google/gemini-2.0-flash-001",
+            model="google/gemini-2.5-flash",
             max_tokens=800,
         )
         if response and 'content' in response:
@@ -227,7 +227,7 @@ def evaluate_light_submission(submission):
     response = client.generate_completion(
         system_prompt="You are an expert idea evaluator. Return ONLY valid JSON, no other text.",
         user_prompt=prompt,
-        model="anthropic/claude-sonnet-4",
+        model="anthropic/claude-sonnet-4.5",
         max_tokens=2000,
         images=image_paths if image_paths else None,
     )
@@ -280,7 +280,7 @@ def evaluate_light_submission(submission):
 
     # Metadata
     submission.ai_confidence = eval_data.get('confidence', 'medium')
-    submission.ai_model_used = response.get('model', 'anthropic/claude-sonnet-4')
+    submission.ai_model_used = response.get('model', 'anthropic/claude-sonnet-4.5')
     submission.ai_raw_response = response.get('raw_response', '')
     submission.is_evaluated = True
     submission.evaluated_at = timezone.now()

@@ -19,8 +19,8 @@ logger = logging.getLogger(__name__)
 
 # Model Configuration - Hybrid approach
 MODELS = {
-    'default': 'anthropic/claude-sonnet-4',    # Text + Images
-    'video': 'google/gemini-2.0-flash-001',       # Native video analysis
+    'default': 'anthropic/claude-sonnet-4.5',    # Text + Images
+    'video': 'google/gemini-2.5-flash',       # Native video analysis
     'premium': 'anthropic/claude-3-opus',
 }
 
