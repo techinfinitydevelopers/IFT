@@ -927,8 +927,9 @@
     })();
     // ---- ID-based upload (no emails) ----
     (function(){
-        var CHUNK=20;
+        var CHUNK=10;  // smaller chunks = lighter requests, less chance of overwhelming the worker
         function csrf(){var c=(document.cookie.split('; ').find(function(x){return x.indexOf('csrftoken=')===0;})||''); return c.split('=')[1]||'';}
+        function sleep(ms){return new Promise(function(rs){setTimeout(rs, ms);});}
         var btn=document.getElementById('bulkUploadIdBtn'), exportBtn=document.getElementById('bulkExportBatchBtn');
         if(!btn) return;
         var lastBatchId=null;
@@ -961,8 +962,21 @@
             for(var i=0;i<total;i+=CHUNK){
                 var chunk=rows.slice(i,i+CHUNK);
                 var res;
-                try{ res=await fetch("{% url 'admins:bulk_create_students_id_chunk' %}", {method:'POST',headers:{'X-CSRFToken':csrf(),'Content-Type':'application/json'},body:JSON.stringify({school_id:schoolId,rows:chunk,batch_key:batchKey,file_name:file.name})}).then(function(r){return r.json();}); }
-                catch(e){ res={results:chunk.map(function(c){return {row:c.row,name:((c.first_name||'')+' '+(c.last_name||'')).trim(),login_id:'',status:'failed',reason:'Request failed'};})}; }
+                // Retry a chunk if the request itself fails (e.g. the single worker
+                // restarts mid-upload -> 502/timeout). Already-created rows are skipped
+                // by dedup on retry, so the upload self-heals and completes.
+                var attempts=0, maxAttempts=5;
+                while(true){
+                    try{
+                        res=await fetch("{% url 'admins:bulk_create_students_id_chunk' %}", {method:'POST',headers:{'X-CSRFToken':csrf(),'Content-Type':'application/json'},body:JSON.stringify({school_id:schoolId,rows:chunk,batch_key:batchKey,file_name:file.name})}).then(function(r){ if(!r.ok){ throw new Error('HTTP '+r.status); } return r.json(); });
+                        break;
+                    }catch(e){
+                        attempts++;
+                        if(attempts>=maxAttempts){ res={results:chunk.map(function(c){return {row:c.row,name:((c.first_name||'')+' '+(c.last_name||'')).trim(),login_id:'',status:'failed',reason:'Request failed (after '+maxAttempts+' retries)'};})}; break; }
+                        btn.textContent='Retrying… ('+attempts+')';
+                        await sleep(4000);  // give the worker time to come back
+                    }
+                }
                 if(res.batch_id) lastBatchId=res.batch_id;
                 (res.results||[]).forEach(function(x){
                     done++; if(x.status==='created'){created++;}else{failed++;}
