@@ -1887,7 +1887,13 @@ def bulk_send_emails_chunk(request):
             temp_password = secrets.token_urlsafe(6)
             user.set_password(temp_password)
             user.save(update_fields=['password'])
-            send_onboard_credentials(user, temp_password, 'Student', {'username': email})
+            sent_ok = send_onboard_credentials(user, temp_password, 'Student', {'username': email})
+            if not sent_ok:
+                # Email did NOT actually go out (invalid address / SMTP error).
+                # Do NOT mark it sent — surface it so the admin can fix the address.
+                results.append({'id': st.id, 'name': label, 'email': email,
+                                'status': 'failed', 'reason': 'Email could not be delivered (check the address)'})
+                continue
             # Mark "credentials emailed" in a SEPARATE log (no change to Student /
             # reports) — drives the green tick in the bulk students table.
             MilestoneEmailLog.objects.get_or_create(student=st, milestone='bulk_creds')

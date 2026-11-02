@@ -91,6 +91,7 @@ def send_onboard_credentials(user, temp_password, role, extra_context=None):
         else:
             text_message = render_to_string('accounts/email_onboard_credentials.txt', context)
 
+    result = 0
     try:
         email = EmailMultiAlternatives(subject, text_message, settings.DEFAULT_FROM_EMAIL, [user.email])
         if html_message:
@@ -101,6 +102,7 @@ def send_onboard_credentials(user, temp_password, role, extra_context=None):
         print(f"[EMAIL] Failed to send to {user.email}: {e}")
         import traceback
         traceback.print_exc()
+        result = 0
 
     # In-app / push notification for the new account.
     try:
@@ -110,3 +112,7 @@ def send_onboard_credentials(user, temp_password, role, extra_context=None):
                '/accounts/sign-in/', 'Log In')
     except Exception:
         pass
+
+    # Return the real send result so callers can tell a genuine send from a
+    # silently-failed one (don't mark creds 'sent' when email.send() failed).
+    return result
