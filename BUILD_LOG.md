@@ -1,5 +1,11 @@
 # Build Log
 
+## 2026-11-28 — School email routing: stale login email after admin edit / school delete
+- Symptom: after deleting duplicate school "Somerville", password-reset mail still went to the deleted school's address.
+- Investigation: no code routes student/school mail by school — all mail goes to `User.email`. Two real bugs: (1) `admins/views.py:edit_school` updated `School.contact_email` but not the linked `User.email/username`, so reset/credential mail kept going to the old login email; (2) deleting a School outside the admin "Delete school" button (Django admin/shell) left its login `User` active (`School.user` is SET_NULL).
+- Fix: `edit_school` now syncs `User.email/username` (rejects clashes with another account); `students/models.py` post_delete signal on `School` removes the orphan school login (skips staff/student/jury); new read-only `python manage.py audit_school_emails [--sync]` lists mismatches/orphans, `--sync` fixes mismatches only, never deletes.
+- Not verified against production data (no DB access); Django not installed locally, syntax-checked only. Existing bad rows need `audit_school_emails --sync` once deployed.
+
 ## 2026-08-31 — School dashboard: "Complete Your Profile" as a floating alert, not a hard blocker
 - User wanted the mandatory full-screen profile-completion form (shown on first login while `School.status == 'pending'`) removed as a blocker. Requirement: pending schools should see the FULL dashboard immediately, but the other 8 dashboard pages (Teams/Students/Submissions/Results/Reports/Notifications/Announcements/Hall of Fame) must STAY locked until the profile form is filled — plus 3 more flagged in a follow-up: Marketing Collaterals, Learning Resources, IFTx Highlights.
 - `students/views.py:school_dashboard` — removed the early-return that rendered a form-only template for pending schools. Now computes the full dashboard context for BOTH pending and active schools (`is_pending` flag passed through); only a truly non-active/non-pending status (admin-deactivated) still blocks + logs out.

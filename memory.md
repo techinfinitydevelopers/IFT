@@ -65,3 +65,7 @@ Students submit venture ideas, get AI + jury evaluated, ranked (Top 400 / Top
 - Wants **concise, precise** answers (org policy). No filler.
 - Commits only on explicit instruction, directly to `main`.
 - Often asks "sirf batao" / "kya tumhe samjha" → wants understanding/confirmation BEFORE building.
+
+## School email / login-account sync (2026-11-28)
+- All outgoing mail goes to `User.email`; school mail uses `School.contact_email`/`principal_email`. School login = `School.user` (username = email). Admin `edit_school` now keeps them in sync; deleting a School auto-deletes its orphan login (signal in students/models.py).
+- Diagnose/repair stale emails: `python manage.py audit_school_emails` (read-only) then `--sync`. Orphans are reported only.

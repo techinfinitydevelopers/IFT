@@ -661,3 +661,28 @@ class VideoProgress(models.Model):
 
     def __str__(self):
         return f"{self.student} - {self.video.title} - {'Watched' if self.watched else 'Pending'}"
+
+
+# --- Cleanup: deleting a School must not leave its login account behind -----
+# The admin "Delete school" view removes the linked User itself, but deleting a
+# School any other way (Django admin, shell, bulk delete) left an orphan school
+# User with the old email still active, so reset/credential mail kept resolving
+# to that stale account.
+from django.db.models.signals import post_delete as _post_delete
+from django.dispatch import receiver as _receiver
+
+
+@_receiver(_post_delete, sender=School)
+def _delete_orphan_school_user(sender, instance, **kwargs):
+    uid = instance.user_id
+    if not uid:
+        return
+    u = User.objects.filter(pk=uid).first()
+    if not u or u.is_staff or u.is_superuser:
+        return
+    if hasattr(u, 'student_profile') or hasattr(u, 'jury_profile'):
+        return
+    prof = getattr(u, 'profile', None)
+    if prof is not None and prof.role != 'school':
+        return
+    u.delete()

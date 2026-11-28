@@ -2698,6 +2698,24 @@ def edit_school(request, school_id):
         school.total_students = int(total) if total else school.total_students
         school.school_type = request.POST.get('school_type', school.school_type).strip()
         school.medium = request.POST.get('medium', school.medium).strip()
+        # Keep the LOGIN/reset email (User.email + username) in sync with the
+        # school's contact email. Editing only School.contact_email used to leave
+        # the auth account on the OLD address, so password-reset / credential
+        # emails kept going to the previous email.
+        new_login = school.contact_email
+        u = school.user
+        if u and new_login and new_login.lower() != (u.email or '').lower():
+            if '@' not in new_login or '.' not in new_login.rsplit('@', 1)[-1]:
+                return JsonResponse({'success': False, 'message': 'Please enter a valid school email.'}, status=400)
+            clash = User.objects.filter(
+                Q(email__iexact=new_login) | Q(username__iexact=new_login)
+            ).exclude(pk=u.pk).exists()
+            if clash:
+                return JsonResponse({'success': False,
+                                     'message': 'That email is already used by another account.'}, status=400)
+            u.email = new_login
+            u.username = new_login  # school accounts use username = email
+            u.save(update_fields=['email', 'username'])
         school.save()
 
         return JsonResponse({
